@@ -190,7 +190,11 @@ class EmailManager():
       keyVals.append(field.FieldName + "=" + field.Value)
 
     cmd += keyVals
-    subprocess.call(cmd)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    (out, err) = process.communicate()
+    print >> sys.stdout, out
+    print >> sys.stderr, err
+    return {'exitCode': process.returncode, 'stdout': out, 'stderr': err}
   def writeAccountConfig(self, fields):
     fieldValues = []
     accName = None
@@ -200,11 +204,11 @@ class EmailManager():
       else:
         fieldValues.append(field)
     cmd = [EMAIL_BIN, "--write-config", accName]
-    self.writeConfig(fieldValues, cmd)
+    return self.writeConfig(fieldValues, cmd)
   def writeOptionsConfig(self, fields):
     fieldValues = fields
     cmd = [EMAIL_BIN, "--write-options"]
-    self.writeConfig(fieldValues, cmd)
+    return self.writeConfig(fieldValues, cmd)
 
   def getAccounts(self):
     accountOut = self.readProc([EMAIL_BIN, "--accounts"])
