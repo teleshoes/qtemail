@@ -26,11 +26,16 @@ PageStackWindow {
       anchors.fill: parent
       model: accountModel
       delegate: Component  {
-        Button {
+        Rectangle {
           height: 150
-          onClicked: {
-            controller.accountSelected(model.account)
-            navToPage(headerPage)
+          width: parent.width
+          color: "gray"
+          MouseArea{
+            anchors.fill: parent
+            onClicked: {
+              controller.accountSelected(model.account)
+              navToPage(headerPage)
+            }
           }
           Text {
             anchors.centerIn: parent

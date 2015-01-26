@@ -44,6 +44,7 @@ Rectangle {
           Rectangle {
             height: 150
             width: parent.width
+            color: "gray"
             MouseArea{
               anchors.fill: parent
               onClicked: {
