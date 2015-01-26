@@ -1,0 +1,85 @@
+Copyright 2015 by Elliot Wolk
+This project is free software, released under the GPLv3
+
+Simple IMAP client with a QT gui and a CLI
+Minimal dependencies, currently minimal features
+
+FILES
+  src/email-gui.py
+    simple python QT gui (pyside+QML)
+      essentially a wrapper around email.pl
+    should work anywhere QT/python/perl work with little effort
+    explicitly supported platforms:
+      Meego Harmattan
+      Debian GNU/Linux
+    QML is located in /opt/email-gui/
+
+  src/email.pl
+    simple command line IMAP client
+    caches all headers, and caches unread bodies
+    e.g.:
+      > echo "configure $HOME/.secrets first"
+        configure /home/wolke/.secrets and run 'email.pl'
+      > email.pl
+      GMail: logging in
+      fetching all message ids
+      fetched 15906 ids
+      caching headers for 15906 messages
+      caching bodies for 1 messages
+      > email.pl --summary
+      GMail Tue, 20 Jan 2015 11:10:01 -0500 "Naked Girls Reading NYC" <ngrnyc@gmail.com>
+        Join us tomorrow night for SCIENCE!
+      > email.pl --print
+      ACCOUNT: GMail
+      UID: 35870
+      DATE: Tue, 20 Jan 2015 11:10:01 -0500
+      FROM: "Naked Girls Reading NYC" <ngrnyc@gmail.com>
+      SUBJECT: Join us tomorrow night for SCIENCE!
+      BODY:
+        This November, the Naked Girls give it all away
+        as Naked Girls Reading presents SPOILER ALERT!
+        Join the hit nude literary salon for an evening...
+      > email.pl --unread-line && echo
+      G1
+      > email.pl --body G 35870 | grep -o '<div>' | wc -l
+      0
+      > email.pl --body-html G 35870 | grep -o '<div>' | wc -l
+      12
+
+  $HOME/.secrets
+    Account config goes here.
+    Each line is one key of the format: email.ACCOUNT_NAME.FIELD = value
+    Account names can be any word characters (alphanumeric plus underscore)
+    Other keys are ignored.
+    required fields:
+      user     {Required} IMAP username, usually the full email address
+      password {Required} *password in plaintext*
+      server   {Required} IMAP server
+      port     {Required} IMAP server port
+      folder   {Required} IMAP folder name to use
+      ssl      {Optional} false to forcibly disable security
+    e.g.: > cat ~/.secrets
+      email.GMail.user = example@gmail.com
+      email.GMail.password = correcthorsebatterystaple
+      email.GMail.server = imap.gmail.com
+      email.GMail.port = 993
+      email.GMail.folder = INBOX
+      email.AOL.user = iheartbieber179241
+      email.AOL.password = b4life
+      email.AOL.server = imap.aol.com
+      email.AOL.port = 143
+      email.AOL.folder = Inbox
+      email.AOL.ssl = false
+
+
+Dependencies:
+  perl
+  perl modules:
+    Mail::IMAPClient
+    IO::Socket::SSL
+    MIME::Parser
+  python
+  pyside
+  qt
+  qtquick 1.1
+
