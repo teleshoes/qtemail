@@ -20,15 +20,18 @@ FILES
     e.g.:
       > echo "configure $HOME/.secrets first"
         configure /home/wolke/.secrets and run 'email.pl'
+      >
       > email.pl
       GMail: logging in
       fetching all message ids
       fetched 15906 ids
       caching headers for 15906 messages
       caching bodies for 1 messages
+      >
       > email.pl --summary
-      GMail Tue, 20 Jan 2015 11:10:01 -0500 "Naked Girls Reading NYC" <ngrnyc@gmail.com>
+      GMail 2015-01-20 11:10:01 "Naked Girls Reading NYC" <ngrnyc@gmail.com>
         Join us tomorrow night for SCIENCE!
+      >
       > email.pl --print
       ACCOUNT: GMail
       UID: 35870
@@ -39,6 +42,7 @@ FILES
         This November, the Naked Girls give it all away
         as Naked Girls Reading presents SPOILER ALERT!
         Join the hit nude literary salon for an evening...
+      >
       > email.pl --unread-line && echo
       G1
       > email.pl --body G 35870 | grep -o '<div>' | wc -l
