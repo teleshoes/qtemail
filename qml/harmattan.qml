@@ -81,7 +81,7 @@ PageStackWindow {
           MouseArea {
             anchors.fill: parent
             onClicked: {
-              bodyText.text = controller.getBodyText(model.header)
+              bodyView.setBody(controller.getBodyText(model.header))
               navToPage(bodyPage)
             }
           }
@@ -121,6 +121,9 @@ PageStackWindow {
     }
     Flickable {
       id: bodyView
+      function setBody(body){
+        bodyText.text = body
+      }
       contentWidth: bodyText.paintedWidth
       contentHeight: bodyText.paintedHeight
       anchors.fill: parent
