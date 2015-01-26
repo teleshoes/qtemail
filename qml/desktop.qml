@@ -48,7 +48,7 @@ Rectangle {
               anchors.fill: parent
               onClicked: {
                 controller.accountSelected(model.account)
-                main.navToPage(headerPage)
+                navToPage(headerPage)
               }
             }
             Text {
@@ -97,7 +97,6 @@ Rectangle {
               Text {
                 text: model.header.Subject
                 font.pointSize: 16
-                wrapMode: Text.Wrap
               }
             }
           }
@@ -139,7 +138,7 @@ Rectangle {
       Btn {
         id: backButton
         text: "back"
-        onClicked: main.backPage()
+        onClicked: backPage()
         visible: false
       }
       Btn {

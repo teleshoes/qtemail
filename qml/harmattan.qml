@@ -4,6 +4,15 @@ import com.nokia.meego 1.1
 PageStackWindow {
   id: main
   initialPage: accountPage
+  function navToPage(page){
+    pageStack.push(page)
+    if(page == accountPage){
+      controller.setupAccounts()
+    }
+  }
+  function backPage(){
+    pageStack.pop()
+  }
   Page {
     id: accountPage
     anchors.margins: 30
@@ -21,7 +30,7 @@ PageStackWindow {
           height: 150
           onClicked: {
             controller.accountSelected(model.account)
-            pageStack.push(headerPage)
+            navToPage(headerPage)
           }
           Text {
             anchors.centerIn: parent
@@ -40,7 +49,7 @@ PageStackWindow {
       ToolButton {
         text: "back"
         onClicked: {
-          pageStack.pop()
+          backPage()
           controller.setupAccounts()
         }
       }
@@ -68,7 +77,7 @@ PageStackWindow {
             anchors.fill: parent
             onClicked: {
               bodyText.text = controller.getBodyText(model.header)
-              pageStack.push(bodyPage)
+              navToPage(bodyPage)
             }
           }
           Column {
@@ -85,7 +94,6 @@ PageStackWindow {
             Text {
               text: model.header.Subject
               font.pointSize: 16
-              wrapMode: Text.Wrap
             }
           }
         }
@@ -100,7 +108,7 @@ PageStackWindow {
     tools: ToolBarLayout {
       ToolButton {
         text: "back"
-        onClicked: pageStack.pop()
+        onClicked: backPage()
       }
     }
     ScrollDecorator {
