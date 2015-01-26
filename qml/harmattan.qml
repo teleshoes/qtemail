@@ -13,6 +13,7 @@ PageStackWindow {
   function backPage(){
     pageStack.pop()
   }
+
   Page {
     id: accountPage
     anchors.margins: 30
@@ -20,31 +21,7 @@ PageStackWindow {
     ScrollDecorator {
       flickableItem: accountView
     }
-    ListView {
-      id: accountView
-      spacing: 50
-      anchors.fill: parent
-      model: accountModel
-      delegate: Component  {
-        Rectangle {
-          height: 150
-          width: parent.width
-          color: "gray"
-          MouseArea{
-            anchors.fill: parent
-            onClicked: {
-              controller.accountSelected(model.account)
-              navToPage(headerPage)
-            }
-          }
-          Text {
-            anchors.centerIn: parent
-            text: model.account.Name + ": " + model.account.Unread
-            font.pointSize: 36
-          }
-        }
-      }
-    }
+    AccountView{ id: accountView }
   }
 
   Page {
@@ -68,42 +45,8 @@ PageStackWindow {
     ScrollDecorator {
       flickableItem: headerView
     }
-    ListView {
-      id: headerView
-      spacing: 10
-      anchors.fill: parent
-      model: headerModel
-      delegate: Component  {
-        Rectangle {
-          color: "#AAAAAA"
-          height: 125
-          width: parent.width
-          MouseArea {
-            anchors.fill: parent
-            onClicked: {
-              bodyView.setBody(controller.getBodyText(model.header))
-              navToPage(bodyPage)
-            }
-          }
-          Column {
-            id: col
-            anchors.fill: parent
-            Text {
-              text: model.header.From
-              font.pointSize: 24
-            }
-            Text {
-              text: model.header.Date
-              font.pointSize: 20
-            }
-            Text {
-              text: model.header.Subject
-              font.pointSize: 16
-            }
-          }
-        }
-      }
-    }
+
+    HeaderView{ id: headerView }
   }
 
   Page {
@@ -119,25 +62,6 @@ PageStackWindow {
     ScrollDecorator {
       flickableItem: bodyView
     }
-    Flickable {
-      id: bodyView
-      function setBody(body){
-        bodyText.text = body
-      }
-      contentWidth: bodyText.paintedWidth
-      contentHeight: bodyText.paintedHeight
-      anchors.fill: parent
-      flickableDirection: Flickable.HorizontalAndVerticalFlick
-      boundsBehavior: Flickable.DragOverBounds
-      Rectangle{
-        anchors.fill: parent
-        color: white
-        Text {
-          id: bodyText
-          anchors.fill: parent
-          font.pointSize: 24
-        }
-      }
-    }
+    BodyView{ id: bodyView }
   }
 }
