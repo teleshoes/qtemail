@@ -5,9 +5,9 @@ use Mail::IMAPClient;
 use IO::Socket::SSL;
 use MIME::Parser;
 
-sub mergeUnreadCounts($);
+sub mergeUnreadCounts($@);
 sub readUnreadCounts();
-sub writeUnreadCounts($);
+sub writeUnreadCounts($@);
 sub readUidFile($$);
 sub writeUidFile($$@);
 sub cacheAllHeaders($$$);
@@ -117,11 +117,13 @@ sub main(@){
 
   die $usage if @_ > 0 and $_[0] =~ /^(-h|--help)$/;
 
-  my $accounts = readSecrets();
+  my $config = readSecrets();
+  my @accOrder = @{$$config{accOrder}};
+  my $accounts = $$config{accounts};
 
   if($cmd =~ /^(--update)$/){
     $VERBOSE = 1;
-    my @accNames = @_ == 0 ? sort keys %$accounts : @_;
+    my @accNames = @_ == 0 ? @accOrder : @_;
     my $counts = {};
     for my $accName(@accNames){
       my $acc = $$accounts{$accName};
@@ -159,7 +161,7 @@ sub main(@){
       my @newUnread = grep {not defined $oldUnread{$_}} @unread;
       writeUidFile $accName, "new-unread", @newUnread;
     }
-    mergeUnreadCounts $counts;
+    mergeUnreadCounts $counts, @accOrder;
   }elsif($cmd =~ /^(--body|--body-html)$/){
     die $usage if @_ != 2;
     my $preferHtml = $cmd =~ /body-html/;
@@ -182,7 +184,7 @@ sub main(@){
     chomp $fmt;
     print "$fmt\n";
   }elsif($cmd =~ /^(--print)$/){
-    my @accNames = @_ == 0 ? sort keys %$accounts : @_;
+    my @accNames = @_ == 0 ? @accOrder : @_;
     my $mimeParser = MIME::Parser->new();
     for my $accName(@accNames){
       my @unread = readUidFile $accName, "unread";
@@ -204,7 +206,7 @@ sub main(@){
       }
     }
   }elsif($cmd =~ /^(--summary)$/){
-    my @accNames = @_ == 0 ? sort keys %$accounts : @_;
+    my @accNames = @_ == 0 ? @accOrder : @_;
     for my $accName(@accNames){
       my @unread = readUidFile $accName, "unread";
       for my $uid(@unread){
@@ -213,7 +215,7 @@ sub main(@){
       }
     }
   }elsif($cmd =~ /^(--unread-line)$/){
-    my @accNames = @_ == 0 ? sort keys %$accounts : @_;
+    my @accNames = @_ == 0 ? @accOrder : @_;
     my $counts = readUnreadCounts();
     my @fmts;
     for my $accName(@accNames){
@@ -229,7 +231,7 @@ sub main(@){
     }
     print "@fmts";
   }elsif($cmd =~ /^(--has-error)$/){
-    my @accNames = @_ == 0 ? sort keys %$accounts : @_;
+    my @accNames = @_ == 0 ? @accOrder : @_;
     for my $accName(@accNames){
       if(-f "$emailDir/$accName/error"){
         print "yes\n";
@@ -239,7 +241,7 @@ sub main(@){
     print "no\n";
     exit 1;
   }elsif($cmd =~ /^(--has-new-unread)$/){
-    my @accNames = @_ == 0 ? sort keys %$accounts : @_;
+    my @accNames = @_ == 0 ? @accOrder : @_;
     my @fmts;
     for my $accName(@accNames){
       my @unread = readUidFile $accName, "new-unread";
@@ -251,7 +253,7 @@ sub main(@){
     print "no\n";
     exit 1;
   }elsif($cmd =~ /^(--has-unread)$/){
-    my @accNames = @_ == 0 ? sort keys %$accounts : @_;
+    my @accNames = @_ == 0 ? @accOrder : @_;
     my @fmts;
     for my $accName(@accNames){
       my @unread = readUidFile $accName, "unread";
@@ -265,10 +267,10 @@ sub main(@){
   }
 }
 
-sub mergeUnreadCounts($){
-  my $counts = shift;
+sub mergeUnreadCounts($@){
+  my ($counts , @accOrder)= @_;
   $counts = {%{readUnreadCounts()}, %$counts};
-  writeUnreadCounts($counts);
+  writeUnreadCounts($counts, @accOrder);
 }
 sub readUnreadCounts(){
   my $counts = {};
@@ -285,10 +287,10 @@ sub readUnreadCounts(){
   }
   return $counts;
 }
-sub writeUnreadCounts($){
-  my $counts = shift;
+sub writeUnreadCounts($@){
+  my ($counts , @accOrder)= @_;
   open FH, "> $unreadCountsFile" or die "Could not write $unreadCountsFile\n";
-  for my $accName(sort keys %$counts){
+  for my $accName(@accOrder){
     print FH "$$counts{$accName}:$accName\n";
   }
   close FH;
@@ -514,10 +516,14 @@ sub getSocket($){
 sub readSecrets(){
   my @lines = `cat $secretsFile 2>/dev/null`;
   my $accounts = {};
+  my $accOrder = [];
   my $okConfigKeys = join "|", (@configKeys, @extraConfigKeys);
   for my $line(@lines){
     if($line =~ /^email\.(\w+)\.($okConfigKeys)\s*=\s*(.+)$/){
-      $$accounts{$1} = {} if not defined $$accounts{$1};
+      if(not defined $$accounts{$1}){
+        $$accounts{$1} = {};
+        push @$accOrder, $1;
+      }
       $$accounts{$1}{$2} = $3;
     }
   }
@@ -528,7 +534,7 @@ sub readSecrets(){
       die "Missing '$key' for '$accName' in $secretsFile\n" if not defined $$acc{$key};
     }
   }
-  return $accounts;
+  return {accounts => $accounts, accOrder => $accOrder};
 }
 
 &main(@ARGV);
