@@ -9,6 +9,7 @@ my @deps = qw(
   libmail-imapclient-perl
   libmime-tools-perl
   libio-socket-ssl-perl
+  libtimedate-perl
 );
 
 sub main(@){
