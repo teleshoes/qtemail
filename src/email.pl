@@ -4,6 +4,8 @@ use warnings;
 use Mail::IMAPClient;
 use IO::Socket::SSL;
 use MIME::Parser;
+use Date::Parse qw(str2time);
+use Date::Format qw(time2str);
 
 sub mergeUnreadCounts($@);
 sub readUnreadCounts();
@@ -20,6 +22,7 @@ sub readCachedHeader($$);
 sub examineFolder($$);
 sub getClient($);
 sub getSocket($);
+sub formatDate($);
 sub readSecrets();
 
 my $secretsFile = "$ENV{HOME}/.secrets";
@@ -31,6 +34,7 @@ my $unreadCountsFile = "$ENV{HOME}/.unread-counts";
 my $emailDir = "$ENV{HOME}/.cache/email";
 
 my $VERBOSE = 0;
+my $DATE_FORMAT = "%Y-%m-%d %H:%M:%S";
 
 my $settings = {
   Peek => 1,
@@ -194,10 +198,11 @@ sub main(@){
         $body = "" if not defined $body;
         $body = "[NO BODY]\n" if $body =~ /^\s*$/;
         $body =~ s/^/  /mg;
+        my $date = formatDate($$hdr{Date});
         print "\n"
           . "ACCOUNT: $accName\n"
           . "UID: $uid\n"
-          . "DATE: $$hdr{Date}\n"
+          . "DATE: $date\n"
           . "FROM: $$hdr{From}\n"
           . "SUBJECT: $$hdr{Subject}\n"
           . "BODY:\n$body\n"
@@ -211,7 +216,8 @@ sub main(@){
       my @unread = readUidFile $accName, "unread";
       for my $uid(@unread){
         my $hdr = readCachedHeader($accName, $uid);
-        print "$accName $$hdr{Date} $$hdr{From}\n  $$hdr{Subject}\n";
+        my $date = formatDate($$hdr{Date});
+        print "$accName $date $$hdr{From}\n  $$hdr{Subject}\n";
       }
     }
   }elsif($cmd =~ /^(--unread-line)$/){
@@ -511,6 +517,15 @@ sub getSocket($){
     PeerAddr => $$acc{server},
     PeerPort => $$acc{port},
   );
+}
+
+sub formatDate($){
+  my $date = shift;
+  my $d = str2time($date);
+  if(defined $d){
+    return time2str($DATE_FORMAT, $d);
+  }
+  return $date;
 }
 
 sub readSecrets(){
