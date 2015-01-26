@@ -78,6 +78,8 @@ Dependencies:
     Mail::IMAPClient
     IO::Socket::SSL
     MIME::Parser
+    Date::Parse
+    Date::Format
   python
   pyside
   qt
