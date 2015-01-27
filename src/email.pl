@@ -187,6 +187,14 @@ sub main(@){
     my $f = openFolder($acc, $c, 1);
     die "Error getting folder $$acc{folder}\n" if not defined $f;
     setFlagStatus($c, $uid, "Seen", $readStatus);
+    my @unread = readUidFile $$acc{name}, "unread";
+    @unread = grep {$_ != $uid} @unread;
+    if(not $readStatus){
+      push @unread, $uid;
+    }
+    writeUidFile $$acc{name}, "unread", @unread;
+    my $count = @unread;
+    mergeUnreadCounts {$accName => $count}, @accOrder;
     $c->logout();
   }elsif($cmd =~ /^(--body|--body-html)$/){
     die $usage if @_ != 2;
