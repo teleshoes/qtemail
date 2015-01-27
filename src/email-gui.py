@@ -136,6 +136,17 @@ class Controller(QObject):
     headers = self.emailManager.fetchHeaders(self.currentAccount,
       limit=PAGE_INITIAL_SIZE, exclude=[])
     self.headerModel.setItems(headers)
+  @Slot(QObject)
+  def toggleRead(self, header):
+    wasRead = header.Read
+    print wasRead
+    if wasRead:
+      cmd = "--mark-unread"
+    else:
+      cmd = "--mark-read"
+    exitCode = subprocess.call(["email.pl", cmd, self.currentAccount, str(header.uid_)])
+    if exitCode == 0:
+      header.read_ = not wasRead
   @Slot()
   def moreHeaders(self):
     headers = self.emailManager.fetchHeaders(self.currentAccount,

@@ -25,6 +25,14 @@ ListView {
         function getReadColor(){
           return model.header.Read ? "#E1D6A1" : "#666666"
         }
+        MouseArea {
+          anchors.fill: parent
+          onPressed: parent.color = "#FF0000"
+          onExited: parent.color = parent.getReadColor()
+          onClicked: {
+            controller.toggleRead(model.header)
+          }
+        }
       }
       Column {
         id: col
