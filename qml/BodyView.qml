@@ -11,7 +11,7 @@ Flickable {
   boundsBehavior: Flickable.DragOverBounds
   Rectangle{
     anchors.fill: parent
-    color: white
+    color: "#FFFFFF"
     Text {
       id: bodyText
       anchors.fill: parent
