@@ -43,7 +43,8 @@ my $settings = {
 };
 
 my $okCmds = join "|", qw(
-  --update --body --body-html --mark-read --mark-unread
+  --update --body --body-html
+  --mark-read --mark-unread
   --print --summary --unread-line
   --has-error --has-new-unread --has-unread
 );
