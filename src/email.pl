@@ -217,7 +217,7 @@ sub main(@){
       my $hdr = readCachedHeader($accName, $uid);
       die "Unknown message: $uid\n" if not defined $hdr;
       for my $field(@headerFields){
-        print "$uid.$field: " . formatHeaderField($hdr, $field) . "\n";
+        print "$uid.$field: $$hdr{$field}\n";
       }
     }
   }elsif($cmd =~ /^(--body|--body-html)$/){
@@ -263,9 +263,9 @@ sub main(@){
         print "\n"
           . "ACCOUNT: $accName\n"
           . "UID: $uid\n"
-          . "DATE: " . formatHeaderField($hdr, "Date") . "\n"
-          . "FROM: " . formatHeaderField($hdr, "From") . "\n"
-          . "SUBJECT: " . formatHeaderField($hdr, "Subject") . "\n"
+          . "DATE: $$hdr{Date}\n"
+          . "FROM: $$hdr{From}\n"
+          . "SUBJECT: $$hdr{Subject}\n"
           . "BODY:\n$body\n"
           . "\n"
           ;
@@ -279,10 +279,10 @@ sub main(@){
         my $hdr = readCachedHeader($accName, $uid);
         print ""
           . "$accName"
-          . " " . formatHeaderField($hdr, "Date")
-          . " " . formatHeaderField($hdr, "From")
+          . " $$hdr{Date}"
+          . " $$hdr{From}"
           . "\n"
-          . "  " . formatHeaderField($hdr, "Subject")
+          . "  $$hdr{Subject}"
           . "\n"
           ;
       }
@@ -423,20 +423,27 @@ sub cacheAllHeaders($$$){
   my $headers = $c->parse_headers(\@messages, @headerFields);
   for my $uid(keys %$headers){
     my $hdr = $$headers{$uid};
-    open FH, "> $headersDir/$uid";
+    my @fmtLines;
+    my @rawLines;
     for my $field(sort @headerFields){
       my $vals = $$hdr{$field};
-      my $val = "";
+      my $val;
       if(not defined $vals or @$vals == 0){
         warn "WARNING: $uid has no field $field\n";
+        $val = "";
       }else{
         $val = $$vals[0];
       }
       if($val =~ s/\n/\\n/){
         warn "WARNING: newlines in $uid $field {replaced with \\n}\n";
       }
-      print FH "$field: $val\n";
+      my $rawVal = $val;
+      my $fmtVal = formatHeaderField($field, $val);
+      push @fmtLines, "$field: $fmtVal\n";
+      push @rawLines, "raw_$field: $rawVal\n";
     }
+    open FH, "> $headersDir/$uid";
+    print FH (@fmtLines, @rawLines);
     close FH;
   }
 }
@@ -602,8 +609,7 @@ sub getSocket($){
 }
 
 sub formatHeaderField($$){
-  my ($hdr, $field) = @_;
-  my $val = $$hdr{$field};
+  my ($field, $val) = @_;
   $val = decode('MIME-Header', $val);
   if($field =~ /^(Date)$/){
     $val = formatDate($val);
