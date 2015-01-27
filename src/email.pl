@@ -71,17 +71,17 @@ my $usage = "
             6:GMAIL
             0:WORK_GMAIL
 
-  $0 --mark-read ACCOUNT_NAME UID
-    login and mark the indicated message as read
+  $0 --mark-read ACCOUNT_NAME UID [UID UID ...]
+    login and mark the indicated message(s) as read
 
-  $0 --mark-unread ACCOUNT_NAME UID
-    login mark the indicated message as unread
+  $0 --mark-unread ACCOUNT_NAME UID [UID UID ...]
+    login mark the indicated message(s) as unread
 
-  $0 --body ACCOUNT_NAME UID
-    download, format and print the body of message UID in account ACCOUNT_NAME
+  $0 --body ACCOUNT_NAME UID [UID UID ...]
+    download, format and print the body of the indicated message(s)
     if body is cached, skip download
 
-  $0 --body-html ACCOUNT_NAME UID
+  $0 --body-html ACCOUNT_NAME UID [UID UID ...]
     same as --body, but prefer HTML instead of plaintext
 
   $0 --print [ACCOUNT_NAME ACCOUNT_NAME ...]
@@ -177,48 +177,57 @@ sub main(@){
     mergeUnreadCounts $counts, @accOrder;
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/){
     $VERBOSE = 1;
-    die $usage if @_ != 2;
+    die $usage if @_ < 2;
+    my ($accName, @uids) = @_;
     my $readStatus = $cmd =~ /^(--mark-read)$/ ? 1 : 0;
-    my $accName = shift;
-    my $uid = shift;
     my $acc = $$accounts{$accName};
     die "Unknown account $accName\n" if not defined $acc;
     my $c = getClient($acc);
     die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
     my $f = openFolder($acc, $c, 1);
     die "Error getting folder $$acc{folder}\n" if not defined $f;
-    setFlagStatus($c, $uid, "Seen", $readStatus);
+    for my $uid(@uids){
+      setFlagStatus($c, $uid, "Seen", $readStatus);
+    }
     my @unread = readUidFile $$acc{name}, "unread";
-    @unread = grep {$_ != $uid} @unread;
+    my %toRemove = map {$_ => 1} @uids;
+    @unread = grep {not defined $toRemove{$_}} @unread;
     if(not $readStatus){
-      push @unread, $uid;
+      @unread = (@unread, sort keys %toRemove);
     }
     writeUidFile $$acc{name}, "unread", @unread;
     my $count = @unread;
     mergeUnreadCounts {$accName => $count}, @accOrder;
     $c->logout();
   }elsif($cmd =~ /^(--body|--body-html)$/){
-    die $usage if @_ != 2;
+    die $usage if @_ < 2;
+    my ($accName, @uids) = @_;
     my $preferHtml = $cmd =~ /body-html/;
-    my $accName = shift;
-    my $uid = shift;
     my $acc = $$accounts{$accName};
-    my $body = readCachedBody($accName, $uid);
-    if(not defined $body){
-      die "Unknown account $accName\n" if not defined $acc;
-      my $c = getClient($acc);
-      die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
-      my $f = openFolder($acc, $c, 0);
-      die "Error getting folder $$acc{folder}\n" if not defined $f;
-      cacheBodies($acc, $c, $uid);
-      $c->logout();
-      $body = readCachedBody($accName, $uid);
-    }
-    die "No body found for $accName $uid\n" if not defined $body;
+    die "Unknown account $accName\n" if not defined $acc;
+    my $c;
+    my $f;
     my $mimeParser = MIME::Parser->new();
-    my $fmt = getBody($mimeParser, $body, $preferHtml);
-    chomp $fmt;
-    print "$fmt\n";
+    for my $uid(@uids){
+      my $body = readCachedBody($accName, $uid);
+      if(not defined $body){
+        if(not defined $c){
+          $c = getClient($acc);
+          die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
+        }
+        if(not defined $f){
+          my $f = openFolder($acc, $c, 0);
+          die "Error getting folder $$acc{folder}\n" if not defined $f;
+        }
+        cacheBodies($acc, $c, $uid);
+        $body = readCachedBody($accName, $uid);
+      }
+      die "No body found for $accName $uid\n" if not defined $body;
+      my $fmt = getBody($mimeParser, $body, $preferHtml);
+      chomp $fmt;
+      print "$fmt\n";
+    }
+    $c->logout();
   }elsif($cmd =~ /^(--print)$/){
     my @accNames = @_ == 0 ? @accOrder : @_;
     my $mimeParser = MIME::Parser->new();
