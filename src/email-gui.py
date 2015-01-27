@@ -88,34 +88,31 @@ class EmailManager():
       uids = filter(lambda uid: uid not in exUids, uids)
     if limit != None:
       uids = uids[0:limit]
-    return self.getHeaders(accName, uids)
-  def getHeaders(self, accName, uids):
-    header = self.readProc(["email.pl", "--header", accName] + map(str, uids))
+    unread = set(self.getUids(accName, "unread"))
+    return map(lambda uid: self.getHeader(accName, uid, not uid in unread), uids)
+  def getHeader(self, accName, uid, isRead):
+    filePath = EMAIL_DIR + "/" + accName + "/" + "headers/" + str(uid)
+    if not os.path.isfile(filePath):
+      return None
+    f = open(filePath, 'r')
+    header = f.read()
+    f.close()
     hdrDate = ""
     hdrFrom = ""
     hdrSubject = ""
-    headerFields = {}
     for line in header.splitlines():
-      m = re.match('(\d+)\.(\w+): (.*)', line)
+      m = re.match('(\w+): (.*)', line)
       if not m:
         return None
-      uid = int(m.group(1))
-      field = m.group(2)
-      val = m.group(3)
-      if uid not in headerFields:
-        headerFields[uid] = {}
-      headerFields[uid][field] = val
-    headers = []
-    unread = set(self.getUids(accName, "unread"))
-    for uid in uids:
-      isRead = not uid in unread
-      hdr = headerFields[uid]
-      headers.append(Header(uid,
-        hdr['Date'],
-        hdr['From'],
-        hdr['Subject'],
-        isRead))
-    return headers
+      field = m.group(1)
+      val = m.group(2)
+      if field == "Date":
+        hdrDate = val
+      elif field == "From":
+        hdrFrom = val
+      elif field == "Subject":
+        hdrSubject = val
+    return Header(uid, hdrDate, hdrFrom, hdrSubject, isRead)
   def getBody(self, accName, uid):
     return self.readProc(["email.pl", "--body-html", accName, str(uid)])
   def readProc(self, cmdArr):
