@@ -114,9 +114,10 @@ class EmailManager():
         hdrSubject = val
     return Header(uid, hdrDate, hdrFrom, hdrSubject, isRead)
   def getBody(self, accName, uid):
-    process = subprocess.Popen(["email.pl", "--body-html", accName, str(uid)],
-      stdout=subprocess.PIPE)
-    (stdout, stderr) = process.communicate()
+    return self.readProc(["email.pl", "--body-html", accName, str(uid)])
+  def readProc(self, cmdArr):
+    process = subprocess.Popen(cmdArr, stdout=subprocess.PIPE)
+    (stdout, _) = process.communicate()
     return stdout
 
 class Controller(QObject):
