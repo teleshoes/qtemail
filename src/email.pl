@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+use Encode;
 use Mail::IMAPClient;
 use IO::Socket::SSL;
 use MIME::Parser;
@@ -23,6 +24,7 @@ sub readCachedHeader($$);
 sub openFolder($$$);
 sub getClient($);
 sub getSocket($);
+sub formatHeaderField($$);
 sub formatDate($);
 sub readSecrets();
 
@@ -243,13 +245,12 @@ sub main(@){
         $body = "" if not defined $body;
         $body = "[NO BODY]\n" if $body =~ /^\s*$/;
         $body =~ s/^/  /mg;
-        my $date = formatDate($$hdr{Date});
         print "\n"
           . "ACCOUNT: $accName\n"
           . "UID: $uid\n"
-          . "DATE: $date\n"
-          . "FROM: $$hdr{From}\n"
-          . "SUBJECT: $$hdr{Subject}\n"
+          . "DATE: " . formatHeaderField($hdr, "Date") . "\n"
+          . "FROM: " . formatHeaderField($hdr, "From") . "\n"
+          . "SUBJECT: " . formatHeaderField($hdr, "Subject") . "\n"
           . "BODY:\n$body\n"
           . "\n"
           ;
@@ -261,8 +262,14 @@ sub main(@){
       my @unread = readUidFile $accName, "unread";
       for my $uid(@unread){
         my $hdr = readCachedHeader($accName, $uid);
-        my $date = formatDate($$hdr{Date});
-        print "$accName $date $$hdr{From}\n  $$hdr{Subject}\n";
+        print ""
+          . "$accName"
+          . " " . formatHeaderField($hdr, "Date")
+          . " " . formatHeaderField($hdr, "From")
+          . "\n"
+          . "  " . formatHeaderField($hdr, "Subject")
+          . "\n"
+          ;
       }
     }
   }elsif($cmd =~ /^(--unread-line)$/){
@@ -577,6 +584,18 @@ sub getSocket($){
     PeerAddr => $$acc{server},
     PeerPort => $$acc{port},
   );
+}
+
+sub formatHeaderField($$){
+  my ($hdr, $field) = @_;
+  my $val = $$hdr{$field};
+  $val = decode('MIME-Header', $val);
+  if($field =~ /^(Date)$/){
+    $val = formatDate($val);
+  }
+  chomp $val;
+  $val =~ s/\n/\\n/g;
+  return $val;
 }
 
 sub formatDate($){
