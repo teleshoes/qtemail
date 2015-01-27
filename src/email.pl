@@ -19,7 +19,7 @@ sub hasWords($);
 sub parseBody($$);
 sub getCachedHeaderUids($);
 sub readCachedHeader($$);
-sub examineFolder($$);
+sub openFolder($$$);
 sub getClient($);
 sub getSocket($);
 sub formatDate($);
@@ -143,7 +143,7 @@ sub main(@){
         close FH;
         next;
       }
-      my $f = examineFolder($acc, $c);
+      my $f = openFolder($acc, $c, 0);
       if(not defined $f){
         my $msg = "Error getting folder $$acc{folder}\n";
         warn $msg;
@@ -177,7 +177,7 @@ sub main(@){
       die "Unknown account $accName\n" if not defined $acc;
       my $c = getClient($acc);
       die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
-      my $f = examineFolder($acc, $c);
+      my $f = openFolder($acc, $c, 0);
       die "Error getting folder $$acc{folder}\n" if not defined $f;
       cacheBodies($acc, $c, $uid);
       $body = readCachedBody($accName, $uid);
@@ -472,15 +472,19 @@ sub readCachedHeader($$){
   return $header;
 }
 
-sub examineFolder($$){
-  my ($acc, $c) = @_;
+sub openFolder($$$){
+  my ($acc, $c, $allowEditing) = @_;
   my @folders = $c->folders($$acc{folder});
   if(@folders != 1){
     return undef;
   }
 
   my $f = $folders[0];
-  $c->examine($f);
+  if($allowEditing){
+    $c->select($f) or $f = undef;
+  }else{
+    $c->examine($f) or $f = undef;
+  }
   return $f;
 }
 
