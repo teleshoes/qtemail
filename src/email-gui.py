@@ -106,6 +106,11 @@ class EmailManager():
         return None
       field = m.group(1)
       val = m.group(2)
+      try:
+        val = val.encode('utf-8')
+      except:
+        val = val.decode('utf-8')
+
       if field == "Date":
         hdrDate = val
       elif field == "From":
