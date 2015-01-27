@@ -88,8 +88,9 @@ class EmailManager():
       uids = filter(lambda uid: uid not in exUids, uids)
     if limit != None:
       uids = uids[0:limit]
-    return map(lambda uid: self.getHeader(accName, uid), uids)
-  def getHeader(self, accName, uid):
+    unread = set(self.getUids(accName, "unread"))
+    return map(lambda uid: self.getHeader(accName, uid, not uid in unread), uids)
+  def getHeader(self, accName, uid, isRead):
     filePath = EMAIL_DIR + "/" + accName + "/" + "headers/" + str(uid)
     if not os.path.isfile(filePath):
       return None
@@ -111,7 +112,7 @@ class EmailManager():
         hdrFrom = val
       elif field == "Subject":
         hdrSubject = val
-    return Header(uid, hdrDate, hdrFrom, hdrSubject)
+    return Header(uid, hdrDate, hdrFrom, hdrSubject, isRead)
   def getBody(self, accName, uid):
     process = subprocess.Popen(["email.pl", "--body-html", accName, str(uid)],
       stdout=subprocess.PIPE)
@@ -200,12 +201,13 @@ class Account(QObject):
   Unread = Property(unicode, Unread, notify=changed)
 
 class Header(QObject):
-  def __init__(self, uid_, date_, from_, subject_):
+  def __init__(self, uid_, date_, from_, subject_, read_):
     QObject.__init__(self)
     self.uid_ = uid_
     self.date_ = date_
     self.from_ = from_
     self.subject_ = subject_
+    self.read_ = read_
   def Uid(self):
     return str(self.uid_)
   def Date(self):
@@ -214,11 +216,14 @@ class Header(QObject):
     return str(self.from_)
   def Subject(self):
     return str(self.subject_)
+  def Read(self):
+    return self.read_
   changed = Signal()
   Uid = Property(unicode, Uid, notify=changed)
   Date = Property(unicode, Date, notify=changed)
   From = Property(unicode, From, notify=changed)
   Subject = Property(unicode, Subject, notify=changed)
+  Read = Property(bool, Read, notify=changed)
 
 class MainWindow(QDeclarativeView):
   def __init__(self, qmlFile, controller, accountModel, headerModel):
