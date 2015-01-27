@@ -167,6 +167,8 @@ sub main(@){
 
       cacheBodies($acc, $c, @unread);
 
+      $c->logout();
+
       my %oldUnread = map {$_ => 1} readUidFile $accName, "unread";
       writeUidFile $accName, "unread", @unread;
       my @newUnread = grep {not defined $oldUnread{$_}} @unread;
@@ -185,6 +187,7 @@ sub main(@){
     my $f = openFolder($acc, $c, 1);
     die "Error getting folder $$acc{folder}\n" if not defined $f;
     setFlagStatus($c, $uid, "Seen", $readStatus);
+    $c->logout();
   }elsif($cmd =~ /^(--body|--body-html)$/){
     die $usage if @_ != 2;
     my $preferHtml = $cmd =~ /body-html/;
@@ -199,6 +202,7 @@ sub main(@){
       my $f = openFolder($acc, $c, 0);
       die "Error getting folder $$acc{folder}\n" if not defined $f;
       cacheBodies($acc, $c, $uid);
+      $c->logout();
       $body = readCachedBody($accName, $uid);
     }
     die "No body found for $accName $uid\n" if not defined $body;
