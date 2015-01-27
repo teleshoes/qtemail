@@ -45,7 +45,7 @@ my $settings = {
 };
 
 my $okCmds = join "|", qw(
-  --update --body --body-html
+  --update --header --body --body-html
   --mark-read --mark-unread
   --print --summary --unread-line
   --has-error --has-new-unread --has-unread
@@ -79,6 +79,11 @@ my $usage = "
 
   $0 --mark-unread ACCOUNT_NAME UID [UID UID ...]
     login mark the indicated message(s) as unread
+
+  $0 --header ACCOUNT_NAME UID [UID UID ...]
+    format and print the header of the indicated message(s)
+    prints each of [@headerFields]
+      one per line, formatted \"FIELD: VALUE\"
 
   $0 --body ACCOUNT_NAME UID [UID UID ...]
     download, format and print the body of the indicated message(s)
@@ -205,6 +210,16 @@ sub main(@){
     my $count = @unread;
     mergeUnreadCounts {$accName => $count}, @accOrder;
     $c->logout();
+  }elsif($cmd =~ /^(--header)$/){
+    die $usage if @_ < 2;
+    my ($accName, @uids) = @_;
+    for my $uid(@uids){
+      my $hdr = readCachedHeader($accName, $uid);
+      die "Unknown message: $uid\n" if not defined $hdr;
+      for my $field(@headerFields){
+        print "$field: " . formatHeaderField($hdr, $field) . "\n";
+      }
+    }
   }elsif($cmd =~ /^(--body|--body-html)$/){
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
