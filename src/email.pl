@@ -420,10 +420,24 @@ sub cacheAllHeaders($$$){
   my %toSkip = map {$_ => 1} getCachedHeaderUids($acc);
 
   @messages = grep {not defined $toSkip{$_}} @messages;
-  print "caching headers for " . @messages . " messages\n" if $VERBOSE;
+  my $total = @messages;
 
+  print "downloading headers for $total messages\n" if $VERBOSE;
   my $headers = $c->parse_headers(\@messages, @headerFields);
+
+  print "encoding and formatting $total headers\n" if $VERBOSE;
+  my $count = 0;
+  my $segment = int($total/20);
+
+  if($VERBOSE){
+    my $old_fh = select(STDOUT);
+    $| = 1;
+    select($old_fh);
+  }
+
   for my $uid(keys %$headers){
+    $count++;
+    print "." if $segment > 0 and $count % $segment == 0 and $VERBOSE;
     my $hdr = $$headers{$uid};
     my @fmtLines;
     my @rawLines;
@@ -431,13 +445,13 @@ sub cacheAllHeaders($$$){
       my $vals = $$hdr{$field};
       my $val;
       if(not defined $vals or @$vals == 0){
-        warn "WARNING: $uid has no field $field\n";
+        warn "\nWARNING: $uid has no field $field\n";
         $val = "";
       }else{
         $val = $$vals[0];
       }
       if($val =~ s/\n/\\n/){
-        warn "WARNING: newlines in $uid $field {replaced with \\n}\n";
+        warn "\nWARNING: newlines in $uid $field {replaced with \\n}\n";
       }
       my $rawVal = $val;
       my $fmtVal = formatHeaderField($field, $val);
@@ -449,6 +463,7 @@ sub cacheAllHeaders($$$){
     print FH (@fmtLines, @rawLines);
     close FH;
   }
+  print "\n" if $segment > 0 and $VERBOSE;
 }
 
 sub cacheBodies($$@){
