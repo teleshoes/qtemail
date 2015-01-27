@@ -69,7 +69,7 @@ class EmailManager():
       m = re.match('^(\d+):(\w+)', line)
       if not m:
         return []
-      accounts.append(Account(m.group(2), m.group(1)))
+      accounts.append(Account(m.group(2), int(m.group(1))))
     return accounts
   def getUids(self, accName, fileName):
     filePath = EMAIL_DIR + "/" + accName + "/" + fileName
@@ -205,12 +205,12 @@ class Account(QObject):
     self.name_ = name_
     self.unread_ = unread_
   def Name(self):
-    return str(self.name_)
+    return self.name_
   def Unread(self):
-    return str(self.unread_)
+    return self.unread_
   changed = Signal()
   Name = Property(unicode, Name, notify=changed)
-  Unread = Property(unicode, Unread, notify=changed)
+  Unread = Property(int, Unread, notify=changed)
 
 class Header(QObject):
   def __init__(self, uid_, date_, from_, subject_, read_):
@@ -221,17 +221,17 @@ class Header(QObject):
     self.subject_ = subject_
     self.read_ = read_
   def Uid(self):
-    return str(self.uid_)
+    return self.uid_
   def Date(self):
-    return str(self.date_)
+    return self.date_
   def From(self):
-    return str(self.from_)
+    return self.from_
   def Subject(self):
-    return str(self.subject_)
+    return self.subject_
   def Read(self):
     return self.read_
   changed = Signal()
-  Uid = Property(unicode, Uid, notify=changed)
+  Uid = Property(int, Uid, notify=changed)
   Date = Property(unicode, Date, notify=changed)
   From = Property(unicode, From, notify=changed)
   Subject = Property(unicode, Subject, notify=changed)
