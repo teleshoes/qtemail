@@ -213,6 +213,7 @@ sub main(@){
   }elsif($cmd =~ /^(--header)$/){
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
+    binmode STDOUT, ':utf8';
     for my $uid(@uids){
       my $hdr = readCachedHeader($accName, $uid);
       die "Unknown message: $uid\n" if not defined $hdr;
@@ -252,6 +253,7 @@ sub main(@){
   }elsif($cmd =~ /^(--print)$/){
     my @accNames = @_ == 0 ? @accOrder : @_;
     my $mimeParser = MIME::Parser->new();
+    binmode STDOUT, ':utf8';
     for my $accName(@accNames){
       my @unread = readUidFile $accName, "unread";
       for my $uid(@unread){
@@ -443,6 +445,7 @@ sub cacheAllHeaders($$$){
       push @rawLines, "raw_$field: $rawVal\n";
     }
     open FH, "> $headersDir/$uid";
+    binmode FH, ':utf8';
     print FH (@fmtLines, @rawLines);
     close FH;
   }
@@ -546,7 +549,10 @@ sub readCachedHeader($$){
     return undef;
   }
   my $header = {};
-  my @lines = `cat "$hdrFile"`;
+  open FH, "< $hdrFile";
+  binmode FH, ':utf8';
+  my @lines = <FH>;
+  close FH;
   for my $line(@lines){
     if($line =~ /^(\w+): (.*)$/){
       $$header{$1} = $2;
