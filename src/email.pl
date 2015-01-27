@@ -190,10 +190,13 @@ sub main(@){
       setFlagStatus($c, $uid, "Seen", $readStatus);
     }
     my @unread = readUidFile $$acc{name}, "unread";
-    my %toRemove = map {$_ => 1} @uids;
-    @unread = grep {not defined $toRemove{$_}} @unread;
+    my %all = map {$_ => 1} readUidFile $$acc{name}, "all";
+    my %marked = map {$_ => 1} @uids;
+
+    my %toUpdate = map {$_ => 1} grep {defined $all{$_}} keys %marked;
+    @unread = grep {not defined $toUpdate{$_}} @unread;
     if(not $readStatus){
-      @unread = (@unread, sort keys %toRemove);
+      @unread = (@unread, sort keys %toUpdate);
     }
     writeUidFile $$acc{name}, "unread", @unread;
     my $count = @unread;
