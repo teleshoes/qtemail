@@ -7,6 +7,7 @@ use MIME::Parser;
 use Date::Parse qw(str2time);
 use Date::Format qw(time2str);
 
+sub setFlagStatus($$$$);
 sub mergeUnreadCounts($@);
 sub readUnreadCounts();
 sub writeUnreadCounts($@);
@@ -42,7 +43,7 @@ my $settings = {
 };
 
 my $okCmds = join "|", qw(
-  --update --body --body-html
+  --update --body --body-html --mark-read --mark-unread
   --print --summary --unread-line
   --has-error --has-new-unread --has-unread
 );
@@ -69,6 +70,12 @@ my $usage = "
       e.g.: 3:AOL
             6:GMAIL
             0:WORK_GMAIL
+
+  $0 --mark-read ACCOUNT_NAME UID
+    login and mark the indicated message as read
+
+  $0 --mark-unread ACCOUNT_NAME UID
+    login mark the indicated message as unread
 
   $0 --body ACCOUNT_NAME UID
     download, format and print the body of message UID in account ACCOUNT_NAME
@@ -166,6 +173,18 @@ sub main(@){
       writeUidFile $accName, "new-unread", @newUnread;
     }
     mergeUnreadCounts $counts, @accOrder;
+  }elsif($cmd =~ /^(--mark-read|--mark-unread)$/){
+    die $usage if @_ != 2;
+    my $readStatus = $cmd =~ /^(--mark-read)$/ ? 1 : 0;
+    my $accName = shift;
+    my $uid = shift;
+    my $acc = $$accounts{$accName};
+    die "Unknown account $accName\n" if not defined $acc;
+    my $c = getClient($acc);
+    die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
+    my $f = openFolder($acc, $c, 1);
+    die "Error getting folder $$acc{folder}\n" if not defined $f;
+    setFlagStatus($c, $uid, "Seen", $readStatus);
   }elsif($cmd =~ /^(--body|--body-html)$/){
     die $usage if @_ != 2;
     my $preferHtml = $cmd =~ /body-html/;
@@ -270,6 +289,15 @@ sub main(@){
     }
     print "no\n";
     exit 1;
+  }
+}
+
+sub setFlagStatus($$$$){
+  my ($c, $uid, $flag, $status) = @_;
+  if($status){
+    $c->set_flag($flag, $uid) or die "FAILED: set $flag on $uid\n";
+  }else{
+    $c->unset_flag($flag, $uid) or die "FAILED: unset flag on $uid\n";
   }
 }
 
