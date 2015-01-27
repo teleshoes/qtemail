@@ -176,6 +176,7 @@ sub main(@){
     }
     mergeUnreadCounts $counts, @accOrder;
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/){
+    $VERBOSE = 1;
     die $usage if @_ != 2;
     my $readStatus = $cmd =~ /^(--mark-read)$/ ? 1 : 0;
     my $accName = shift;
@@ -307,8 +308,10 @@ sub main(@){
 sub setFlagStatus($$$$){
   my ($c, $uid, $flag, $status) = @_;
   if($status){
+    print "$uid $flag => true\n" if $VERBOSE;
     $c->set_flag($flag, $uid) or die "FAILED: set $flag on $uid\n";
   }else{
+    print "$uid $flag => false\n" if $VERBOSE;
     $c->unset_flag($flag, $uid) or die "FAILED: unset flag on $uid\n";
   }
 }
