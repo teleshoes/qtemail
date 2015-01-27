@@ -83,7 +83,7 @@ my $usage = "
   $0 --header ACCOUNT_NAME UID [UID UID ...]
     format and print the header of the indicated message(s)
     prints each of [@headerFields]
-      one per line, formatted \"FIELD: VALUE\"
+      one per line, formatted \"UID.FIELD: VALUE\"
 
   $0 --body ACCOUNT_NAME UID [UID UID ...]
     download, format and print the body of the indicated message(s)
@@ -217,7 +217,7 @@ sub main(@){
       my $hdr = readCachedHeader($accName, $uid);
       die "Unknown message: $uid\n" if not defined $hdr;
       for my $field(@headerFields){
-        print "$field: " . formatHeaderField($hdr, $field) . "\n";
+        print "$uid.$field: " . formatHeaderField($hdr, $field) . "\n";
       }
     }
   }elsif($cmd =~ /^(--body|--body-html)$/){
