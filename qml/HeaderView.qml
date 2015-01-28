@@ -22,14 +22,19 @@ ListView {
         width: parent.width * 0.15
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        color: getReadColor()
-        function getReadColor(){
-          return model.header.Read ? "#E1D6A1" : "#666666"
+        color: getColor()
+        function getColor(){
+          if(model.header.IsLoading){
+            return "#FF0000";
+          }else{
+            return model.header.Read ? "#E1D6A1" : "#666666"
+          }
+        }
+        function updateColor(){
+          this.color = getColor()
         }
         MouseArea {
           anchors.fill: parent
-          onPressed: parent.color = "#FF0000"
-          onExited: parent.color = parent.getReadColor()
           onClicked: {
             controller.toggleRead(readIndicator, model.header)
           }
