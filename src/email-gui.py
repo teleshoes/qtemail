@@ -117,7 +117,7 @@ class EmailManager():
         hdrFrom = val
       elif field == "Subject":
         hdrSubject = val
-    return Header(uid, hdrDate, hdrFrom, hdrSubject, isRead)
+    return Header(uid, hdrDate, hdrFrom, hdrSubject, isRead, False)
   def getBody(self, accName, uid):
     return self.readProc(["email.pl", "--body-html", accName, str(uid)])
   def readProc(self, cmdArr):
@@ -218,13 +218,14 @@ class Account(QObject):
   Unread = Property(int, Unread, notify=changed)
 
 class Header(QObject):
-  def __init__(self, uid_, date_, from_, subject_, read_):
+  def __init__(self, uid_, date_, from_, subject_, read_, isLoading_):
     QObject.__init__(self)
     self.uid_ = uid_
     self.date_ = date_
     self.from_ = from_
     self.subject_ = subject_
     self.read_ = read_
+    self.isLoading_ = isLoading_
   def Uid(self):
     return self.uid_
   def Date(self):
@@ -235,12 +236,15 @@ class Header(QObject):
     return self.subject_
   def Read(self):
     return self.read_
+  def IsLoading(self):
+    return self.isLoading_
   changed = Signal()
   Uid = Property(int, Uid, notify=changed)
   Date = Property(unicode, Date, notify=changed)
   From = Property(unicode, From, notify=changed)
   Subject = Property(unicode, Subject, notify=changed)
   Read = Property(bool, Read, notify=changed)
+  IsLoading = Property(bool, IsLoading, notify=changed)
 
 class MainWindow(QDeclarativeView):
   def __init__(self, qmlFile, controller, accountModel, headerModel):
