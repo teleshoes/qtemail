@@ -145,8 +145,16 @@ class Controller(QObject):
     self.headerModel.setItems(headers)
   @Slot(QObject, QObject)
   def toggleRead(self, readIndicator, header):
+    header.isLoading_ = True
+    readIndicator.updateColor()
+
     thread = ToggleReadThread(readIndicator, self.currentAccount, header)
+    thread.toggleReadFinished.connect(self.onToggleReadFinished)
     self.startThread(thread)
+  def onToggleReadFinished(self, readIndicator, header, isRead):
+    header.isLoading_ = False
+    header.read_ = isRead
+    readIndicator.updateColor()
   @Slot()
   def moreHeaders(self):
     headers = self.emailManager.fetchHeaders(self.currentAccount,
@@ -164,6 +172,7 @@ class Controller(QObject):
     self.threads.remove(thread)
 
 class ToggleReadThread(QThread):
+  toggleReadFinished = Signal(QObject, QObject, bool)
   def __init__(self, readIndicator, account, header):
     QThread.__init__(self)
     self.readIndicator = readIndicator
@@ -181,6 +190,7 @@ class ToggleReadThread(QThread):
       isRead = not wasRead
     else:
       isRead = wasRead
+    self.toggleReadFinished.emit(self.readIndicator, self.header, isRead)
 
 class BaseListModel(QAbstractListModel):
   def __init__(self):
