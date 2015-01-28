@@ -132,6 +132,7 @@ class Controller(QObject):
     self.accountModel = accountModel
     self.headerModel = headerModel
     self.currentAccount = None
+    self.threads = []
   @Slot()
   def setupAccounts(self):
     self.accountModel.setItems(self.emailManager.getAccounts())
@@ -144,15 +145,8 @@ class Controller(QObject):
     self.headerModel.setItems(headers)
   @Slot(QObject, QObject)
   def toggleRead(self, readIndicator, header):
-    wasRead = header.Read
-    print wasRead
-    if wasRead:
-      cmd = "--mark-unread"
-    else:
-      cmd = "--mark-read"
-    exitCode = subprocess.call(["email.pl", cmd, self.currentAccount, str(header.uid_)])
-    if exitCode == 0:
-      header.read_ = not wasRead
+    thread = ToggleReadThread(readIndicator, self.currentAccount, header)
+    self.startThread(thread)
   @Slot()
   def moreHeaders(self):
     headers = self.emailManager.fetchHeaders(self.currentAccount,
@@ -162,6 +156,31 @@ class Controller(QObject):
   def getBodyText(self, header):
     print 'clicked uid:', str(header.uid_)
     return self.emailManager.getBody(self.currentAccount, header.uid_)
+  def startThread(self, thread):
+    self.threads.append(thread)
+    thread.finished.connect(lambda: self.cleanupThread(thread))
+    thread.start()
+  def cleanupThread(self, thread):
+    self.threads.remove(thread)
+
+class ToggleReadThread(QThread):
+  def __init__(self, readIndicator, account, header):
+    QThread.__init__(self)
+    self.readIndicator = readIndicator
+    self.account = account
+    self.header = header
+  def run(self):
+    wasRead = self.header.Read
+    if wasRead:
+      arg = "--mark-unread"
+    else:
+      arg = "--mark-read"
+    cmd = ["email.pl", arg, self.account, str(self.header.uid_)]
+    exitCode = subprocess.call(cmd)
+    if exitCode == 0:
+      isRead = not wasRead
+    else:
+      isRead = wasRead
 
 class BaseListModel(QAbstractListModel):
   def __init__(self):
