@@ -249,7 +249,7 @@ sub main(@){
       chomp $fmt;
       print "$fmt\n";
     }
-    $c->logout();
+    $c->logout() if defined $c;
   }elsif($cmd =~ /^(--print)$/){
     my @accNames = @_ == 0 ? @accOrder : @_;
     my $mimeParser = MIME::Parser->new();
