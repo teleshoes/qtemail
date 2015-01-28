@@ -142,8 +142,8 @@ class Controller(QObject):
     headers = self.emailManager.fetchHeaders(self.currentAccount,
       limit=PAGE_INITIAL_SIZE, exclude=[])
     self.headerModel.setItems(headers)
-  @Slot(QObject)
-  def toggleRead(self, header):
+  @Slot(QObject, QObject)
+  def toggleRead(self, readIndicator, header):
     wasRead = header.Read
     print wasRead
     if wasRead:

@@ -17,6 +17,7 @@ ListView {
         }
       }
       Rectangle {
+        id: readIndicator
         height: parent.height
         width: parent.width * 0.15
         anchors.right: parent.right
@@ -30,7 +31,7 @@ ListView {
           onPressed: parent.color = "#FF0000"
           onExited: parent.color = parent.getReadColor()
           onClicked: {
-            controller.toggleRead(model.header)
+            controller.toggleRead(readIndicator, model.header)
           }
         }
       }
