@@ -22,8 +22,8 @@ PLATFORM_HARMATTAN = 1
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-PAGE_INITIAL_SIZE = 50
-PAGE_MORE_SIZE = 50
+PAGE_INITIAL_SIZE = 200
+PAGE_MORE_SIZE = 200
 
 UNREAD_COUNTS = os.getenv("HOME") + "/.unread-counts"
 EMAIL_DIR = os.getenv("HOME") + "/.cache/email"
