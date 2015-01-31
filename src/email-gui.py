@@ -71,16 +71,16 @@ class EmailManager():
         return []
       accounts.append(Account(m.group(2), int(m.group(1))))
     return accounts
-  def getUids(self, accName, fileName):
-    filePath = EMAIL_DIR + "/" + accName + "/" + fileName
+  def getUids(self, accName, folderName, fileName):
+    filePath = EMAIL_DIR + "/" + accName + "/" + folderName + "/" + fileName
     if not os.path.isfile(filePath):
       return []
     f = open(filePath, 'r')
     uids = f.read()
     f.close()
     return map(int, uids.splitlines())
-  def fetchHeaders(self, accName, limit=None, exclude=[]):
-    uids = self.getUids(accName, "all")
+  def fetchHeaders(self, accName, folderName, limit=None, exclude=[]):
+    uids = self.getUids(accName, folderName, "all")
     uids.sort()
     uids.reverse()
     if len(exclude) > 0:
@@ -88,10 +88,14 @@ class EmailManager():
       uids = filter(lambda uid: uid not in exUids, uids)
     if limit != None:
       uids = uids[0:limit]
-    unread = set(self.getUids(accName, "unread"))
-    return map(lambda uid: self.getHeader(accName, uid, not uid in unread), uids)
-  def getHeader(self, accName, uid, isRead):
-    filePath = EMAIL_DIR + "/" + accName + "/" + "headers/" + str(uid)
+    unread = set(self.getUids(accName, folderName, "unread"))
+    headers = []
+    for uid in uids:
+      header = self.getHeader(accName, folderName, uid, not uid in unread)
+      headers.append(header)
+    return headers
+  def getHeader(self, accName, folderName, uid, isRead):
+    filePath = EMAIL_DIR + "/" + accName + "/" + folderName + "/" + "headers/" + str(uid)
     if not os.path.isfile(filePath):
       return None
     f = open(filePath, 'r')
@@ -118,8 +122,9 @@ class EmailManager():
       elif field == "Subject":
         hdrSubject = val
     return Header(uid, hdrDate, hdrFrom, hdrSubject, isRead, False)
-  def getBody(self, accName, uid):
-    return self.readProc(["email.pl", "--body-html", accName, str(uid)])
+  def getBody(self, accName, folderName, uid):
+    return self.readProc(["email.pl", "--body-html",
+      "--folder=" + folderName, accName, str(uid)])
   def readProc(self, cmdArr):
     process = subprocess.Popen(cmdArr, stdout=subprocess.PIPE)
     (stdout, _) = process.communicate()
@@ -131,7 +136,8 @@ class Controller(QObject):
     self.emailManager = emailManager
     self.accountModel = accountModel
     self.headerModel = headerModel
-    self.currentAccount = None
+    self.accountName = None
+    self.folderName = "inbox"
     self.threads = []
   @Slot()
   def setupAccounts(self):
@@ -139,8 +145,9 @@ class Controller(QObject):
   @Slot(QObject)
   def accountSelected(self, account):
     print 'clicked acc: ', account.Name
-    self.currentAccount = account.Name
-    headers = self.emailManager.fetchHeaders(self.currentAccount,
+    self.accountName = account.Name
+    headers = self.emailManager.fetchHeaders(
+      self.accountName, self.folderName,
       limit=PAGE_INITIAL_SIZE, exclude=[])
     self.headerModel.setItems(headers)
   @Slot(QObject, QObject)
@@ -148,7 +155,8 @@ class Controller(QObject):
     header.isLoading_ = True
     readIndicator.updateColor()
 
-    thread = ToggleReadThread(readIndicator, self.currentAccount, header)
+    thread = ToggleReadThread(readIndicator,
+      self.accountName, self.folderName, header)
     thread.toggleReadFinished.connect(self.onToggleReadFinished)
     self.startThread(thread)
   def onToggleReadFinished(self, readIndicator, header, isRead):
@@ -157,13 +165,15 @@ class Controller(QObject):
     readIndicator.updateColor()
   @Slot()
   def moreHeaders(self):
-    headers = self.emailManager.fetchHeaders(self.currentAccount,
+    headers = self.emailManager.fetchHeaders(
+      self.accountName, self.folderName,
       limit=PAGE_MORE_SIZE, exclude=self.headerModel.getItems())
     self.headerModel.appendItems(headers)
   @Slot(QObject, result=str)
   def getBodyText(self, header):
     print 'clicked uid:', str(header.uid_)
-    return self.emailManager.getBody(self.currentAccount, header.uid_)
+    return self.emailManager.getBody(
+      self.accountName, self.folderName, header.uid_)
   def startThread(self, thread):
     self.threads.append(thread)
     thread.finished.connect(lambda: self.cleanupThread(thread))
@@ -173,10 +183,11 @@ class Controller(QObject):
 
 class ToggleReadThread(QThread):
   toggleReadFinished = Signal(QObject, QObject, bool)
-  def __init__(self, readIndicator, account, header):
+  def __init__(self, readIndicator, accountName, folderName, header):
     QThread.__init__(self)
     self.readIndicator = readIndicator
-    self.account = account
+    self.accountName = accountName
+    self.folderName = folderName
     self.header = header
   def run(self):
     wasRead = self.header.Read
@@ -184,7 +195,8 @@ class ToggleReadThread(QThread):
       arg = "--mark-unread"
     else:
       arg = "--mark-read"
-    cmd = ["email.pl", arg, self.account, str(self.header.uid_)]
+    cmd = ["email.pl", arg,
+      "--folder=" + self.folderName, self.accountName, str(self.header.uid_)]
     exitCode = subprocess.call(cmd)
     if exitCode == 0:
       isRead = not wasRead
