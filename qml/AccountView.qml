@@ -17,6 +17,30 @@ ListView {
           navToPage(headerPage)
         }
       }
+      Rectangle {
+        id: updateIndicator
+        height: parent.height
+        width: parent.width * 0.15
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        color: getColor()
+        function getColor(){
+          if(model.account.IsLoading){
+            return "#FF0000";
+          }else{
+            return "#666666"
+          }
+        }
+        function updateColor(){
+          this.color = getColor()
+        }
+        MouseArea {
+          anchors.fill: parent
+          onClicked: {
+            controller.updateAccount(updateIndicator, model.account)
+          }
+        }
+      }
       Text {
         anchors.centerIn: parent
         text: model.account.Name + ": " + model.account.Unread
@@ -24,6 +48,7 @@ ListView {
       }
       Text {
         anchors.right: parent.right
+        anchors.rightMargin: parent.width * 0.15
         text: model.account.LastUpdatedRel
         font.pointSize: 24
       }

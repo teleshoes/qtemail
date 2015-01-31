@@ -72,7 +72,7 @@ class EmailManager():
         totalCount = int(m.group(5))
         error = m.group(6)
         accounts.append(Account(
-          accName, lastUpdated, lastUpdatedRel, unreadCount, totalCount, error))
+          accName, lastUpdated, lastUpdatedRel, unreadCount, totalCount, error, False))
     return accounts
   def getFolders(self, accountName):
     folderOut = self.readProc(["email.pl", "--folders", accountName])
@@ -180,6 +180,16 @@ class Controller(QObject):
     print 'clicked folder: ', folder.Name
     self.folderName = folder.Name
   @Slot(QObject, QObject)
+  def updateAccount(self, updateIndicator, account):
+    account.isLoading_ = True
+    updateIndicator.updateColor()
+
+    thread = UpdateThread(updateIndicator, account)
+    thread.updateFinished.connect(self.onUpdateAccountFinished)
+    self.startThread(thread)
+  def onUpdateAccountFinished(self, updateIndicator, account):
+    self.setupAccounts()
+  @Slot(QObject, QObject)
   def toggleRead(self, readIndicator, header):
     header.isLoading_ = True
     readIndicator.updateColor()
@@ -209,6 +219,17 @@ class Controller(QObject):
     thread.start()
   def cleanupThread(self, thread):
     self.threads.remove(thread)
+
+class UpdateThread(QThread):
+  updateFinished = Signal(QObject, QObject)
+  def __init__(self, updateIndicator, account):
+    QThread.__init__(self)
+    self.updateIndicator = updateIndicator
+    self.account = account
+  def run(self):
+    cmd = ["email.pl", "--update", self.account.Name]
+    subprocess.call(cmd)
+    self.updateFinished.emit(self.updateIndicator, self.account)
 
 class ToggleReadThread(QThread):
   toggleReadFinished = Signal(QObject, QObject, bool)
@@ -281,7 +302,7 @@ class HeaderModel(BaseListModel):
     self.setRoleNames(dict(enumerate(HeaderModel.COLUMNS)))
 
 class Account(QObject):
-  def __init__(self, name_, lastUpdated_, lastUpdatedRel_, unread_, total_, error_):
+  def __init__(self, name_, lastUpdated_, lastUpdatedRel_, unread_, total_, error_, isLoading_):
     QObject.__init__(self)
     self.name_ = name_
     self.lastUpdated_ = lastUpdated_
@@ -289,6 +310,7 @@ class Account(QObject):
     self.unread_ = unread_
     self.total_ = total_
     self.error_ = error_
+    self.isLoading_ = isLoading_
   def Name(self):
     return self.name_
   def LastUpdated(self):
@@ -301,6 +323,8 @@ class Account(QObject):
     return self.total_
   def Error(self):
     return self.error_
+  def IsLoading(self):
+    return self.isLoading_
   changed = Signal()
   Name = Property(unicode, Name, notify=changed)
   LastUpdated = Property(int, LastUpdated, notify=changed)
@@ -308,6 +332,7 @@ class Account(QObject):
   Unread = Property(int, Unread, notify=changed)
   Total = Property(int, Total, notify=changed)
   Error = Property(unicode, Error, notify=changed)
+  IsLoading = Property(bool, IsLoading, notify=changed)
 
 class Folder(QObject):
   def __init__(self, name_, unread_, total_):
