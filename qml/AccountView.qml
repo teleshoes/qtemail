@@ -22,6 +22,11 @@ ListView {
         text: model.account.Name + ": " + model.account.Unread
         font.pointSize: 36
       }
+      Text {
+        anchors.right: parent.right
+        text: model.account.LastUpdatedRel
+        font.pointSize: 24
+      }
     }
   }
 }
