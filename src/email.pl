@@ -12,6 +12,8 @@ sub setFlagStatus($$$$);
 sub mergeUnreadCounts($@);
 sub readUnreadCounts();
 sub writeUnreadCounts($@);
+sub readLastUpdated($);
+sub writeLastUpdated($);
 sub readUidFileCounts($$$);
 sub readUidFile($$$);
 sub writeUidFile($$$@);
@@ -222,6 +224,8 @@ sub main(@){
         writeUidFile $accName, $folderName, "unread", @unread;
         my @newUnread = grep {not defined $oldUnread{$_}} @unread;
         writeUidFile $accName, $folderName, "new-unread", @newUnread;
+
+        writeLastUpdated $accName;
       }
       $c->logout();
       $$counts{$accName} = $unreadCount;
@@ -268,11 +272,12 @@ sub main(@){
       my $folders = $accFolders{$accName};
       my $unreadCount = 0;
       my $totalCount = 0;
+      my $lastUpdated = readLastUpdated $accName;
       for my $folderName(sort keys %$folders){
         $unreadCount += readUidFileCounts $accName, $folderName, "unread";
         $totalCount += readUidFileCounts $accName, $folderName, "all";
       }
-      printf "$accName:$unreadCount/$totalCount\n";
+      printf "$accName:$lastUpdated:$unreadCount/$totalCount\n";
     }
   }elsif($cmd =~ /^(--folders)$/){
     die $usage if @_ != 1;
@@ -489,6 +494,26 @@ sub writeUnreadCounts($@){
   close FH;
 }
 
+sub readLastUpdated($){
+  my ($accName) = @_;
+  my $f = "$emailDir/$accName/last_updated";
+  if(not -f $f){
+    return undef;
+  }
+  open FH, "< $f" or die "Could not read $f\n";
+  my $time = <FH>;
+  close FH;
+  chomp $time;
+  return $time;
+}
+sub writeLastUpdated($){
+  my ($accName) = @_;
+  my $f = "$emailDir/$accName/last_updated";
+  open FH, "> $f" or die "Could not write to $f\n";
+  print FH time . "\n";
+  close FH;
+}
+
 sub readUidFileCounts($$$){
   my ($accName, $folderName, $fileName) = @_;
   my $dir = "$emailDir/$accName/$folderName";
@@ -516,7 +541,6 @@ sub readUidFile($$$){
     return @uids;
   }
 }
-
 sub writeUidFile($$$@){
   my ($accName, $folderName, $fileName, @uids) = @_;
   my $dir = "$emailDir/$accName/$folderName";
