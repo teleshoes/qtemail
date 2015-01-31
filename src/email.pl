@@ -226,10 +226,10 @@ sub main(@){
         my @newUnread = grep {not defined $oldUnread{$_}} @unread;
         writeUidFile $accName, $folderName, "new-unread", @newUnread;
 
-        writeLastUpdated $accName;
       }
       $c->logout();
       $$counts{$accName} = $unreadCount;
+      writeLastUpdated $accName;
     }
     mergeUnreadCounts $counts, @accOrder;
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/){
