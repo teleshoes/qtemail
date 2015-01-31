@@ -80,7 +80,11 @@ class EmailManager():
     for line in folderOut.splitlines():
       m = re.match("([a-z]+):(\d+)/(\d+)", line)
       if m:
-        folders.append(Folder(m.group(1), int(m.group(2)), int(m.group(3))))
+        folderName = m.group(1)
+        unreadCount = int(m.group(2))
+        totalCount = int(m.group(3))
+        folders.append(Folder(
+          folderName, unreadCount, totalCount))
     return folders
   def getUids(self, accName, folderName, fileName):
     filePath = EMAIL_DIR + "/" + accName + "/" + folderName + "/" + fileName
