@@ -44,7 +44,7 @@ ListView {
         id: col
         anchors.fill: parent
         Text {
-          text: model.header.From
+          text: model.header.IsSent ? "=>" + model.header.To : model.header.From
           font.pointSize: 24
         }
         Text {
