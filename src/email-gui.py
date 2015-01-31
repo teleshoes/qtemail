@@ -63,9 +63,15 @@ class EmailManager():
     accountOut = self.readProc(["email.pl", "--accounts"])
     accounts = []
     for line in accountOut.splitlines():
-      m = re.match("(\w+):(\d+)/(\d+)", line)
+      m = re.match("(\w+):(\d+):([a-z0-9_\- ]+):(\d+)/(\d+)", line)
       if m:
-        accounts.append(Account(m.group(1), int(m.group(2)), int(m.group(3))))
+        accName = m.group(1)
+        lastUpdated = int(m.group(2))
+        lastUpdatedRel = m.group(3)
+        unreadCount = int(m.group(4))
+        totalCount = int(m.group(5))
+        accounts.append(Account(
+          accName, lastUpdated, lastUpdatedRel, unreadCount, totalCount))
     return accounts
   def getFolders(self, accountName):
     folderOut = self.readProc(["email.pl", "--folders", accountName])
@@ -270,19 +276,27 @@ class HeaderModel(BaseListModel):
     self.setRoleNames(dict(enumerate(HeaderModel.COLUMNS)))
 
 class Account(QObject):
-  def __init__(self, name_, unread_, total_):
+  def __init__(self, name_, lastUpdated_, lastUpdatedRel_, unread_, total_):
     QObject.__init__(self)
     self.name_ = name_
+    self.lastUpdated_ = lastUpdated_
+    self.lastUpdatedRel_ = lastUpdatedRel_
     self.unread_ = unread_
     self.total_ = total_
   def Name(self):
     return self.name_
+  def LastUpdated(self):
+    return self.lastUpdated_
+  def LastUpdatedRel(self):
+    return self.lastUpdatedRel_
   def Unread(self):
     return self.unread_
   def Total(self):
     return self.total_
   changed = Signal()
   Name = Property(unicode, Name, notify=changed)
+  LastUpdated = Property(unicode, LastUpdated, notify=changed)
+  LastUpdatedRel = Property(unicode, LastUpdatedRel, notify=changed)
   Unread = Property(int, Unread, notify=changed)
   Total = Property(int, Total, notify=changed)
 
