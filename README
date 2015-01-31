@@ -69,3 +69,104 @@ Dependencies:
 
 
 Usage:
+
+  Simple IMAP client.
+  Configuration is in ~/.secrets
+    Each line is one key of the format: email.ACCOUNT_NAME.FIELD = value
+    Account names can be any word characters (alphanumeric plus underscore)
+    Other keys are ignored.
+    required fields:
+      user     {Required} IMAP username, usually the full email address
+      password {Required} *password in plaintext*
+      server   {Required} IMAP server
+      port     {Required} IMAP server port
+      ssl      {Optional} false to forcibly disable security
+      inbox    {Optional} main IMAP folder name to use (default is "INBOX")
+      sent     {Optional} IMAP folder name to use for sent mail
+      folders  {Optional} colon-separated list of additional folders to fetch
+        each folder has a FOLDER_NAME,
+        which is the directory on the filesystem will be lowercase
+        FOLDER_NAME is the folder, with all non-alphanumeric characters
+          replaced with _s, and all leading and trailing _s removed
+        e.g.:  junk:[GMail]/Drafts:_12_/ponies
+               =>  ["junk", "gmail_drafts", "12_ponies"]
+
+  ACCOUNT_NAME    the word following "email." in ~/.secrets
+  FOLDER_NAME     "inbox", "sent" or one of the names from "folders"
+  UID             an IMAP UID {UIDVALIDITY is assumed to never change}
+
+  /usr/local/bin/email.pl -h|--help
+    show this message
+
+  /usr/local/bin/email.pl [--update] [ACCOUNT_NAME ACCOUNT_NAME ...]
+    -for each account specified, or all if none are specified:
+      -login to IMAP server, or create file ~/.cache/email/ACCOUNT_NAME/error
+      -for each FOLDER_NAME:
+        -fetch and write all message UIDs to
+          ~/.cache/email/ACCOUNT_NAME/FOLDER_NAME/all
+        -fetch and cache all message headers in
+          ~/.cache/email/ACCOUNT_NAME/FOLDER_NAME/headers/UID
+        -fetch all unread messages and write their UIDs to
+          ~/.cache/email/ACCOUNT_NAME/FOLDER_NAME/unread
+        -write all message UIDs that are now in unread and were not before
+          ~/.cache/email/ACCOUNT_NAME/FOLDER_NAME/new-unread
+    -update global unread counts file ~/.unread-counts
+      ignored or missing accounts are preserved in ~/.unread-counts
+
+      write the unread counts, one line per account, to ~/.unread-counts
+      e.g.: 3:AOL
+            6:GMAIL
+            0:WORK_GMAIL
+
+  /usr/local/bin/email.pl --mark-read [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+    login and mark the indicated message(s) as read
+
+  /usr/local/bin/email.pl --mark-unread [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+    login mark the indicated message(s) as unread
+
+  /usr/local/bin/email.pl --header [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+    format and print the header of the indicated message(s)
+    prints each of [Date Subject From To]
+      one per line, formatted "UID.FIELD: VALUE"
+
+  /usr/local/bin/email.pl --body [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+    download, format and print the body of the indicated message(s)
+    if body is cached, skip download
+
+  /usr/local/bin/email.pl --body-html [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+    same as --body, but prefer HTML instead of plaintext
+
+  /usr/local/bin/email.pl --print [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
+    format and print cached unread message headers and bodies
+
+  /usr/local/bin/email.pl --summary [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
+    format and print cached unread message headers
+
+  /usr/local/bin/email.pl --unread-line [ACCOUNT_NAME ACCOUNT_NAME ...]
+    does not fetch anything, merely reads ~/.unread-counts
+    format and print ~/.unread-counts
+    the string is a space-separated list of the first character of
+      each account name followed by the integer count
+    no newline character is printed
+    if the count is zero for a given account, it is omitted
+    if accounts are specified, all but those are omitted
+    e.g.: A3 G6
+
+  /usr/local/bin/email.pl --has-error [ACCOUNT_NAME ACCOUNT_NAME ...]
+    checks if ~/.cache/email/ACCOUNT_NAME/error exists
+    print "yes" and exit with zero exit code if it does
+    otherwise, print "no" and exit with non-zero exit code
+
+  /usr/local/bin/email.pl --has-new-unread [ACCOUNT_NAME ACCOUNT_NAME ...]
+    checks for any NEW unread emails, in any account
+      {UIDs in ~/.cache/email/ACCOUNT_NAME/new-unread}
+    if accounts are specified, all but those are ignored
+    print "yes" and exit with zero exit code if there are new unread emails
+    otherwise, print "no" and exit with non-zero exit code
+
+  /usr/local/bin/email.pl --has-unread [ACCOUNT_NAME ACCOUNT_NAME ...]
+    checks for any unread emails, in any account
+      {UIDs in ~/.cache/email/ACCOUNT_NAME/unread}
+    if accounts are specified, all but those are ignored
+    print "yes" and exit with zero exit code if there are unread emails
+    otherwise, print "no" and exit with non-zero exit code
