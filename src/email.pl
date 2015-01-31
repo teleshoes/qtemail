@@ -12,15 +12,15 @@ sub setFlagStatus($$$$);
 sub mergeUnreadCounts($@);
 sub readUnreadCounts();
 sub writeUnreadCounts($@);
-sub readUidFile($$);
-sub writeUidFile($$@);
+sub readUidFile($$$);
+sub writeUidFile($$$@);
 sub cacheAllHeaders($$$);
-sub cacheBodies($$@);
+sub cacheBodies($$$@);
 sub getBody($$$);
 sub hasWords($);
 sub parseBody($$);
-sub getCachedHeaderUids($);
-sub readCachedHeader($$);
+sub getCachedHeaderUids($$);
+sub readCachedHeader($$$);
 sub openFolder($$$);
 sub getClient($);
 sub getSocket($);
@@ -60,14 +60,15 @@ my $usage = "
   $0 [--update] [ACCOUNT_NAME ACCOUNT_NAME ...]
     -for each account specified, or all if none are specified:
       -login to IMAP server, or create file $emailDir/ACCOUNT_NAME/error
-      -fetch and write all message UIDs to
-        $emailDir/ACCOUNT_NAME/all
-      -fetch and cache all message headers in
-        $emailDir/ACCOUNT_NAME/headers/UID
-      -fetch all unread messages and write their UIDs to
-        $emailDir/ACCOUNT_NAME/unread
-      -write all message UIDs that are now in unread and were not before
-        $emailDir/ACCOUNT_NAME/new-unread
+      -for each FOLDER_NAME:
+        -fetch and write all message UIDs to
+          $emailDir/ACCOUNT_NAME/FOLDER_NAME/all
+        -fetch and cache all message headers in
+          $emailDir/ACCOUNT_NAME/FOLDER_NAME/headers/UID
+        -fetch all unread messages and write their UIDs to
+          $emailDir/ACCOUNT_NAME/FOLDER_NAME/unread
+        -write all message UIDs that are now in unread and were not before
+          $emailDir/ACCOUNT_NAME/FOLDER_NAME/new-unread
     -update global unread counts file $unreadCountsFile
       ignored or missing accounts are preserved in $unreadCountsFile
 
@@ -76,28 +77,28 @@ my $usage = "
             6:GMAIL
             0:WORK_GMAIL
 
-  $0 --mark-read ACCOUNT_NAME UID [UID UID ...]
+  $0 --mark-read [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     login and mark the indicated message(s) as read
 
-  $0 --mark-unread ACCOUNT_NAME UID [UID UID ...]
+  $0 --mark-unread [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     login mark the indicated message(s) as unread
 
-  $0 --header ACCOUNT_NAME UID [UID UID ...]
+  $0 --header [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     format and print the header of the indicated message(s)
     prints each of [@headerFields]
       one per line, formatted \"UID.FIELD: VALUE\"
 
-  $0 --body ACCOUNT_NAME UID [UID UID ...]
+  $0 --body [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     download, format and print the body of the indicated message(s)
     if body is cached, skip download
 
-  $0 --body-html ACCOUNT_NAME UID [UID UID ...]
+  $0 --body-html [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but prefer HTML instead of plaintext
 
-  $0 --print [ACCOUNT_NAME ACCOUNT_NAME ...]
+  $0 --print [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers and bodies
 
-  $0 --summary [ACCOUNT_NAME ACCOUNT_NAME ...]
+  $0 --summary [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers
 
   $0 --unread-line [ACCOUNT_NAME ACCOUNT_NAME ...]
@@ -148,7 +149,6 @@ sub main(@){
     for my $accName(@accNames){
       my $acc = $$accounts{$accName};
       die "Unknown account $accName\n" if not defined $acc;
-      my $folders = $accFolders{$accName};
       my $errorFile = "$emailDir/$accName/error";
       system "rm", "-f", $errorFile;
       my $c = getClient($acc);
@@ -160,47 +160,62 @@ sub main(@){
         close FH;
         next;
       }
-      my $f = openFolder($acc, $c, 0);
-      if(not defined $f){
-        my $msg = "Error getting folder $$acc{folder}\n";
-        warn $msg;
-        open FH, "> $errorFile";
-        print FH $msg;
-        close FH;
-        next;
+
+      my $folders = $accFolders{$accName};
+      my $unreadCount = 0;
+      for my $folderName(sort keys %$folders){
+        my $imapFolder = $$folders{$folderName};
+        my $f = openFolder($imapFolder, $c, 0);
+        if(not defined $f){
+          my $msg = "Error getting folder $folderName\n";
+          warn $msg;
+          open FH, "> $errorFile";
+          print FH $msg;
+          close FH;
+          next;
+        }
+
+        cacheAllHeaders($accName, $folderName, $c);
+
+        my @unread = $c->unseen;
+        $unreadCount += @unread;
+
+        cacheBodies($acc, $c, @unread);
+
+        $c->close();
+
+        my %oldUnread = map {$_ => 1} readUidFile $accName, $folderName, "unread";
+        writeUidFile $accName, $folderName, "unread", @unread;
+        my @newUnread = grep {not defined $oldUnread{$_}} @unread;
+        writeUidFile $accName, $folderName, "new-unread", @newUnread;
       }
-
-      cacheAllHeaders($acc, $c, $f);
-
-      my @unread = $c->unseen;
-      $$counts{$accName} = @unread;
-
-      cacheBodies($acc, $c, @unread);
-
       $c->logout();
-
-      my %oldUnread = map {$_ => 1} readUidFile $accName, "unread";
-      writeUidFile $accName, "unread", @unread;
-      my @newUnread = grep {not defined $oldUnread{$_}} @unread;
-      writeUidFile $accName, "new-unread", @newUnread;
+      $$counts{$accName} = $unreadCount;
     }
     mergeUnreadCounts $counts, @accOrder;
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/){
+    my $folderName = "inbox";
+    if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
+      $folderName = $1;
+      shift;
+    }
     $VERBOSE = 1;
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
     my $readStatus = $cmd =~ /^(--mark-read)$/ ? 1 : 0;
     my $acc = $$accounts{$accName};
     die "Unknown account $accName\n" if not defined $acc;
+    my $imapFolder = $accFolders{$accName}{$folderName};
+    die "Unknown folder $folderName\n" if not defined $imapFolder;
     my $c = getClient($acc);
     die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
-    my $f = openFolder($acc, $c, 1);
-    die "Error getting folder $$acc{folder}\n" if not defined $f;
+    my $f = openFolder($imapFolder, $c, 1);
+    die "Error getting folder $folderName\n" if not defined $f;
     for my $uid(@uids){
       setFlagStatus($c, $uid, "Seen", $readStatus);
     }
-    my @unread = readUidFile $$acc{name}, "unread";
-    my %all = map {$_ => 1} readUidFile $$acc{name}, "all";
+    my @unread = readUidFile $$acc{name}, $folderName, "unread";
+    my %all = map {$_ => 1} readUidFile $$acc{name}, $folderName, "all";
     my %marked = map {$_ => 1} @uids;
 
     my %toUpdate = map {$_ => 1} grep {defined $all{$_}} keys %marked;
@@ -208,59 +223,81 @@ sub main(@){
     if(not $readStatus){
       @unread = (@unread, sort keys %toUpdate);
     }
-    writeUidFile $$acc{name}, "unread", @unread;
+    writeUidFile $$acc{name}, $folderName, "unread", @unread;
     my $count = @unread;
     mergeUnreadCounts {$accName => $count}, @accOrder;
+    $c->close();
     $c->logout();
   }elsif($cmd =~ /^(--header)$/){
+    my $folderName = "inbox";
+    if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
+      $folderName = $1;
+      shift;
+    }
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
     binmode STDOUT, ':utf8';
     for my $uid(@uids){
-      my $hdr = readCachedHeader($accName, $uid);
+      my $hdr = readCachedHeader($accName, $folderName, $uid);
       die "Unknown message: $uid\n" if not defined $hdr;
       for my $field(@headerFields){
         print "$uid.$field: $$hdr{$field}\n";
       }
     }
   }elsif($cmd =~ /^(--body|--body-html)$/){
+    my $folderName = "inbox";
+    if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
+      $folderName = $1;
+      shift;
+    }
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
     my $preferHtml = $cmd =~ /body-html/;
     my $acc = $$accounts{$accName};
     die "Unknown account $accName\n" if not defined $acc;
+    my $imapFolder = $accFolders{$accName}{$folderName};
+    die "Unknown folder $folderName\n" if not defined $imapFolder;
     my $c;
     my $f;
     my $mimeParser = MIME::Parser->new();
     for my $uid(@uids){
-      my $body = readCachedBody($accName, $uid);
+      my $body = readCachedBody($accName, $folderName, $uid);
       if(not defined $body){
         if(not defined $c){
           $c = getClient($acc);
           die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
         }
         if(not defined $f){
-          my $f = openFolder($acc, $c, 0);
-          die "Error getting folder $$acc{folder}\n" if not defined $f;
+          my $f = openFolder($imapFolder, $c, 0);
+          die "Error getting folder $folderName\n" if not defined $f;
         }
         cacheBodies($acc, $c, $uid);
-        $body = readCachedBody($accName, $uid);
+        $body = readCachedBody($accName, $folderName, $uid);
       }
-      die "No body found for $accName $uid\n" if not defined $body;
+      if(not defined $body){
+        die "No body found for $accName=>$folderName=>$uid\n";
+      }
       my $fmt = getBody($mimeParser, $body, $preferHtml);
       chomp $fmt;
       print "$fmt\n";
     }
+    $c->close() if defined $c;
     $c->logout() if defined $c;
   }elsif($cmd =~ /^(--print)$/){
+    my $folderName = "inbox";
+    if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
+      $folderName = $1;
+      shift;
+    }
     my @accNames = @_ == 0 ? @accOrder : @_;
     my $mimeParser = MIME::Parser->new();
     binmode STDOUT, ':utf8';
     for my $accName(@accNames){
-      my @unread = readUidFile $accName, "unread";
+      my @unread = readUidFile $accName, $folderName, "unread";
       for my $uid(@unread){
-        my $hdr = readCachedHeader($accName, $uid);
-        my $body = getBody($mimeParser, readCachedBody($accName, $uid), 0);
+        my $hdr = readCachedHeader($accName, $folderName, $uid);
+        my $cachedBody = readCachedBody($accName, $folderName, $uid);
+        my $body = getBody($mimeParser, $cachedBody, 0);
         $body = "" if not defined $body;
         $body = "[NO BODY]\n" if $body =~ /^\s*$/;
         $body =~ s/^/  /mg;
@@ -277,11 +314,16 @@ sub main(@){
       }
     }
   }elsif($cmd =~ /^(--summary)$/){
+    my $folderName = "inbox";
+    if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
+      $folderName = $1;
+      shift;
+    }
     my @accNames = @_ == 0 ? @accOrder : @_;
     for my $accName(@accNames){
-      my @unread = readUidFile $accName, "unread";
+      my @unread = readUidFile $accName, $folderName, "unread";
       for my $uid(@unread){
-        my $hdr = readCachedHeader($accName, $uid);
+        my $hdr = readCachedHeader($accName, $folderName, $uid);
         print ""
           . "$accName"
           . " $$hdr{Date}"
@@ -323,10 +365,13 @@ sub main(@){
     my @accNames = @_ == 0 ? @accOrder : @_;
     my @fmts;
     for my $accName(@accNames){
-      my @unread = readUidFile $accName, "new-unread";
-      if(@unread > 0){
-        print "yes\n";
-        exit 0;
+      my $folders = $accFolders{$accName};
+      for my $folderName(sort keys %$folders){
+        my @unread = readUidFile $accName, $folderName, "new-unread";
+        if(@unread > 0){
+          print "yes\n";
+          exit 0;
+        }
       }
     }
     print "no\n";
@@ -335,10 +380,13 @@ sub main(@){
     my @accNames = @_ == 0 ? @accOrder : @_;
     my @fmts;
     for my $accName(@accNames){
-      my @unread = readUidFile $accName, "unread";
-      if(@unread > 0){
-        print "yes\n";
-        exit 0;
+      my $folders = $accFolders{$accName};
+      for my $folderName(sort keys %$folders){
+        my @unread = readUidFile $accName, $folderName, "unread";
+        if(@unread > 0){
+          print "yes\n";
+          exit 0;
+        }
       }
     }
     print "no\n";
@@ -386,9 +434,9 @@ sub writeUnreadCounts($@){
   close FH;
 }
 
-sub readUidFile($$){
-  my ($accName, $fileName) = @_;
-  my $dir = "$emailDir/$accName";
+sub readUidFile($$$){
+  my ($accName, $folderName, $fileName) = @_;
+  my $dir = "$emailDir/$accName/$folderName";
 
   if(not -f "$dir/$fileName"){
     return ();
@@ -399,9 +447,9 @@ sub readUidFile($$){
   }
 }
 
-sub writeUidFile($$@){
-  my ($accName, $fileName, @uids) = @_;
-  my $dir = "$emailDir/$accName";
+sub writeUidFile($$$@){
+  my ($accName, $folderName, $fileName, @uids) = @_;
+  my $dir = "$emailDir/$accName/$folderName";
   system "mkdir", "-p", $dir;
 
   open FH, "> $dir/$fileName" or die "Could not write $dir/$fileName\n";
@@ -410,18 +458,18 @@ sub writeUidFile($$@){
 }
 
 sub cacheAllHeaders($$$){
-  my ($acc, $c, $f) = @_;
+  my ($accName, $folderName, $c) = @_;
   print "fetching all message ids\n" if $VERBOSE;
   my @messages = $c->messages;
   print "fetched " . @messages . " ids\n" if $VERBOSE;
 
-  my $dir = "$emailDir/$$acc{name}";
-  writeUidFile $$acc{name}, "all", @messages;
+  my $dir = "$emailDir/$accName/$folderName";
+  writeUidFile $accName, $folderName, "all", @messages;
 
   my $headersDir = "$dir/headers";
   system "mkdir", "-p", $headersDir;
 
-  my %toSkip = map {$_ => 1} getCachedHeaderUids($acc);
+  my %toSkip = map {$_ => 1} getCachedHeaderUids($accName, $folderName);
 
   @messages = grep {not defined $toSkip{$_}} @messages;
   my $total = @messages;
@@ -474,12 +522,12 @@ sub cacheAllHeaders($$$){
   print "\n" if $segment > 0 and $VERBOSE;
 }
 
-sub cacheBodies($$@){
-  my ($acc, $c, @messages) = @_;
-  my $bodiesDir = "$emailDir/$$acc{name}/bodies";
+sub cacheBodies($$$@){
+  my ($accName, $folderName, $c, @messages) = @_;
+  my $bodiesDir = "$emailDir/$accName/$folderName/bodies";
   system "mkdir", "-p", $bodiesDir;
 
-  my %toSkip = map {$_ => 1} getCachedBodyUids($acc);
+  my %toSkip = map {$_ => 1} getCachedBodyUids($accName, $folderName);
   @messages = grep {not defined $toSkip{$_}} @messages;
   print "caching bodies for " . @messages . " messages\n" if $VERBOSE;
 
@@ -487,7 +535,9 @@ sub cacheBodies($$@){
     my $body = $c->message_string($uid);
     $body = "" if not defined $body;
     if($body =~ /^\s*$/){
-      warn "WARNING: no body found for $$acc{name} $uid\n" if $body =~ /^\s*$/;
+      if($body =~ /^\s*$/){
+        warn "WARNING: no body found for $accName $folderName $uid\n";
+      }
     }else{
       open FH, "> $bodiesDir/$uid" or die "Could not write $bodiesDir/$uid\n";
       print FH $body;
@@ -541,33 +591,33 @@ sub parseBody($$){
 }
 
 
-sub getCachedHeaderUids($){
-  my $acc = shift;
-  my $headersDir = "$emailDir/$$acc{name}/headers";
+sub getCachedHeaderUids($$){
+  my ($accName, $folderName) = @_;
+  my $headersDir = "$emailDir/$accName/$folderName/headers";
   my @cachedHeaders = `cd "$headersDir"; ls`;
   chomp foreach @cachedHeaders;
   return @cachedHeaders;
 }
-sub getCachedBodyUids($){
-  my $acc = shift;
-  my $bodiesDir = "$emailDir/$$acc{name}/bodies";
+sub getCachedBodyUids($$){
+  my ($accName, $folderName) = @_;
+  my $bodiesDir = "$emailDir/$accName/$folderName/bodies";
   my @cachedBodies = `cd "$bodiesDir"; ls`;
   chomp foreach @cachedBodies;
   return @cachedBodies;
 }
 
-sub readCachedBody($$){
-  my ($accName, $uid) = @_;
-  my $bodyFile = "$emailDir/$accName/bodies/$uid";
+sub readCachedBody($$$){
+  my ($accName, $folderName, $uid) = @_;
+  my $bodyFile = "$emailDir/$accName/$folderName/bodies/$uid";
   if(not -f $bodyFile){
     return undef;
   }
   return `cat "$bodyFile"`;
 }
 
-sub readCachedHeader($$){
-  my ($accName, $uid) = @_;
-  my $hdrFile = "$emailDir/$accName/headers/$uid";
+sub readCachedHeader($$$){
+  my ($accName, $folderName, $uid) = @_;
+  my $hdrFile = "$emailDir/$accName/$folderName/headers/$uid";
   if(not -f $hdrFile){
     return undef;
   }
@@ -587,8 +637,10 @@ sub readCachedHeader($$){
 }
 
 sub openFolder($$$){
-  my ($acc, $c, $allowEditing) = @_;
-  my @folders = $c->folders($$acc{folder});
+  my ($imapFolder, $c, $allowEditing) = @_;
+  print "Opening folder $imapFolder\n" if $VERBOSE;
+
+  my @folders = $c->folders($imapFolder);
   if(@folders != 1){
     return undef;
   }
@@ -669,12 +721,12 @@ sub getFolderName($){
 sub parseFolders($){
   my $acc = shift;
   my $fs = {};
-  if(defined $$acc{inbox}){
-    my $f = $$acc{inbox};
-    my $name = "inbox";
-    die "DUPE FOLDER: $f and $$fs{$name}\n" if defined $$fs{$name};
-    $$fs{$name} = $f;
-  }
+
+  my $f = defined $$acc{inbox} ? $$acc{inbox} : "INBOX";
+  my $name = "inbox";
+  die "DUPE FOLDER: $f and $$fs{$name}\n" if defined $$fs{$name};
+  $$fs{$name} = $f;
+
   if(defined $$acc{sent}){
     my $f = $$acc{sent};
     my $name = "sent";
