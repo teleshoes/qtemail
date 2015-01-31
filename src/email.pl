@@ -114,7 +114,6 @@ my $usage = "
     otherwise, print \"no\" and exit with non-zero exit code
 
   $0 --has-new-unread [ACCOUNT_NAME ACCOUNT_NAME ...]
-    does not fetch anything, merely reads $unreadCountsFile
     checks for any NEW unread emails, in any account
       {UIDs in $emailDir/ACCOUNT_NAME/new-unread}
     if accounts are specified, all but those are ignored
@@ -122,7 +121,6 @@ my $usage = "
     otherwise, print \"no\" and exit with non-zero exit code
 
   $0 --has-unread [ACCOUNT_NAME ACCOUNT_NAME ...]
-    does not fetch anything, merely reads $unreadCountsFile
     checks for any unread emails, in any account
       {UIDs in $emailDir/ACCOUNT_NAME/unread}
     if accounts are specified, all but those are ignored
