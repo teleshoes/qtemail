@@ -12,6 +12,7 @@ sub setFlagStatus($$$$);
 sub mergeUnreadCounts($@);
 sub readUnreadCounts();
 sub writeUnreadCounts($@);
+sub relTime($);
 sub readLastUpdated($);
 sub writeLastUpdated($);
 sub readUidFileCounts($$$);
@@ -273,11 +274,12 @@ sub main(@){
       my $unreadCount = 0;
       my $totalCount = 0;
       my $lastUpdated = readLastUpdated $accName;
+      my $lastUpdatedRel = relTime $lastUpdated;
       for my $folderName(sort keys %$folders){
         $unreadCount += readUidFileCounts $accName, $folderName, "unread";
         $totalCount += readUidFileCounts $accName, $folderName, "all";
       }
-      printf "$accName:$lastUpdated:$unreadCount/$totalCount\n";
+      printf "$accName:$lastUpdated:$lastUpdatedRel:$unreadCount/$totalCount\n";
     }
   }elsif($cmd =~ /^(--folders)$/){
     die $usage if @_ != 1;
@@ -492,6 +494,40 @@ sub writeUnreadCounts($@){
     print FH "$$counts{$accName}:$accName\n";
   }
   close FH;
+}
+
+sub relTime($){
+  my ($time) = @_;
+  my $diff = time - $time;
+
+  return "now" if $diff == 0;
+
+  my $ago;
+  if($diff > 0){
+    $ago = "ago";
+  }else{
+    $diff = 0 - $diff;
+    $ago = "in the future";
+  }
+
+  my @diffs = (
+    [second  => int(0.5 + $diff)],
+    [minute  => int(0.5 + $diff / 60)],
+    [hour    => int(0.5 + $diff / 60 / 60)],
+    [day     => int(0.5 + $diff / 60 / 60 / 24)],
+    [month   => int(0.5 + $diff / 60 / 60 / 24 / 30.4)],
+    [year    => int(0.5 + $diff / 60 / 60 / 24 / 365.25)],
+  );
+  my @diffUnits = map {$$_[0]} @diffs;
+  my %diffVals = map {$$_[0] => $$_[1]} @diffs;
+
+  for my $unit(reverse @diffUnits){
+    my $val = $diffVals{$unit};
+    if($val > 0){
+      my $unit = $val == 1 ? $unit : "${unit}s";
+      return "$val $unit $ago";
+    }
+  }
 }
 
 sub readLastUpdated($){
