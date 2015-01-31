@@ -8,6 +8,8 @@ PageStackWindow {
     pageStack.push(page)
     if(page == accountPage){
       controller.setupAccounts()
+    }else if(page == folderPage){
+      controller.setupFolders()
     }
   }
   function backPage(){
@@ -25,6 +27,24 @@ PageStackWindow {
   }
 
   Page {
+    id: folderPage
+    anchors.margins: 30
+    tools: ToolBarLayout {
+      ToolButton {
+        text: "back"
+        onClicked: {
+          backPage()
+        }
+      }
+    }
+    ScrollDecorator {
+      flickableItem: headerView
+    }
+
+    FolderView{ id: folderView }
+  }
+
+  Page {
     id: headerPage
     anchors.margins: 30
     tools: ToolBarLayout {
@@ -39,6 +59,12 @@ PageStackWindow {
         text: "more"
         onClicked: {
           controller.moreHeaders()
+        }
+      }
+      ToolButton {
+        text: "folders"
+        onClicked: {
+          navToPage(folderPage)
         }
       }
     }
