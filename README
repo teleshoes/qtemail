@@ -1,6 +1,9 @@
 Copyright 2015 by Elliot Wolk
 This project is free software, released under the GPLv3
 
+smtp-cli Copyright Michal Ludvig 2003-2014
+smtp-cli is free software, released under the GPLv3
+
 Simple IMAP client with a QT gui and a CLI
 Minimal dependencies, currently minimal features
 
@@ -49,6 +52,10 @@ FILES
       0
       > email.pl --body-html G 35870 | grep -o '<div>' | wc -l
       12
+
+  src/smtp-cli
+    SMTP command line client, written by Michal Ludvig
+    https://github.com/mludvig/smtp-cli
 
   ~/.secrets
     Account config goes here. See "Usage" below.
