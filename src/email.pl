@@ -12,6 +12,7 @@ sub setFlagStatus($$$$);
 sub mergeUnreadCounts($@);
 sub readUnreadCounts();
 sub writeUnreadCounts($@);
+sub readUidFileCounts($$$);
 sub readUidFile($$$);
 sub writeUidFile($$$@);
 sub cacheAllHeaders($$$);
@@ -268,10 +269,8 @@ sub main(@){
       my $unreadCount = 0;
       my $totalCount = 0;
       for my $folderName(sort keys %$folders){
-        my @unread = readUidFile $accName, $folderName, "unread";
-        my @all = readUidFile $accName, $folderName, "all";
-        $unreadCount += @unread;
-        $totalCount += @all;
+        $unreadCount += readUidFileCounts $accName, $folderName, "unread";
+        $totalCount += readUidFileCounts $accName, $folderName, "all";
       }
       printf "$accName:$unreadCount/$totalCount\n";
     }
@@ -280,10 +279,8 @@ sub main(@){
     my $accName = shift;
     my $folders = $accFolders{$accName};
     for my $folderName(sort keys %$folders){
-      my @unread = readUidFile $accName, $folderName, "unread";
-      my @all = readUidFile $accName, $folderName, "all";
-      my $unreadCount = @unread;
-      my $totalCount = @all;
+      my $unreadCount = readUidFileCounts $accName, $folderName, "unread";
+      my $totalCount = readUidFileCounts $accName, $folderName, "all";
       printf "$folderName:$unreadCount/$totalCount\n";
     }
   }elsif($cmd =~ /^(--header)$/){
@@ -425,8 +422,8 @@ sub main(@){
     for my $accName(@accNames){
       my $folders = $accFolders{$accName};
       for my $folderName(sort keys %$folders){
-        my @unread = readUidFile $accName, $folderName, "new-unread";
-        if(@unread > 0){
+        my $unread = readUidFileCounts $accName, $folderName, "new-unread";
+        if($unread > 0){
           print "yes\n";
           exit 0;
         }
@@ -440,8 +437,8 @@ sub main(@){
     for my $accName(@accNames){
       my $folders = $accFolders{$accName};
       for my $folderName(sort keys %$folders){
-        my @unread = readUidFile $accName, $folderName, "unread";
-        if(@unread > 0){
+        my $unread = readUidFileCounts $accName, $folderName, "unread";
+        if($unread > 0){
           print "yes\n";
           exit 0;
         }
@@ -490,6 +487,21 @@ sub writeUnreadCounts($@){
     print FH "$$counts{$accName}:$accName\n";
   }
   close FH;
+}
+
+sub readUidFileCounts($$$){
+  my ($accName, $folderName, $fileName) = @_;
+  my $dir = "$emailDir/$accName/$folderName";
+
+  if(not -f "$dir/$fileName"){
+    return 0;
+  }else{
+    my $count = `wc -l $dir/$fileName`;
+    if($count =~ /^(\d+)/){
+      return $1;
+    }
+    return 0
+  }
 }
 
 sub readUidFile($$$){
