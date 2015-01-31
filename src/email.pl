@@ -34,7 +34,7 @@ my $secretsFile = "$ENV{HOME}/.secrets";
 my @configKeys = qw(user password server port);
 my @extraConfigKeys = qw(inbox sent folders ssl);
 
-my @headerFields = qw(Date Subject From);
+my @headerFields = qw(Date Subject From To);
 my $unreadCountsFile = "$ENV{HOME}/.unread-counts";
 my $emailDir = "$ENV{HOME}/.cache/email";
 
@@ -269,6 +269,7 @@ sub main(@){
           . "UID: $uid\n"
           . "DATE: $$hdr{Date}\n"
           . "FROM: $$hdr{From}\n"
+          . "TO: $$hdr{To}\n"
           . "SUBJECT: $$hdr{Subject}\n"
           . "BODY:\n$body\n"
           . "\n"
@@ -285,6 +286,7 @@ sub main(@){
           . "$accName"
           . " $$hdr{Date}"
           . " $$hdr{From}"
+          . " $$hdr{To}"
           . "\n"
           . "  $$hdr{Subject}"
           . "\n"
