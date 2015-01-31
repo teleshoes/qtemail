@@ -40,7 +40,7 @@ sub readSecrets();
 
 my $secretsFile = "$ENV{HOME}/.secrets";
 my @configKeys = qw(user password server port);
-my @extraConfigKeys = qw(inbox sent folders ssl);
+my @extraConfigKeys = qw(inbox sent folders ssl smtp_server smtp_port);
 
 my @headerFields = qw(Date Subject From To);
 my $unreadCountsFile = "$ENV{HOME}/.unread-counts";
@@ -56,13 +56,14 @@ my $settings = {
 
 my $okCmds = join "|", qw(
   --update --header --body --body-html
+  --smtp
   --mark-read --mark-unread
   --accounts --folders --print --summary --unread-line
   --has-error --has-new-unread --has-unread
 );
 
 my $usage = "
-  Simple IMAP client.
+  Simple IMAP client. {--smtp command is a convenience wrapper around smtp-cli}
   Configuration is in $secretsFile
     Each line is one key of the format: email.ACCOUNT_NAME.FIELD = value
     Account names can be any word characters (alphanumeric plus underscore)
@@ -109,6 +110,17 @@ my $usage = "
       e.g.: 3:AOL
             6:GMAIL
             0:WORK_GMAIL
+
+  $0 --smtp ACCOUNT_NAME SUBJECT BODY TO [ARG ARG ..]
+    simple wrapper around smtp-cli. {you can add extra recipients with --to}
+    calls:
+      smtp-cli \\
+        --server=<smtp_server> --port=<smtp_port> \\
+        --user=<user> --pass=<password> \\
+        --from=<user> \\
+        --subject=SUBJECT --body-plain=BODY \\
+        --to=TO \\
+        ARG ARG ..
 
   $0 --mark-read [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     login and mark the indicated message(s) as read
@@ -231,6 +243,16 @@ sub main(@){
       writeLastUpdated $accName unless hasError $accName;
     }
     mergeUnreadCounts $counts, @accOrder;
+  }elsif($cmd =~ /^(--smtp)$/){
+    die $usage if @_ < 4;
+    my ($accName, $subject, $body, $to, @args) = @_;
+    my $acc = $$accounts{$accName};
+    die "Unknown account $accName\n" if not defined $acc;
+    exec "smtp-cli",
+      "--server=$$acc{smtp_server}", "--port=$$acc{smtp_port}",
+      "--user=$$acc{user}", "--pass=$$acc{password}",
+      "--subject=$subject", "--body-plain=$body", "--to=$to",
+      @args;
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/){
     my $folderName = "inbox";
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
