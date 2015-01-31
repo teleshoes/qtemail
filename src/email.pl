@@ -13,6 +13,10 @@ sub mergeUnreadCounts($@);
 sub readUnreadCounts();
 sub writeUnreadCounts($@);
 sub relTime($);
+sub clearError($);
+sub hasError($);
+sub readError($);
+sub writeError($$);
 sub readLastUpdated($);
 sub writeLastUpdated($);
 sub readUidFileCounts($$$);
@@ -186,15 +190,12 @@ sub main(@){
     for my $accName(@accNames){
       my $acc = $$accounts{$accName};
       die "Unknown account $accName\n" if not defined $acc;
-      my $errorFile = "$emailDir/$accName/error";
-      system "rm", "-f", $errorFile;
+      clearError $accName;
       my $c = getClient($acc);
       if(not defined $c){
-        my $msg = "Could not authenticate $$acc{name} ($$acc{user})\n";
+        my $msg = "ERROR: Could not authenticate $$acc{name} ($$acc{user})\n";
         warn $msg;
-        open FH, "> $errorFile";
-        print FH $msg;
-        close FH;
+        writeError $accName, $msg;
         next;
       }
 
@@ -204,11 +205,9 @@ sub main(@){
         my $imapFolder = $$folders{$folderName};
         my $f = openFolder($imapFolder, $c, 0);
         if(not defined $f){
-          my $msg = "Error getting folder $folderName\n";
+          my $msg = "ERROR: Could not open folder $folderName\n";
           warn $msg;
-          open FH, "> $errorFile";
-          print FH $msg;
-          close FH;
+          writeError $accName, $msg;
           next;
         }
 
@@ -416,7 +415,7 @@ sub main(@){
   }elsif($cmd =~ /^(--has-error)$/){
     my @accNames = @_ == 0 ? @accOrder : @_;
     for my $accName(@accNames){
-      if(-f "$emailDir/$accName/error"){
+      if(hasError $accName){
         print "yes\n";
         exit 0;
       }
@@ -528,6 +527,35 @@ sub relTime($){
       return "$val $unit $ago";
     }
   }
+}
+
+sub hasError($){
+  my ($accName) = @_;
+  my $errorFile = "$emailDir/$accName/error";
+  return -f $errorFile;
+}
+sub clearError($){
+  my ($accName) = @_;
+  my $errorFile = "$emailDir/$accName/error";
+  system "rm", "-f", $errorFile;
+}
+sub readError($){
+  my ($accName) = @_;
+  my $errorFile = "$emailDir/$accName/error";
+  if(not -f $errorFile){
+    return undef;
+  }
+  open FH, "< $errorFile" or die "Could not read $errorFile\n";
+  my $error = join "", <FH>;
+  close FH;
+  return $error;
+}
+sub writeError($$){
+  my ($accName, $msg) = @_;
+  my $errorFile = "$emailDir/$accName/error";
+  open FH, "> $errorFile" or die "Could not write to $errorFile\n";
+  print FH $msg;
+  close FH;
 }
 
 sub readLastUpdated($){
