@@ -50,41 +50,8 @@ FILES
       > email.pl --body-html G 35870 | grep -o '<div>' | wc -l
       12
 
-  $HOME/.secrets
-    Account config goes here.
-    Each line is one key of the format: email.ACCOUNT_NAME.FIELD = value
-    Account names can be any word characters (alphanumeric plus underscore)
-    Other keys are ignored.
-    required fields:
-      user     {Required} IMAP username, usually the full email address
-      password {Required} *password in plaintext*
-      server   {Required} IMAP server
-      port     {Required} IMAP server port
-      ssl      {Optional} false to forcibly disable security
-      inbox    {Optional} main IMAP folder name to use (default is INBOX)
-      sent     {Optional} IMAP folder name to use for sent mail
-      folders  {Optional} colon-separated list of additional folders to fetch
-        each folder has a FOLDER_NAME,
-        which is the directory on the filesystem will be lowercase
-        FOLDER_NAME is the folder, with all non-alphanumeric characters
-          replaced with _s, and all leading and trailing _s removed
-        e.g.:  junk:[GMail]/Drafts:_12_/ponies
-               =>  ["junk", "gmail_drafts", "12_ponies"]
-    e.g.: > cat ~/.secrets
-      email.GMail.user = example@gmail.com
-      email.GMail.password = correcthorsebatterystaple
-      email.GMail.server = imap.gmail.com
-      email.GMail.port = 993
-      email.GMail.inbox = [Gmail]/All Mail
-      email.GMail.sent = [Gmail]/Sent Mail
-      email.GMail.folders = [Gmail]/Drafts
-      email.AOL.user = iheartbieber179241
-      email.AOL.password = b4life
-      email.AOL.server = imap.aol.com
-      email.AOL.port = 143
-      email.AOL.inbox = Inbox
-      email.AOL.sent = Sent
-      email.AOL.ssl = false
+  ~/.secrets
+    Account config goes here. See "Usage" below.
 
 
 Dependencies:
@@ -100,3 +67,5 @@ Dependencies:
   qt
   qtquick 1.1
 
+
+Usage:
