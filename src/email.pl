@@ -228,7 +228,7 @@ sub main(@){
       }
       $c->logout();
       $$counts{$accName} = $unreadCount;
-      writeLastUpdated $accName;
+      writeLastUpdated $accName unless hasError $accName;
     }
     mergeUnreadCounts $counts, @accOrder;
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/){
