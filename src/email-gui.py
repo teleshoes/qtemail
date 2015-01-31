@@ -123,9 +123,12 @@ class EmailManager():
         hdrDate = val
       elif field == "From":
         hdrFrom = val
+      elif field == "To":
+        hdrTo = val
       elif field == "Subject":
         hdrSubject = val
-    return Header(uid, hdrDate, hdrFrom, hdrSubject, isRead, False)
+    isSent = folderName == "sent"
+    return Header(uid, hdrDate, hdrFrom, hdrTo, hdrSubject, isSent, isRead, False)
   def getBody(self, accName, folderName, uid):
     return self.readProc(["email.pl", "--body-html",
       "--folder=" + folderName, accName, str(uid)])
@@ -301,12 +304,14 @@ class Folder(QObject):
   Total = Property(int, Total, notify=changed)
 
 class Header(QObject):
-  def __init__(self, uid_, date_, from_, subject_, read_, isLoading_):
+  def __init__(self, uid_, date_, from_, to_, subject_, isSent_, read_, isLoading_):
     QObject.__init__(self)
     self.uid_ = uid_
     self.date_ = date_
     self.from_ = from_
+    self.to_ = to_
     self.subject_ = subject_
+    self.isSent_ = isSent_
     self.read_ = read_
     self.isLoading_ = isLoading_
   def Uid(self):
@@ -315,8 +320,12 @@ class Header(QObject):
     return self.date_
   def From(self):
     return self.from_
+  def To(self):
+    return self.to_
   def Subject(self):
     return self.subject_
+  def IsSent(self):
+    return self.isSent_
   def Read(self):
     return self.read_
   def IsLoading(self):
@@ -325,7 +334,9 @@ class Header(QObject):
   Uid = Property(int, Uid, notify=changed)
   Date = Property(unicode, Date, notify=changed)
   From = Property(unicode, From, notify=changed)
+  To = Property(unicode, To, notify=changed)
   Subject = Property(unicode, Subject, notify=changed)
+  IsSent = Property(bool, IsSent, notify=changed)
   Read = Property(bool, Read, notify=changed)
   IsLoading = Property(bool, IsLoading, notify=changed)
 
