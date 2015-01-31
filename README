@@ -64,9 +64,10 @@ FILES
       inbox    {Optional} main IMAP folder name to use (default is INBOX)
       sent     {Optional} IMAP folder name to use for sent mail
       folders  {Optional} colon-separated list of additional folders to fetch
-        the directory on the filesystem will be lowercase,
-        with all non-alphanumeric characters replaced with _s,
-        and all leading and trailing _s removed
+        each folder has a FOLDER_NAME,
+        which is the directory on the filesystem will be lowercase
+        FOLDER_NAME is the folder, with all non-alphanumeric characters
+          replaced with _s, and all leading and trailing _s removed
         e.g.:  junk:[GMail]/Drafts:_12_/ponies
                =>  ["junk", "gmail_drafts", "12_ponies"]
     e.g.: > cat ~/.secrets
