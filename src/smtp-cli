@@ -392,7 +392,7 @@ my %connect_args = (
 	PeerAddr => $host,
 	PeerPort => $port,
 	Proto => 'tcp',
-	Timeout => 5);
+);
 if ($socket6) {
 	$connect_args{'Domain'} = $addr_family;
 	$sock = IO::Socket::INET6->new(%connect_args) or die ("Connect failed: $@\n");
