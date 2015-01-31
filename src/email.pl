@@ -205,7 +205,7 @@ sub main(@){
         my @unread = $c->unseen;
         $unreadCount += @unread;
 
-        cacheBodies($acc, $c, @unread);
+        cacheBodies($accName, $folderName, $c, @unread);
 
         $c->close();
 
@@ -296,7 +296,7 @@ sub main(@){
           my $f = openFolder($imapFolder, $c, 0);
           die "Error getting folder $folderName\n" if not defined $f;
         }
-        cacheBodies($acc, $c, $uid);
+        cacheBodies($accName, $folderName, $c, $uid);
         $body = readCachedBody($accName, $folderName, $uid);
       }
       if(not defined $body){
