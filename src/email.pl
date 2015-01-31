@@ -49,7 +49,7 @@ my $settings = {
 my $okCmds = join "|", qw(
   --update --header --body --body-html
   --mark-read --mark-unread
-  --print --summary --unread-line
+  --accounts --folders --print --summary --unread-line
   --has-error --has-new-unread --has-unread
 );
 
@@ -107,6 +107,14 @@ my $usage = "
 
   $0 --mark-unread [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     login mark the indicated message(s) as unread
+
+  $0 --accounts
+    format and print information about each account
+    \"FOLDER_NAME:<unread_count>/<total_count>\"
+
+  $0 --folders ACCOUNT_NAME
+    format and print information about each folder for the given account
+    \"FOLDER_NAME:<unread_count>/<total_count>\"
 
   $0 --header [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     format and print the header of the indicated message(s)
@@ -253,6 +261,31 @@ sub main(@){
     mergeUnreadCounts {$accName => $count}, @accOrder;
     $c->close();
     $c->logout();
+  }elsif($cmd =~ /^(--accounts)$/){
+    die $usage if @_ != 0;
+    for my $accName(@accOrder){
+      my $folders = $accFolders{$accName};
+      my $unreadCount = 0;
+      my $totalCount = 0;
+      for my $folderName(sort keys %$folders){
+        my @unread = readUidFile $accName, $folderName, "unread";
+        my @all = readUidFile $accName, $folderName, "all";
+        $unreadCount += @unread;
+        $totalCount += @all;
+      }
+      printf "$accName:$unreadCount/$totalCount\n";
+    }
+  }elsif($cmd =~ /^(--folders)$/){
+    die $usage if @_ != 1;
+    my $accName = shift;
+    my $folders = $accFolders{$accName};
+    for my $folderName(sort keys %$folders){
+      my @unread = readUidFile $accName, $folderName, "unread";
+      my @all = readUidFile $accName, $folderName, "all";
+      my $unreadCount = @unread;
+      my $totalCount = @all;
+      printf "$folderName:$unreadCount/$totalCount\n";
+    }
   }elsif($cmd =~ /^(--header)$/){
     my $folderName = "inbox";
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
