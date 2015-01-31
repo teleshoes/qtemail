@@ -698,11 +698,12 @@ sub readSecrets(){
   my $okConfigKeys = join "|", (@configKeys, @extraConfigKeys);
   for my $line(@lines){
     if($line =~ /^email\.(\w+)\.($okConfigKeys)\s*=\s*(.+)$/){
-      if(not defined $$accounts{$1}){
+      my ($accName, $key, $val)= ($1, $2, $3);
+      if(not defined $$accounts{$accName}){
         $$accounts{$1} = {};
-        push @$accOrder, $1;
+        push @$accOrder, $accName;
       }
-      $$accounts{$1}{$2} = $3;
+      $$accounts{$accName}{$key} = $val;
     }
   }
   for my $accName(keys %$accounts){
