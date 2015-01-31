@@ -251,6 +251,7 @@ sub main(@){
     exec "smtp-cli",
       "--server=$$acc{smtp_server}", "--port=$$acc{smtp_port}",
       "--user=$$acc{user}", "--pass=$$acc{password}",
+      "--from=$$acc{user}",
       "--subject=$subject", "--body-plain=$body", "--to=$to",
       @args;
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/){
