@@ -43,13 +43,14 @@ def main():
 
   emailManager = EmailManager()
   accountModel = AccountModel()
+  folderModel = FolderModel()
   headerModel = HeaderModel()
-  controller = Controller(emailManager, accountModel, headerModel)
+  controller = Controller(emailManager, accountModel, folderModel, headerModel)
 
   controller.setupAccounts()
 
   app = QApplication([])
-  widget = MainWindow(qmlFile, controller, accountModel, headerModel)
+  widget = MainWindow(qmlFile, controller, accountModel, folderModel, headerModel)
   if platform == PLATFORM_HARMATTAN:
     widget.window().showFullScreen()
   else:
@@ -66,6 +67,14 @@ class EmailManager():
       if m:
         accounts.append(Account(m.group(1), int(m.group(2)), int(m.group(3))))
     return accounts
+  def getFolders(self, accountName):
+    folderOut = self.readProc(["email.pl", "--folders", accountName])
+    folders = []
+    for line in folderOut.splitlines():
+      m = re.match("([a-z]+):(\d+)/(\d+)", line)
+      if m:
+        folders.append(Folder(m.group(1), int(m.group(2)), int(m.group(3))))
+    return folders
   def getUids(self, accName, folderName, fileName):
     filePath = EMAIL_DIR + "/" + accName + "/" + folderName + "/" + fileName
     if not os.path.isfile(filePath):
@@ -126,25 +135,36 @@ class EmailManager():
     return stdout
 
 class Controller(QObject):
-  def __init__(self, emailManager, accountModel, headerModel):
+  def __init__(self, emailManager, accountModel, folderModel, headerModel):
     QObject.__init__(self)
     self.emailManager = emailManager
     self.accountModel = accountModel
+    self.folderModel = folderModel
     self.headerModel = headerModel
     self.accountName = None
-    self.folderName = "inbox"
+    self.folderName = None
     self.threads = []
   @Slot()
   def setupAccounts(self):
     self.accountModel.setItems(self.emailManager.getAccounts())
-  @Slot(QObject)
-  def accountSelected(self, account):
-    print 'clicked acc: ', account.Name
-    self.accountName = account.Name
+  @Slot()
+  def setupFolders(self):
+    self.folderModel.setItems(self.emailManager.getFolders(self.accountName))
+  @Slot()
+  def setupHeaders(self):
     headers = self.emailManager.fetchHeaders(
       self.accountName, self.folderName,
       limit=PAGE_INITIAL_SIZE, exclude=[])
     self.headerModel.setItems(headers)
+  @Slot(QObject)
+  def accountSelected(self, account):
+    print 'clicked acc: ', account.Name
+    self.accountName = account.Name
+    self.folderName = "inbox"
+  @Slot(QObject)
+  def folderSelected(self, folder):
+    print 'clicked folder: ', folder.Name
+    self.folderName = folder.Name
   @Slot(QObject, QObject)
   def toggleRead(self, readIndicator, header):
     header.isLoading_ = True
@@ -234,6 +254,12 @@ class AccountModel(BaseListModel):
     BaseListModel.__init__(self)
     self.setRoleNames(dict(enumerate(AccountModel.COLUMNS)))
 
+class FolderModel(BaseListModel):
+  COLUMNS = ('folder',)
+  def __init__(self):
+    BaseListModel.__init__(self)
+    self.setRoleNames(dict(enumerate(FolderModel.COLUMNS)))
+
 class HeaderModel(BaseListModel):
   COLUMNS = ('header',)
   def __init__(self):
@@ -245,6 +271,24 @@ class Account(QObject):
     QObject.__init__(self)
     self.name_ = name_
     self.unread_ = unread_
+    self.total_ = total_
+  def Name(self):
+    return self.name_
+  def Unread(self):
+    return self.unread_
+  def Total(self):
+    return self.total_
+  changed = Signal()
+  Name = Property(unicode, Name, notify=changed)
+  Unread = Property(int, Unread, notify=changed)
+  Total = Property(int, Total, notify=changed)
+
+class Folder(QObject):
+  def __init__(self, name_, unread_, total_):
+    QObject.__init__(self)
+    self.name_ = name_
+    self.unread_ = unread_
+    self.total_ = total_
   def Name(self):
     return self.name_
   def Unread(self):
@@ -286,10 +330,11 @@ class Header(QObject):
   IsLoading = Property(bool, IsLoading, notify=changed)
 
 class MainWindow(QDeclarativeView):
-  def __init__(self, qmlFile, controller, accountModel, headerModel):
+  def __init__(self, qmlFile, controller, accountModel, folderModel, headerModel):
     super(MainWindow, self).__init__(None)
     context = self.rootContext()
     context.setContextProperty('accountModel', accountModel)
+    context.setContextProperty('folderModel', folderModel)
     context.setContextProperty('headerModel', headerModel)
     context.setContextProperty('controller', controller)
     self.setResizeMode(QDeclarativeView.SizeRootObjectToView)
