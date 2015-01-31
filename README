@@ -60,19 +60,29 @@ FILES
       password {Required} *password in plaintext*
       server   {Required} IMAP server
       port     {Required} IMAP server port
-      folder   {Required} IMAP folder name to use
       ssl      {Optional} false to forcibly disable security
+      inbox    {Optional} main IMAP folder name to use (default is INBOX)
+      sent     {Optional} IMAP folder name to use for sent mail
+      folders  {Optional} colon-separated list of additional folders to fetch
+        the directory on the filesystem will be lowercase,
+        with all non-alphanumeric characters replaced with _s,
+        and all leading and trailing _s removed
+        e.g.:  junk:[GMail]/Drafts:_12_/ponies
+               =>  ["junk", "gmail_drafts", "12_ponies"]
     e.g.: > cat ~/.secrets
       email.GMail.user = example@gmail.com
       email.GMail.password = correcthorsebatterystaple
       email.GMail.server = imap.gmail.com
       email.GMail.port = 993
-      email.GMail.folder = INBOX
+      email.GMail.inbox = [Gmail]/All Mail
+      email.GMail.sent = [Gmail]/Sent Mail
+      email.GMail.folders = [Gmail]/Drafts
       email.AOL.user = iheartbieber179241
       email.AOL.password = b4life
       email.AOL.server = imap.aol.com
       email.AOL.port = 143
-      email.AOL.folder = Inbox
+      email.AOL.inbox = Inbox
+      email.AOL.sent = Sent
       email.AOL.ssl = false
 
 

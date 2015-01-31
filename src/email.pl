@@ -26,11 +26,13 @@ sub getClient($);
 sub getSocket($);
 sub formatHeaderField($$);
 sub formatDate($);
+sub getFolderName($);
+sub parseFolders($);
 sub readSecrets();
 
 my $secretsFile = "$ENV{HOME}/.secrets";
-my @configKeys = qw(user password server port folder);
-my @extraConfigKeys = qw(ssl);
+my @configKeys = qw(user password server port);
+my @extraConfigKeys = qw(inbox sent folders ssl);
 
 my @headerFields = qw(Date Subject From);
 my $unreadCountsFile = "$ENV{HOME}/.unread-counts";
@@ -137,6 +139,7 @@ sub main(@){
   my $config = readSecrets();
   my @accOrder = @{$$config{accOrder}};
   my $accounts = $$config{accounts};
+  my %accFolders = map {$_ => parseFolders $$accounts{$_}} keys %$accounts;
 
   if($cmd =~ /^(--update)$/){
     $VERBOSE = 1;
@@ -145,6 +148,7 @@ sub main(@){
     for my $accName(@accNames){
       my $acc = $$accounts{$accName};
       die "Unknown account $accName\n" if not defined $acc;
+      my $folders = $accFolders{$accName};
       my $errorFile = "$emailDir/$accName/error";
       system "rm", "-f", $errorFile;
       my $c = getClient($acc);
@@ -649,6 +653,42 @@ sub formatDate($){
     return time2str($DATE_FORMAT, $d);
   }
   return $date;
+}
+
+sub getFolderName($){
+  my $folder = shift;
+  my $name = lc $folder;
+  $name =~ s/[^a-z0-9]+/_/g;
+  $name =~ s/^_+//;
+  $name =~ s/_+$//;
+  return $name;
+}
+
+sub parseFolders($){
+  my $acc = shift;
+  my $fs = {};
+  if(defined $$acc{inbox}){
+    my $f = $$acc{inbox};
+    my $name = "inbox";
+    die "DUPE FOLDER: $f and $$fs{$name}\n" if defined $$fs{$name};
+    $$fs{$name} = $f;
+  }
+  if(defined $$acc{sent}){
+    my $f = $$acc{sent};
+    my $name = "sent";
+    die "DUPE FOLDER: $f and $$fs{$name}\n" if defined $$fs{$name};
+    $$fs{$name} = $f;
+  }
+  if(defined $$acc{folders}){
+    for my $f(split /:/, $$acc{folders}){
+      $f =~ s/^\s*//;
+      $f =~ s/\s*$//;
+      my $name = getFolderName $f;
+      die "DUPE FOLDER: $f and $$fs{$name}\n" if defined $$fs{$name};
+      $$fs{$name} = $f;
+    }
+  }
+  return $fs;
 }
 
 sub readSecrets(){
