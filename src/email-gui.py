@@ -59,17 +59,12 @@ def main():
 
 class EmailManager():
   def getAccounts(self):
-    if not os.path.isfile(UNREAD_COUNTS):
-      return []
-    f = open(UNREAD_COUNTS, 'r')
-    counts = f.read()
-    f.close()
+    accountOut = self.readProc(["email.pl", "--accounts"])
     accounts = []
-    for line in counts.splitlines():
-      m = re.match('^(\d+):(\w+)', line)
-      if not m:
-        return []
-      accounts.append(Account(m.group(2), int(m.group(1))))
+    for line in accountOut.splitlines():
+      m = re.match("(\w+):(\d+)/(\d+)", line)
+      if m:
+        accounts.append(Account(m.group(1), int(m.group(2)), int(m.group(3))))
     return accounts
   def getUids(self, accName, folderName, fileName):
     filePath = EMAIL_DIR + "/" + accName + "/" + folderName + "/" + fileName
@@ -246,7 +241,7 @@ class HeaderModel(BaseListModel):
     self.setRoleNames(dict(enumerate(HeaderModel.COLUMNS)))
 
 class Account(QObject):
-  def __init__(self, name_, unread_):
+  def __init__(self, name_, unread_, total_):
     QObject.__init__(self)
     self.name_ = name_
     self.unread_ = unread_
@@ -254,9 +249,12 @@ class Account(QObject):
     return self.name_
   def Unread(self):
     return self.unread_
+  def Total(self):
+    return self.total_
   changed = Signal()
   Name = Property(unicode, Name, notify=changed)
   Unread = Property(int, Unread, notify=changed)
+  Total = Property(int, Total, notify=changed)
 
 class Header(QObject):
   def __init__(self, uid_, date_, from_, subject_, read_, isLoading_):
