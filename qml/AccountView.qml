@@ -27,6 +27,12 @@ ListView {
         text: model.account.LastUpdatedRel
         font.pointSize: 24
       }
+      Text {
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        text: model.account.Error
+        font.pointSize: 24
+      }
     }
   }
 }
