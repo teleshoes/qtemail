@@ -118,7 +118,7 @@ my $usage = "
 
   $0 --accounts
     format and print information about each account
-    \"FOLDER_NAME:<unread_count>/<total_count>\"
+    \"ACCOUNT_NAME:<timestamp>:<relative_time>:<unread_count>/<total_count>:<error>\"
 
   $0 --folders ACCOUNT_NAME
     format and print information about each folder for the given account
@@ -274,11 +274,13 @@ sub main(@){
       my $totalCount = 0;
       my $lastUpdated = readLastUpdated $accName;
       my $lastUpdatedRel = relTime $lastUpdated;
+      my $error = readError $accName;
+      $error = "" if not defined $error;
       for my $folderName(sort keys %$folders){
         $unreadCount += readUidFileCounts $accName, $folderName, "unread";
         $totalCount += readUidFileCounts $accName, $folderName, "all";
       }
-      printf "$accName:$lastUpdated:$lastUpdatedRel:$unreadCount/$totalCount\n";
+      print "$accName:$lastUpdated:$lastUpdatedRel:$unreadCount/$totalCount:$error\n";
     }
   }elsif($cmd =~ /^(--folders)$/){
     die $usage if @_ != 1;
