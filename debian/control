@@ -6,6 +6,6 @@ Standards-Version: 3.8.4
 
 Package: qtemail
 Architecture: all
-Depends: python-pyside, libmail-imapclient-perl, libmailtools-perl, libio-socket-ssl-perl, libnet-ssleay-perl, libmime-lite-perl, libmime-tools-perl, libparse-recdescent-perl, libconvert-binhex-perl
+Depends: python-pyside, libmail-imapclient-perl, libio-socket-ssl-perl, libmime-lite-perl, libmime-tools-perl
 Description: QT Email
   Simple CLI+QT email client
