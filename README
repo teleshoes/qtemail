@@ -78,7 +78,7 @@ Dependencies:
 
 Usage:
 
-  Simple IMAP client.
+  Simple IMAP client. {--smtp command is a convenience wrapper around smtp-cli}
   Configuration is in ~/.secrets
     Each line is one key of the format: email.ACCOUNT_NAME.FIELD = value
     Account names can be any word characters (alphanumeric plus underscore)
@@ -126,11 +126,30 @@ Usage:
             6:GMAIL
             0:WORK_GMAIL
 
+  /usr/local/bin/email.pl --smtp ACCOUNT_NAME SUBJECT BODY TO [ARG ARG ..]
+    simple wrapper around smtp-cli. {you can add extra recipients with --to}
+    calls:
+      smtp-cli \
+        --server=<smtp_server> --port=<smtp_port> \
+        --user=<user> --pass=<password> \
+        --from=<user> \
+        --subject=SUBJECT --body-plain=BODY \
+        --to=TO \
+        ARG ARG ..
+
   /usr/local/bin/email.pl --mark-read [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     login and mark the indicated message(s) as read
 
   /usr/local/bin/email.pl --mark-unread [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     login mark the indicated message(s) as unread
+
+  /usr/local/bin/email.pl --accounts
+    format and print information about each account
+    "ACCOUNT_NAME:<timestamp>:<relative_time>:<unread_count>/<total_count>:<error>"
+
+  /usr/local/bin/email.pl --folders ACCOUNT_NAME
+    format and print information about each folder for the given account
+    "FOLDER_NAME:<unread_count>/<total_count>"
 
   /usr/local/bin/email.pl --header [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     format and print the header of the indicated message(s)
