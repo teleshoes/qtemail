@@ -12,7 +12,7 @@ sub main(@){
     exec "sudo", $0, @ARGV;
   }
   my $prefix = shift;
-  $prefix = "/usr/local" if not defined $prefix;
+  $prefix = "/usr" if not defined $prefix;
   my $binDir = "$prefix/bin";
 
   run "mkdir", "-p", $qmlDir;
