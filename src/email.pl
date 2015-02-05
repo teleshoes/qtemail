@@ -37,6 +37,7 @@ sub formatDate($);
 sub getFolderName($);
 sub parseFolders($);
 sub readSecrets();
+sub modifySecrets($$);
 
 my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
@@ -61,6 +62,7 @@ my $okCmds = join "|", qw(
   --mark-read --mark-unread
   --accounts --folders --print --summary --unread-line
   --has-error --has-new-unread --has-unread
+  --config
 );
 
 my $usage = "
@@ -183,6 +185,12 @@ my $usage = "
     if accounts are specified, all but those are ignored
     print \"yes\" and exit with zero exit code if there are unread emails
     otherwise, print \"no\" and exit with non-zero exit code
+
+  $0 --config ACCOUNT_NAME KEY=VAL [KEY=VAL KEY=VAL]
+    modifies $secretsFile
+    for each KEY/VAL pair:
+      removes any line that matches \"$secretsPrefix.ACCOUNT_NAME.KEY\\s*=\"
+      adds a line at the end \"$secretsPrefix.ACCOUNT_NAME.KEY = VAL\"
 ";
 
 sub main(@){
@@ -190,6 +198,21 @@ sub main(@){
   $cmd = "--update" if not defined $cmd;
 
   die $usage if @_ > 0 and $_[0] =~ /^(-h|--help)$/;
+
+  if($cmd =~ /^(--config)$/){
+    my ($accName, @keyValPairs) = @_;
+    die $usage if not defined $accName or @keyValPairs == 0;
+    my $config = {};
+    for my $keyValPair(@keyValPairs){
+      if($keyValPair =~ /^(\w+)=(.*)$/){
+        $$config{$1} = $2;
+      }else{
+        die "Malformed KEY=VAL pair: $keyValPair\n";
+      }
+    }
+    modifySecrets $accName, $config;
+    exit 0;
+  }
 
   my $config = readSecrets();
   my @accOrder = @{$$config{accOrder}};
@@ -952,6 +975,33 @@ sub readSecrets(){
     }
   }
   return {accounts => $accounts, accOrder => $accOrder};
+}
+
+sub modifySecrets($$){
+  my ($accName, $config) = @_;
+  die "invalid account name, must be a word i.e.: \\w+\n" if $accName !~ /^\w+$/;
+  my @lines = `cat $secretsFile 2>/dev/null`;
+  my @newLines;
+  for my $line(@lines){
+    my $skip = 0;
+    for my $key(sort keys %$config){
+      if($line =~ /^$secretsPrefix\.$accName\.$key\s*=/){
+        $skip = 1;
+        last;
+      }
+    }
+    push @newLines, $line unless $skip;
+  }
+
+  my $okConfigKeys = join "|", (@configKeys, @extraConfigKeys);
+  for my $key(sort keys %$config){
+    die "Unknown config key: $key\n" if $key !~ /^($okConfigKeys)$/;
+    push @newLines, "$secretsPrefix.$accName.$key = $$config{$key}\n";
+  }
+
+  open FH, "> $secretsFile" or die "Could not write $secretsFile\n";
+  print FH @newLines;
+  close FH;
 }
 
 &main(@ARGV);
