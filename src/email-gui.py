@@ -45,12 +45,13 @@ def main():
   accountModel = AccountModel()
   folderModel = FolderModel()
   headerModel = HeaderModel()
-  controller = Controller(emailManager, accountModel, folderModel, headerModel)
+  configModel = ConfigModel()
+  controller = Controller(emailManager, accountModel, folderModel, headerModel, configModel)
 
   controller.setupAccounts()
 
   app = QApplication([])
-  widget = MainWindow(qmlFile, controller, accountModel, folderModel, headerModel)
+  widget = MainWindow(qmlFile, controller, accountModel, folderModel, headerModel, configModel)
   if platform == PLATFORM_HARMATTAN:
     widget.window().showFullScreen()
   else:
@@ -149,12 +150,13 @@ class EmailManager():
     return stdout
 
 class Controller(QObject):
-  def __init__(self, emailManager, accountModel, folderModel, headerModel):
+  def __init__(self, emailManager, accountModel, folderModel, headerModel, configModel):
     QObject.__init__(self)
     self.emailManager = emailManager
     self.accountModel = accountModel
     self.folderModel = folderModel
     self.headerModel = headerModel
+    self.configModel = configModel
     self.accountName = None
     self.folderName = None
     self.threads = []
@@ -170,6 +172,19 @@ class Controller(QObject):
       self.accountName, self.folderName,
       limit=PAGE_INITIAL_SIZE, exclude=[])
     self.headerModel.setItems(headers)
+  @Slot(str)
+  def setupConfig(self, accName):
+    fieldNames = [ "account"
+                 , "user"
+                 , "password"
+                 , "server"
+                 , "sent"
+                 , "port"
+                 , "ssl"
+                 , "smtp_server"
+                 , "smtp_port"
+                 ]
+    self.configModel.setItems(map(lambda name: Field(name, ""), fieldNames))
   @Slot(QObject)
   def accountSelected(self, account):
     print 'clicked acc: ', account.Name
@@ -301,6 +316,12 @@ class HeaderModel(BaseListModel):
     BaseListModel.__init__(self)
     self.setRoleNames(dict(enumerate(HeaderModel.COLUMNS)))
 
+class ConfigModel(BaseListModel):
+  COLUMNS = ('config',)
+  def __init__(self):
+    BaseListModel.__init__(self)
+    self.setRoleNames(dict(enumerate(ConfigModel.COLUMNS)))
+
 class Account(QObject):
   def __init__(self, name_, lastUpdated_, lastUpdatedRel_, unread_, total_, error_, isLoading_):
     QObject.__init__(self)
@@ -388,13 +409,27 @@ class Header(QObject):
   Read = Property(bool, Read, notify=changed)
   IsLoading = Property(bool, IsLoading, notify=changed)
 
+class Field(QObject):
+  def __init__(self, name_, value_):
+    QObject.__init__(self)
+    self.name_ = name_
+    self.value_ = value_
+  def Name(self):
+    return self.name_
+  def Value(self):
+    return self.value_
+  changed = Signal()
+  Name = Property(unicode, Name, notify=changed)
+  Value = Property(unicode, Value, notify=changed)
+
 class MainWindow(QDeclarativeView):
-  def __init__(self, qmlFile, controller, accountModel, folderModel, headerModel):
+  def __init__(self, qmlFile, controller, accountModel, folderModel, headerModel, configModel):
     super(MainWindow, self).__init__(None)
     context = self.rootContext()
     context.setContextProperty('accountModel', accountModel)
     context.setContextProperty('folderModel', folderModel)
     context.setContextProperty('headerModel', headerModel)
+    context.setContextProperty('configModel', configModel)
     context.setContextProperty('controller', controller)
     self.setResizeMode(QDeclarativeView.SizeRootObjectToView)
     self.setSource(qmlFile)
