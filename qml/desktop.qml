@@ -4,6 +4,8 @@ Rectangle {
   id: main
   width: 1; height: 1 //retarded hack to get resizing to work
 
+  Component.onCompleted: navToPage(accountPage)
+
   function navToPage(page){
     accountPage.visible = false
     folderPage.visible = false
@@ -47,7 +49,7 @@ Rectangle {
     Rectangle {
       id: accountPage
       anchors.fill: parent
-      visible: true
+      visible: false
       anchors.margins: 30
 
       AccountView{ id: accountView }

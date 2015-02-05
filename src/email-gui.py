@@ -48,8 +48,6 @@ def main():
   configModel = ConfigModel()
   controller = Controller(emailManager, accountModel, folderModel, headerModel, configModel)
 
-  controller.setupAccounts()
-
   app = QApplication([])
   widget = MainWindow(qmlFile, controller, accountModel, folderModel, headerModel, configModel)
   if platform == PLATFORM_HARMATTAN:

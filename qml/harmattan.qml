@@ -3,7 +3,9 @@ import com.nokia.meego 1.1
 
 PageStackWindow {
   id: main
-  initialPage: accountPage
+
+  Component.onCompleted: navToPage(accountPage)
+
   function navToPage(page){
     pageStack.push(page)
     if(page == accountPage){
