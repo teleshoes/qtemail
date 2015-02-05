@@ -39,6 +39,7 @@ sub parseFolders($);
 sub readSecrets();
 
 my $secretsFile = "$ENV{HOME}/.secrets";
+my $secretsPrefix = "email";
 my @configKeys = qw(user password server port);
 my @extraConfigKeys = qw(inbox sent folders ssl smtp_server smtp_port);
 
@@ -65,7 +66,7 @@ my $okCmds = join "|", qw(
 my $usage = "
   Simple IMAP client. {--smtp command is a convenience wrapper around smtp-cli}
   Configuration is in $secretsFile
-    Each line is one key of the format: email.ACCOUNT_NAME.FIELD = value
+    Each line is one key of the format: $secretsPrefix.ACCOUNT_NAME.FIELD = value
     Account names can be any word characters (alphanumeric plus underscore)
     Other keys are ignored.
     required fields:
@@ -84,7 +85,7 @@ my $usage = "
         e.g.:  junk:[GMail]/Drafts:_12_/ponies
                =>  [\"junk\", \"gmail_drafts\", \"12_ponies\"]
 
-  ACCOUNT_NAME    the word following \"email.\" in $secretsFile
+  ACCOUNT_NAME    the word following \"$secretsPrefix.\" in $secretsFile
   FOLDER_NAME     \"inbox\", \"sent\" or one of the names from \"folders\"
   UID             an IMAP UID {UIDVALIDITY is assumed to never change}
 
@@ -934,7 +935,7 @@ sub readSecrets(){
   my $accOrder = [];
   my $okConfigKeys = join "|", (@configKeys, @extraConfigKeys);
   for my $line(@lines){
-    if($line =~ /^email\.(\w+)\.($okConfigKeys)\s*=\s*(.+)$/){
+    if($line =~ /^$secretsPrefix\.(\w+)\.($okConfigKeys)\s*=\s*(.+)$/){
       my ($accName, $key, $val)= ($1, $2, $3);
       if(not defined $$accounts{$accName}){
         $$accounts{$1} = {};
