@@ -4,50 +4,64 @@ import com.nokia.meego 1.1
 PageStackWindow {
   id: main
 
+  // NAVIGATION
   Component.onCompleted: navToPage(accountPage)
+  property variant curPage: null
 
   function navToPage(page){
     pageStack.push(page)
-    if(page == accountPage){
-      controller.setupAccounts()
-    }else if(page == folderPage){
-      controller.setupFolders()
-    }else if(page == configPage){
-      controller.setupConfig(null)
-    }
+    curPage = pageStack.currentPage
+    initPage()
   }
   function backPage(){
     pageStack.pop()
+    curPage = pageStack.currentPage
+    initPage()
+  }
+  function initPage(){
+    configButton.visible = false
+    submitButton.visible = false
+    backButton.visible = false
+    moreButton.visible = false
+    folderButton.visible = false
+
+    if(curPage == accountPage){
+      controller.setupAccounts()
+      configButton.visible = true
+    }else if(curPage == folderPage){
+      controller.setupFolders()
+      backButton.visible = true
+    }else if(curPage == headerPage){
+      backButton.visible = true
+      moreButton.visible = true
+      folderButton.visible = true
+    }else if(curPage == bodyPage){
+      backButton.visible = true
+    }else if(curPage == configPage){
+      controller.setupConfig(null)
+      submitButton.visible = true
+      backButton.visible = true
+    }
   }
 
+  // ACCOUNT PAGE
   Page {
     id: accountPage
-    tools: ToolBarLayout {
-      ToolButton {
-        text: "config"
-        onClicked: navToPage(configPage)
-      }
-    }
-
+    tools: toolBar
     anchors.margins: 30
-    anchors.fill: parent
+
     ScrollDecorator {
       flickableItem: accountView
     }
     AccountView{ id: accountView }
   }
 
+  // FOLDER PAGE
   Page {
     id: folderPage
+    tools: toolBar
     anchors.margins: 30
-    tools: ToolBarLayout {
-      ToolButton {
-        text: "back"
-        onClicked: {
-          backPage()
-        }
-      }
-    }
+
     ScrollDecorator {
       flickableItem: headerView
     }
@@ -55,30 +69,12 @@ PageStackWindow {
     FolderView{ id: folderView }
   }
 
+  // HEADER PAGE
   Page {
     id: headerPage
+    tools: toolBar
     anchors.margins: 30
-    tools: ToolBarLayout {
-      ToolButton {
-        text: "back"
-        onClicked: {
-          backPage()
-          controller.setupAccounts()
-        }
-      }
-      ToolButton {
-        text: "more"
-        onClicked: {
-          controller.moreHeaders()
-        }
-      }
-      ToolButton {
-        text: "folders"
-        onClicked: {
-          navToPage(folderPage)
-        }
-      }
-    }
+
     ScrollDecorator {
       flickableItem: headerView
     }
@@ -86,16 +82,12 @@ PageStackWindow {
     HeaderView{ id: headerView }
   }
 
+  // BODY PAGE
   Page {
     id: bodyPage
+    tools: toolBar
     anchors.margins: 30
 
-    tools: ToolBarLayout {
-      ToolButton {
-        text: "back"
-        onClicked: backPage()
-      }
-    }
     ScrollDecorator {
       flickableItem: bodyView
     }
@@ -108,20 +100,11 @@ PageStackWindow {
     BodyView{ id: bodyView }
   }
 
+  // CONFIG PAGE
   Page {
     id: configPage
+    tools: toolBar
     anchors.margins: 30
-
-    tools: ToolBarLayout {
-      ToolButton {
-        text: "submit"
-        onClicked: submitForm()
-      }
-      ToolButton {
-        text: "back"
-        onClicked: backPage()
-      }
-    }
 
     ConfigView{ id: configView }
     // HACK TO HIDE KEYBOARD
@@ -139,5 +122,41 @@ PageStackWindow {
       height: 0
     }
     // HACK TO HIDE KEYBOARD
+  }
+
+  // TOOLBAR
+  ToolBarLayout {
+    id: toolBar
+
+    ToolButton {
+      id: backButton
+      text: "back"
+      onClicked: backPage()
+      visible: false
+    }
+    ToolButton {
+      id: configButton
+      text: "config"
+      onClicked: navToPage(configPage)
+      visible: false
+    }
+    ToolButton {
+      id: submitButton
+      text: "submit"
+      onClicked: submitForm()
+      visible: false
+    }
+    ToolButton {
+      id: moreButton
+      text: "more"
+      onClicked: controller.moreHeaders()
+      visible: false
+    }
+    ToolButton {
+      id: folderButton
+      text: "folders"
+      onClicked: navToPage(folderPage)
+      visible: false
+    }
   }
 }

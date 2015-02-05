@@ -4,7 +4,9 @@ Rectangle {
   id: main
   width: 1; height: 1 //retarded hack to get resizing to work
 
+  // NAVIGATION
   Component.onCompleted: navToPage(accountPage)
+  property variant curPage: null
 
   function navToPage(page){
     accountPage.visible = false
@@ -12,41 +14,10 @@ Rectangle {
     headerPage.visible = false
     bodyPage.visible = false
     configPage.visible = false
-    if(page == accountPage){
-      controller.setupAccounts()
-      configButton.visible = true
-      submitButton.visible = false
-      backButton.visible = false
-      moreButton.visible = false
-      folderButton.visible = false
-    }else if(page == folderPage){
-      controller.setupFolders()
-      configButton.visible = false
-      submitButton.visible = false
-      backButton.visible = true
-      moreButton.visible = false
-      folderButton.visible = false
-    }else if(page == headerPage){
-      configButton.visible = false
-      submitButton.visible = false
-      backButton.visible = true
-      moreButton.visible = true
-      folderButton.visible = true
-    }else if(page == bodyPage){
-      configButton.visible = false
-      submitButton.visible = false
-      backButton.visible = true
-      moreButton.visible = false
-      folderButton.visible = false
-    }else if(page == configPage){
-      controller.setupConfig(null)
-      configButton.visible = false
-      submitButton.visible = true
-      backButton.visible = true
-      moreButton.visible = false
-      folderButton.visible = false
-    }
+
     page.visible = true
+    curPage = page
+    initPage()
   }
   function backPage(){
     if(headerPage.visible){
@@ -59,56 +30,82 @@ Rectangle {
       navToPage(accountPage);
     }
   }
+  function initPage(){
+    configButton.visible = false
+    submitButton.visible = false
+    backButton.visible = false
+    moreButton.visible = false
+    folderButton.visible = false
 
-  Rectangle {
-    anchors.top: parent.top
-    anchors.bottom: toolBar.top
-    width: parent.width
-    Rectangle {
-      id: accountPage
-      anchors.fill: parent
-      visible: false
-      anchors.margins: 30
-
-      AccountView{ id: accountView }
-    }
-
-    Rectangle {
-      id: folderPage
-      anchors.fill: parent
-      visible: false
-      anchors.margins: 30
-
-      FolderView{ id: folderView }
-    }
-
-    Rectangle {
-      id: headerPage
-      anchors.fill: parent
-      visible: false
-      anchors.margins: 30
-      HeaderView{ id: headerView }
-    }
-
-    Rectangle {
-      id: bodyPage
-      visible: false
-      anchors.fill: parent
-      anchors.margins: 30
-
-      BodyView{ id: bodyView }
-    }
-
-    Rectangle {
-      id: configPage
-      anchors.fill: parent
-      visible: false
-      anchors.margins: 30
-
-      ConfigView{ id: configView }
+    if(curPage == accountPage){
+      controller.setupAccounts()
+      configButton.visible = true
+    }else if(curPage == folderPage){
+      controller.setupFolders()
+      backButton.visible = true
+    }else if(curPage == headerPage){
+      backButton.visible = true
+      moreButton.visible = true
+      folderButton.visible = true
+    }else if(curPage == bodyPage){
+      backButton.visible = true
+    }else if(curPage == configPage){
+      controller.setupConfig(null)
+      submitButton.visible = true
+      backButton.visible = true
     }
   }
 
+  // ACCOUNT PAGE
+  Rectangle {
+    id: accountPage
+    anchors.fill: parent
+    visible: false
+    anchors.margins: 30
+
+    AccountView{ id: accountView }
+  }
+
+  // FOLDER PAGE
+  Rectangle {
+    id: folderPage
+    anchors.fill: parent
+    visible: false
+    anchors.margins: 30
+
+    FolderView{ id: folderView }
+  }
+
+  // HEADER PAGE
+  Rectangle {
+    id: headerPage
+    anchors.fill: parent
+    visible: false
+    anchors.margins: 30
+    HeaderView{ id: headerView }
+  }
+
+  // BODY PAGE
+  Rectangle {
+    id: bodyPage
+    visible: false
+    anchors.fill: parent
+    anchors.margins: 30
+
+    BodyView{ id: bodyView }
+  }
+
+  // CONFIG PAGE
+  Rectangle {
+    id: configPage
+    anchors.fill: parent
+    visible: false
+    anchors.margins: 30
+
+    ConfigView{ id: configView }
+  }
+
+  // TOOLBAR
   Rectangle {
     id: toolBar
     anchors.bottom: parent.bottom
@@ -116,6 +113,12 @@ Rectangle {
     width: parent.width
     Row {
       spacing: 10
+      Btn {
+        id: backButton
+        text: "back"
+        onClicked: backPage()
+        visible: false
+      }
       Btn {
         id: configButton
         text: "config"
@@ -126,12 +129,6 @@ Rectangle {
         id: submitButton
         text: "submit"
         onClicked: submitForm()
-        visible: false
-      }
-      Btn {
-        id: backButton
-        text: "back"
-        onClicked: backPage()
         visible: false
       }
       Btn {
