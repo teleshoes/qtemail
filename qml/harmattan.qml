@@ -12,6 +12,8 @@ PageStackWindow {
       controller.setupAccounts()
     }else if(page == folderPage){
       controller.setupFolders()
+    }else if(page == configPage){
+      controller.setupConfig(null)
     }
   }
   function backPage(){
@@ -20,6 +22,13 @@ PageStackWindow {
 
   Page {
     id: accountPage
+    tools: ToolBarLayout {
+      ToolButton {
+        text: "config"
+        onClicked: navToPage(configPage)
+      }
+    }
+
     anchors.margins: 30
     anchors.fill: parent
     ScrollDecorator {
@@ -97,5 +106,23 @@ PageStackWindow {
       pinch.target: bodyView
     }
     BodyView{ id: bodyView }
+  }
+
+  Page {
+    id: configPage
+    anchors.margins: 30
+
+    tools: ToolBarLayout {
+      ToolButton {
+        text: "submit"
+        onClicked: submitForm()
+      }
+      ToolButton {
+        text: "back"
+        onClicked: backPage()
+      }
+    }
+
+    ConfigView{ id: configView }
   }
 }

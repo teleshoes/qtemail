@@ -11,21 +11,37 @@ Rectangle {
     folderPage.visible = false
     headerPage.visible = false
     bodyPage.visible = false
+    configPage.visible = false
     if(page == accountPage){
       controller.setupAccounts()
+      configButton.visible = true
+      submitButton.visible = false
       backButton.visible = false
       moreButton.visible = false
       folderButton.visible = false
     }else if(page == folderPage){
       controller.setupFolders()
+      configButton.visible = false
+      submitButton.visible = false
       backButton.visible = true
       moreButton.visible = false
       folderButton.visible = false
     }else if(page == headerPage){
+      configButton.visible = false
+      submitButton.visible = false
       backButton.visible = true
       moreButton.visible = true
       folderButton.visible = true
     }else if(page == bodyPage){
+      configButton.visible = false
+      submitButton.visible = false
+      backButton.visible = true
+      moreButton.visible = false
+      folderButton.visible = false
+    }else if(page == configPage){
+      controller.setupConfig(null)
+      configButton.visible = false
+      submitButton.visible = true
       backButton.visible = true
       moreButton.visible = false
       folderButton.visible = false
@@ -39,6 +55,8 @@ Rectangle {
       navToPage(headerPage);
     }else if(folderPage.visible){
       navToPage(headerPage);
+    }else if(configPage.visible){
+      navToPage(accountPage);
     }
   }
 
@@ -80,6 +98,15 @@ Rectangle {
 
       BodyView{ id: bodyView }
     }
+
+    Rectangle {
+      id: configPage
+      anchors.fill: parent
+      visible: false
+      anchors.margins: 30
+
+      ConfigView{ id: configView }
+    }
   }
 
   Rectangle {
@@ -89,6 +116,18 @@ Rectangle {
     width: parent.width
     Row {
       spacing: 10
+      Btn {
+        id: configButton
+        text: "config"
+        onClicked: navToPage(configPage)
+        visible: false
+      }
+      Btn {
+        id: submitButton
+        text: "submit"
+        onClicked: submitForm()
+        visible: false
+      }
       Btn {
         id: backButton
         text: "back"
