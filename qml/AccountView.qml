@@ -1,62 +1,105 @@
 import QtQuick 1.1
 
-ListView {
-  spacing: 50
+Rectangle {
   anchors.fill: parent
-  model: accountModel
-  delegate: Component  {
-    Rectangle {
-      height: 150
-      width: parent.width
-      color: "gray"
-      MouseArea{
-        anchors.fill: parent
-        onClicked: {
-          controller.accountSelected(model.account)
-          controller.setupHeaders()
-          navToPage(headerPage)
-        }
-      }
+  ListView {
+    id: accountListView
+    spacing: 50
+    width: parent.width
+    height: parent.height * 0.80
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: messageBox.top
+    model: accountModel
+    delegate: Component  {
       Rectangle {
-        id: updateIndicator
-        height: parent.height
-        width: parent.width * 0.15
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        color: getColor()
-        function getColor(){
-          if(model.account.IsLoading){
-            return "#FF0000";
-          }else{
-            return "#666666"
-          }
-        }
-        function updateColor(){
-          this.color = getColor()
-        }
-        MouseArea {
+        height: 150
+        width: parent.width
+        color: "gray"
+        MouseArea{
           anchors.fill: parent
           onClicked: {
-            controller.updateAccount(updateIndicator, model.account)
+            controller.accountSelected(model.account)
+            controller.setupHeaders()
+            navToPage(headerPage)
           }
         }
+        Rectangle {
+          id: updateIndicator
+          height: parent.height
+          width: parent.width * 0.15
+          anchors.right: parent.right
+          anchors.bottom: parent.bottom
+          color: getColor()
+          function getColor(){
+            if(model.account.IsLoading){
+              return "#FF0000";
+            }else{
+              return "#666666"
+            }
+          }
+          function updateColor(){
+            this.color = getColor()
+          }
+          MouseArea {
+            anchors.fill: parent
+            onClicked: {
+              controller.updateAccount(updateIndicator, messageBox, model.account)
+            }
+          }
+        }
+        Text {
+          anchors.centerIn: parent
+          text: model.account.Name + ": " + model.account.Unread
+          font.pointSize: 36
+        }
+        Text {
+          anchors.right: parent.right
+          anchors.rightMargin: parent.width * 0.15
+          text: model.account.LastUpdatedRel
+          font.pointSize: 24
+        }
+        Text {
+          anchors.left: parent.left
+          anchors.bottom: parent.bottom
+          text: model.account.Error
+          font.pointSize: 24
+        }
       }
+    }
+  }
+
+  Rectangle{
+    id: messageBox
+    color: "#FFFFFF"
+    border.color: "#000000"
+    border.width: 2
+    anchors.bottom: parent.bottom
+    width: parent.width
+    height: parent.height * 0.10
+    clip: true
+
+    function append(text) {
+      messageBoxTextArea.text = messageBoxTextArea.text + text
+    }
+    function setText(text) {
+       messageBoxTextArea.text = text
+    }
+    function scrollToBottom() {
+      messageBoxTextArea.contentY = messageBoxTextArea.height
+    }
+
+    Flickable {
+      anchors.fill: parent
+      contentWidth: messageBoxTextArea.paintedWidth
+      contentHeight: messageBoxTextArea.paintedHeight
+      flickableDirection: Flickable.HorizontalAndVerticalFlick
+      boundsBehavior: Flickable.DragOverBounds
       Text {
-        anchors.centerIn: parent
-        text: model.account.Name + ": " + model.account.Unread
-        font.pointSize: 36
-      }
-      Text {
-        anchors.right: parent.right
-        anchors.rightMargin: parent.width * 0.15
-        text: model.account.LastUpdatedRel
-        font.pointSize: 24
-      }
-      Text {
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
-        text: model.account.Error
-        font.pointSize: 24
+        anchors.fill: parent
+        id: messageBoxTextArea
+        text: "CONSOLE OUTPUT\n"
       }
     }
   }
