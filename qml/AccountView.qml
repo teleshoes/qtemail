@@ -8,9 +8,9 @@ Rectangle {
   }
   ListView {
     id: accountListView
-    spacing: 50
+    spacing: 15
     width: parent.width
-    height: parent.height * 0.80
+    height: parent.height * 0.70
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
@@ -18,7 +18,7 @@ Rectangle {
     model: accountModel
     delegate: Component  {
       Rectangle {
-        height: 150
+        height: 100
         width: parent.width
         color: "gray"
         MouseArea{
@@ -54,9 +54,10 @@ Rectangle {
           }
         }
         Text {
-          anchors.centerIn: parent
+          anchors.left: parent.left
+          anchors.margins: 2
           text: model.account.Name + ": " + model.account.Unread
-          font.pointSize: 36
+          font.pointSize: 32
         }
         Text {
           anchors.right: parent.right
@@ -81,7 +82,7 @@ Rectangle {
     border.width: 2
     anchors.bottom: parent.bottom
     width: parent.width
-    height: parent.height * 0.10
+    height: parent.height * 0.30
     clip: true
 
     function append(text) {
