@@ -241,9 +241,16 @@ class Controller(QObject):
     self.folderName = folder.Name
   @Slot(QObject, QObject, QObject)
   def updateAccount(self, updateIndicator, messageBox, account):
-    self.onAppendMessage(messageBox, "STARTING UPDATE FOR " + account.Name + "\n")
-    account.isLoading_ = True
-    updateIndicator.updateColor()
+    if account == None:
+      accMsg = "ALL ACCOUNTS"
+    else:
+      accMsg = account.Name
+    self.onAppendMessage(messageBox, "STARTING UPDATE FOR " + accMsg + "\n")
+
+    if account != None:
+      account.isLoading_ = True
+    if updateIndicator != None:
+      updateIndicator.updateColor()
 
     thread = UpdateThread(updateIndicator, messageBox, account)
     thread.updateFinished.connect(self.onUpdateAccountFinished)
