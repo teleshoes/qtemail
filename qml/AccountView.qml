@@ -87,10 +87,11 @@ Rectangle {
        messageBoxTextArea.text = text
     }
     function scrollToBottom() {
-      messageBoxTextArea.contentY = messageBoxTextArea.height
+      messageBoxFlickable.contentY = messageBoxTextArea.height - messageBoxFlickable.height
     }
 
     Flickable {
+      id: messageBoxFlickable
       anchors.fill: parent
       contentWidth: messageBoxTextArea.paintedWidth
       contentHeight: messageBoxTextArea.paintedHeight
