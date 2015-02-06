@@ -1,3 +1,10 @@
+qtemail (0.0.4) UNRELEASED; urgency=low
+  * Display command output in GUI
+  * Large style tweaks
+  * Button updates
+  * Bug fixes
+ -- teleshoes <elliot.wolk@gmail.com>  Thu, 05 Feb 2015 23:32:28 -0500
+
 qtemail (0.0.3) UNRELEASED; urgency=low
   * Add simple account config UI
   * Harmattan style tweaks
