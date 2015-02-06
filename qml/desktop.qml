@@ -58,7 +58,7 @@ Rectangle {
     // ACCOUNT PAGE
     Rectangle {
       id: accountPage
-      property variant buttons: [configButton]
+      property variant buttons: [configButton, updateButton]
       anchors.fill: parent
       visible: false
       anchors.margins: 30
@@ -128,6 +128,12 @@ Rectangle {
       id: configButton
       text: "config"
       onClicked: navToPage(configPage)
+      visible: false
+    }
+    Btn {
+      id: updateButton
+      text: "update"
+      onClicked: accountView.updateAllAccounts()
       visible: false
     }
     Btn {

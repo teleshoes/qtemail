@@ -2,6 +2,10 @@ import QtQuick 1.1
 
 Rectangle {
   anchors.fill: parent
+
+  function updateAllAccounts(){
+    controller.updateAccount(null, messageBox, null)
+  }
   ListView {
     id: accountListView
     spacing: 50

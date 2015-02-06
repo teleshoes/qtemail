@@ -39,7 +39,7 @@ PageStackWindow {
   // ACCOUNT PAGE
   Page {
     id: accountPage
-    property variant buttons: [configButton]
+    property variant buttons: [configButton, updateButton]
     tools: toolBar
     anchors.margins: 30
 
@@ -143,6 +143,16 @@ PageStackWindow {
         anchors.horizontalCenter: parent.horizontalCenter
       }
       onClicked: navToPage(configPage)
+      visible: false
+    }
+    ToolIcon {
+      id: updateButton
+      iconId: "toolbar-refresh"
+      Text{
+        text: "update"
+        anchors.horizontalCenter: parent.horizontalCenter
+      }
+      onClicked: accountView.updateAllAccounts()
       visible: false
     }
     ToolIcon {
