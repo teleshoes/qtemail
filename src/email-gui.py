@@ -245,7 +245,7 @@ class Controller(QObject):
     account.isLoading_ = True
     updateIndicator.updateColor()
 
-    thread = UpdateThread(updateIndicator, messageBox, None)#account)
+    thread = UpdateThread(updateIndicator, messageBox, account)
     thread.updateFinished.connect(self.onUpdateAccountFinished)
     thread.setMessage.connect(self.onSetMessage)
     thread.appendMessage.connect(self.onAppendMessage)
