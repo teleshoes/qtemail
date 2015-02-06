@@ -28,7 +28,7 @@ ListView {
       Text {
         id: label
         anchors.fill: parent
-        text: model.config.Name
+        text: model.config.FieldName
         font.pointSize: fontSize
       }
     }
@@ -50,8 +50,10 @@ ListView {
         TextEdit {
           anchors.margins: 3
           id: edit
+          text: model.config.Value
           anchors.fill: parent
           font.pointSize: fontSize
+          onTextChanged: controller.updateConfigFieldValue(model.config, edit.text)
         }
       }
     }

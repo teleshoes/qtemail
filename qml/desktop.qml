@@ -39,11 +39,12 @@ Rectangle {
     }
 
     if(curPage == accountPage){
+      controller.clearAccount()
       controller.setupAccounts()
     }else if(curPage == folderPage){
       controller.setupFolders()
     }else if(curPage == configPage){
-      controller.setupConfig(null)
+      controller.setupConfig()
     }
   }
 
@@ -72,7 +73,7 @@ Rectangle {
   // HEADER PAGE
   Rectangle {
     id: headerPage
-    property variant buttons: [backButton, moreButton, folderButton]
+    property variant buttons: [backButton, moreButton, configButton, folderButton]
     anchors.fill: parent
     visible: false
     anchors.margins: 30
@@ -123,8 +124,8 @@ Rectangle {
       }
       Btn {
         id: submitButton
-        text: "submit"
-        onClicked: submitForm()
+        text: "save"
+        onClicked: controller.saveConfig()
         visible: false
       }
       Btn {
