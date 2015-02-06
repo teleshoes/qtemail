@@ -37,6 +37,7 @@ sub formatDate($);
 sub getFolderName($);
 sub parseFolders($);
 sub readSecrets();
+sub validateSecrets($);
 sub modifySecrets($$);
 
 my $secretsFile = "$ENV{HOME}/.secrets";
