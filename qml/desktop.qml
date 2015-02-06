@@ -48,98 +48,105 @@ Rectangle {
     }
   }
 
-  // ACCOUNT PAGE
   Rectangle {
-    id: accountPage
-    property variant buttons: [configButton]
-    anchors.fill: parent
-    visible: false
-    anchors.margins: 30
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: toolBar.top
+    clip: true
 
-    AccountView{ id: accountView }
-  }
+    // ACCOUNT PAGE
+    Rectangle {
+      id: accountPage
+      property variant buttons: [configButton]
+      anchors.fill: parent
+      visible: false
+      anchors.margins: 30
 
-  // FOLDER PAGE
-  Rectangle {
-    id: folderPage
-    property variant buttons: [backButton]
-    anchors.fill: parent
-    visible: false
-    anchors.margins: 30
+      AccountView{ id: accountView }
+    }
 
-    FolderView{ id: folderView }
-  }
+    // FOLDER PAGE
+    Rectangle {
+      id: folderPage
+      property variant buttons: [backButton]
+      anchors.fill: parent
+      visible: false
+      anchors.margins: 30
 
-  // HEADER PAGE
-  Rectangle {
-    id: headerPage
-    property variant buttons: [backButton, moreButton, configButton, folderButton]
-    anchors.fill: parent
-    visible: false
-    anchors.margins: 30
-    HeaderView{ id: headerView }
-  }
+      FolderView{ id: folderView }
+    }
 
-  // BODY PAGE
-  Rectangle {
-    id: bodyPage
-    property variant buttons: [backButton]
-    visible: false
-    anchors.fill: parent
-    anchors.margins: 30
+    // HEADER PAGE
+    Rectangle {
+      id: headerPage
+      property variant buttons: [backButton, moreButton, configButton, folderButton]
+      anchors.fill: parent
+      visible: false
+      anchors.margins: 30
+      HeaderView{ id: headerView }
+    }
 
-    BodyView{ id: bodyView }
-  }
+    // BODY PAGE
+    Rectangle {
+      id: bodyPage
+      property variant buttons: [backButton]
+      visible: false
+      anchors.fill: parent
+      anchors.margins: 30
 
-  // CONFIG PAGE
-  Rectangle {
-    id: configPage
-    property variant buttons: [backButton, submitButton]
-    anchors.fill: parent
-    visible: false
-    anchors.margins: 30
+      BodyView{ id: bodyView }
+    }
 
-    ConfigView{ id: configView }
+    // CONFIG PAGE
+    Rectangle {
+      id: configPage
+      property variant buttons: [backButton, submitButton]
+      anchors.fill: parent
+      visible: false
+      anchors.margins: 30
+
+      ConfigView{ id: configView }
+    }
   }
 
   // TOOLBAR
-  Rectangle {
+  Row {
+    id: toolBar
     anchors.bottom: parent.bottom
     height: backButton.height
     width: parent.width
-    Row {
-      id: toolBar
-      spacing: 10
-      Btn {
-        id: backButton
-        text: "back"
-        onClicked: backPage()
-        visible: false
-      }
-      Btn {
-        id: configButton
-        text: "config"
-        onClicked: navToPage(configPage)
-        visible: false
-      }
-      Btn {
-        id: submitButton
-        text: "save"
-        onClicked: controller.saveConfig()
-        visible: false
-      }
-      Btn {
-        id: moreButton
-        text: "more"
-        onClicked: controller.moreHeaders()
-        visible: false
-      }
-      Btn {
-        id: folderButton
-        text: "folders"
-        onClicked: navToPage(folderPage)
-        visible: false
-      }
+
+    spacing: 10
+    Btn {
+      id: backButton
+      text: "back"
+      onClicked: backPage()
+      visible: false
+    }
+    Btn {
+      id: configButton
+      text: "config"
+      onClicked: navToPage(configPage)
+      visible: false
+    }
+    Btn {
+      id: submitButton
+      text: "save"
+      onClicked: controller.saveConfig()
+      visible: false
+    }
+    Btn {
+      id: moreButton
+      text: "more"
+      onClicked: controller.moreHeaders()
+      visible: false
+    }
+    Btn {
+      id: folderButton
+      text: "folders"
+      onClicked: navToPage(folderPage)
+      visible: false
     }
   }
 }
