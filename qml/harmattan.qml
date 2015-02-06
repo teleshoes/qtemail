@@ -124,33 +124,53 @@ PageStackWindow {
   ToolBarLayout {
     id: toolBar
 
-    ToolButton {
+    ToolIcon {
       id: backButton
-      text: "back"
+      iconId: "toolbar-tab-previous"
+      Text{
+        text: "back"
+        anchors.horizontalCenter: parent.horizontalCenter
+      }
       onClicked: backPage()
       visible: false
     }
-    ToolButton {
+    ToolIcon {
       id: configButton
-      text: "config"
+      iconId: "toolbar-settings"
+      Text{
+        text: "config"
+        anchors.horizontalCenter: parent.horizontalCenter
+      }
       onClicked: navToPage(configPage)
       visible: false
     }
-    ToolButton {
+    ToolIcon {
       id: submitButton
-      text: "submit"
+      iconId: "toolbar-done"
+      Text{
+        text: "submit"
+        anchors.horizontalCenter: parent.horizontalCenter
+      }
       onClicked: submitForm()
       visible: false
     }
-    ToolButton {
+    ToolIcon {
       id: moreButton
-      text: "more"
+      iconId: "toolbar-down"
+      Text{
+        text: "more"
+        anchors.horizontalCenter: parent.horizontalCenter
+      }
       onClicked: controller.moreHeaders()
       visible: false
     }
-    ToolButton {
+    ToolIcon {
       id: folderButton
-      text: "folders"
+      Text{
+        text: "folders"
+        anchors.horizontalCenter: parent.horizontalCenter
+      }
+      iconId: "toolbar-directory"
       onClicked: navToPage(folderPage)
       visible: false
     }
