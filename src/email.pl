@@ -242,12 +242,14 @@ sub main(@){
     $VERBOSE = 1;
     my @accNames = @_ == 0 ? @accOrder : @_;
     my $counts = {};
+    my $isError = 0;
     for my $accName(@accNames){
       my $acc = $$accounts{$accName};
       die "Unknown account $accName\n" if not defined $acc;
       clearError $accName;
       my $c = getClient($acc);
       if(not defined $c){
+        $isError = 1;
         my $msg = "ERROR: Could not authenticate $$acc{name} ($$acc{user})\n";
         warn $msg;
         writeError $accName, $msg;
@@ -260,6 +262,7 @@ sub main(@){
         my $imapFolder = $$folders{$folderName};
         my $f = openFolder($imapFolder, $c, 0);
         if(not defined $f){
+          $isError = 1;
           my $msg = "ERROR: Could not open folder $folderName\n";
           warn $msg;
           writeError $accName, $msg;
@@ -286,6 +289,7 @@ sub main(@){
       writeLastUpdated $accName unless hasError $accName;
     }
     mergeUnreadCounts $counts, @accOrder;
+    exit $isError ? 1 : 0;
   }elsif($cmd =~ /^(--smtp)$/){
     die $usage if @_ < 4;
     my ($accName, $subject, $body, $to, @args) = @_;
