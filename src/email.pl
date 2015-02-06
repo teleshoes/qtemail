@@ -908,7 +908,7 @@ sub getClient($){
     Password => $$acc{password},
     %$settings,
   );
-  return undef if not $c->IsAuthenticated();
+  return undef if not defined $c or not $c->IsAuthenticated();
   return $c;
 }
 
