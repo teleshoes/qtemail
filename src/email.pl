@@ -215,6 +215,7 @@ sub main(@){
   }
 
   my $config = readSecrets();
+  validateSecrets $config;
   my @accOrder = @{$$config{accOrder}};
   my $accounts = $$config{accounts};
   my %accFolders = map {$_ => parseFolders $$accounts{$_}} keys %$accounts;
@@ -961,20 +962,24 @@ sub readSecrets(){
     if($line =~ /^$secretsPrefix\.(\w+)\.($okConfigKeys)\s*=\s*(.+)$/){
       my ($accName, $key, $val)= ($1, $2, $3);
       if(not defined $$accounts{$accName}){
-        $$accounts{$1} = {};
+        $$accounts{$1} = {name => $accName};
         push @$accOrder, $accName;
       }
       $$accounts{$accName}{$key} = $val;
     }
   }
+  return {accounts => $accounts, accOrder => $accOrder};
+}
+
+sub validateSecrets($){
+  my $config = shift;
+  my $accounts = $$config{accounts};
   for my $accName(keys %$accounts){
     my $acc = $$accounts{$accName};
-    $$acc{name} = $accName;
     for my $key(sort @configKeys){
       die "Missing '$key' for '$accName' in $secretsFile\n" if not defined $$acc{$key};
     }
   }
-  return {accounts => $accounts, accOrder => $accOrder};
 }
 
 sub modifySecrets($$){
