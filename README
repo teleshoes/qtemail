@@ -198,3 +198,14 @@ Usage:
     if accounts are specified, all but those are ignored
     print "yes" and exit with zero exit code if there are unread emails
     otherwise, print "no" and exit with non-zero exit code
+
+  /usr/bin/email.pl --read-config ACCOUNT_NAME
+    reads ~/.secrets
+    for each line of the form "email.ACCOUNT_NAME.KEY\s*=\s*VAL"
+      print KEY=VAL
+
+  /usr/bin/email.pl --write-config ACCOUNT_NAME KEY=VAL [KEY=VAL KEY=VAL]
+    modifies ~/.secrets
+    for each KEY/VAL pair:
+      removes any line that matches "email.ACCOUNT_NAME.KEY\s*="
+      adds a line at the end "email.ACCOUNT_NAME.KEY = VAL"
