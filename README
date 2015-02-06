@@ -104,10 +104,10 @@ Usage:
   FOLDER_NAME     "inbox", "sent" or one of the names from "folders"
   UID             an IMAP UID {UIDVALIDITY is assumed to never change}
 
-  /usr/local/bin/email.pl -h|--help
+  /usr/bin/email.pl -h|--help
     show this message
 
-  /usr/local/bin/email.pl [--update] [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /usr/bin/email.pl [--update] [ACCOUNT_NAME ACCOUNT_NAME ...]
     -for each account specified, or all if none are specified:
       -login to IMAP server, or create file ~/.cache/email/ACCOUNT_NAME/error
       -for each FOLDER_NAME:
@@ -127,7 +127,7 @@ Usage:
             6:GMAIL
             0:WORK_GMAIL
 
-  /usr/local/bin/email.pl --smtp ACCOUNT_NAME SUBJECT BODY TO [ARG ARG ..]
+  /usr/bin/email.pl --smtp ACCOUNT_NAME SUBJECT BODY TO [ARG ARG ..]
     simple wrapper around smtp-cli. {you can add extra recipients with --to}
     calls:
       smtp-cli \
@@ -138,39 +138,39 @@ Usage:
         --to=TO \
         ARG ARG ..
 
-  /usr/local/bin/email.pl --mark-read [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  /usr/bin/email.pl --mark-read [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     login and mark the indicated message(s) as read
 
-  /usr/local/bin/email.pl --mark-unread [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  /usr/bin/email.pl --mark-unread [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     login mark the indicated message(s) as unread
 
-  /usr/local/bin/email.pl --accounts
+  /usr/bin/email.pl --accounts
     format and print information about each account
     "ACCOUNT_NAME:<timestamp>:<relative_time>:<unread_count>/<total_count>:<error>"
 
-  /usr/local/bin/email.pl --folders ACCOUNT_NAME
+  /usr/bin/email.pl --folders ACCOUNT_NAME
     format and print information about each folder for the given account
     "FOLDER_NAME:<unread_count>/<total_count>"
 
-  /usr/local/bin/email.pl --header [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  /usr/bin/email.pl --header [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     format and print the header of the indicated message(s)
     prints each of [Date Subject From To]
       one per line, formatted "UID.FIELD: VALUE"
 
-  /usr/local/bin/email.pl --body [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  /usr/bin/email.pl --body [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     download, format and print the body of the indicated message(s)
     if body is cached, skip download
 
-  /usr/local/bin/email.pl --body-html [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  /usr/bin/email.pl --body-html [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but prefer HTML instead of plaintext
 
-  /usr/local/bin/email.pl --print [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /usr/bin/email.pl --print [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers and bodies
 
-  /usr/local/bin/email.pl --summary [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /usr/bin/email.pl --summary [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers
 
-  /usr/local/bin/email.pl --unread-line [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /usr/bin/email.pl --unread-line [ACCOUNT_NAME ACCOUNT_NAME ...]
     does not fetch anything, merely reads ~/.unread-counts
     format and print ~/.unread-counts
     the string is a space-separated list of the first character of
@@ -180,19 +180,19 @@ Usage:
     if accounts are specified, all but those are omitted
     e.g.: A3 G6
 
-  /usr/local/bin/email.pl --has-error [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /usr/bin/email.pl --has-error [ACCOUNT_NAME ACCOUNT_NAME ...]
     checks if ~/.cache/email/ACCOUNT_NAME/error exists
     print "yes" and exit with zero exit code if it does
     otherwise, print "no" and exit with non-zero exit code
 
-  /usr/local/bin/email.pl --has-new-unread [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /usr/bin/email.pl --has-new-unread [ACCOUNT_NAME ACCOUNT_NAME ...]
     checks for any NEW unread emails, in any account
       {UIDs in ~/.cache/email/ACCOUNT_NAME/new-unread}
     if accounts are specified, all but those are ignored
     print "yes" and exit with zero exit code if there are new unread emails
     otherwise, print "no" and exit with non-zero exit code
 
-  /usr/local/bin/email.pl --has-unread [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /usr/bin/email.pl --has-unread [ACCOUNT_NAME ACCOUNT_NAME ...]
     checks for any unread emails, in any account
       {UIDs in ~/.cache/email/ACCOUNT_NAME/unread}
     if accounts are specified, all but those are ignored
