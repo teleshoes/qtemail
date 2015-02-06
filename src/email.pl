@@ -350,6 +350,7 @@ sub main(@){
         $unreadCount += readUidFileCounts $accName, $folderName, "unread";
         $totalCount += readUidFileCounts $accName, $folderName, "all";
       }
+      $lastUpdated = 0 if not defined $lastUpdated;
       print "$accName:$lastUpdated:$lastUpdatedRel:$unreadCount/$totalCount:$error\n";
     }
   }elsif($cmd =~ /^(--folders)$/){
@@ -569,6 +570,7 @@ sub writeUnreadCounts($@){
 
 sub relTime($){
   my ($time) = @_;
+  return "never" if not defined $time;
   my $diff = time - $time;
 
   return "now" if $diff == 0;
