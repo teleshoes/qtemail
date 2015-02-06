@@ -239,14 +239,22 @@ class Controller(QObject):
   def folderSelected(self, folder):
     print 'clicked folder: ', folder.Name
     self.folderName = folder.Name
-  @Slot(QObject, QObject)
-  def updateAccount(self, updateIndicator, account):
+  @Slot(QObject, QObject, QObject)
+  def updateAccount(self, updateIndicator, messageBox, account):
+    self.onAppendMessage(messageBox, "STARTING UPDATE FOR " + account.Name + "\n")
     account.isLoading_ = True
     updateIndicator.updateColor()
 
-    thread = UpdateThread(updateIndicator, account)
+    thread = UpdateThread(updateIndicator, messageBox, None)#account)
     thread.updateFinished.connect(self.onUpdateAccountFinished)
+    thread.setMessage.connect(self.onSetMessage)
+    thread.appendMessage.connect(self.onAppendMessage)
     self.startThread(thread)
+  def onSetMessage(self, messageBox, message):
+    messageBox.setText(message)
+  def onAppendMessage(self, messageBox, message):
+    messageBox.append(message)
+    messageBox.scrollToBottom()
   def onUpdateAccountFinished(self, updateIndicator, account):
     self.setupAccounts()
   @Slot(QObject, QObject)
@@ -282,13 +290,25 @@ class Controller(QObject):
 
 class UpdateThread(QThread):
   updateFinished = Signal(QObject, QObject)
-  def __init__(self, updateIndicator, account):
+  setMessage = Signal(QObject, str)
+  appendMessage = Signal(QObject, str)
+  def __init__(self, updateIndicator, messageBox, account):
     QThread.__init__(self)
     self.updateIndicator = updateIndicator
+    self.messageBox = messageBox
     self.account = account
   def run(self):
-    cmd = ["email.pl", "--update", self.account.Name]
-    subprocess.call(cmd)
+    cmd = ["email.pl", "--update"]
+    if self.account != None:
+      cmd.append(self.account.Name)
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    for line in iter(proc.stdout.readline,''):
+      self.appendMessage.emit(self.messageBox, line)
+    proc.wait()
+    if proc.returncode == 0:
+      self.appendMessage.emit(self.messageBox, "SUCCESS\n")
+    else:
+      self.appendMessage.emit(self.messageBox, "FAILURE\n")
     self.updateFinished.emit(self.updateIndicator, self.account)
 
 class ToggleReadThread(QThread):
