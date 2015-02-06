@@ -62,7 +62,7 @@ my $okCmds = join "|", qw(
   --mark-read --mark-unread
   --accounts --folders --print --summary --unread-line
   --has-error --has-new-unread --has-unread
-  --config
+  --read-config --write-config
 );
 
 my $usage = "
@@ -186,7 +186,12 @@ my $usage = "
     print \"yes\" and exit with zero exit code if there are unread emails
     otherwise, print \"no\" and exit with non-zero exit code
 
-  $0 --config ACCOUNT_NAME KEY=VAL [KEY=VAL KEY=VAL]
+  $0 --read-config ACCOUNT_NAME
+    reads $secretsFile
+    for each line of the form \"$secretsPrefix.ACCOUNT_NAME.KEY\\s*=\\s*VAL\"
+      print KEY=VAL
+
+  $0 --write-config ACCOUNT_NAME KEY=VAL [KEY=VAL KEY=VAL]
     modifies $secretsFile
     for each KEY/VAL pair:
       removes any line that matches \"$secretsPrefix.ACCOUNT_NAME.KEY\\s*=\"
@@ -199,7 +204,19 @@ sub main(@){
 
   die $usage if @_ > 0 and $_[0] =~ /^(-h|--help)$/;
 
-  if($cmd =~ /^(--config)$/){
+  if($cmd =~ /^(--read-config)$/){
+    die $usage if @_ != 1;
+    my $accName = shift;
+    my $config = readSecrets;
+    my $accounts = $$config{accounts};
+    if(defined $$accounts{$accName}){
+      my $acc = $$accounts{$accName};
+      for my $key(keys %$acc){
+        print "$key=$$acc{$key}\n";
+      }
+    }
+    exit 0;
+  }elsif($cmd =~ /^(--write-config)$/){
     my ($accName, @keyValPairs) = @_;
     die $usage if not defined $accName or @keyValPairs == 0;
     my $config = {};
