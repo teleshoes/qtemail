@@ -58,6 +58,50 @@ def main():
   app.exec_()
 
 class EmailManager():
+  def readAccountConfig(self, accName):
+    fieldNames = [ "name"
+                 , "user"
+                 , "password"
+                 , "server"
+                 , "sent"
+                 , "port"
+                 , "ssl"
+                 , "smtp_server"
+                 , "smtp_port"
+                 ]
+
+    config = {}
+    if accName != None:
+      configOut = self.readProc(["email.pl", "--read-config", accName])
+      for line in configOut.splitlines():
+        print line
+        m = re.match("(\w+)=(.*)", line)
+        if m:
+          fieldName = m.group(1)
+          value = m.group(2)
+          print fieldName + " => " + value
+          if fieldName in fieldNames:
+            config[m.group(1)] = m.group(2)
+
+    fields = []
+    for fieldName in fieldNames:
+      if fieldName in config:
+        value = config[fieldName]
+      else:
+        value = ""
+      fields.append(Field(fieldName, value))
+    return fields
+  def writeAccountConfig(self, fields):
+    keyVals = []
+    accName = None
+    for field in fields:
+      if field.FieldName == "name":
+        accName = field.Value
+      else:
+        keyVals.append(field.FieldName + "=" + field.Value)
+
+    cmd = ["email.pl", "--write-config", accName] + keyVals
+    exitCode = subprocess.call(cmd)
   def getAccounts(self):
     accountOut = self.readProc(["email.pl", "--accounts"])
     accounts = []
@@ -170,24 +214,27 @@ class Controller(QObject):
       self.accountName, self.folderName,
       limit=PAGE_INITIAL_SIZE, exclude=[])
     self.headerModel.setItems(headers)
-  @Slot(str)
-  def setupConfig(self, accName):
-    fieldNames = [ "account"
-                 , "user"
-                 , "password"
-                 , "server"
-                 , "sent"
-                 , "port"
-                 , "ssl"
-                 , "smtp_server"
-                 , "smtp_port"
-                 ]
-    self.configModel.setItems(map(lambda name: Field(name, ""), fieldNames))
+  @Slot()
+  def setupConfig(self):
+    config = self
+    fields = self.emailManager.readAccountConfig(self.accountName)
+    self.configModel.setItems(fields)
+  @Slot(QObject, str)
+  def updateConfigFieldValue(self, field, value):
+    field.value_ = value
+  @Slot()
+  def saveConfig(self):
+    fields = self.configModel.getItems()
+    self.emailManager.writeAccountConfig(fields)
   @Slot(QObject)
   def accountSelected(self, account):
     print 'clicked acc: ', account.Name
     self.accountName = account.Name
     self.folderName = "inbox"
+  @Slot()
+  def clearAccount(self):
+    self.accountName = None
+    self.folderName = None
   @Slot(QObject)
   def folderSelected(self, folder):
     print 'clicked folder: ', folder.Name
@@ -408,16 +455,16 @@ class Header(QObject):
   IsLoading = Property(bool, IsLoading, notify=changed)
 
 class Field(QObject):
-  def __init__(self, name_, value_):
+  def __init__(self, fieldName_, value_):
     QObject.__init__(self)
-    self.name_ = name_
+    self.fieldName_ = fieldName_
     self.value_ = value_
-  def Name(self):
-    return self.name_
+  def FieldName(self):
+    return self.fieldName_
   def Value(self):
     return self.value_
   changed = Signal()
-  Name = Property(unicode, Name, notify=changed)
+  FieldName = Property(unicode, FieldName, notify=changed)
   Value = Property(unicode, Value, notify=changed)
 
 class MainWindow(QDeclarativeView):
