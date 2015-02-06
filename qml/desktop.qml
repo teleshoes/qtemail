@@ -31,34 +31,26 @@ Rectangle {
     }
   }
   function initPage(){
-    configButton.visible = false
-    submitButton.visible = false
-    backButton.visible = false
-    moreButton.visible = false
-    folderButton.visible = false
+    for (var i = 0; i < toolBar.children.length; ++i){
+      toolBar.children[i].visible = false
+    }
+    for (var i = 0; i < curPage.buttons.length; ++i){
+      curPage.buttons[i].visible = true
+    }
 
     if(curPage == accountPage){
       controller.setupAccounts()
-      configButton.visible = true
     }else if(curPage == folderPage){
       controller.setupFolders()
-      backButton.visible = true
-    }else if(curPage == headerPage){
-      backButton.visible = true
-      moreButton.visible = true
-      folderButton.visible = true
-    }else if(curPage == bodyPage){
-      backButton.visible = true
     }else if(curPage == configPage){
       controller.setupConfig(null)
-      submitButton.visible = true
-      backButton.visible = true
     }
   }
 
   // ACCOUNT PAGE
   Rectangle {
     id: accountPage
+    property variant buttons: [configButton]
     anchors.fill: parent
     visible: false
     anchors.margins: 30
@@ -69,6 +61,7 @@ Rectangle {
   // FOLDER PAGE
   Rectangle {
     id: folderPage
+    property variant buttons: [backButton]
     anchors.fill: parent
     visible: false
     anchors.margins: 30
@@ -79,6 +72,7 @@ Rectangle {
   // HEADER PAGE
   Rectangle {
     id: headerPage
+    property variant buttons: [backButton, moreButton, folderButton]
     anchors.fill: parent
     visible: false
     anchors.margins: 30
@@ -88,6 +82,7 @@ Rectangle {
   // BODY PAGE
   Rectangle {
     id: bodyPage
+    property variant buttons: [backButton]
     visible: false
     anchors.fill: parent
     anchors.margins: 30
@@ -98,6 +93,7 @@ Rectangle {
   // CONFIG PAGE
   Rectangle {
     id: configPage
+    property variant buttons: [backButton, submitButton]
     anchors.fill: parent
     visible: false
     anchors.margins: 30
@@ -107,11 +103,11 @@ Rectangle {
 
   // TOOLBAR
   Rectangle {
-    id: toolBar
     anchors.bottom: parent.bottom
     height: backButton.height
     width: parent.width
     Row {
+      id: toolBar
       spacing: 10
       Btn {
         id: backButton
