@@ -1,3 +1,8 @@
+qtemail (0.0.5) UNRELEASED; urgency=low
+  * Email searchbox filter
+  * Command line options for email-gui
+ -- teleshoes <elliot.wolk@gmail.com>  Sat, 07 Feb 2015 00:26:16 -0500
+
 qtemail (0.0.4) UNRELEASED; urgency=low
   * Display command output in GUI
   * Large style tweaks
