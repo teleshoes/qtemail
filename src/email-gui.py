@@ -28,7 +28,49 @@ PAGE_MORE_SIZE = 200
 UNREAD_COUNTS = os.getenv("HOME") + "/.unread-counts"
 EMAIL_DIR = os.getenv("HOME") + "/.cache/email"
 
+pages = ["account", "header", "config", "folder", "body"]
+okPages = "|".join(pages)
+
+usage = """Usage:
+  %(exec)s [OPTS]
+
+  OPTS:
+    --page=[%(okPages)s]
+      start on the indicated page
+    --account=ACCOUNT_NAME
+      default the account to ACCOUNT_NAME {only useful with --page}
+    --folder=FOLDER_NAME
+      default the folder to ACCOUNT_NAME {only useful with --page}
+    --uid=UID
+      default the message to UID {only useful with --page}
+""" % {"exec": sys.argv[0], "okPages": okPages}
+
 def main():
+  args = sys.argv
+  args.pop(0)
+
+  opts = {}
+  while len(args) > 0 and args[0].startswith("-"):
+    arg = args.pop(0)
+    pageMatch = re.match("^--page=(" + okPages + ")$", arg)
+    accountMatch = re.match("^--account=(\\w+)$", arg)
+    folderMatch = re.match("^--folder=(\\w+)$", arg)
+    uidMatch = re.match("^--uid=(\\w+)$", arg)
+    if pageMatch:
+      opts['page'] = pageMatch.group(1)
+    elif accountMatch:
+      opts['account'] = accountMatch.group(1)
+    elif folderMatch:
+      opts['folder'] = folderMatch.group(1)
+    elif uidMatch:
+      opts['uid'] = uidMatch.group(1)
+    else:
+      print >> sys.stderr, usage
+      sys.exit(2)
+  if len(args) > 0:
+    print >> sys.stderr, usage
+    sys.exit(2)
+
   issue = open('/etc/issue').read().strip().lower()
   platform = None
   if "harmattan" in issue:
@@ -47,6 +89,15 @@ def main():
   headerModel = HeaderModel()
   configModel = ConfigModel()
   controller = Controller(emailManager, accountModel, folderModel, headerModel, configModel)
+
+  if 'page' in opts:
+    controller.setInitialPageName(opts['page'])
+  if 'account' in opts:
+    controller.setAccountName(opts['account'])
+  if 'folder' in opts:
+    controller.setFolderName(opts['folder'])
+  if 'uid' in opts:
+    controller.setUid(opts['uid'])
 
   app = QApplication([])
   widget = MainWindow(qmlFile, controller, accountModel, folderModel, headerModel, configModel)
