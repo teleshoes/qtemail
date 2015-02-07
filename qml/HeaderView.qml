@@ -3,9 +3,38 @@ import QtQuick 1.1
 Rectangle {
   anchors.fill: parent
 
+  Rectangle {
+    id: searchBox
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: headerListView.top
+    width: parent.width
+    height: 30
+    border.width: 2
+    z: 10
+
+    TextInput {
+      anchors.margins: 2
+      id: searchTextBox
+      anchors.fill: parent
+      font.pointSize: 18
+      onTextChanged: {
+        controller.onSearchTextChanged(searchTextBox.text)
+      }
+    }
+  }
+
   ListView {
+    id: headerListView
+    anchors.bottom: parent.bottom
+    anchors.top: searchBox.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    width: parent.width
+    height: parent.height - searchBox.height
+
     spacing: 10
-    anchors.fill: parent
     model: headerModel
     delegate: Component  {
       Rectangle {
