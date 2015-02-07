@@ -122,20 +122,22 @@ PageStackWindow {
     ConfigView{ id: configView }
     // HACK TO HIDE KEYBOARD
     Btn {
-      id: hideKbBtn
       text: "push to hide keyboard"
       anchors.top: parent.bottom
       height: parent.anchors.bottomMargin
       width: parent.width
       onClicked: hideKbDummyEdit.closeSoftwareInputPanel();
     }
-    TextEdit {
-      id: hideKbDummyEdit
-      width: 0
-      height: 0
-    }
     // HACK TO HIDE KEYBOARD
   }
+
+  // HACK TO HIDE KEYBOARD
+  TextEdit {
+    id: hideKbDummyEdit
+    width: 0
+    height: 0
+  }
+  // HACK TO HIDE KEYBOARD
 
   // TOOLBAR
   ToolBarLayout {
