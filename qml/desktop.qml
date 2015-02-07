@@ -105,7 +105,7 @@ Rectangle {
     Rectangle {
       id: bodyPage
       objectName: "bodyPage"
-      property variant buttons: [backButton]
+      property variant buttons: [backButton, attachmentsButton]
       visible: false
       anchors.fill: parent
       anchors.margins: 30
@@ -169,6 +169,12 @@ Rectangle {
       id: folderButton
       text: "folders"
       onClicked: navToPage(folderPage)
+      visible: false
+    }
+    Btn {
+      id: attachmentsButton
+      text: "attach"
+      onClicked: controller.saveCurrentAttachments()
       visible: false
     }
   }

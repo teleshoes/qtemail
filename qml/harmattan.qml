@@ -114,7 +114,7 @@ PageStackWindow {
   Page {
     id: bodyPage
     objectName: "bodyPage"
-    property variant buttons: [backButton]
+    property variant buttons: [backButton, attachmentsButton]
     tools: toolBar
     anchors.margins: 30
 
@@ -223,6 +223,16 @@ PageStackWindow {
       }
       iconId: "toolbar-directory"
       onClicked: navToPage(folderPage)
+      visible: false
+    }
+    ToolIcon {
+      id: attachmentsButton
+      Text{
+        text: "attach"
+        anchors.horizontalCenter: parent.horizontalCenter
+      }
+      iconId: "icon-m-toolbar-attachment"
+      onClicked: controller.saveCurrentAttachments()
       visible: false
     }
   }
