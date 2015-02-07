@@ -48,6 +48,15 @@ PageStackWindow {
     }
   }
 
+  function onLinkActivated(link){
+    controller.shellCommand(""
+      + " /usr/bin/invoker --type=m "
+      + " /usr/bin/grob "
+      + " '" + link + "'"
+      + " >/dev/null 2>/dev/null"
+      )
+  }
+
   // ACCOUNT PAGE
   Page {
     id: accountPage

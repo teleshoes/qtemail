@@ -16,6 +16,7 @@ Flickable {
       id: bodyText
       anchors.fill: parent
       font.pointSize: 24
+      onLinkActivated: main.onLinkActivated(link)
     }
   }
 }

@@ -55,6 +55,10 @@ Rectangle {
     }
   }
 
+  function onLinkActivated(link){
+    Qt.openUrlExternally(link)
+  }
+
   Rectangle {
     anchors.top: parent.top
     anchors.left: parent.left
