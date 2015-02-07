@@ -199,10 +199,15 @@ class Controller(QObject):
     self.folderModel = folderModel
     self.headerModel = headerModel
     self.configModel = configModel
+    self.initialPageName = "account"
     self.accountName = None
     self.folderName = None
     self.uid = None
     self.threads = []
+
+  @Slot(QObject, str, result=QObject)
+  def findChild(self, obj, name):
+    return obj.findChild(QObject, name)
 
   @Slot()
   def setupAccounts(self):
@@ -243,6 +248,12 @@ class Controller(QObject):
   @Slot()
   def clearAccount(self):
     self.reset()
+
+  @Slot(result=str)
+  def getInitialPageName(self):
+    return self.initialPageName
+  def setInitialPageName(self, pageName):
+    self.initialPageName = pageName
 
   def setAccountName(self, accName):
     self.accountName = accName
