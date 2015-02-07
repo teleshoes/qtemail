@@ -237,6 +237,9 @@ class EmailManager():
   def getBody(self, accName, folderName, uid):
     return self.readProc(["email.pl", "--body-html",
       "--folder=" + folderName, accName, str(uid)])
+  def saveAttachments(self, accName, folderName, destDir, uid):
+    return self.readProc(["email.pl", "--attachments",
+      "--folder=" + folderName, accName, destDir, str(uid)])
   def readProc(self, cmdArr):
     process = subprocess.Popen(cmdArr, stdout=subprocess.PIPE)
     (stdout, _) = process.communicate()
@@ -403,6 +406,15 @@ class Controller(QObject):
     if self.uid != None:
       return self.emailManager.getBody(
         self.accountName, self.folderName, self.uid)
+    else:
+      return "MISSING UID"
+
+  @Slot(result=str)
+  def saveCurrentAttachments(self):
+    if self.uid != None:
+      destDir = os.getenv("HOME")
+      return self.emailManager.saveAttachments(
+        self.accountName, self.folderName, destDir, self.uid)
     else:
       return "MISSING UID"
 
