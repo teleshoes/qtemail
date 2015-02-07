@@ -95,7 +95,7 @@ PageStackWindow {
       anchors.top: parent.bottom
       height: parent.anchors.bottomMargin
       width: parent.width
-      onClicked: hideKbDummyEdit.closeSoftwareInputPanel();
+      onClicked: hideKb()
     }
     // HACK TO HIDE KEYBOARD
   }
@@ -135,12 +135,15 @@ PageStackWindow {
       anchors.top: parent.bottom
       height: parent.anchors.bottomMargin
       width: parent.width
-      onClicked: hideKbDummyEdit.closeSoftwareInputPanel();
+      onClicked: hideKb()
     }
     // HACK TO HIDE KEYBOARD
   }
 
   // HACK TO HIDE KEYBOARD
+  function hideKb(){
+    hideKbDummyEdit.closeSoftwareInputPanel()
+  }
   TextEdit {
     id: hideKbDummyEdit
     width: 0
