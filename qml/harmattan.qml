@@ -12,6 +12,7 @@ PageStackWindow {
     navToPage(controller.findChild(main, pageName + "Page"))
   }
   function navToPage(page){
+    hideKb()
     pageStack.push(page)
     curPage = pageStack.currentPage
     initPage()
