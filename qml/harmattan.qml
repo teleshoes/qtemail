@@ -89,6 +89,15 @@ PageStackWindow {
     }
 
     HeaderView{ id: headerView }
+    // HACK TO HIDE KEYBOARD
+    Btn {
+      text: "push to hide keyboard"
+      anchors.top: parent.bottom
+      height: parent.anchors.bottomMargin
+      width: parent.width
+      onClicked: hideKbDummyEdit.closeSoftwareInputPanel();
+    }
+    // HACK TO HIDE KEYBOARD
   }
 
   // BODY PAGE
