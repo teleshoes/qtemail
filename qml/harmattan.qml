@@ -5,9 +5,12 @@ PageStackWindow {
   id: main
 
   // NAVIGATION
-  Component.onCompleted: navToPage(accountPage)
+  Component.onCompleted: navToPageByName(controller.getInitialPageName())
   property variant curPage: null
 
+  function navToPageByName(pageName){
+    navToPage(controller.findChild(main, pageName + "Page"))
+  }
   function navToPage(page){
     pageStack.push(page)
     curPage = pageStack.currentPage
@@ -43,6 +46,7 @@ PageStackWindow {
   // ACCOUNT PAGE
   Page {
     id: accountPage
+    objectName: "accountPage"
     property variant buttons: [configButton, updateButton]
     tools: toolBar
     anchors.margins: 30
@@ -56,6 +60,7 @@ PageStackWindow {
   // FOLDER PAGE
   Page {
     id: folderPage
+    objectName: "folderPage"
     property variant buttons: [backButton]
     tools: toolBar
     anchors.margins: 30
@@ -70,6 +75,7 @@ PageStackWindow {
   // HEADER PAGE
   Page {
     id: headerPage
+    objectName: "headerPage"
     property variant buttons: [backButton, moreButton, configButton, folderButton]
     tools: toolBar
     anchors.margins: 30
@@ -84,6 +90,7 @@ PageStackWindow {
   // BODY PAGE
   Page {
     id: bodyPage
+    objectName: "bodyPage"
     property variant buttons: [backButton]
     tools: toolBar
     anchors.margins: 30
@@ -103,6 +110,7 @@ PageStackWindow {
   // CONFIG PAGE
   Page {
     id: configPage
+    objectName: "configPage"
     property variant buttons: [backButton, submitButton]
     tools: toolBar
     anchors.margins: 30

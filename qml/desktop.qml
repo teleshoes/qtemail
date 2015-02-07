@@ -5,9 +5,12 @@ Rectangle {
   width: 1; height: 1 //retarded hack to get resizing to work
 
   // NAVIGATION
-  Component.onCompleted: navToPage(accountPage)
+  Component.onCompleted: navToPageByName(controller.getInitialPageName())
   property variant curPage: null
 
+  function navToPageByName(pageName){
+    navToPage(controller.findChild(main, pageName + "Page"))
+  }
   function navToPage(page){
     accountPage.visible = false
     folderPage.visible = false
@@ -62,6 +65,7 @@ Rectangle {
     // ACCOUNT PAGE
     Rectangle {
       id: accountPage
+      objectName: "accountPage"
       property variant buttons: [configButton, updateButton]
       anchors.fill: parent
       visible: false
@@ -73,6 +77,7 @@ Rectangle {
     // FOLDER PAGE
     Rectangle {
       id: folderPage
+      objectName: "folderPage"
       property variant buttons: [backButton]
       anchors.fill: parent
       visible: false
@@ -84,6 +89,7 @@ Rectangle {
     // HEADER PAGE
     Rectangle {
       id: headerPage
+      objectName: "headerPage"
       property variant buttons: [backButton, moreButton, configButton, folderButton]
       anchors.fill: parent
       visible: false
@@ -94,6 +100,7 @@ Rectangle {
     // BODY PAGE
     Rectangle {
       id: bodyPage
+      objectName: "bodyPage"
       property variant buttons: [backButton]
       visible: false
       anchors.fill: parent
@@ -105,6 +112,7 @@ Rectangle {
     // CONFIG PAGE
     Rectangle {
       id: configPage
+      objectName: "configPage"
       property variant buttons: [backButton, submitButton]
       anchors.fill: parent
       visible: false
@@ -117,6 +125,7 @@ Rectangle {
   // TOOLBAR
   Row {
     id: toolBar
+    objectName: "toolBar"
     anchors.bottom: parent.bottom
     height: backButton.height
     width: parent.width
