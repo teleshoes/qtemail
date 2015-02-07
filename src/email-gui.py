@@ -201,7 +201,9 @@ class Controller(QObject):
     self.configModel = configModel
     self.accountName = None
     self.folderName = None
+    self.uid = None
     self.threads = []
+
   @Slot()
   def setupAccounts(self):
     self.accountModel.setItems(self.emailManager.getAccounts())
@@ -219,6 +221,7 @@ class Controller(QObject):
     config = self
     fields = self.emailManager.readAccountConfig(self.accountName)
     self.configModel.setItems(fields)
+
   @Slot(QObject, str)
   def updateConfigFieldValue(self, field, value):
     field.value_ = value
@@ -226,19 +229,32 @@ class Controller(QObject):
   def saveConfig(self):
     fields = self.configModel.getItems()
     self.emailManager.writeAccountConfig(fields)
+
   @Slot(QObject)
   def accountSelected(self, account):
-    print 'clicked acc: ', account.Name
-    self.accountName = account.Name
-    self.folderName = "inbox"
-  @Slot()
-  def clearAccount(self):
-    self.accountName = None
-    self.folderName = None
+    self.setAccountName(account.Name)
+    self.setFolderName("inbox")
   @Slot(QObject)
   def folderSelected(self, folder):
-    print 'clicked folder: ', folder.Name
-    self.folderName = folder.Name
+    self.setFolderName(folder.Name)
+  @Slot(QObject)
+  def headerSelected(self, header):
+    self.setUid(header.Uid)
+  @Slot()
+  def clearAccount(self):
+    self.reset()
+
+  def setAccountName(self, accName):
+    self.accountName = accName
+  def setFolderName(self, folderName):
+    self.folderName = folderName
+  def setUid(self, uid):
+    self.uid = uid
+  def reset(self):
+    self.setAccountName(None)
+    self.setFolderName(None)
+    self.setUid(None)
+
   @Slot(QObject, QObject, QObject)
   def updateAccount(self, updateIndicator, messageBox, account):
     if account == None:
@@ -264,6 +280,7 @@ class Controller(QObject):
     messageBox.scrollToBottom()
   def onUpdateAccountFinished(self, updateIndicator, account):
     self.setupAccounts()
+
   @Slot(QObject, QObject)
   def toggleRead(self, readIndicator, header):
     header.isLoading_ = True
@@ -277,17 +294,22 @@ class Controller(QObject):
     header.isLoading_ = False
     header.read_ = isRead
     readIndicator.updateColor()
+
   @Slot()
   def moreHeaders(self):
     headers = self.emailManager.fetchHeaders(
       self.accountName, self.folderName,
       limit=PAGE_MORE_SIZE, exclude=self.headerModel.getItems())
     self.headerModel.appendItems(headers)
-  @Slot(QObject, result=str)
-  def getBodyText(self, header):
-    print 'clicked uid:', str(header.uid_)
-    return self.emailManager.getBody(
-      self.accountName, self.folderName, header.uid_)
+
+  @Slot(result=str)
+  def getCurrentBodyText(self):
+    if self.uid != None:
+      return self.emailManager.getBody(
+        self.accountName, self.folderName, self.uid)
+    else:
+      return "MISSING UID"
+
   def startThread(self, thread):
     self.threads.append(thread)
     thread.finished.connect(lambda: self.cleanupThread(thread))
