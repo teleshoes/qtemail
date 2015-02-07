@@ -255,6 +255,8 @@ class Controller(QObject):
     self.folderName = None
     self.uid = None
     self.threads = []
+    self.currentHeaders = []
+    self.headerFilterRegex = None
 
   @Slot(QObject, str, result=QObject)
   def findChild(self, obj, name):
@@ -268,10 +270,11 @@ class Controller(QObject):
     self.folderModel.setItems(self.emailManager.getFolders(self.accountName))
   @Slot()
   def setupHeaders(self):
+    self.headerFilterRegex = None
     headers = self.emailManager.fetchHeaders(
       self.accountName, self.folderName,
       limit=PAGE_INITIAL_SIZE, exclude=[])
-    self.headerModel.setItems(headers)
+    self.setHeaders(headers)
   @Slot()
   def setupConfig(self):
     config = self
@@ -317,6 +320,29 @@ class Controller(QObject):
     self.setFolderName(None)
     self.setUid(None)
 
+  def filterHeader(self, header):
+    return (self.headerFilterRegex == None
+      or self.headerFilterRegex.search(header.subject_)
+      or self.headerFilterRegex.search(header.from_)
+      or self.headerFilterRegex.search(header.to_)
+    )
+  def setHeaderFilterRegex(self, regex):
+    self.headerFilterRegex = regex
+    self.setHeaders(self.currentHeaders)
+  def setHeaders(self, headers):
+    self.currentHeaders = headers
+    filteredHeaders = filter(self.filterHeader, headers)
+    if len(filteredHeaders) == 0:
+      self.headerModel.clear()
+    else:
+      self.headerModel.setItems(filteredHeaders)
+  def appendHeaders(self, headers):
+    self.currentHeaders += headers
+    filteredHeaders = filter(self.filterHeader, headers)
+    print "\n\n\n\n" + str(len(filteredHeaders)) + "\n"
+    if len(filteredHeaders) > 0:
+      self.headerModel.appendItems(filteredHeaders)
+
   @Slot(QObject, QObject, QObject)
   def updateAccount(self, updateIndicator, messageBox, account):
     if account == None:
@@ -361,8 +387,8 @@ class Controller(QObject):
   def moreHeaders(self):
     headers = self.emailManager.fetchHeaders(
       self.accountName, self.folderName,
-      limit=PAGE_MORE_SIZE, exclude=self.headerModel.getItems())
-    self.headerModel.appendItems(headers)
+      limit=PAGE_MORE_SIZE, exclude=self.currentHeaders)
+    self.appendHeaders(headers)
 
   @Slot(result=str)
   def getCurrentBodyText(self):
