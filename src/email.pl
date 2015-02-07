@@ -60,7 +60,7 @@ my $settings = {
 };
 
 my $okCmds = join "|", qw(
-  --update --header --body --body-html
+  --update --header --body --body-html --attachments
   --smtp
   --mark-read --mark-unread
   --accounts --folders --print --summary --unread-line
@@ -153,6 +153,10 @@ my $usage = "
 
   $0 --body-html [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but prefer HTML instead of plaintext
+
+  $0 --attachments [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_DIR UID [UID UID ...]
+    download the body of the indicated message(s) and save any attachments to DEST_DIR
+    if body is cached, skip download
 
   $0 --print [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers and bodies
@@ -380,14 +384,24 @@ sub main(@){
         print "$uid.$field: $$hdr{$field}\n";
       }
     }
-  }elsif($cmd =~ /^(--body|--body-html)$/){
+  }elsif($cmd =~ /^(--body|--body-html|--attachments)$/){
     my $folderName = "inbox";
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
       $folderName = $1;
       shift;
     }
     die $usage if @_ < 2;
-    my ($accName, @uids) = @_;
+    my ($accName, $destDir, @uids);
+    if($cmd =~ /^(--body|--body-html)/){
+      ($accName, @uids) = @_;
+      $destDir = "/tmp";
+      die $usage if not defined $accName or @uids == 0;
+    }elsif($cmd =~ /^(--attachments)$/){
+      ($accName, $destDir, @uids) = @_;
+      die $usage if not defined $accName or @uids == 0
+        or not defined $destDir or not -d $destDir;
+    }
+
     my $preferHtml = $cmd =~ /body-html/;
     my $acc = $$accounts{$accName};
     die "Unknown account $accName\n" if not defined $acc;
@@ -396,6 +410,7 @@ sub main(@){
     my $c;
     my $f;
     my $mimeParser = MIME::Parser->new();
+    $mimeParser->output_dir($destDir);
     for my $uid(@uids){
       my $body = readCachedBody($accName, $folderName, $uid);
       if(not defined $body){
@@ -413,9 +428,16 @@ sub main(@){
       if(not defined $body){
         die "No body found for $accName=>$folderName=>$uid\n";
       }
-      my $fmt = getBody($mimeParser, $body, $preferHtml);
-      chomp $fmt;
-      print "$fmt\n";
+      if($cmd =~ /^(--body|--body-html)/){
+        my $fmt = getBody($mimeParser, $body, $preferHtml);
+        chomp $fmt;
+        print "$fmt\n";
+      }elsif($cmd =~ /^(--attachments)$/){
+        my @attachments = writeAttachments($mimeParser, $body);
+        for my $attachment(@attachments){
+          print " saved att: $attachment\n";
+        }
+      }
     }
     $c->close() if defined $c;
     $c->logout() if defined $c;
