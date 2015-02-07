@@ -17,7 +17,11 @@ PageStackWindow {
     initPage()
   }
   function backPage(){
-    pageStack.pop()
+    if(pageStack.depth == 1){
+      pageStack.push(accountPage)
+    }else{
+      pageStack.pop()
+    }
     curPage = pageStack.currentPage
     initPage()
   }
