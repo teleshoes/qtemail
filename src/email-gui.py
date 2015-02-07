@@ -343,6 +343,10 @@ class Controller(QObject):
     if len(filteredHeaders) > 0:
       self.headerModel.appendItems(filteredHeaders)
 
+  @Slot(str)
+  def onSearchTextChanged(self, searchText):
+    self.setHeaderFilterRegex(re.compile(searchText.strip(), re.IGNORECASE))
+
   @Slot(QObject, QObject, QObject)
   def updateAccount(self, updateIndicator, messageBox, account):
     if account == None:
