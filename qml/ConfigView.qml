@@ -47,7 +47,7 @@ ListView {
         border.color: "#000000"
         border.width: 2
 
-        TextEdit {
+        TextInput {
           anchors.margins: 3
           id: edit
           text: model.config.Value
