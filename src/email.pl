@@ -27,6 +27,8 @@ sub cacheBodies($$$@);
 sub getBody($$$);
 sub hasWords($);
 sub parseBody($$);
+sub writeAttachments($$);
+sub parseAttachments($);
 sub getCachedHeaderUids($$);
 sub readCachedHeader($$$);
 sub openFolder($$$);
@@ -818,6 +820,35 @@ sub parseBody($$){
     }elsif($html and $type eq "text/html"){
       return ($entity->bodyhandle->as_string);
     }else{
+      return ();
+    }
+  }
+}
+
+sub writeAttachments($$){
+  my ($mimeParser, $bodyString) = @_;
+  my $mimeBody = $mimeParser->parse_data($bodyString);
+  my @attachments = parseAttachments($mimeBody);
+  return @attachments;
+}
+
+sub parseAttachments($){
+  my ($entity) = @_;
+  my $count = $entity->parts;
+  if($count > 0){
+    my @parts;
+    for(my $i=0; $i<$count; $i++){
+      my @subParts = parseAttachments($entity->parts($i - 1));
+      @parts = (@parts, @subParts);
+    }
+    return @parts;
+  }else{
+    my $path = $entity->bodyhandle ? $entity->bodyhandle->path : undef;
+    my $disposition = $entity->head->mime_attr('content-disposition');
+    if($disposition =~ /attachment/){
+      return ($path);
+    }else{
+      unlink $path or warn "WARNING: could not remove file: $path\n";
       return ();
     }
   }
