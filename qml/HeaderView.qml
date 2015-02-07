@@ -15,7 +15,7 @@ Rectangle {
         MouseArea {
           anchors.fill: parent
           onClicked: {
-            bodyView.setBody(controller.getBodyText(model.header))
+            controller.headerSelected(model.header)
             navToPage(bodyPage)
           }
         }

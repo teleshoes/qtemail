@@ -25,7 +25,6 @@ Rectangle {
           anchors.fill: parent
           onClicked: {
             controller.accountSelected(model.account)
-            controller.setupHeaders()
             navToPage(headerPage)
           }
         }

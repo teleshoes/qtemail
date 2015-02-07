@@ -29,8 +29,12 @@ PageStackWindow {
     if(curPage == accountPage){
       controller.clearAccount()
       controller.setupAccounts()
+    }else if(curPage == headerPage){
+      controller.setupHeaders()
     }else if(curPage == folderPage){
       controller.setupFolders()
+    }else if(curPage == bodyPage){
+      bodyView.setBody(controller.getCurrentBodyText())
     }else if(curPage == configPage){
       controller.setupConfig()
     }
