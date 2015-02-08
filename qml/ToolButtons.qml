@@ -4,9 +4,10 @@ Item {
   property variant pages: {
     "accountPage": ["config", "update"],
     "folderPage": ["back"],
-    "headerPage": ["back", "more", "wayMore", "all", "config", "folder"],
+    "headerPage": ["back", "more", "wayMore", "all", "config", "send", "folder"],
     "bodyPage": ["back", "attachments", "toggleHtml"],
-    "configPage": ["back", "submit"]
+    "configPage": ["back", "submit"],
+    "sendPage": ["back"],
   }
 
   function getButtons(){
@@ -28,6 +29,13 @@ Item {
       property variant text: "config"
       property variant iconName: "settings"
       onClicked: navToPage(configPage)
+    }
+    Item {
+      signal clicked
+      property variant name: "send"
+      property variant text: "send"
+      property variant iconName: "new-email"
+      onClicked: navToPage(sendPage)
     }
     Item {
       signal clicked

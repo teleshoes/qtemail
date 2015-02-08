@@ -49,6 +49,7 @@ PageStackWindow {
       controller.fetchCurrentBodyText(notifier, bodyView)
     }else if(curPage == configPage){
       controller.setupConfig()
+    }else if(curPage == sendPage){
     }
   }
 
@@ -121,6 +122,25 @@ PageStackWindow {
     anchors.margins: 30
 
     ConfigView{ id: configView }
+    // HACK TO HIDE KEYBOARD
+    Btn {
+      text: "push to hide keyboard"
+      anchors.top: parent.bottom
+      height: parent.anchors.bottomMargin
+      width: parent.width
+      onClicked: hideKb()
+    }
+    // HACK TO HIDE KEYBOARD
+  }
+
+  // CONFIG PAGE
+  Page {
+    id: sendPage
+    objectName: "sendPage"
+    tools: toolBar
+    anchors.margins: 30
+
+    SendView{ id: sendView }
     // HACK TO HIDE KEYBOARD
     Btn {
       text: "push to hide keyboard"

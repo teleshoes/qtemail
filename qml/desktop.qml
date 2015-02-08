@@ -17,6 +17,7 @@ Rectangle {
     headerPage.visible = false
     bodyPage.visible = false
     configPage.visible = false
+    sendPage.visible = false
 
     page.visible = true
     curPage = page
@@ -31,6 +32,8 @@ Rectangle {
       navToPage(headerPage);
     }else if(configPage.visible){
       navToPage(accountPage);
+    }else if(sendPage.visible){
+      navToPage(headerPage);
     }
   }
   function initPage(){
@@ -56,6 +59,7 @@ Rectangle {
       controller.fetchCurrentBodyText(notifier, bodyView)
     }else if(curPage == configPage){
       controller.setupConfig()
+    }else if(curPage == sendPage){
     }
   }
 
@@ -125,6 +129,17 @@ Rectangle {
       anchors.margins: 30
 
       ConfigView{ id: configView }
+    }
+
+    // SEND PAGE
+    Rectangle {
+      id: sendPage
+      objectName: "sendPage"
+      anchors.fill: parent
+      visible: false
+      anchors.margins: 30
+
+      SendView{ id: sendView }
     }
   }
 
