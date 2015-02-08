@@ -1,5 +1,6 @@
 import QtQuick 1.1
 import com.nokia.meego 1.1
+import com.nokia.extras 1.1
 
 PageStackWindow {
   id: main
@@ -42,7 +43,7 @@ PageStackWindow {
     }else if(curPage == folderPage){
       controller.setupFolders()
     }else if(curPage == bodyPage){
-      bodyView.setBody(controller.getCurrentBodyText())
+      bodyView.setBody(controller.getCurrentBodyText(main))
     }else if(curPage == configPage){
       controller.setupConfig()
     }
@@ -55,6 +56,15 @@ PageStackWindow {
       + " '" + link + "'"
       + " >/dev/null 2>/dev/null"
       )
+  }
+
+  // NOTIFY
+  function notify(text) {
+    infoBanner.text = "\n" + text
+    infoBanner.show();
+  }
+  InfoBanner {
+    id: infoBanner
   }
 
   // ACCOUNT PAGE
@@ -232,7 +242,7 @@ PageStackWindow {
         anchors.horizontalCenter: parent.horizontalCenter
       }
       iconId: "icon-m-toolbar-attachment"
-      onClicked: controller.saveCurrentAttachments()
+      onClicked: controller.saveCurrentAttachments(main)
       visible: false
     }
   }
