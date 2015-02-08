@@ -462,10 +462,16 @@ class Controller(QObject):
       messageBox.scrollToBottom()
 
   @Slot(QObject, int)
-  def moreHeaders(self, counterBox):
+  def moreHeaders(self, counterBox, percentage):
+    if percentage != None:
+      limit = int(self.totalSize * percentage / 100)
+    else:
+      limit = 0
+    if limit < PAGE_MORE_SIZE:
+      limit = PAGE_MORE_SIZE
     (total, headers) = self.emailManager.fetchHeaders(
       self.accountName, self.folderName,
-      limit=PAGE_MORE_SIZE, exclude=self.currentHeaders)
+      limit=limit, exclude=self.currentHeaders)
     self.curSize = len(self.currentHeaders) + len(headers)
     self.totalSize = total
     self.updateCounterBox(counterBox)
