@@ -29,7 +29,7 @@ Rectangle {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.bottom: headerListView.top
+    anchors.bottom: headerFlickable.top
     width: parent.width
     height: 30
     border.width: 2
