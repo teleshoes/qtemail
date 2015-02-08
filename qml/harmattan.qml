@@ -122,7 +122,7 @@ PageStackWindow {
   Page {
     id: bodyPage
     objectName: "bodyPage"
-    property variant buttons: [backButton, attachmentsButton]
+    property variant buttons: [backButton, toggleHtmlButton, attachmentsButton]
     tools: toolBar
     anchors.margins: 30
 
@@ -252,6 +252,24 @@ PageStackWindow {
       }
       iconId: "toolbar-directory"
       onClicked: navToPage(folderPage)
+      visible: false
+    }
+    ToolIcon {
+      id: toggleHtmlButton
+      Text{
+        id: toggleHtmlButtonTextArea
+        anchors.horizontalCenter: parent.horizontalCenter
+      }
+      iconId: "icon-m-toolbar-jump-to-dimmed-white"
+      Component.onCompleted: setIsHtml(controller.isHtml())
+      function setIsHtml(isHtml){
+        toggleHtmlButtonTextArea.text = isHtml ? "text" : "html"
+      }
+      onClicked: {
+        controller.toggleIsHtml()
+        setIsHtml(controller.isHtml())
+        controller.fetchCurrentBodyText(notifier, bodyView)
+      }
       visible: false
     }
     ToolIcon {

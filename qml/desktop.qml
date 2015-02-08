@@ -108,7 +108,7 @@ Rectangle {
     Rectangle {
       id: bodyPage
       objectName: "bodyPage"
-      property variant buttons: [backButton, attachmentsButton]
+      property variant buttons: [backButton, attachmentsButton, toggleHtmlButton]
       visible: false
       anchors.fill: parent
       anchors.margins: 30
@@ -184,6 +184,19 @@ Rectangle {
       id: folderButton
       text: "folders"
       onClicked: navToPage(folderPage)
+      visible: false
+    }
+    Btn {
+      id: toggleHtmlButton
+      Component.onCompleted: setIsHtml(controller.isHtml())
+      function setIsHtml(isHtml){
+        toggleHtmlButton.text = isHtml ? "text" : "html"
+      }
+      onClicked: {
+        controller.toggleIsHtml()
+        setIsHtml(controller.isHtml())
+        controller.fetchCurrentBodyText(notifier, bodyView)
+      }
       visible: false
     }
     Btn {
