@@ -7,6 +7,13 @@ Rectangle {
     bodyText.text = body
   }
 
+  PinchFlick{
+    anchors.fill: parent
+    pinch.minimumScale: 0.1
+    pinch.maximumScale: 10
+    pinch.target: bodyFlickable
+  }
+
   Flickable {
     id: bodyFlickable
     contentWidth: bodyText.paintedWidth

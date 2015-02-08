@@ -110,12 +110,6 @@ PageStackWindow {
     tools: toolBar
     anchors.margins: 30
 
-    PinchFlick{
-      anchors.fill: parent
-      pinch.minimumScale: 0.1
-      pinch.maximumScale: 10
-      pinch.target: bodyView
-    }
     BodyView{ id: bodyView }
   }
 
