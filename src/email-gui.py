@@ -270,8 +270,36 @@ class Controller(QObject):
 
   @Slot(QObject, QObject)
   def sendEmail(self, sendForm, notifier):
+    to = sendForm.getTo()
+    cc = sendForm.getCC()
+    bcc = sendForm.getBCC()
     subject = sendForm.getSubject()
-    print subject
+    body = sendForm.getBody()
+    if len(to) == 0:
+      notifier.notify("TO is empty\n")
+      return
+    if self.accountName == None:
+      notifier.notify("no FROM account selected\n")
+      return
+    firstTo = to.pop(0)
+
+    notifier.notify("sending...")
+    cmd = ["email.pl", "--smtp", self.accountName, subject, body, firstTo]
+    for email in to:
+      cmd += ["--to", email]
+    for email in cc:
+      cmd += ["--cc", email]
+    for email in bcc:
+      cmd += ["--bcc", email]
+
+    self.startEmailCommandThread(cmd, None,
+      self.onSendEmailFinished, {'notifier': notifier})
+  def onSendEmailFinished(self, isSuccess, output, extraArgs):
+    notifier = extraArgs['notifier']
+    if not isSuccess:
+      notifier.notify("\nFAILED\n\n" + output)
+    else:
+      notifier.notify("\nSUCCESS\n\n" + output)
 
   @Slot()
   def setupAccounts(self):
