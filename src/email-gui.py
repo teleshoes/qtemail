@@ -192,6 +192,7 @@ class EmailManager():
     uids = self.getUids(accName, folderName, "all")
     uids.sort()
     uids.reverse()
+    total = len(uids)
     if len(exclude) > 0:
       exUids = set(map(lambda header: header.uid_, exclude))
       uids = filter(lambda uid: uid not in exUids, uids)
@@ -202,7 +203,7 @@ class EmailManager():
     for uid in uids:
       header = self.getHeader(accName, folderName, uid, not uid in unread)
       headers.append(header)
-    return headers
+    return (total, headers)
   def getHeader(self, accName, folderName, uid, isRead):
     filePath = EMAIL_DIR + "/" + accName + "/" + folderName + "/" + "headers/" + str(uid)
     if not os.path.isfile(filePath):
@@ -272,12 +273,15 @@ class Controller(QObject):
   @Slot()
   def setupFolders(self):
     self.folderModel.setItems(self.emailManager.getFolders(self.accountName))
-  @Slot()
-  def setupHeaders(self):
+  @Slot(QObject)
+  def setupHeaders(self, counterBox):
     self.headerFilterRegex = None
-    headers = self.emailManager.fetchHeaders(
+    (total, headers) = self.emailManager.fetchHeaders(
       self.accountName, self.folderName,
       limit=PAGE_INITIAL_SIZE, exclude=[])
+    self.totalSize = total
+    self.curSize = len(headers)
+    self.updateCounterBox(counterBox)
     self.setHeaders(headers)
   @Slot()
   def setupConfig(self):
@@ -457,12 +461,18 @@ class Controller(QObject):
       messageBox.append(message)
       messageBox.scrollToBottom()
 
-  @Slot()
-  def moreHeaders(self):
-    headers = self.emailManager.fetchHeaders(
+  @Slot(QObject, int)
+  def moreHeaders(self, counterBox):
+    (total, headers) = self.emailManager.fetchHeaders(
       self.accountName, self.folderName,
       limit=PAGE_MORE_SIZE, exclude=self.currentHeaders)
+    self.curSize = len(self.currentHeaders) + len(headers)
+    self.totalSize = total
+    self.updateCounterBox(counterBox)
     self.appendHeaders(headers)
+  def updateCounterBox(self, counterBox):
+    counterBox.setCounterText(str(self.curSize) + " / " + str(self.totalSize))
+
 
 class EmailCommandThread(QThread):
   commandFinished = Signal(bool, str, object, list)
