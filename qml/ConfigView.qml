@@ -1,59 +1,63 @@
 import QtQuick 1.1
 
-ListView {
-  spacing: 3
+Rectangle {
   anchors.fill: parent
 
-  property real labelWidth: 0.30
-  property int fontSize: 16
+  ListView {
+    spacing: 3
+    anchors.fill: parent
 
-  model: configModel
+    property real labelWidth: 0.30
+    property int fontSize: 16
 
-  delegate: Rectangle {
-    property alias label: label.text
-    property alias value: edit.text
-    property string rowColor: index % 2 == 0 ? "#444444" : "#666666"
-    color: rowColor
+    model: configModel
 
-    height: fontSize * 2
-    width: parent.width
-
-    Rectangle {
-      id: labelContainer
-      width: parent.width * labelWidth
-      height: parent.height
+    delegate: Rectangle {
+      property alias label: label.text
+      property alias value: edit.text
+      property string rowColor: index % 2 == 0 ? "#444444" : "#666666"
       color: rowColor
-      anchors.margins: 2
 
-      Text {
-        id: label
-        anchors.fill: parent
-        text: model.config.FieldName
-        font.pointSize: fontSize
-      }
-    }
+      height: fontSize * 2
+      width: parent.width
 
-    Rectangle {
-      id: editContainer
-      anchors.left: labelContainer.right
-      width: parent.width * (1 - labelWidth)
-      height: parent.height
-      color: rowColor
       Rectangle {
-        anchors.centerIn: parent
-        width: parent.width - 4
-        height: parent.height - 4
-        color: "#FFFFFF"
-        border.color: "#000000"
-        border.width: 2
+        id: labelContainer
+        width: parent.width * labelWidth
+        height: parent.height
+        color: rowColor
+        anchors.margins: 2
 
-        TextInput {
-          anchors.margins: 3
-          id: edit
-          text: model.config.Value
+        Text {
+          id: label
           anchors.fill: parent
+          text: model.config.FieldName
           font.pointSize: fontSize
-          onTextChanged: controller.updateConfigFieldValue(model.config, edit.text)
+        }
+      }
+
+      Rectangle {
+        id: editContainer
+        anchors.left: labelContainer.right
+        width: parent.width * (1 - labelWidth)
+        height: parent.height
+        color: rowColor
+        Rectangle {
+          anchors.centerIn: parent
+          width: parent.width - 4
+          height: parent.height - 4
+          color: "#FFFFFF"
+          border.color: "#000000"
+          border.width: 2
+
+          TextInput {
+            anchors.margins: 3
+            id: edit
+            text: model.config.Value
+            anchors.fill: parent
+            font.pointSize: fontSize
+            onTextChanged: controller.updateConfigFieldValue(model.config, edit.text)
+          }
         }
       }
     }
