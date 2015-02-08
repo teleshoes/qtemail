@@ -438,13 +438,15 @@ class Controller(QObject):
       messageBox=messageBox,
       finishedAction=finishedAction,
       extraArgs=extraArgs)
-    thread.finished.connect(self.onFinished)
+    thread.finished.connect(lambda: self.onThreadFinished(thread))
+    thread.commandFinished.connect(self.onCommandFinished)
     thread.setMessage.connect(self.onSetMessage)
     thread.appendMessage.connect(self.onAppendMessage)
     self.threads.append(thread)
     thread.start()
-  def onFinished(self, isSuccess, output, thread, finishedAction, extraArgs):
+  def onThreadFinished(self, thread):
     self.threads.remove(thread)
+  def onCommandFinished(self, isSuccess, output, finishedAction, extraArgs):
     if finishedAction != None:
       finishedAction(isSuccess, output, extraArgs)
   def onSetMessage(self, messageBox, message):
@@ -463,7 +465,7 @@ class Controller(QObject):
     self.appendHeaders(headers)
 
 class EmailCommandThread(QThread):
-  finished = Signal(bool, str, QThread, object, list)
+  commandFinished = Signal(bool, str, object, list)
   setMessage = Signal(QObject, str)
   appendMessage = Signal(QObject, str)
   def __init__(self, command, messageBox=None, finishedAction=None, extraArgs=None):
@@ -489,7 +491,7 @@ class EmailCommandThread(QThread):
 
     self.appendMessage.emit(self.messageBox, status)
 
-    self.finished.emit(success, output, self, self.finishedAction, self.extraArgs)
+    self.commandFinished.emit(success, output, self.finishedAction, self.extraArgs)
 
 class BaseListModel(QAbstractListModel):
   def __init__(self):
