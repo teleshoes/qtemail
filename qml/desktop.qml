@@ -45,7 +45,7 @@ Rectangle {
       controller.clearAccount()
       controller.setupAccounts()
     }else if(curPage == headerPage){
-      controller.setupHeaders()
+      controller.setupHeaders(headerView)
     }else if(curPage == folderPage){
       controller.setupFolders()
     }else if(curPage == bodyPage){
@@ -165,7 +165,7 @@ Rectangle {
     Btn {
       id: moreButton
       text: "more"
-      onClicked: controller.moreHeaders()
+      onClicked: controller.moreHeaders(headerView)
       visible: false
     }
     Btn {

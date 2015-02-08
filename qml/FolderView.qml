@@ -13,7 +13,7 @@ ListView {
         anchors.fill: parent
         onClicked: {
           controller.folderSelected(model.folder)
-          controller.setupHeaders()
+          controller.setupHeaders(headerView)
           navToPage(headerPage)
         }
       }

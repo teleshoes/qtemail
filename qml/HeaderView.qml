@@ -3,6 +3,27 @@ import QtQuick 1.1
 Rectangle {
   anchors.fill: parent
 
+  function setCounterText(text){
+    counterTextArea.text = text
+  }
+
+  Rectangle {
+    id: counterBox
+    anchors.left: parent.left
+    anchors.right: parent.right
+    width: parent.width
+    height: 30
+    y: 0 - 30
+    z: 10
+
+    Text {
+      id: counterTextArea
+      anchors.margins: 5
+      anchors.right: parent.right
+      font.pointSize: 12
+    }
+  }
+
   Rectangle {
     id: searchBox
     anchors.top: parent.top

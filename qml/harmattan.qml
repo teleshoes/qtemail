@@ -39,7 +39,7 @@ PageStackWindow {
       controller.clearAccount()
       controller.setupAccounts()
     }else if(curPage == headerPage){
-      controller.setupHeaders()
+      controller.setupHeaders(headerView)
     }else if(curPage == folderPage){
       controller.setupFolders()
     }else if(curPage == bodyPage){
@@ -216,7 +216,7 @@ PageStackWindow {
         text: "more"
         anchors.horizontalCenter: parent.horizontalCenter
       }
-      onClicked: controller.moreHeaders()
+      onClicked: controller.moreHeaders(headerView)
       visible: false
     }
     ToolIcon {
