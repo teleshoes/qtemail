@@ -234,12 +234,6 @@ class EmailManager():
         hdrSubject = val
     isSent = folderName == "sent"
     return Header(uid, hdrDate, hdrFrom, hdrTo, hdrSubject, isSent, isRead, False)
-  def getBody(self, accName, folderName, uid):
-    return self.readProc(["email.pl", "--body-html",
-      "--folder=" + folderName, accName, str(uid)])
-  def saveAttachments(self, accName, folderName, destDir, uid):
-    return self.readProc(["email.pl", "--attachments",
-      "--folder=" + folderName, accName, destDir, str(uid)])
   def readProc(self, cmdArr):
     process = subprocess.Popen(cmdArr, stdout=subprocess.PIPE)
     (stdout, _) = process.communicate()
@@ -399,6 +393,42 @@ class Controller(QObject):
       header.read_ = not header.read_
     indicator.updateColor()
 
+  @Slot(QObject, QObject)
+  def fetchCurrentBodyText(self, notifier, bodyBox):
+    bodyBox.setBody("...loading body")
+    if self.uid == None:
+      notifier.notify("MISSING UID")
+      return
+
+    cmd = ["email.pl", "--body-html",
+      "--folder=" + self.folderName, self.accountName, str(self.uid)]
+
+    self.startEmailCommandThread(cmd, None,
+      lambda isSuccess, output: self.onFetchCurrentBodyTextFinished(isSuccess, output, bodyBox))
+  def onFetchCurrentBodyTextFinished(self, isSuccess, output, bodyBox):
+    if isSuccess:
+      bodyBox.setBody(output)
+    else:
+      bodyBox.setBody("ERROR FETCHING BODY\n")
+
+  @Slot(QObject)
+  def saveCurrentAttachments(self, notifier):
+    if self.uid == None:
+      notifier.notify("MISSING UID")
+      return
+
+    destDir = os.getenv("HOME")
+    cmd = ["email.pl", "--attachments",
+      "--folder=" + self.folderName, self.accountName, destDir, str(self.uid)]
+
+    self.startEmailCommandThread(cmd, None,
+      lambda isSuccess, output: self.onSaveCurrentAttachmentsFinished(isSuccess, output, notifier))
+  def onSaveCurrentAttachmentsFinished(self, isSuccess, output, notifier):
+    if isSuccess:
+      notifier.notify("saved attachments\n" + output)
+    else:
+      notifier.notify("ERROR: saving attachments failed\n")
+
   def startEmailCommandThread(self, command, messageBox, finishedAction):
     thread = EmailCommandThread(
       command=command,
@@ -427,24 +457,6 @@ class Controller(QObject):
       self.accountName, self.folderName,
       limit=PAGE_MORE_SIZE, exclude=self.currentHeaders)
     self.appendHeaders(headers)
-
-  @Slot(QObject, result=str)
-  def getCurrentBodyText(self, notifier):
-    if self.uid != None:
-      return self.emailManager.getBody(
-        self.accountName, self.folderName, self.uid)
-    else:
-      notifier.notify("MISSING UID")
-
-  @Slot(QObject, result=str)
-  def saveCurrentAttachments(self, notifier):
-    if self.uid != None:
-      destDir = os.getenv("HOME")
-      self.emailManager.saveAttachments(
-        self.accountName, self.folderName, destDir, self.uid)
-      notifier.notify('attachments saved')
-    else:
-      return "MISSING UID"
 
 class EmailCommandThread(QThread):
   finished = Signal(bool, str, QThread, object)
