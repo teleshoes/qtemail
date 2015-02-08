@@ -261,9 +261,12 @@ class Controller(QObject):
     self.currentHeaders = []
     self.headerFilterRegex = None
 
+  @Slot('QVariantList')
+  def runCommand(self, cmdArr):
+    subprocess.Popen(cmdArr)
   @Slot(str)
-  def shellCommand(self, cmd):
-    subprocess.Popen(['sh', '-c', cmd])
+  def shellCommand(self, cmdStr):
+    subprocess.Popen(['sh', '-c', cmdStr])
 
   @Slot(QObject, str, result=QObject)
   def findChild(self, obj, name):
