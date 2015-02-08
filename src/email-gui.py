@@ -368,8 +368,8 @@ class Controller(QObject):
       cmd.append(account.Name)
 
     self.startEmailCommandThread(cmd, messageBox,
-      lambda isSuccess, output: self.onUpdateAccountFinished(isSuccess, output))
-  def onUpdateAccountFinished(self, isSuccess, output):
+      self.onUpdateAccountFinished, {})
+  def onUpdateAccountFinished(self, isSuccess, output, extraArgs):
     self.setupAccounts()
 
   @Slot(QObject, QObject)
@@ -384,9 +384,11 @@ class Controller(QObject):
     cmd = ["email.pl", arg,
       "--folder=" + self.folderName, self.accountName, str(header.uid_)]
 
-    self.startEmailCommandThread(cmd, None, self.onToggleReadFinished,
-      lambda isSuccess, output: self.onToggleReadFinished(isSuccess, output, indicator, header))
-  def onToggleReadFinished(self, isSuccess, output, indicator, header):
+    self.startEmailCommandThread(cmd, None,
+      self.onToggleReadFinished, {'indicator': indicator, 'header': header})
+  def onToggleReadFinished(self, isSuccess, output, extraArgs):
+    indicator = extraArgs['indicator']
+    header = extraArgs['header']
     header.isLoading_ = False
     if isSuccess:
       header.read_ = not header.read_
@@ -403,8 +405,9 @@ class Controller(QObject):
       "--folder=" + self.folderName, self.accountName, str(self.uid)]
 
     self.startEmailCommandThread(cmd, None,
-      lambda isSuccess, output: self.onFetchCurrentBodyTextFinished(isSuccess, output, bodyBox))
-  def onFetchCurrentBodyTextFinished(self, isSuccess, output, bodyBox):
+      self.onFetchCurrentBodyTextFinished, {'bodyBox': bodyBox})
+  def onFetchCurrentBodyTextFinished(self, isSuccess, output, extraArgs):
+    bodyBox = extraArgs['bodyBox']
     if isSuccess:
       bodyBox.setBody(output)
     else:
@@ -421,27 +424,29 @@ class Controller(QObject):
       "--folder=" + self.folderName, self.accountName, destDir, str(self.uid)]
 
     self.startEmailCommandThread(cmd, None,
-      lambda isSuccess, output: self.onSaveCurrentAttachmentsFinished(isSuccess, output, notifier))
-  def onSaveCurrentAttachmentsFinished(self, isSuccess, output, notifier):
+      self.onSaveCurrentAttachmentsFinished, {'notifier': notifier})
+  def onSaveCurrentAttachmentsFinished(self, isSuccess, output, extraArgs):
+    notifier = extraArgs['notifier']
     if isSuccess:
       notifier.notify("saved attachments\n" + output)
     else:
       notifier.notify("ERROR: saving attachments failed\n")
 
-  def startEmailCommandThread(self, command, messageBox, finishedAction):
+  def startEmailCommandThread(self, command, messageBox, finishedAction, extraArgs):
     thread = EmailCommandThread(
       command=command,
       messageBox=messageBox,
-      finishedAction=finishedAction)
+      finishedAction=finishedAction,
+      extraArgs=extraArgs)
     thread.finished.connect(self.onFinished)
     thread.setMessage.connect(self.onSetMessage)
     thread.appendMessage.connect(self.onAppendMessage)
     self.threads.append(thread)
     thread.start()
-  def onFinished(self, isSuccess, output, thread, finishedAction):
+  def onFinished(self, isSuccess, output, thread, finishedAction, extraArgs):
     self.threads.remove(thread)
     if finishedAction != None:
-      finishedAction(isSuccess, output)
+      finishedAction(isSuccess, output, extraArgs)
   def onSetMessage(self, messageBox, message):
     if messageBox != None:
       messageBox.setText(message)
@@ -458,14 +463,15 @@ class Controller(QObject):
     self.appendHeaders(headers)
 
 class EmailCommandThread(QThread):
-  finished = Signal(bool, str, QThread, object)
+  finished = Signal(bool, str, QThread, object, list)
   setMessage = Signal(QObject, str)
   appendMessage = Signal(QObject, str)
-  def __init__(self, command, messageBox=None, finishedAction=None):
+  def __init__(self, command, messageBox=None, finishedAction=None, extraArgs=None):
     QThread.__init__(self)
     self.command = command
     self.messageBox = messageBox
     self.finishedAction = finishedAction
+    self.extraArgs = extraArgs
   def run(self):
     proc = subprocess.Popen(self.command, stdout=subprocess.PIPE)
     output = ""
@@ -483,7 +489,7 @@ class EmailCommandThread(QThread):
 
     self.appendMessage.emit(self.messageBox, status)
 
-    self.finished.emit(success, output, self, self.finishedAction)
+    self.finished.emit(success, output, self, self.finishedAction, self.extraArgs)
 
 class BaseListModel(QAbstractListModel):
   def __init__(self):
