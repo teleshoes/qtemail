@@ -355,7 +355,7 @@ class Controller(QObject):
     self.setHeaderFilterRegex(re.compile(searchText.strip(), re.IGNORECASE))
 
   @Slot(QObject, QObject, QObject)
-  def updateAccount(self, updateIndicator, messageBox, account):
+  def updateAccount(self, indicator, messageBox, account):
     if account == None:
       accMsg = "ALL ACCOUNTS"
     else:
@@ -364,35 +364,59 @@ class Controller(QObject):
 
     if account != None:
       account.isLoading_ = True
-    if updateIndicator != None:
-      updateIndicator.updateColor()
+    if indicator != None:
+      indicator.updateColor()
 
-    thread = UpdateThread(updateIndicator, messageBox, account)
-    thread.updateFinished.connect(self.onUpdateAccountFinished)
-    thread.setMessage.connect(self.onSetMessage)
-    thread.appendMessage.connect(self.onAppendMessage)
-    self.startThread(thread)
-  def onSetMessage(self, messageBox, message):
-    messageBox.setText(message)
-  def onAppendMessage(self, messageBox, message):
-    messageBox.append(message)
-    messageBox.scrollToBottom()
-  def onUpdateAccountFinished(self, updateIndicator, account):
+    cmd = ["email.pl", "--update"]
+    if account != None:
+      cmd.append(account.Name)
+
+    self.startEmailCommandThread(cmd, messageBox,
+      lambda isSuccess: self.onUpdateAccountFinished(isSuccess))
+  def onUpdateAccountFinished(self, isSuccess):
     self.setupAccounts()
 
   @Slot(QObject, QObject)
-  def toggleRead(self, readIndicator, header):
+  def toggleRead(self, indicator, header):
     header.isLoading_ = True
-    readIndicator.updateColor()
+    indicator.updateColor()
 
-    thread = ToggleReadThread(readIndicator,
-      self.accountName, self.folderName, header)
-    thread.toggleReadFinished.connect(self.onToggleReadFinished)
-    self.startThread(thread)
-  def onToggleReadFinished(self, readIndicator, header, isRead):
+    if header.read_:
+      arg = "--mark-unread"
+    else:
+      arg = "--mark-read"
+    cmd = ["email.pl", arg,
+      "--folder=" + self.folderName, self.accountName, str(header.uid_)]
+
+    self.startEmailCommandThread(cmd, None,
+      lambda isSuccess: self.onToggleReadFinished(isSuccess, indicator, header))
+  def onToggleReadFinished(self, isSuccess, indicator, header):
     header.isLoading_ = False
-    header.read_ = isRead
-    readIndicator.updateColor()
+    if isSuccess:
+      header.read_ = not header.read_
+    indicator.updateColor()
+
+  def startEmailCommandThread(self, command, messageBox, finishedAction):
+    thread = EmailCommandThread(
+      command=command,
+      messageBox=messageBox,
+      finishedAction=finishedAction)
+    thread.finished.connect(self.onFinished)
+    thread.setMessage.connect(self.onSetMessage)
+    thread.appendMessage.connect(self.onAppendMessage)
+    self.threads.append(thread)
+    thread.start()
+  def onFinished(self, isSuccess, thread, finishedAction):
+    self.threads.remove(thread)
+    if finishedAction != None:
+      finishedAction(isSuccess)
+  def onSetMessage(self, messageBox, message):
+    if messageBox != None:
+      messageBox.setText(message)
+  def onAppendMessage(self, messageBox, message):
+    if messageBox != None:
+      messageBox.append(message)
+      messageBox.scrollToBottom()
 
   @Slot()
   def moreHeaders(self):
@@ -418,58 +442,31 @@ class Controller(QObject):
     else:
       return "MISSING UID"
 
-  def startThread(self, thread):
-    self.threads.append(thread)
-    thread.finished.connect(lambda: self.cleanupThread(thread))
-    thread.start()
-  def cleanupThread(self, thread):
-    self.threads.remove(thread)
-
-class UpdateThread(QThread):
-  updateFinished = Signal(QObject, QObject)
+class EmailCommandThread(QThread):
+  finished = Signal(bool, QThread, object)
   setMessage = Signal(QObject, str)
   appendMessage = Signal(QObject, str)
-  def __init__(self, updateIndicator, messageBox, account):
+  def __init__(self, command, messageBox=None, finishedAction=None):
     QThread.__init__(self)
-    self.updateIndicator = updateIndicator
+    self.command = command
     self.messageBox = messageBox
-    self.account = account
+    self.finishedAction = finishedAction
   def run(self):
-    cmd = ["email.pl", "--update"]
-    if self.account != None:
-      cmd.append(self.account.Name)
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    proc = subprocess.Popen(self.command, stdout=subprocess.PIPE)
     for line in iter(proc.stdout.readline,''):
       self.appendMessage.emit(self.messageBox, line)
     proc.wait()
-    if proc.returncode == 0:
-      self.appendMessage.emit(self.messageBox, "SUCCESS\n")
-    else:
-      self.appendMessage.emit(self.messageBox, "FAILURE\n")
-    self.updateFinished.emit(self.updateIndicator, self.account)
 
-class ToggleReadThread(QThread):
-  toggleReadFinished = Signal(QObject, QObject, bool)
-  def __init__(self, readIndicator, accountName, folderName, header):
-    QThread.__init__(self)
-    self.readIndicator = readIndicator
-    self.accountName = accountName
-    self.folderName = folderName
-    self.header = header
-  def run(self):
-    wasRead = self.header.Read
-    if wasRead:
-      arg = "--mark-unread"
+    if proc.returncode == 0:
+      success = True
+      status = "SUCCESS\n"
     else:
-      arg = "--mark-read"
-    cmd = ["email.pl", arg,
-      "--folder=" + self.folderName, self.accountName, str(self.header.uid_)]
-    exitCode = subprocess.call(cmd)
-    if exitCode == 0:
-      isRead = not wasRead
-    else:
-      isRead = wasRead
-    self.toggleReadFinished.emit(self.readIndicator, self.header, isRead)
+      success = False
+      status = "FAILURE\n"
+
+    self.appendMessage.emit(self.messageBox, status)
+
+    self.finished.emit(success, self, self.finishedAction)
 
 class BaseListModel(QAbstractListModel):
   def __init__(self):
