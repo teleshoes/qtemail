@@ -49,7 +49,7 @@ Rectangle {
     }else if(curPage == folderPage){
       controller.setupFolders()
     }else if(curPage == bodyPage){
-      controller.fetchCurrentBodyText(main, bodyView)
+      controller.fetchCurrentBodyText(notifier, bodyView)
     }else if(curPage == configPage){
       controller.setupConfig()
     }
@@ -59,10 +59,8 @@ Rectangle {
     Qt.openUrlExternally(link)
   }
 
-  // NOTIFY
-  function notify(text) {
-    controller.runCommand(['notify-send', text])
-  }
+  // NOTIFIER
+  Notifier { id: notifier }
 
   Rectangle {
     anchors.top: parent.top
@@ -179,7 +177,7 @@ Rectangle {
     Btn {
       id: attachmentsButton
       text: "attach"
-      onClicked: controller.saveCurrentAttachments(main)
+      onClicked: controller.saveCurrentAttachments(notifier)
       visible: false
     }
   }

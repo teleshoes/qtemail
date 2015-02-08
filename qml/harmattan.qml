@@ -43,7 +43,7 @@ PageStackWindow {
     }else if(curPage == folderPage){
       controller.setupFolders()
     }else if(curPage == bodyPage){
-      controller.fetchCurrentBodyText(main, bodyView)
+      controller.fetchCurrentBodyText(notifier, bodyView)
     }else if(curPage == configPage){
       controller.setupConfig()
     }
@@ -58,14 +58,8 @@ PageStackWindow {
       )
   }
 
-  // NOTIFY
-  function notify(text) {
-    infoBanner.text = "\n" + text
-    infoBanner.show();
-  }
-  InfoBanner {
-    id: infoBanner
-  }
+  // NOTIFIER
+  Notifier { id: notifier }
 
   // ACCOUNT PAGE
   Page {
@@ -242,7 +236,7 @@ PageStackWindow {
         anchors.horizontalCenter: parent.horizontalCenter
       }
       iconId: "icon-m-toolbar-attachment"
-      onClicked: controller.saveCurrentAttachments(main)
+      onClicked: controller.saveCurrentAttachments(notifier)
       visible: false
     }
   }
