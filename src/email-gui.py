@@ -399,6 +399,18 @@ class Controller(QObject):
       header.read_ = not header.read_
     indicator.updateColor()
 
+  @Slot(result=bool)
+  def isHtml(self):
+    return self.htmlMode
+
+  @Slot()
+  def toggleIsHtml(self):
+    self.htmlMode = not self.htmlMode
+    if self.htmlMode:
+      text = "text"
+    else:
+      text = "html"
+
   @Slot(QObject, QObject)
   def fetchCurrentBodyText(self, notifier, bodyBox):
     bodyBox.setBody("...loading body")
