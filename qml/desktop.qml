@@ -97,7 +97,7 @@ Rectangle {
     Rectangle {
       id: headerPage
       objectName: "headerPage"
-      property variant buttons: [backButton, moreButton, configButton, folderButton]
+      property variant buttons: [backButton, moreButton, wayMoreButton, allButton, configButton, folderButton]
       anchors.fill: parent
       visible: false
       anchors.margins: 30
@@ -164,8 +164,20 @@ Rectangle {
     }
     Btn {
       id: moreButton
-      text: "more"
-      onClicked: controller.moreHeaders(headerView)
+      text: "some\nmore"
+      onClicked: controller.moreHeaders(headerView, 0)
+      visible: false
+    }
+    Btn {
+      id: wayMoreButton
+      text: "30%\nmore"
+      onClicked: controller.moreHeaders(headerView, 30)
+      visible: false
+    }
+    Btn {
+      id: allButton
+      text: "all"
+      onClicked: controller.moreHeaders(headerView, 100)
       visible: false
     }
     Btn {

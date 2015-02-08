@@ -94,7 +94,7 @@ PageStackWindow {
   Page {
     id: headerPage
     objectName: "headerPage"
-    property variant buttons: [backButton, moreButton, configButton, folderButton]
+    property variant buttons: [backButton, moreButton, wayMoreButton, allButton, configButton, folderButton]
     tools: toolBar
     anchors.margins: 30
 
@@ -216,7 +216,27 @@ PageStackWindow {
         text: "more"
         anchors.horizontalCenter: parent.horizontalCenter
       }
-      onClicked: controller.moreHeaders(headerView)
+      onClicked: controller.moreHeaders(headerView, 0)
+      visible: false
+    }
+    ToolIcon {
+      id: wayMoreButton
+      iconId: "toolbar-down"
+      Text{
+        text: "+30%"
+        anchors.horizontalCenter: parent.horizontalCenter
+      }
+      onClicked: controller.moreHeaders(headerView, 30)
+      visible: false
+    }
+    ToolIcon {
+      id: allButton
+      iconId: "toolbar-down"
+      Text{
+        text: "all"
+        anchors.horizontalCenter: parent.horizontalCenter
+      }
+      onClicked: controller.moreHeaders(headerView, 100)
       visible: false
     }
     ToolIcon {
