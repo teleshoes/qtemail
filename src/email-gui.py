@@ -268,6 +268,11 @@ class Controller(QObject):
   def findChild(self, obj, name):
     return obj.findChild(QObject, name)
 
+  @Slot(QObject, QObject)
+  def sendEmail(self, sendForm, notifier):
+    subject = sendForm.getSubject()
+    print subject
+
   @Slot()
   def setupAccounts(self):
     self.accountModel.setItems(self.emailManager.getAccounts())
