@@ -867,7 +867,7 @@ sub parseAttachments($){
   }else{
     my $path = $entity->bodyhandle ? $entity->bodyhandle->path : undef;
     my $disposition = $entity->head->mime_attr('content-disposition');
-    if($disposition =~ /attachment/){
+    if(defined $disposition and $disposition =~ /attachment/){
       return ($path);
     }else{
       unlink $path or warn "WARNING: could not remove file: $path\n";
