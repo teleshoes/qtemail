@@ -115,5 +115,6 @@ Rectangle {
         }
       }
     }
+    clip: true
   }
 }
