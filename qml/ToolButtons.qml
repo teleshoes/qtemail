@@ -7,7 +7,7 @@ Item {
     "headerPage": ["back", "more", "wayMore", "all", "config", "send", "folder"],
     "bodyPage": ["back", "attachments", "toggleHtml"],
     "configPage": ["back", "submit"],
-    "sendPage": ["back"],
+    "sendPage": ["back", "sendEmail"],
   }
 
   function getButtons(){
@@ -33,9 +33,16 @@ Item {
     Item {
       signal clicked
       property variant name: "send"
-      property variant text: "send"
+      property variant text: "write"
       property variant iconName: "new-email"
       onClicked: navToPage(sendPage)
+    }
+    Item {
+      signal clicked
+      property variant name: "sendEmail"
+      property variant text: "send"
+      property variant iconName: "done"
+      onClicked: controller.sendEmail(sendView.getForm(), notifier)
     }
     Item {
       signal clicked

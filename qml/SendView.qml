@@ -1,15 +1,28 @@
 import QtQuick 1.1
 
 Rectangle {
+  id: sendView
   anchors.fill: parent
 
-  function getValues(){
-    return {
-      "to": to.getEmails(),
-      "cc": cc.getEmails(),
-      "bcc": bcc.getEmails(),
-      "subject": subject.value,
-      "body": body.value,
+  function getForm(){
+    return form
+  }
+  Item {
+    id: form
+    function getTo(){
+      return to.getEmails()
+    }
+    function getCC(){
+      return cc.getEmails()
+    }
+    function getBCC(){
+      return bcc.getEmails()
+    }
+    function getSubject(){
+      return subject.value
+    }
+    function getBody(){
+      return body.value
     }
   }
 
