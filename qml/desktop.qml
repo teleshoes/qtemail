@@ -61,7 +61,7 @@ Rectangle {
 
   // NOTIFY
   function notify(text) {
-    controller.shellCommand('notify-send ' + text)
+    controller.runCommand(['notify-send', text])
   }
 
   Rectangle {
