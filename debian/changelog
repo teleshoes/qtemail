@@ -1,3 +1,9 @@
+qtemail (0.0.6) UNRELEASED; urgency=low
+  * Display attachment names in body
+  * Add button to download attachments
+  * Make body URLs clickable
+ -- teleshoes <elliot.wolk@gmail.com>  Sat, 07 Feb 2015 21:54:56 -0500
+
 qtemail (0.0.5) UNRELEASED; urgency=low
   * Email searchbox filter
   * Command line options for email-gui
