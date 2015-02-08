@@ -343,7 +343,6 @@ class Controller(QObject):
   def appendHeaders(self, headers):
     self.currentHeaders += headers
     filteredHeaders = filter(self.filterHeader, headers)
-    print "\n\n\n\n" + str(len(filteredHeaders)) + "\n"
     if len(filteredHeaders) > 0:
       self.headerModel.appendItems(filteredHeaders)
 
