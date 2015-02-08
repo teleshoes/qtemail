@@ -3,12 +3,8 @@ import QtQuick 1.1
 Rectangle {
   anchors.fill: parent
 
-  function getFlickable(){
-    return folderListView
-  }
-
   ListView {
-    id: folderListView
+    id: folderFlickable
     spacing: 50
     anchors.fill: parent
     model: folderModel
@@ -32,5 +28,10 @@ Rectangle {
         }
       }
     }
+  }
+
+  ScrollBar{
+    flickable: folderFlickable
+    anchors.rightMargin: 0 - 30
   }
 }

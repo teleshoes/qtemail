@@ -4,6 +4,7 @@ Rectangle {
   anchors.fill: parent
 
   ListView {
+    id: configFlickable
     spacing: 3
     anchors.fill: parent
 
@@ -61,5 +62,10 @@ Rectangle {
         }
       }
     }
+  }
+
+  ScrollBar{
+    flickable: configFlickable
+    anchors.rightMargin: 0 - 30
   }
 }

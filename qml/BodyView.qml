@@ -8,6 +8,7 @@ Rectangle {
   }
 
   Flickable {
+    id: bodyFlickable
     contentWidth: bodyText.paintedWidth
     contentHeight: bodyText.paintedHeight
     anchors.fill: parent
@@ -23,5 +24,10 @@ Rectangle {
         onLinkActivated: main.onLinkActivated(link)
       }
     }
+  }
+
+  ScrollBar{
+    flickable: bodyFlickable
+    anchors.rightMargin: 0 - 30
   }
 }

@@ -3,10 +3,6 @@ import QtQuick 1.1
 Rectangle {
   anchors.fill: parent
 
-  function getFlickable(){
-    return headerListView
-  }
-
   function setCounterText(text){
     counterTextArea.text = text
   }
@@ -51,7 +47,7 @@ Rectangle {
   }
 
   ListView {
-    id: headerListView
+    id: headerFlickable
     anchors.bottom: parent.bottom
     anchors.top: searchBox.bottom
     anchors.left: parent.left
@@ -116,5 +112,10 @@ Rectangle {
       }
     }
     clip: true
+  }
+
+  ScrollBar{
+    flickable: headerFlickable
+    anchors.rightMargin: -30
   }
 }

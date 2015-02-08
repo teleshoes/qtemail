@@ -3,15 +3,12 @@ import QtQuick 1.1
 Rectangle {
   anchors.fill: parent
 
-  function getFlickable(){
-    return accountListView
-  }
-
   function updateAllAccounts(){
     controller.updateAccount(null, messageBox, null)
   }
+
   ListView {
-    id: accountListView
+    id: accountFlickable
     spacing: 15
     width: parent.width
     height: parent.height * 0.70
@@ -111,5 +108,10 @@ Rectangle {
         text: "CONSOLE OUTPUT\n"
       }
     }
+  }
+
+  ScrollBar {
+    flickable: accountFlickable
+    anchors.rightMargin: -30
   }
 }
