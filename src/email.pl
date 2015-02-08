@@ -25,9 +25,8 @@ sub writeUidFile($$$@);
 sub cacheAllHeaders($$$);
 sub cacheBodies($$$@);
 sub getBody($$$);
-sub hasWords($);
-sub parseBody($$);
 sub writeAttachments($$);
+sub parseMimeEntity($);
 sub parseAttachments($);
 sub getCachedHeaderUids($$);
 sub readCachedHeader($$$);
@@ -38,6 +37,7 @@ sub formatHeaderField($$);
 sub formatDate($);
 sub getFolderName($);
 sub parseFolders($);
+sub hasWords($);
 sub readSecrets();
 sub validateSecrets($);
 sub modifySecrets($$);
@@ -807,72 +807,66 @@ sub getBody($$$){
   my ($mimeParser, $bodyString, $preferHtml) = @_;
   my $mimeBody = $mimeParser->parse_data($bodyString);
 
+  my @parts = parseMimeEntity($mimeBody);
+  my @text = map {$_->{handle}} grep {$_->{partType} eq "text"} @parts;
+  my @html = map {$_->{handle}} grep {$_->{partType} eq "html"} @parts;
+
+  my $body = "";
   for my $isHtml($preferHtml ? (1, 0) : (0, 1)){
-    my $fmt = join "\n", parseBody($mimeBody, $isHtml);
+    my @strings = map {$_->as_string} ($isHtml ? @html : @text);
+    my $fmt = join "\n", @strings;
     if(hasWords $fmt){
-      $mimeParser->filer->purge;
-      return $fmt;
+      $body .= $fmt;
+      last;
     }
   }
 
   $mimeParser->filer->purge;
-  return undef;
-}
-
-sub hasWords($){
-  my $msg = shift;
-  $msg =~ s/\W+//g;
-  return length($msg) > 0;
-}
-
-sub parseBody($$){
-  my ($entity, $html) = @_;
-  my $count = $entity->parts;
-  if($count > 0){
-    my @parts;
-    for(my $i=0; $i<$count; $i++){
-      my @subParts = parseBody($entity->parts($i - 1), $html);
-      @parts = (@parts, @subParts);
-    }
-    return @parts;
-  }else{
-    my $type = $entity->effective_type;
-    if(not $html and $type eq "text/plain"){
-      return ($entity->bodyhandle->as_string);
-    }elsif($html and $type eq "text/html"){
-      return ($entity->bodyhandle->as_string);
-    }else{
-      return ();
-    }
-  }
+  return $body;
 }
 
 sub writeAttachments($$){
   my ($mimeParser, $bodyString) = @_;
   my $mimeBody = $mimeParser->parse_data($bodyString);
-  my @attachments = parseAttachments($mimeBody);
+  my @parts = parseMimeEntity($mimeBody);
+  my @attachments;
+  for my $part(@parts){
+    my $partType = $$part{partType};
+    my $path = $$part{handle}->path;
+    if($partType eq "attachment"){
+      push @attachments, $path;
+    }else{
+      unlink $path or warn "WARNING: could not remove file: $path\n";
+    }
+  }
   return @attachments;
 }
 
-sub parseAttachments($){
+sub parseMimeEntity($){
   my ($entity) = @_;
   my $count = $entity->parts;
   if($count > 0){
     my @parts;
     for(my $i=0; $i<$count; $i++){
-      my @subParts = parseAttachments($entity->parts($i - 1));
+      my @subParts = parseMimeEntity($entity->parts($i));
       @parts = (@parts, @subParts);
     }
     return @parts;
   }else{
-    my $path = $entity->bodyhandle ? $entity->bodyhandle->path : undef;
+    my $type = $entity->effective_type;
+    my $handle = $entity->bodyhandle;
     my $disposition = $entity->head->mime_attr('content-disposition');
-    if(defined $disposition and $disposition =~ /attachment/){
-      return ($path);
+    my $partType;
+    if($type eq "text/plain"){
+      $partType = "text";
+    }elsif($type eq "text/html"){
+      $partType = "html";
+    }elsif(defined $disposition and $disposition =~ /attachment/){
+      $partType = "attachment";
     }else{
-      unlink $path or warn "WARNING: could not remove file: $path\n";
-      return ();
+      $partType = "unknown";
     }
+    return ({partType=>$partType, handle=>$handle});
   }
 }
 
@@ -1029,6 +1023,12 @@ sub parseFolders($){
     }
   }
   return $fs;
+}
+
+sub hasWords($){
+  my $msg = shift;
+  $msg =~ s/\W+//g;
+  return length($msg) > 0;
 }
 
 sub readSecrets(){
