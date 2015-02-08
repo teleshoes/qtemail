@@ -43,7 +43,7 @@ PageStackWindow {
     }else if(curPage == folderPage){
       controller.setupFolders()
     }else if(curPage == bodyPage){
-      bodyView.setBody(controller.getCurrentBodyText(main))
+      controller.fetchCurrentBodyText(main, bodyView)
     }else if(curPage == configPage){
       controller.setupConfig()
     }
