@@ -3,13 +3,13 @@ import QtQuick 1.1
 Rectangle {
   anchors.fill: parent
 
+  property real labelWidth: 0.30
+  property int fontSize: 16
+
   ListView {
     id: configFlickable
     spacing: 3
     anchors.fill: parent
-
-    property real labelWidth: 0.30
-    property int fontSize: 16
 
     model: configModel
 
