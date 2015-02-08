@@ -28,7 +28,7 @@ PAGE_MORE_SIZE = 200
 UNREAD_COUNTS = os.getenv("HOME") + "/.unread-counts"
 EMAIL_DIR = os.getenv("HOME") + "/.cache/email"
 
-pages = ["account", "header", "config", "folder", "body"]
+pages = ["account", "header", "config", "send", "folder", "body"]
 okPages = "|".join(pages)
 
 usage = """Usage:
