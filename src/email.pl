@@ -810,6 +810,7 @@ sub getBody($$$){
   my @parts = parseMimeEntity($mimeBody);
   my @text = map {$_->{handle}} grep {$_->{partType} eq "text"} @parts;
   my @html = map {$_->{handle}} grep {$_->{partType} eq "html"} @parts;
+  my @atts = map {$_->{handle}} grep {$_->{partType} eq "attachment"} @parts;
 
   my $body = "";
   for my $isHtml($preferHtml ? (1, 0) : (0, 1)){
@@ -821,8 +822,24 @@ sub getBody($$$){
     }
   }
 
+  my $attachments = "";
+  my $first = 1;
+  for my $att(@atts){
+    my $path = $att->path;
+    my $attName = $path;
+    $attName =~ s/.*\///;
+    if($preferHtml){
+      $attachments .= "<br/>" if $first;
+      $attachments .= "<i>attachment: $attName</i><br/>";
+    }else{
+      $attachments .= "\n" if $first;
+      $attachments .= "attachment: $attName\n";
+    }
+    $first = 0;
+  }
+
   $mimeParser->filer->purge;
-  return $body;
+  return $attachments . $body;
 }
 
 sub writeAttachments($$){
