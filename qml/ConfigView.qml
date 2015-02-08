@@ -1,10 +1,8 @@
 import QtQuick 1.1
 
 Rectangle {
+  id: configView
   anchors.fill: parent
-
-  property real labelWidth: 0.30
-  property int fontSize: 16
 
   ListView {
     id: configFlickable
@@ -13,53 +11,13 @@ Rectangle {
 
     model: configModel
 
-    delegate: Rectangle {
-      property alias label: label.text
-      property alias value: edit.text
-      property string rowColor: index % 2 == 0 ? "#444444" : "#666666"
-      color: rowColor
+    delegate: Field {
+      label: model.config.FieldName
+      value: model.config.Value
+      isDark: index % 2 == 0
 
-      height: fontSize * 2
-      width: parent.width
-
-      Rectangle {
-        id: labelContainer
-        width: parent.width * labelWidth
-        height: parent.height
-        color: rowColor
-        anchors.margins: 2
-
-        Text {
-          id: label
-          anchors.fill: parent
-          text: model.config.FieldName
-          font.pointSize: fontSize
-        }
-      }
-
-      Rectangle {
-        id: editContainer
-        anchors.left: labelContainer.right
-        width: parent.width * (1 - labelWidth)
-        height: parent.height
-        color: rowColor
-        Rectangle {
-          anchors.centerIn: parent
-          width: parent.width - 4
-          height: parent.height - 4
-          color: "#FFFFFF"
-          border.color: "#000000"
-          border.width: 2
-
-          TextInput {
-            anchors.margins: 3
-            id: edit
-            text: model.config.Value
-            anchors.fill: parent
-            font.pointSize: fontSize
-            onTextChanged: controller.updateConfigFieldValue(model.config, edit.text)
-          }
-        }
+      onValueChanged: {
+        controller.updateConfigFieldValue(model.config, value)
       }
     }
   }
