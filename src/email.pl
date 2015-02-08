@@ -821,6 +821,9 @@ sub getBody($$$){
       last;
     }
   }
+  $body =~ s/\r\n/\n/g;
+  chomp $body;
+  $body .= "\n" if length($body) > 0;
 
   my $attachments = "";
   my $first = 1;
