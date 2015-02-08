@@ -425,20 +425,21 @@ class Controller(QObject):
       limit=PAGE_MORE_SIZE, exclude=self.currentHeaders)
     self.appendHeaders(headers)
 
-  @Slot(result=str)
-  def getCurrentBodyText(self):
+  @Slot(QObject, result=str)
+  def getCurrentBodyText(self, notifier):
     if self.uid != None:
       return self.emailManager.getBody(
         self.accountName, self.folderName, self.uid)
     else:
-      return "MISSING UID"
+      notifier.notify("MISSING UID")
 
-  @Slot(result=str)
-  def saveCurrentAttachments(self):
+  @Slot(QObject, result=str)
+  def saveCurrentAttachments(self, notifier):
     if self.uid != None:
       destDir = os.getenv("HOME")
-      return self.emailManager.saveAttachments(
+      self.emailManager.saveAttachments(
         self.accountName, self.folderName, destDir, self.uid)
+      notifier.notify('attachments saved')
     else:
       return "MISSING UID"
 
