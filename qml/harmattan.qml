@@ -30,8 +30,12 @@ PageStackWindow {
     for (var i = 0; i < toolBar.children.length; ++i){
       toolBar.children[i].visible = false
     }
-    for (var i = 0; i < curPage.buttons.length; ++i){
-      curPage.buttons[i].visible = true
+    var pageName = curPage.objectName
+    var buttonNames = toolButtons.pages[pageName]
+    for (var i = 0; i < buttonNames.length; ++i){
+      var objectName = "toolbarButton-" + buttonNames[i]
+      var btn = controller.findChild(main, objectName)
+      btn.visible = true
     }
 
     if(curPage == accountPage){
@@ -64,7 +68,6 @@ PageStackWindow {
   Page {
     id: accountPage
     objectName: "accountPage"
-    property variant buttons: [configButton, updateButton]
     tools: toolBar
     anchors.margins: 30
 
@@ -75,7 +78,6 @@ PageStackWindow {
   Page {
     id: folderPage
     objectName: "folderPage"
-    property variant buttons: [backButton]
     tools: toolBar
     anchors.margins: 30
 
@@ -86,7 +88,6 @@ PageStackWindow {
   Page {
     id: headerPage
     objectName: "headerPage"
-    property variant buttons: [backButton, moreButton, wayMoreButton, allButton, configButton, folderButton]
     tools: toolBar
     anchors.margins: 30
 
@@ -106,7 +107,6 @@ PageStackWindow {
   Page {
     id: bodyPage
     objectName: "bodyPage"
-    property variant buttons: [backButton, toggleHtmlButton, attachmentsButton]
     tools: toolBar
     anchors.margins: 30
 
@@ -117,7 +117,6 @@ PageStackWindow {
   Page {
     id: configPage
     objectName: "configPage"
-    property variant buttons: [backButton, submitButton]
     tools: toolBar
     anchors.margins: 30
 
@@ -145,116 +144,29 @@ PageStackWindow {
   // HACK TO HIDE KEYBOARD
 
   // TOOLBAR
+  ToolButtons {
+    id: toolButtons
+  }
+
   ToolBarLayout {
     id: toolBar
 
-    ToolIcon {
-      id: backButton
-      iconId: "toolbar-tab-previous"
-      Text{
-        text: "back"
-        anchors.horizontalCenter: parent.horizontalCenter
+    Repeater {
+      model: toolButtons.getButtons()
+      ToolIcon {
+        function setText(text){
+          buttonTextArea.text = text
+        }
+        objectName: "toolbarButton-" + modelData.name
+        iconId: "toolbar-" + modelData.iconName
+        Text{
+          id: buttonTextArea
+          text: modelData.text
+          anchors.horizontalCenter: parent.horizontalCenter
+        }
+        onClicked: modelData.clicked()
+        visible: false
       }
-      onClicked: backPage()
-      visible: false
-    }
-    ToolIcon {
-      id: configButton
-      iconId: "toolbar-settings"
-      Text{
-        text: "config"
-        anchors.horizontalCenter: parent.horizontalCenter
-      }
-      onClicked: navToPage(configPage)
-      visible: false
-    }
-    ToolIcon {
-      id: updateButton
-      iconId: "toolbar-refresh"
-      Text{
-        text: "update"
-        anchors.horizontalCenter: parent.horizontalCenter
-      }
-      onClicked: accountView.updateAllAccounts()
-      visible: false
-    }
-    ToolIcon {
-      id: submitButton
-      iconId: "toolbar-done"
-      Text{
-        text: "submit"
-        anchors.horizontalCenter: parent.horizontalCenter
-      }
-      onClicked: controller.saveConfig()
-      visible: false
-    }
-    ToolIcon {
-      id: moreButton
-      iconId: "toolbar-down"
-      Text{
-        text: "more"
-        anchors.horizontalCenter: parent.horizontalCenter
-      }
-      onClicked: controller.moreHeaders(headerView, 0)
-      visible: false
-    }
-    ToolIcon {
-      id: wayMoreButton
-      iconId: "toolbar-down"
-      Text{
-        text: "+30%"
-        anchors.horizontalCenter: parent.horizontalCenter
-      }
-      onClicked: controller.moreHeaders(headerView, 30)
-      visible: false
-    }
-    ToolIcon {
-      id: allButton
-      iconId: "toolbar-down"
-      Text{
-        text: "all"
-        anchors.horizontalCenter: parent.horizontalCenter
-      }
-      onClicked: controller.moreHeaders(headerView, 100)
-      visible: false
-    }
-    ToolIcon {
-      id: folderButton
-      Text{
-        text: "folders"
-        anchors.horizontalCenter: parent.horizontalCenter
-      }
-      iconId: "toolbar-directory"
-      onClicked: navToPage(folderPage)
-      visible: false
-    }
-    ToolIcon {
-      id: toggleHtmlButton
-      Text{
-        id: toggleHtmlButtonTextArea
-        anchors.horizontalCenter: parent.horizontalCenter
-      }
-      iconId: "icon-m-toolbar-jump-to-dimmed-white"
-      Component.onCompleted: setIsHtml(controller.isHtml())
-      function setIsHtml(isHtml){
-        toggleHtmlButtonTextArea.text = isHtml ? "text" : "html"
-      }
-      onClicked: {
-        controller.toggleIsHtml()
-        setIsHtml(controller.isHtml())
-        controller.fetchCurrentBodyText(notifier, bodyView)
-      }
-      visible: false
-    }
-    ToolIcon {
-      id: attachmentsButton
-      Text{
-        text: "attach"
-        anchors.horizontalCenter: parent.horizontalCenter
-      }
-      iconId: "icon-m-toolbar-attachment"
-      onClicked: controller.saveCurrentAttachments(notifier)
-      visible: false
     }
   }
 }

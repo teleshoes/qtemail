@@ -37,8 +37,12 @@ Rectangle {
     for (var i = 0; i < toolBar.children.length; ++i){
       toolBar.children[i].visible = false
     }
-    for (var i = 0; i < curPage.buttons.length; ++i){
-      curPage.buttons[i].visible = true
+    var pageName = curPage.objectName
+    var buttonNames = toolButtons.pages[pageName]
+    for (var i = 0; i < buttonNames.length; ++i){
+      var objectName = "toolbarButton-" + buttonNames[i]
+      var btn = controller.findChild(main, objectName)
+      btn.visible = true
     }
 
     if(curPage == accountPage){
@@ -73,7 +77,6 @@ Rectangle {
     Rectangle {
       id: accountPage
       objectName: "accountPage"
-      property variant buttons: [configButton, updateButton]
       anchors.fill: parent
       visible: false
       anchors.margins: 30
@@ -85,7 +88,6 @@ Rectangle {
     Rectangle {
       id: folderPage
       objectName: "folderPage"
-      property variant buttons: [backButton]
       anchors.fill: parent
       visible: false
       anchors.margins: 30
@@ -97,7 +99,6 @@ Rectangle {
     Rectangle {
       id: headerPage
       objectName: "headerPage"
-      property variant buttons: [backButton, moreButton, wayMoreButton, allButton, configButton, folderButton]
       anchors.fill: parent
       visible: false
       anchors.margins: 30
@@ -108,7 +109,6 @@ Rectangle {
     Rectangle {
       id: bodyPage
       objectName: "bodyPage"
-      property variant buttons: [backButton, attachmentsButton, toggleHtmlButton]
       visible: false
       anchors.fill: parent
       anchors.margins: 30
@@ -120,7 +120,6 @@ Rectangle {
     Rectangle {
       id: configPage
       objectName: "configPage"
-      property variant buttons: [backButton, submitButton]
       anchors.fill: parent
       visible: false
       anchors.margins: 30
@@ -130,80 +129,28 @@ Rectangle {
   }
 
   // TOOLBAR
+  ToolButtons {
+    id: toolButtons
+  }
+
   Row {
     id: toolBar
     objectName: "toolBar"
     anchors.bottom: parent.bottom
-    height: backButton.height
     width: parent.width
 
     spacing: 10
-    Btn {
-      id: backButton
-      text: "back"
-      onClicked: backPage()
-      visible: false
-    }
-    Btn {
-      id: configButton
-      text: "config"
-      onClicked: navToPage(configPage)
-      visible: false
-    }
-    Btn {
-      id: updateButton
-      text: "update"
-      onClicked: accountView.updateAllAccounts()
-      visible: false
-    }
-    Btn {
-      id: submitButton
-      text: "save"
-      onClicked: controller.saveConfig()
-      visible: false
-    }
-    Btn {
-      id: moreButton
-      text: "some\nmore"
-      onClicked: controller.moreHeaders(headerView, 0)
-      visible: false
-    }
-    Btn {
-      id: wayMoreButton
-      text: "30%\nmore"
-      onClicked: controller.moreHeaders(headerView, 30)
-      visible: false
-    }
-    Btn {
-      id: allButton
-      text: "all"
-      onClicked: controller.moreHeaders(headerView, 100)
-      visible: false
-    }
-    Btn {
-      id: folderButton
-      text: "folders"
-      onClicked: navToPage(folderPage)
-      visible: false
-    }
-    Btn {
-      id: toggleHtmlButton
-      Component.onCompleted: setIsHtml(controller.isHtml())
-      function setIsHtml(isHtml){
-        toggleHtmlButton.text = isHtml ? "text" : "html"
+    Repeater {
+      model: toolButtons.getButtons()
+      Btn {
+        function setText(text){
+          this.text = text
+        }
+        objectName: "toolbarButton-" + modelData.name
+        text: modelData.text
+        onClicked: modelData.clicked()
+        visible: false
       }
-      onClicked: {
-        controller.toggleIsHtml()
-        setIsHtml(controller.isHtml())
-        controller.fetchCurrentBodyText(notifier, bodyView)
-      }
-      visible: false
-    }
-    Btn {
-      id: attachmentsButton
-      text: "attach"
-      onClicked: controller.saveCurrentAttachments(notifier)
-      visible: false
     }
   }
 }
