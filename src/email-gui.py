@@ -375,8 +375,8 @@ class Controller(QObject):
       cmd.append(account.Name)
 
     self.startEmailCommandThread(cmd, messageBox,
-      lambda isSuccess: self.onUpdateAccountFinished(isSuccess))
-  def onUpdateAccountFinished(self, isSuccess):
+      lambda isSuccess, output: self.onUpdateAccountFinished(isSuccess, output))
+  def onUpdateAccountFinished(self, isSuccess, output):
     self.setupAccounts()
 
   @Slot(QObject, QObject)
@@ -391,9 +391,9 @@ class Controller(QObject):
     cmd = ["email.pl", arg,
       "--folder=" + self.folderName, self.accountName, str(header.uid_)]
 
-    self.startEmailCommandThread(cmd, None,
-      lambda isSuccess: self.onToggleReadFinished(isSuccess, indicator, header))
-  def onToggleReadFinished(self, isSuccess, indicator, header):
+    self.startEmailCommandThread(cmd, None, self.onToggleReadFinished,
+      lambda isSuccess, output: self.onToggleReadFinished(isSuccess, output, indicator, header))
+  def onToggleReadFinished(self, isSuccess, output, indicator, header):
     header.isLoading_ = False
     if isSuccess:
       header.read_ = not header.read_
@@ -409,10 +409,10 @@ class Controller(QObject):
     thread.appendMessage.connect(self.onAppendMessage)
     self.threads.append(thread)
     thread.start()
-  def onFinished(self, isSuccess, thread, finishedAction):
+  def onFinished(self, isSuccess, output, thread, finishedAction):
     self.threads.remove(thread)
     if finishedAction != None:
-      finishedAction(isSuccess)
+      finishedAction(isSuccess, output)
   def onSetMessage(self, messageBox, message):
     if messageBox != None:
       messageBox.setText(message)
@@ -447,7 +447,7 @@ class Controller(QObject):
       return "MISSING UID"
 
 class EmailCommandThread(QThread):
-  finished = Signal(bool, QThread, object)
+  finished = Signal(bool, str, QThread, object)
   setMessage = Signal(QObject, str)
   appendMessage = Signal(QObject, str)
   def __init__(self, command, messageBox=None, finishedAction=None):
@@ -457,8 +457,10 @@ class EmailCommandThread(QThread):
     self.finishedAction = finishedAction
   def run(self):
     proc = subprocess.Popen(self.command, stdout=subprocess.PIPE)
+    output = ""
     for line in iter(proc.stdout.readline,''):
       self.appendMessage.emit(self.messageBox, line)
+      output += line
     proc.wait()
 
     if proc.returncode == 0:
@@ -470,7 +472,7 @@ class EmailCommandThread(QThread):
 
     self.appendMessage.emit(self.messageBox, status)
 
-    self.finished.emit(success, self, self.finishedAction)
+    self.finished.emit(success, output, self, self.finishedAction)
 
 class BaseListModel(QAbstractListModel):
   def __init__(self):
