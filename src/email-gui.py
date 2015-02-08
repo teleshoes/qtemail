@@ -249,6 +249,7 @@ class Controller(QObject):
     self.headerModel = headerModel
     self.configModel = configModel
     self.initialPageName = "account"
+    self.htmlMode = False
     self.accountName = None
     self.folderName = None
     self.uid = None
@@ -405,7 +406,12 @@ class Controller(QObject):
       notifier.notify("MISSING UID")
       return
 
-    cmd = ["email.pl", "--body-html",
+    if self.htmlMode:
+      arg = "--body-html"
+    else:
+      arg = "--body"
+
+    cmd = ["email.pl", arg,
       "--folder=" + self.folderName, self.accountName, str(self.uid)]
 
     self.startEmailCommandThread(cmd, None,
