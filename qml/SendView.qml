@@ -2,6 +2,17 @@ import QtQuick 1.1
 
 Rectangle {
   anchors.fill: parent
+
+  function getValues(){
+    return {
+      "to": to.getEmails(),
+      "cc": cc.getEmails(),
+      "bcc": bcc.getEmails(),
+      "subject": subject.value,
+      "body": body.value,
+    }
+  }
+
   Flickable {
     id: sendFlickable
     contentWidth: parent.width
