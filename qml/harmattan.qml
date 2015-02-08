@@ -69,12 +69,7 @@ PageStackWindow {
     tools: toolBar
     anchors.margins: 30
 
-    AccountView{
-      id: accountView
-      ScrollDecorator {
-        flickableItem: accountView.getFlickable()
-      }
-    }
+    AccountView{ id: accountView }
   }
 
   // FOLDER PAGE
@@ -85,12 +80,7 @@ PageStackWindow {
     tools: toolBar
     anchors.margins: 30
 
-    FolderView{
-      id: folderView
-      ScrollDecorator {
-        flickableItem: folderView.getFlickable()
-      }
-    }
+    FolderView{ id: folderView }
   }
 
   // HEADER PAGE
@@ -101,12 +91,7 @@ PageStackWindow {
     tools: toolBar
     anchors.margins: 30
 
-    HeaderView{
-      id: headerView
-      ScrollDecorator {
-        flickableItem: headerView.getFlickable()
-      }
-    }
+    HeaderView{ id: headerView }
     // HACK TO HIDE KEYBOARD
     Btn {
       text: "push to hide keyboard"
@@ -126,10 +111,6 @@ PageStackWindow {
     tools: toolBar
     anchors.margins: 30
 
-    ScrollDecorator {
-      flickableItem: bodyView
-      z: 10
-    }
     PinchFlick{
       anchors.fill: parent
       pinch.minimumScale: 0.1
