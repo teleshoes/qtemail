@@ -3,6 +3,10 @@ import QtQuick 1.1
 Rectangle {
   anchors.fill: parent
 
+  function getFlickable(){
+    return accountListView
+  }
+
   function updateAllAccounts(){
     controller.updateAccount(null, messageBox, null)
   }

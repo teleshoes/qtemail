@@ -3,6 +3,10 @@ import QtQuick 1.1
 Rectangle {
   anchors.fill: parent
 
+  function getFlickable(){
+    return folderListView
+  }
+
   ListView {
     id: folderListView
     spacing: 50
