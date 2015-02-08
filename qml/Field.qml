@@ -1,16 +1,16 @@
 import QtQuick 1.1
 
 Rectangle {
-  signal valueChanged
+  signal enterPressed
 
-  property alias label: label.text
+  property alias labelText: label.text
   property alias value: edit.text
 
   property real labelWidth: 0.30
   property int fontSize: 16
   property bool isDark: false
 
-  property string bgColor: isDark == 0 ? "#444444" : "#666666"
+  property string bgColor: isDark ? "#444444" : "#666666"
   color: bgColor
 
   height: fontSize * 2
@@ -49,6 +49,9 @@ Rectangle {
         id: edit
         anchors.fill: parent
         font.pointSize: fontSize
+        Keys.onReturnPressed: {
+          enterPressed()
+        }
       }
     }
   }

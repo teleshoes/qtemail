@@ -12,7 +12,7 @@ Rectangle {
     model: configModel
 
     delegate: Field {
-      label: model.config.FieldName
+      labelText: model.config.FieldName
       value: model.config.Value
       isDark: index % 2 == 0
 
