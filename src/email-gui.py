@@ -301,18 +301,42 @@ class Controller(QObject):
       notifier.notify("Could not parse headers for message")
       return
 
-    if self.folderName == "inbox":
-      to = header.From
-    else:
-      to = header.To
+    toEmails = self.emailManager.parseEmails(header.To)
+    fromEmails = self.emailManager.parseEmails(header.From)
 
-    sendForm.setTo(self.emailManager.parseEmails(to))
+    if sendType == "reply":
+      if self.folderName == "sent":
+        recipEmails = toEmails
+      else:
+        recipEmails = fromEmails
+    else:
+      recipEmails = []
+
+    subjectPrefix = ""
+    if sendType == "reply":
+      subjectPrefix = "Re: "
+    subject = header.Subject
+    if not subject.startswith(subjectPrefix):
+      subject = subjectPrefix + subject
+
+    if len(fromEmails) > 0:
+      firstFrom = fromEmails[0]
+    else:
+      firstFrom = "[unknown]"
+
+    date = header.Date
+
+    sendForm.setTo(recipEmails)
     sendForm.setCC([])
     sendForm.setBCC([])
-    sendForm.setSubject("Re: " + header.Subject)
+    sendForm.setSubject(subject)
 
     self.fetchCurrentBodyText(notifier, sendForm,
-      lambda body: "\n\nOn " + header.Date + ", " + to + " wrote:\n" + body)
+      lambda body: self.wrapBody(body, date, firstFrom))
+
+  def wrapBody(self, body, date, author):
+    bodyPrefix = "\n\nOn " + date + ", " + author + " wrote:\n"
+    return bodyPrefix + body
 
   @Slot(QObject, QObject)
   def sendEmail(self, sendForm, notifier):
