@@ -12,6 +12,19 @@ Rectangle {
     }
     return emails
   }
+  function setEmails(emails){
+    clearEmails()
+    for(var i=0; i<emails.length; i++){
+      addEmail(emails[i])
+    }
+  }
+
+  function addEmail(email){
+    emailListView.model.append({'email': email})
+  }
+  function clearEmails(){
+    emailListView.model.clear()
+  }
 
   Field {
     id: textField
@@ -33,7 +46,7 @@ Rectangle {
     text: "{" + emailListView.model.count + " email(s)}\n\nadd more"
     onClicked: {
       if(textField.value){
-        emailListView.model.append({'email': textField.value})
+        addEmail(textField.value)
         textField.value = ""
       }
     }
