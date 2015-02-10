@@ -201,10 +201,12 @@ class EmailManager():
     unread = set(self.getUids(accName, folderName, "unread"))
     headers = []
     for uid in uids:
-      header = self.getHeader(accName, folderName, uid, not uid in unread)
+      header = self.getHeader(accName, folderName, uid)
+      header.isSent_ = folderName == "sent"
+      header.isRead_ = not uid in unread
       headers.append(header)
     return (total, headers)
-  def getHeader(self, accName, folderName, uid, isRead):
+  def getHeader(self, accName, folderName, uid):
     filePath = EMAIL_DIR + "/" + accName + "/" + folderName + "/" + "headers/" + str(uid)
     if not os.path.isfile(filePath):
       return None
@@ -233,8 +235,7 @@ class EmailManager():
         hdrTo = val
       elif field == "Subject":
         hdrSubject = val
-    isSent = folderName == "sent"
-    return Header(uid, hdrDate, hdrFrom, hdrTo, hdrSubject, isSent, isRead, False)
+    return Header(uid, hdrDate, hdrFrom, hdrTo, hdrSubject, False, False, False)
   def readProc(self, cmdArr):
     process = subprocess.Popen(cmdArr, stdout=subprocess.PIPE)
     (stdout, _) = process.communicate()
