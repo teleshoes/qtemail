@@ -336,7 +336,9 @@ class Controller(QObject):
 
   def wrapBody(self, body, date, author):
     bodyPrefix = "\n\nOn " + date + ", " + author + " wrote:\n"
-    return bodyPrefix + body
+    lines = [""] + body.splitlines()
+    indentedBody = "\n".join(map(lambda line: "> " + line, lines)) + "\n"
+    return bodyPrefix + indentedBody
 
   @Slot(QObject, QObject)
   def sendEmail(self, sendForm, notifier):
