@@ -5,7 +5,7 @@ Item {
     "accountPage": ["config", "update"],
     "folderPage": ["back"],
     "headerPage": ["back", "more", "wayMore", "all", "config", "send", "folder"],
-    "bodyPage": ["back", "attachments", "toggleHtml", "reply"],
+    "bodyPage": ["back", "attachments", "toggleHtml", "reply", "forward"],
     "configPage": ["back", "submit"],
     "sendPage": ["back", "sendEmail"],
   }
@@ -44,6 +44,16 @@ Item {
       property variant iconName: "reply"
       onClicked: {
         controller.initSend("reply", sendView.getForm(), notifier)
+        navToPage(sendPage)
+      }
+    }
+    Item {
+      signal clicked
+      property variant name: "forward"
+      property variant text: "forward"
+      property variant iconName: "forward"
+      onClicked: {
+        controller.initSend("forward", sendView.getForm(), notifier)
         navToPage(sendPage)
       }
     }
