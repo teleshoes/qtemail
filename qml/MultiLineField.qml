@@ -5,8 +5,8 @@ Rectangle {
 
   signal enterPressed
 
-  property int cursorY: 0
-  property alias editY: editContainer.y
+  property Flickable cursorFollow: null
+
   property alias labelText: label.text
   property alias value: edit.text
 
@@ -18,6 +18,19 @@ Rectangle {
 
   height: labelContainer.height + editContainer.height
   width: parent.width
+
+  function updateCursorFollow(cursorY){
+    if(cursorFollow != null){
+      var scrollY = cursorFollow.contentY
+      var cY = cursorY + fieldContainer.y + editContainer.y
+      console.log(fieldContainer.y)
+      if (scrollY >= cY){
+        cursorFollow.contentY = cY
+      }else if (scrollY+cursorFollow.height <= cY){
+        cursorFollow.contentY = cY-cursorFollow.height
+      }
+    }
+  }
 
   Rectangle {
     id: labelContainer
@@ -59,7 +72,7 @@ Rectangle {
           wrapMode: TextEdit.Wrap
           width: parent.width
           font.pointSize: fontSize
-          onCursorRectangleChanged: fieldContainer.cursorY = cursorRectangle.y
+          onCursorRectangleChanged: updateCursorFollow(cursorRectangle.y)
         }
       }
     }

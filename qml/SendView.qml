@@ -54,16 +54,6 @@ Rectangle {
     flickableDirection: Flickable.VerticalFlick
     boundsBehavior: Flickable.DragOverBounds
 
-    function followBodyCursor(cursorY){
-      console.log([cursorY, body.y, body.editY])
-      var cY = cursorY + body.y + body.editY
-      var offset = body.fontSize*2
-      if (contentY >= cY){
-        contentY = cY - offset
-      }else if (contentY+height <= cY){
-        contentY = cY-height
-      }
-    }
     EmailListField {
       anchors {left: parent.left; right: parent.right; top: parent.top}
       id: to
@@ -99,7 +89,7 @@ Rectangle {
       id: body
       labelText: "BODY"
       isDark: false
-      onCursorYChanged: sendFlickable.followBodyCursor(cursorY)
+      cursorFollow: sendFlickable
     }
   }
 
