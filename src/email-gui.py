@@ -315,6 +315,8 @@ class Controller(QObject):
     subjectPrefix = ""
     if sendType == "reply":
       subjectPrefix = "Re: "
+    elif sendType == "forward":
+      subjectPrefix = "Fwd: "
     subject = header.Subject
     if not subject.startswith(subjectPrefix):
       subject = subjectPrefix + subject
