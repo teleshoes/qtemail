@@ -109,6 +109,27 @@ def main():
   app.exec_()
 
 class EmailManager():
+  def __init__(self):
+    self.emailRegex = self.compileEmailRegex()
+
+  def compileEmailRegex(self):
+    c = "[a-zA-Z0-9!#$%&'*+\\-/=?^_`{|}~]"
+    start = c + "+"
+    middleDot = "(?:" + "\\." + c + ")*"
+    end = c + "*"
+    user = start + middleDot + end
+
+    sub = "[a-zA-Z0-9\\-.]+"
+    top = "[a-zA-Z]{2,}"
+    host = sub + "\\." + top
+
+    return re.compile(user + "@" + host)
+
+  def parseEmails(self, string):
+    if string == None:
+      return []
+    return self.emailRegex.findall(string)
+
   def readAccountConfig(self, accName):
     fieldNames = [ "name"
                  , "user"
