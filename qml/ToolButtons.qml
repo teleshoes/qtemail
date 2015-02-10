@@ -98,7 +98,7 @@ Item {
       onClicked: {
         controller.toggleIsHtml()
         setIsHtml(controller.isHtml())
-        controller.fetchCurrentBodyText(notifier, bodyView)
+        controller.fetchCurrentBodyText(notifier, bodyView, null)
       }
     }
     Item {
