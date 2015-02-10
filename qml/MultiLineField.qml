@@ -3,6 +3,8 @@ import QtQuick 1.1
 Rectangle {
   id: fieldContainer
 
+  property int minHeight: 500
+
   signal enterPressed
 
   property Flickable cursorFollow: null
@@ -52,8 +54,9 @@ Rectangle {
     property int margin: 4
     property int border: 2
 
+    height: edit.height + margin*2 + margin*2 + border*2
     width: parent.width
-    height: edit.paintedHeight + margin*2 + margin*2 + border*2
+
     color: bgColor
     Rectangle {
       id: editBorder
@@ -71,6 +74,7 @@ Rectangle {
           id: edit
           wrapMode: TextEdit.Wrap
           width: parent.width
+          height: paintedHeight < minHeight ? minHeight : paintedHeight
           font.pointSize: fontSize
           onCursorRectangleChanged: updateCursorFollow(cursorRectangle.y)
         }
