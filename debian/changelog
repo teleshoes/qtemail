@@ -1,3 +1,11 @@
+qtemail (0.0.7) UNRELEASED; urgency=low
+  * Send mail GUI
+  * Scrollbars in lists
+  * Pagination email counter
+  * Add buttons to grab 30% more emails or all emails
+  * Bugfixes, style tweaks
+ -- teleshoes <elliot.wolk@gmail.com>  Tue, 10 Feb 2015 00:59:42 -0500
+
 qtemail (0.0.6) UNRELEASED; urgency=low
   * Display attachment names in body
   * Add button to download attachments
