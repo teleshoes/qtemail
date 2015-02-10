@@ -25,7 +25,6 @@ Rectangle {
     if(cursorFollow != null){
       var scrollY = cursorFollow.contentY
       var cY = cursorY + fieldContainer.y + editContainer.y
-      console.log(fieldContainer.y)
       if (scrollY >= cY){
         cursorFollow.contentY = cY
       }else if (scrollY+cursorFollow.height <= cY){
