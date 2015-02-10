@@ -290,6 +290,30 @@ class Controller(QObject):
   def findChild(self, obj, name):
     return obj.findChild(QObject, name)
 
+  @Slot(str, QObject, QObject)
+  def initSend(self, sendType, sendForm, notifier):
+    if self.accountName == None or self.folderName == None or self.uid == None:
+      notifier.notify("Missing source email for " + sendType)
+      return
+
+    header = self.emailManager.getHeader(self.accountName, self.folderName, self.uid)
+    if header == None:
+      notifier.notify("Could not parse headers for message")
+      return
+
+    if self.folderName == "inbox":
+      to = header.From
+    else:
+      to = header.To
+
+    sendForm.setTo(self.emailManager.parseEmails(to))
+    sendForm.setCC([])
+    sendForm.setBCC([])
+    sendForm.setSubject("Re: " + header.Subject)
+
+    self.fetchCurrentBodyText(notifier, sendForm,
+      lambda body: "\n\nOn " + header.Date + ", " + to + " wrote:\n" + body)
+
   @Slot(QObject, QObject)
   def sendEmail(self, sendForm, notifier):
     to = sendForm.getTo()
