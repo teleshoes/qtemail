@@ -5,7 +5,7 @@ Item {
     "accountPage": ["config", "update"],
     "folderPage": ["back"],
     "headerPage": ["back", "more", "wayMore", "all", "config", "send", "folder"],
-    "bodyPage": ["back", "attachments", "toggleHtml"],
+    "bodyPage": ["back", "attachments", "toggleHtml", "reply"],
     "configPage": ["back", "submit"],
     "sendPage": ["back", "sendEmail"],
   }
@@ -36,6 +36,16 @@ Item {
       property variant text: "write"
       property variant iconName: "new-email"
       onClicked: navToPage(sendPage)
+    }
+    Item {
+      signal clicked
+      property variant name: "reply"
+      property variant text: "reply"
+      property variant iconName: "reply"
+      onClicked: {
+        controller.initSend("reply", sendView.getForm(), notifier)
+        navToPage(sendPage)
+      }
     }
     Item {
       signal clicked
