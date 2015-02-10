@@ -9,20 +9,40 @@ Rectangle {
   }
   Item {
     id: form
+
     function getTo(){
       return to.getEmails()
     }
+    function setTo(emails){
+      return to.setEmails(emails)
+    }
+
     function getCC(){
       return cc.getEmails()
     }
+    function setCC(emails){
+      return cc.setEmails(emails)
+    }
+
     function getBCC(){
       return bcc.getEmails()
     }
+    function setBCC(emails){
+      return bcc.setEmails(emails)
+    }
+
     function getSubject(){
       return subject.value
     }
+    function setSubject(value){
+      return subject.value = value
+    }
+
     function getBody(){
       return body.value
+    }
+    function setBody(value){
+      return body.value = value
     }
   }
 
