@@ -224,7 +224,7 @@ class EmailManager():
     for uid in uids:
       header = self.getHeader(accName, folderName, uid)
       header.isSent_ = folderName == "sent"
-      header.isRead_ = not uid in unread
+      header.read_ = not uid in unread
       headers.append(header)
     return (total, headers)
   def getHeader(self, accName, folderName, uid):
