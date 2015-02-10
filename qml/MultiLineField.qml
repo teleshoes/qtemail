@@ -25,10 +25,11 @@ Rectangle {
     if(cursorFollow != null){
       var scrollY = cursorFollow.contentY
       var cY = cursorY + fieldContainer.y + editContainer.y
-      if (scrollY >= cY){
-        cursorFollow.contentY = cY
-      }else if (scrollY+cursorFollow.height <= cY){
-        cursorFollow.contentY = cY-cursorFollow.height
+      var offset = fontSize*2 * 2
+      if (scrollY >= cY - offset){
+        cursorFollow.contentY = cY - offset
+      }else if (scrollY+cursorFollow.height <= cY + offset){
+        cursorFollow.contentY = cY-cursorFollow.height + offset
       }
     }
   }
