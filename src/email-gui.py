@@ -444,8 +444,8 @@ class Controller(QObject):
     else:
       text = "html"
 
-  @Slot(QObject, QObject)
-  def fetchCurrentBodyText(self, notifier, bodyBox):
+  @Slot(QObject, QObject, object)
+  def fetchCurrentBodyText(self, notifier, bodyBox, transform):
     bodyBox.setBody("...loading body")
     if self.uid == None:
       notifier.notify("MISSING UID")
@@ -460,11 +460,17 @@ class Controller(QObject):
       "--folder=" + self.folderName, self.accountName, str(self.uid)]
 
     self.startEmailCommandThread(cmd, None,
-      self.onFetchCurrentBodyTextFinished, {'bodyBox': bodyBox})
+      self.onFetchCurrentBodyTextFinished, {'bodyBox': bodyBox, 'transform': transform})
   def onFetchCurrentBodyTextFinished(self, isSuccess, output, extraArgs):
     bodyBox = extraArgs['bodyBox']
+    transform = extraArgs['transform']
+    if transform:
+      body = transform(output)
+    else:
+      body = output
+
     if isSuccess:
-      bodyBox.setBody(output)
+      bodyBox.setBody(body)
     else:
       bodyBox.setBody("ERROR FETCHING BODY\n")
 
