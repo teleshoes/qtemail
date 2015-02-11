@@ -5,8 +5,6 @@ Rectangle {
 
   property int minHeight: 500
 
-  signal enterPressed
-
   property Flickable cursorFollow: null
 
   property alias labelText: label.text
