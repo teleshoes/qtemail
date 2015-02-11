@@ -78,7 +78,7 @@ Rectangle {
       height: 150
       width: parent.width
     }
-    Field {
+    LongField {
       anchors {left: parent.left; right: parent.right; top: bcc.bottom}
       id: subject
       labelText: "SUBJECT"
