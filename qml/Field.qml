@@ -21,6 +21,7 @@ Rectangle {
   }
   function setValue(value){
     this.value = value
+    edit.cursorPosition = 0
   }
 
   Rectangle {
