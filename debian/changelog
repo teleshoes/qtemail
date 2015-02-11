@@ -1,3 +1,8 @@
+qtemail (0.0.8) UNRELEASED; urgency=low
+  * Add reply/forward
+  * Fix send UI subject/body
+ -- teleshoes <elliot.wolk@gmail.com>  Wed, 11 Feb 2015 12:43:12 -0500
+
 qtemail (0.0.7) UNRELEASED; urgency=low
   * Send mail GUI
   * Scrollbars in lists
