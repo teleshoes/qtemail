@@ -32,17 +32,17 @@ Rectangle {
     }
 
     function getSubject(){
-      return subject.value
+      return subject.getValue()
     }
     function setSubject(value){
-      return subject.value = value
+      return subject.setValue(value)
     }
 
     function getBody(){
-      return body.value
+      return body.getValue()
     }
     function setBody(value){
-      return body.value = value
+      return body.setValue(value)
     }
   }
 

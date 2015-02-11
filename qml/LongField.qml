@@ -15,6 +15,13 @@ Rectangle {
   width: parent.width
   height: labelContainer.height + editContainer.height
 
+  function getValue(){
+    return value
+  }
+  function setValue(value){
+    this.value = value
+  }
+
   Rectangle {
     id: labelContainer
     width: parent.width

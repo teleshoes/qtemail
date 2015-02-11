@@ -16,6 +16,13 @@ Rectangle {
   height: fontSize * 2
   width: parent.width
 
+  function getValue(){
+    return value
+  }
+  function setValue(value){
+    this.value = value
+  }
+
   Rectangle {
     id: labelContainer
     width: parent.width * labelWidth

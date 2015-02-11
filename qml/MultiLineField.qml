@@ -19,6 +19,13 @@ Rectangle {
   height: labelContainer.height + editContainer.height
   width: parent.width
 
+  function getValue(){
+    return value
+  }
+  function setValue(value){
+    this.value = value
+  }
+
   function updateCursorFollow(cursorY){
     if(cursorFollow != null){
       var scrollY = cursorFollow.contentY
