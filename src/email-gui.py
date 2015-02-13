@@ -17,6 +17,8 @@ import signal
 import sys
 import subprocess
 
+EMAIL_BIN = "/usr/bin/email.pl"
+
 PLATFORM_OTHER = 0
 PLATFORM_HARMATTAN = 1
 
@@ -144,7 +146,7 @@ class EmailManager():
 
     config = {}
     if accName != None:
-      configOut = self.readProc(["email.pl", "--read-config", accName])
+      configOut = self.readProc([EMAIL_BIN, "--read-config", accName])
       for line in configOut.splitlines():
         print line
         m = re.match("(\w+)=(.*)", line)
@@ -172,10 +174,10 @@ class EmailManager():
       else:
         keyVals.append(field.FieldName + "=" + field.Value)
 
-    cmd = ["email.pl", "--write-config", accName] + keyVals
+    cmd = [EMAIL_BIN, "--write-config", accName] + keyVals
     exitCode = subprocess.call(cmd)
   def getAccounts(self):
-    accountOut = self.readProc(["email.pl", "--accounts"])
+    accountOut = self.readProc([EMAIL_BIN, "--accounts"])
     accounts = []
     for line in accountOut.splitlines():
       m = re.match("(\w+):(\d+):([a-z0-9_\- ]+):(\d+)/(\d+):(.*)", line)
@@ -190,7 +192,7 @@ class EmailManager():
           accName, lastUpdated, lastUpdatedRel, unreadCount, totalCount, error, False))
     return accounts
   def getFolders(self, accountName):
-    folderOut = self.readProc(["email.pl", "--folders", accountName])
+    folderOut = self.readProc([EMAIL_BIN, "--folders", accountName])
     folders = []
     for line in folderOut.splitlines():
       m = re.match("([a-z]+):(\d+)/(\d+)", line)
@@ -358,7 +360,7 @@ class Controller(QObject):
     firstTo = to.pop(0)
 
     notifier.notify("sending...")
-    cmd = ["email.pl", "--smtp", self.accountName, subject, body, firstTo]
+    cmd = [EMAIL_BIN, "--smtp", self.accountName, subject, body, firstTo]
     for email in to:
       cmd += ["--to", email]
     for email in cc:
@@ -475,7 +477,7 @@ class Controller(QObject):
     if indicator != None:
       indicator.updateColor()
 
-    cmd = ["email.pl", "--update"]
+    cmd = [EMAIL_BIN, "--update"]
     if account != None:
       cmd.append(account.Name)
 
@@ -493,7 +495,7 @@ class Controller(QObject):
       arg = "--mark-unread"
     else:
       arg = "--mark-read"
-    cmd = ["email.pl", arg,
+    cmd = [EMAIL_BIN, arg,
       "--folder=" + self.folderName, self.accountName, str(header.uid_)]
 
     self.startEmailCommandThread(cmd, None,
@@ -530,7 +532,7 @@ class Controller(QObject):
     else:
       arg = "--body"
 
-    cmd = ["email.pl", arg,
+    cmd = [EMAIL_BIN, arg,
       "--folder=" + self.folderName, self.accountName, str(self.uid)]
 
     self.startEmailCommandThread(cmd, None,
@@ -555,7 +557,7 @@ class Controller(QObject):
       return
 
     destDir = os.getenv("HOME")
-    cmd = ["email.pl", "--attachments",
+    cmd = [EMAIL_BIN, "--attachments",
       "--folder=" + self.folderName, self.accountName, destDir, str(self.uid)]
 
     self.startEmailCommandThread(cmd, None,
