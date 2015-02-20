@@ -1,3 +1,10 @@
+qtemail (0.0.9) UNRELEASED; urgency=low
+  * Add Ignoresizeerrors to fix certain stupid IMAP servers
+  * Fix error where no configured accounts breaks harmattan UI
+  * Add desktop launcher and icon
+  * Move QML, images, and executables to /opt/qtemail
+ -- teleshoes <elliot.wolk@gmail.com>  Fri, 20 Feb 2015 15:53:15 -0500
+
 qtemail (0.0.8) UNRELEASED; urgency=low
   * Add reply/forward
   * Fix send UI subject/body
