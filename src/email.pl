@@ -57,6 +57,7 @@ my $DATE_FORMAT = "%Y-%m-%d %H:%M:%S";
 my $settings = {
   Peek => 1,
   Uid => 1,
+  Ignoresizeerrors => 1,
 };
 
 my $okCmds = join "|", qw(
