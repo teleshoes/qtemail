@@ -651,9 +651,12 @@ class BaseListModel(QAbstractListModel):
     return self.items
   def setItems(self, items):
     self.clear()
-    self.beginInsertRows(QModelIndex(), 0, 0)
-    self.items = items
-    self.endInsertRows()
+    if len(items) > 0:
+      self.beginInsertRows(QModelIndex(), 0, 0)
+      self.items = items
+      self.endInsertRows()
+    else:
+      self.items = []
   def appendItems(self, items):
     self.beginInsertRows(QModelIndex(), len(self.items), len(self.items))
     self.items.extend(items)
