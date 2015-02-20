@@ -18,6 +18,7 @@ import sys
 import subprocess
 
 EMAIL_BIN = "/usr/bin/email.pl"
+QML_DIR = "/opt/email-gui"
 
 PLATFORM_OTHER = 0
 PLATFORM_HARMATTAN = 1
@@ -81,9 +82,9 @@ def main():
     platform = PLATFORM_OTHER
 
   if platform == PLATFORM_HARMATTAN:
-    qmlFile = "/opt/email-gui/harmattan.qml"
+    qmlFile = QML_DIR + "/harmattan.qml"
   else:
-    qmlFile = "/opt/email-gui/desktop.qml"
+    qmlFile = QML_DIR + "/desktop.qml"
 
   emailManager = EmailManager()
   accountModel = AccountModel()
