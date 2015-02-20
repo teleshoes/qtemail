@@ -17,8 +17,8 @@ import signal
 import sys
 import subprocess
 
-EMAIL_BIN = "/usr/bin/email.pl"
-QML_DIR = "/opt/email-gui"
+EMAIL_BIN = "/opt/qtemail/bin/email.pl"
+QML_DIR = "/opt/qtemail/qml"
 
 PLATFORM_OTHER = 0
 PLATFORM_HARMATTAN = 1
