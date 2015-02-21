@@ -36,6 +36,8 @@ Rectangle {
       id: label
       anchors.fill: parent
       font.pointSize: fontSize
+      font.capitalization: Font.AllUppercase
+      font.weight: Font.DemiBold
     }
   }
 
@@ -79,6 +81,7 @@ Rectangle {
       id: description
       anchors.fill: parent
       font.pointSize: fontSize
+      font.italic: true
     }
   }
 }
