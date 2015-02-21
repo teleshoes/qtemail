@@ -453,6 +453,7 @@ sub main(@){
     }
     my @accNames = @_ == 0 ? @accOrder : @_;
     my $mimeParser = MIME::Parser->new();
+    $mimeParser->output_dir($TMP_DIR);
     binmode STDOUT, ':utf8';
     for my $accName(@accNames){
       my @unread = readUidFile $accName, $folderName, "unread";
