@@ -42,6 +42,8 @@ sub readSecrets();
 sub validateSecrets($);
 sub modifySecrets($$);
 
+my $SMTP_CLI_EXEC = "smtp-cli";
+
 my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
 my @configKeys = qw(user password server port);
@@ -121,7 +123,7 @@ my $usage = "
   $0 --smtp ACCOUNT_NAME SUBJECT BODY TO [ARG ARG ..]
     simple wrapper around smtp-cli. {you can add extra recipients with --to}
     calls:
-      smtp-cli \\
+      $SMTP_CLI_EXEC \\
         --server=<smtp_server> --port=<smtp_port> \\
         --user=<user> --pass=<password> \\
         --from=<user> \\
@@ -302,7 +304,7 @@ sub main(@){
     my ($accName, $subject, $body, $to, @args) = @_;
     my $acc = $$accounts{$accName};
     die "Unknown account $accName\n" if not defined $acc;
-    exec "smtp-cli",
+    exec $SMTP_CLI_EXEC,
       "--server=$$acc{smtp_server}", "--port=$$acc{smtp_port}",
       "--user=$$acc{user}", "--pass=$$acc{password}",
       "--from=$$acc{user}",
