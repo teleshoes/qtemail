@@ -13,6 +13,7 @@ Rectangle {
 
     delegate: Field {
       labelText: model.config.FieldName
+      descriptionText: model.config.Description
       value: model.config.Value
       isDark: index % 2 == 0
 

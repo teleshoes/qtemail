@@ -4,6 +4,7 @@ Rectangle {
   signal enterPressed
 
   property alias labelText: label.text
+  property alias descriptionText: description.text
   property alias value: edit.text
 
   property real labelWidth: 0.30
@@ -13,7 +14,7 @@ Rectangle {
   property string bgColor: isDark ? "#444444" : "#666666"
   color: bgColor
 
-  height: fontSize * 2
+  height: (fontSize * 2) * 2
   width: parent.width
 
   function getValue(){
@@ -27,7 +28,7 @@ Rectangle {
   Rectangle {
     id: labelContainer
     width: parent.width * labelWidth
-    height: parent.height
+    height: parent.height / 2
     color: bgColor
     anchors.margins: 2
 
@@ -42,7 +43,7 @@ Rectangle {
     id: editContainer
     anchors.left: labelContainer.right
     width: parent.width * (1 - labelWidth)
-    height: parent.height
+    height: parent.height / 2
     color: bgColor
     Rectangle {
       anchors.centerIn: parent
@@ -61,6 +62,23 @@ Rectangle {
           enterPressed()
         }
       }
+    }
+  }
+
+  Rectangle {
+    id: descriptionContainer
+    anchors.top: labelContainer.bottom
+    anchors.left: labelContainer.left
+    anchors.right: editContainer.right
+    width: parent.width
+    height: parent.height / 2
+    color: bgColor
+    anchors.leftMargin: 2
+
+    Text {
+      id: description
+      anchors.fill: parent
+      font.pointSize: fontSize
     }
   }
 }
