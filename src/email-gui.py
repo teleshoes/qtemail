@@ -134,16 +134,18 @@ class EmailManager():
     return self.emailRegex.findall(string)
 
   def readAccountConfig(self, accName):
-    fieldNames = [ "name"
-                 , "user"
-                 , "password"
-                 , "server"
-                 , "sent"
-                 , "port"
-                 , "ssl"
-                 , "smtp_server"
-                 , "smtp_port"
-                 ]
+    fields = [ "name",        "single-word account ID, e.g.: \"Work\""
+             , "user",        "IMAP user, usually the full email address"
+             , "password",    "your password, stored in plaintext"
+             , "server",      "IMAP server, e.g.: \"imap.gmail.com\""
+             , "port",        "IMAP port"
+             , "sent",        "[OPT] sent folder, e.g: \"Sent\""
+             , "ssl",         "[OPT] set to false if necessary"
+             , "smtp_server", "[OPT] SMTP server. e.g.: \"smtp.gmail.com\""
+             , "smtp_port",   "[OPT] SMTP port"
+             ]
+    fieldNames = fields[0::2]
+    fieldDescriptions = dict(zip(fields[0::2], fields[1::2]))
 
     config = {}
     if accName != None:
@@ -164,7 +166,7 @@ class EmailManager():
         value = config[fieldName]
       else:
         value = ""
-      fields.append(Field(fieldName, value))
+      fields.append(Field(fieldName, value, fieldDescriptions[fieldName]))
     return fields
   def writeAccountConfig(self, fields):
     keyVals = []
@@ -787,17 +789,21 @@ class Header(QObject):
   IsLoading = Property(bool, IsLoading, notify=changed)
 
 class Field(QObject):
-  def __init__(self, fieldName_, value_):
+  def __init__(self, fieldName_, value_, description_):
     QObject.__init__(self)
     self.fieldName_ = fieldName_
     self.value_ = value_
+    self.description_ = description_
   def FieldName(self):
     return self.fieldName_
   def Value(self):
     return self.value_
+  def Description(self):
+    return self.description_
   changed = Signal()
   FieldName = Property(unicode, FieldName, notify=changed)
   Value = Property(unicode, Value, notify=changed)
+  Description = Property(unicode, Description, notify=changed)
 
 class MainWindow(QDeclarativeView):
   def __init__(self, qmlFile, controller, accountModel, folderModel, headerModel, configModel):
