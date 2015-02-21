@@ -43,7 +43,7 @@ sub validateSecrets($);
 sub modifySecrets($$);
 
 my $SMTP_CLI_EXEC = "smtp-cli";
-my $TMP_DIR = "/tmp";
+my $TMP_DIR = "/var/tmp";
 
 my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
