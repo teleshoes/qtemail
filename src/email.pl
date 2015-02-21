@@ -42,7 +42,7 @@ sub readSecrets();
 sub validateSecrets($);
 sub modifySecrets($$);
 
-my $SMTP_CLI_EXEC = "smtp-cli";
+my $SMTP_CLI_EXEC = "/opt/qtemail/bin/smtp-cli";
 my $TMP_DIR = "/var/tmp";
 
 my $secretsFile = "$ENV{HOME}/.secrets";
