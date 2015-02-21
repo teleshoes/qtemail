@@ -43,6 +43,7 @@ sub validateSecrets($);
 sub modifySecrets($$);
 
 my $SMTP_CLI_EXEC = "smtp-cli";
+my $TMP_DIR = "/tmp";
 
 my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
@@ -397,7 +398,7 @@ sub main(@){
     my ($accName, $destDir, @uids);
     if($cmd =~ /^(--body|--body-html)/){
       ($accName, @uids) = @_;
-      $destDir = "/tmp";
+      $destDir = $TMP_DIR;
       die $usage if not defined $accName or @uids == 0;
     }elsif($cmd =~ /^(--attachments)$/){
       ($accName, $destDir, @uids) = @_;
