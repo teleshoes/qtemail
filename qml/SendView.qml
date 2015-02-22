@@ -31,6 +31,13 @@ Rectangle {
       return bcc.setEmails(emails)
     }
 
+    function getAttachments(){
+      return attachments.getFiles()
+    }
+    function setAttachments(files){
+      return attachments.setFiles(files)
+    }
+
     function getSubject(){
       return subject.getValue()
     }
@@ -49,7 +56,7 @@ Rectangle {
   Flickable {
     id: sendFlickable
     contentWidth: parent.width
-    contentHeight: to.height + cc.height + bcc.height + subject.height + body.height
+    contentHeight: to.height + cc.height + bcc.height + subject.height + attachments.height + body.height
     anchors.fill: parent
     flickableDirection: Flickable.VerticalFlick
     boundsBehavior: Flickable.DragOverBounds
@@ -78,18 +85,24 @@ Rectangle {
       height: 150
       width: parent.width
     }
-    LongField {
+    FileSelectorField {
+      id: attachments
+      labelText: "ATTACHMENTS"
       anchors {left: parent.left; right: parent.right; top: bcc.bottom}
+      isDark: true
+    }
+    LongField {
+      anchors {left: parent.left; right: parent.right; top: attachments.bottom}
       id: subject
       labelText: "SUBJECT"
-      isDark: true
+      isDark: false
       fontSize: 20
     }
     MultiLineField {
       anchors {left: parent.left; right: parent.right; top: subject.bottom}
       id: body
       labelText: "BODY"
-      isDark: false
+      isDark: true
       cursorFollow: sendFlickable
       fontSize: 20
     }
