@@ -1,3 +1,10 @@
+qtemail (0.1.0) UNRELEASED; urgency=low
+  * Add a file-browser for selecting attachments in send
+  * Fix smtp-cli path location
+  * Use /var/tmp instead of /tmp
+  * Improve config view, add descriptions
+ -- teleshoes <elliot.wolk@gmail.com>  Fri, 22 Feb 2015 04:28:15 -0500
+
 qtemail (0.0.9) UNRELEASED; urgency=low
   * Add Ignoresizeerrors to fix certain stupid IMAP servers
   * Fix error where no configured accounts breaks harmattan UI
