@@ -355,6 +355,7 @@ class Controller(QObject):
     bcc = sendForm.getBCC()
     subject = sendForm.getSubject()
     body = sendForm.getBody()
+    attachments = sendForm.getAttachments()
     if len(to) == 0:
       notifier.notify("TO is empty\n")
       return
@@ -371,6 +372,8 @@ class Controller(QObject):
       cmd += ["--cc", email]
     for email in bcc:
       cmd += ["--bcc", email]
+    for att in attachments:
+      cmd += ["--attach", att]
 
     self.startEmailCommandThread(cmd, None,
       self.onSendEmailFinished, {'notifier': notifier})
