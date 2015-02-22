@@ -660,6 +660,18 @@ class FileSystemController(QObject):
     index = self.dirModel.index(path)
     self.dirModel.refresh(parent=index)
 
+  @Slot(result=bool)
+  def checkDirModelFucked(self):
+    try:
+      if self.dirModel:
+        self.dirModel.isReadOnly()
+    except:
+      print "\n\n\n\n\n\nQDirModel is FUUUUUUCKED\n\n"
+      self.dirModel = None
+      self.ensureDirModel()
+      return True
+    return False
+
 
 class EmailCommandThread(QThread):
   commandFinished = Signal(bool, str, object, list)
