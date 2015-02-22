@@ -1,11 +1,13 @@
 import QtQuick 1.1
 
 Rectangle {
-  height: 500
+  height: isExpanded ? 500 : labelContainer.height
   width: parent.width
 
   property alias labelText: label.text
   property bool isDark: false
+
+  property bool isExpanded: false
 
   color: isDark ? "#444444" : "#666666"
 
@@ -41,10 +43,21 @@ Rectangle {
       font.pointSize: 20
       font.weight: Font.DemiBold
     }
+    Btn {
+      height: parent.height
+      anchors.right: parent.right
+      anchors.rightMargin: 20
+      width: 100
+      text: isExpanded ? "hide" : "show"
+      onClicked: {
+        isExpanded = !isExpanded
+      }
+    }
   }
 
   Column {
     id: leftColumn
+    visible: isExpanded
     width: parent.width * 0.5
     height: parent.height - labelContainer.height
     anchors.top: labelContainer.bottom
@@ -58,6 +71,7 @@ Rectangle {
   }
   Column {
     id: rightColumn
+    visible: isExpanded
     width: parent.width * 0.5
     height: parent.height - labelContainer.height
     anchors.left: leftColumn.right
