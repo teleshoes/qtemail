@@ -34,6 +34,8 @@ Rectangle {
       id: label
       anchors.fill: parent
       font.pointSize: fontSize
+      font.capitalization: Font.AllUppercase
+      font.weight: Font.DemiBold
     }
   }
 
