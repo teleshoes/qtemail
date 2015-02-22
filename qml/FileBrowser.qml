@@ -63,6 +63,7 @@ Rectangle {
   }
 
   function setFileSelected(modelIndex){
+    checkDirModel()
     if(modelIndex == null){
       value = ""
       treeModel.rootIndex = 0
@@ -75,8 +76,16 @@ Rectangle {
       }
     }
   }
+  function checkDirModel(){
+    if(fs.checkDirModelFucked()){
+      treeModel.model = fs.getDirModel()
+      setFileSelectedByPath("/")
+      clear()
+    }
+  }
 
   function clear(){
+    checkDirModel()
     setFileSelected(null)
   }
 
