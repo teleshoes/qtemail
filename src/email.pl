@@ -51,8 +51,8 @@ my @configKeys = qw(user password server port);
 my @extraConfigKeys = qw(inbox sent folders ssl smtp_server smtp_port);
 
 my @headerFields = qw(Date Subject From To);
-my $unreadCountsFile = "$ENV{HOME}/.unread-counts";
 my $emailDir = "$ENV{HOME}/.cache/email";
+my $unreadCountsFile = "$emailDir/unread-counts";
 
 my $VERBOSE = 0;
 my $DATE_FORMAT = "%Y-%m-%d %H:%M:%S";
