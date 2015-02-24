@@ -585,7 +585,7 @@ sub formatStatusLine(@){
       push @fmts, $fmt if $count > 0;
     }
   }
-  return "@fmts";
+  return "@fmts\n";
 }
 
 sub mergeUnreadCounts($@){
