@@ -9,6 +9,7 @@ use Date::Parse qw(str2time);
 use Date::Format qw(time2str);
 
 sub setFlagStatus($$$$);
+sub formatStatusLine(@);
 sub mergeUnreadCounts($@);
 sub readUnreadCounts();
 sub writeUnreadCounts($@);
@@ -67,7 +68,7 @@ my $okCmds = join "|", qw(
   --update --header --body --body-html --attachments
   --smtp
   --mark-read --mark-unread
-  --accounts --folders --print --summary --unread-line
+  --accounts --folders --print --summary --status-line
   --has-error --has-new-unread --has-unread
   --read-config --write-config
 );
@@ -168,7 +169,7 @@ my $usage = "
   $0 --summary [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers
 
-  $0 --unread-line [ACCOUNT_NAME ACCOUNT_NAME ...]
+  $0 --status-line [ACCOUNT_NAME ACCOUNT_NAME ...]
     does not fetch anything, merely reads $unreadCountsFile
     format and print $unreadCountsFile
     the string is a space-separated list of the first character of
@@ -498,22 +499,10 @@ sub main(@){
           ;
       }
     }
-  }elsif($cmd =~ /^(--unread-line)$/){
+  }elsif($cmd =~ /^(--status-line)$/){
     my @accNames = @_ == 0 ? @accOrder : @_;
-    my $counts = readUnreadCounts();
-    my @fmts;
-    for my $accName(@accNames){
-      die "Unknown account $accName\n" if not defined $$counts{$accName};
-      my $count = $$counts{$accName};
-      my $errorFile = "$emailDir/$accName/error";
-      my $fmt = substr($accName, 0, 1) . $count;
-      if(-f $errorFile){
-        push @fmts, "$fmt!err";
-      }else{
-        push @fmts, $fmt if $count > 0;
-      }
-    }
-    print "@fmts";
+    my $line = formatStatusLine(@accNames);
+    print $line;
   }elsif($cmd =~ /^(--has-error)$/){
     my @accNames = @_ == 0 ? @accOrder : @_;
     for my $accName(@accNames){
@@ -566,6 +555,24 @@ sub setFlagStatus($$$$){
     print "$uid $flag => false\n" if $VERBOSE;
     $c->unset_flag($flag, $uid) or die "FAILED: unset flag on $uid\n";
   }
+}
+
+sub formatStatusLine(@){
+  my @accNames = @_;
+  my $counts = readUnreadCounts();
+  my @fmts;
+  for my $accName(@accNames){
+    die "Unknown account $accName\n" if not defined $$counts{$accName};
+    my $count = $$counts{$accName};
+    my $errorFile = "$emailDir/$accName/error";
+    my $fmt = substr($accName, 0, 1) . $count;
+    if(-f $errorFile){
+      push @fmts, "$fmt!err";
+    }else{
+      push @fmts, $fmt if $count > 0;
+    }
+  }
+  return "@fmts";
 }
 
 sub mergeUnreadCounts($@){
