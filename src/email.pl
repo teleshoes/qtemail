@@ -9,6 +9,7 @@ use Date::Parse qw(str2time);
 use Date::Format qw(time2str);
 
 sub setFlagStatus($$$$);
+sub writeStatusLineFile(@);
 sub formatStatusLine(@);
 sub mergeUnreadCounts($@);
 sub readUnreadCounts();
@@ -54,6 +55,7 @@ my @extraConfigKeys = qw(inbox sent folders ssl smtp_server smtp_port);
 my @headerFields = qw(Date Subject From To);
 my $emailDir = "$ENV{HOME}/.cache/email";
 my $unreadCountsFile = "$emailDir/unread-counts";
+my $statusLineFile = "$emailDir/status-line";
 
 my $VERBOSE = 0;
 my $DATE_FORMAT = "%Y-%m-%d %H:%M:%S";
@@ -264,6 +266,7 @@ sub main(@){
         my $msg = "ERROR: Could not authenticate $$acc{name} ($$acc{user})\n";
         warn $msg;
         writeError $accName, $msg;
+        writeStatusLineFile(@accOrder);
         next;
       }
 
@@ -277,6 +280,7 @@ sub main(@){
           my $msg = "ERROR: Could not open folder $folderName\n";
           warn $msg;
           writeError $accName, $msg;
+          writeStatusLineFile(@accOrder);
           next;
         }
 
@@ -300,6 +304,7 @@ sub main(@){
       writeLastUpdated $accName unless hasError $accName;
     }
     mergeUnreadCounts $counts, @accOrder;
+    writeStatusLineFile(@accOrder);
     exit $isError ? 1 : 0;
   }elsif($cmd =~ /^(--smtp)$/){
     die $usage if @_ < 4;
@@ -345,6 +350,7 @@ sub main(@){
     writeUidFile $$acc{name}, $folderName, "unread", @unread;
     my $count = @unread;
     mergeUnreadCounts {$accName => $count}, @accOrder;
+    writeStatusLineFile(@accOrder);
     $c->close();
     $c->logout();
   }elsif($cmd =~ /^(--accounts)$/){
@@ -557,6 +563,13 @@ sub setFlagStatus($$$$){
   }
 }
 
+sub writeStatusLineFile(@){
+  my @accNames = @_;
+  my $line = formatStatusLine @accNames;
+  open FH, "> $statusLineFile" or die "Could not write $statusLineFile\n";
+  print FH $line;
+  close FH;
+}
 sub formatStatusLine(@){
   my @accNames = @_;
   my $counts = readUnreadCounts();
