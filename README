@@ -119,10 +119,10 @@ Usage:
           ~/.cache/email/ACCOUNT_NAME/FOLDER_NAME/unread
         -write all message UIDs that are now in unread and were not before
           ~/.cache/email/ACCOUNT_NAME/FOLDER_NAME/new-unread
-    -update global unread counts file ~/.unread-counts
-      ignored or missing accounts are preserved in ~/.unread-counts
+    -update global unread counts file ~/.cache/email/unread-counts
+      ignored or missing accounts are preserved in ~/.cache/email/unread-counts
 
-      write the unread counts, one line per account, to ~/.unread-counts
+      write the unread counts, one line per account, to ~/.cache/email/unread-counts
       e.g.: 3:AOL
             6:GMAIL
             0:WORK_GMAIL
@@ -130,7 +130,7 @@ Usage:
   /usr/bin/email.pl --smtp ACCOUNT_NAME SUBJECT BODY TO [ARG ARG ..]
     simple wrapper around smtp-cli. {you can add extra recipients with --to}
     calls:
-      smtp-cli \
+      /opt/qtemail/bin/smtp-cli \
         --server=<smtp_server> --port=<smtp_port> \
         --user=<user> --pass=<password> \
         --from=<user> \
@@ -164,15 +164,19 @@ Usage:
   /usr/bin/email.pl --body-html [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but prefer HTML instead of plaintext
 
+  /usr/bin/email.pl --attachments [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_DIR UID [UID UID ...]
+    download the body of the indicated message(s) and save any attachments to DEST_DIR
+    if body is cached, skip download
+
   /usr/bin/email.pl --print [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers and bodies
 
   /usr/bin/email.pl --summary [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers
 
-  /usr/bin/email.pl --unread-line [ACCOUNT_NAME ACCOUNT_NAME ...]
-    does not fetch anything, merely reads ~/.unread-counts
-    format and print ~/.unread-counts
+  /usr/bin/email.pl --status-line [ACCOUNT_NAME ACCOUNT_NAME ...]
+    does not fetch anything, merely reads ~/.cache/email/unread-counts
+    format and print ~/.cache/email/unread-counts
     the string is a space-separated list of the first character of
       each account name followed by the integer count
     no newline character is printed
