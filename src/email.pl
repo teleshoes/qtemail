@@ -50,7 +50,7 @@ my $TMP_DIR = "/var/tmp";
 my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
 my @configKeys = qw(user password server port);
-my @extraConfigKeys = qw(inbox sent folders ssl smtp_server smtp_port);
+my @extraConfigKeys = qw(inbox sent folders ssl smtp_server smtp_port new_unread_cmd);
 
 my @headerFields = qw(Date Subject From To);
 my $emailDir = "$ENV{HOME}/.cache/email";
@@ -256,6 +256,7 @@ sub main(@){
     my @accNames = @_ == 0 ? @accOrder : @_;
     my $counts = {};
     my $isError = 0;
+    my @newUnreadCommands;
     for my $accName(@accNames){
       my $acc = $$accounts{$accName};
       die "Unknown account $accName\n" if not defined $acc;
@@ -272,6 +273,7 @@ sub main(@){
 
       my $folders = $accFolders{$accName};
       my $unreadCount = 0;
+      my $hasNewUnread = 0;
       for my $folderName(sort keys %$folders){
         my $imapFolder = $$folders{$folderName};
         my $f = openFolder($imapFolder, $c, 0);
@@ -297,14 +299,25 @@ sub main(@){
         writeUidFile $accName, $folderName, "unread", @unread;
         my @newUnread = grep {not defined $oldUnread{$_}} @unread;
         writeUidFile $accName, $folderName, "new-unread", @newUnread;
-
+        $hasNewUnread = 1 if @newUnread > 0;
       }
       $c->logout();
       $$counts{$accName} = $unreadCount;
-      writeLastUpdated $accName unless hasError $accName;
+      my $hasError = hasError $accName;
+      if(not $hasError){
+        writeLastUpdated $accName;
+        if($hasNewUnread){
+          my $cmd = $$acc{new_unread_cmd};
+          push @newUnreadCommands, $cmd if defined $cmd and $cmd !~ /^\s*$/;
+        }
+      }
     }
     mergeUnreadCounts $counts, @accOrder;
     writeStatusLineFile(@accOrder);
+    for my $cmd(@newUnreadCommands){
+      print "running new_unread_cmd: $cmd\n";
+      system "$cmd";
+    }
     exit $isError ? 1 : 0;
   }elsif($cmd =~ /^(--smtp)$/){
     die $usage if @_ < 4;
