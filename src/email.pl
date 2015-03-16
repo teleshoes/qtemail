@@ -51,7 +51,7 @@ my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
 my @accConfigKeys = qw(user password server port);
 my @accExtraConfigKeys = qw(inbox sent folders ssl smtp_server smtp_port new_unread_cmd);
-my @globalConfigKeys = qw();
+my @globalConfigKeys = qw(update_cmd);
 
 my @headerFields = qw(Date Subject From To);
 my $emailDir = "$ENV{HOME}/.cache/email";
@@ -315,6 +315,9 @@ sub main(@){
     }
     mergeUnreadCounts $counts, @accOrder;
     writeStatusLineFile(@accOrder);
+    if(defined $$config{update_cmd}){
+      system "$$config{update_cmd}";
+    }
     for my $cmd(@newUnreadCommands){
       print "running new_unread_cmd: $cmd\n";
       system "$cmd";
