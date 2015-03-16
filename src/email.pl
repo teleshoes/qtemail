@@ -25,7 +25,7 @@ sub readUidFileCounts($$$);
 sub readUidFile($$$);
 sub writeUidFile($$$@);
 sub cacheAllHeaders($$$);
-sub cacheBodies($$$@);
+sub cacheBodies($$$$@);
 sub getBody($$$);
 sub writeAttachments($$);
 sub parseMimeEntity($);
@@ -303,7 +303,7 @@ sub main(@){
         my @unread = $c->unseen;
         $unreadCount += @unread;
 
-        cacheBodies($accName, $folderName, $c, @unread);
+        cacheBodies($accName, $folderName, $c, undef, @unread);
 
         $c->close();
 
@@ -463,7 +463,7 @@ sub main(@){
           my $f = openFolder($imapFolder, $c, 0);
           die "Error getting folder $folderName\n" if not defined $f;
         }
-        cacheBodies($accName, $folderName, $c, $uid);
+        cacheBodies($accName, $folderName, $c, undef, $uid);
         $body = readCachedBody($accName, $folderName, $uid);
       }
       if(not defined $body){
@@ -834,13 +834,20 @@ sub cacheAllHeaders($$$){
   print "\n" if $segment > 0 and $VERBOSE;
 }
 
-sub cacheBodies($$$@){
-  my ($accName, $folderName, $c, @messages) = @_;
+sub cacheBodies($$$$@){
+  my ($accName, $folderName, $c, $maxCap, @messages) = @_;
   my $bodiesDir = "$emailDir/$accName/$folderName/bodies";
   system "mkdir", "-p", $bodiesDir;
 
   my %toSkip = map {$_ => 1} getCachedBodyUids($accName, $folderName);
   @messages = grep {not defined $toSkip{$_}} @messages;
+  if(defined $maxCap and $maxCap > 0 and @messages > $maxCap){
+    my $count = @messages;
+    print "only caching $maxCap out of $count\n";
+    @messages = reverse @messages;
+    @messages = splice @messages, 0, $maxCap;
+    @messages = reverse @messages;
+  }
   print "caching bodies for " . @messages . " messages\n" if $VERBOSE;
 
   for my $uid(@messages){
