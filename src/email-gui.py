@@ -473,7 +473,7 @@ class Controller(QObject):
   @Slot(QObject, QObject, QObject)
   def updateAccount(self, indicator, messageBox, account):
     if account == None:
-      accMsg = "ALL ACCOUNTS"
+      accMsg = "ALL ACCOUNTS WITHOUT SKIP"
     else:
       accMsg = account.Name
     self.onAppendMessage(messageBox, "STARTING UPDATE FOR " + accMsg + "\n")
