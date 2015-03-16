@@ -49,8 +49,9 @@ my $TMP_DIR = "/var/tmp";
 
 my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
-my @configKeys = qw(user password server port);
-my @extraConfigKeys = qw(inbox sent folders ssl smtp_server smtp_port new_unread_cmd);
+my @accConfigKeys = qw(user password server port);
+my @accExtraConfigKeys = qw(inbox sent folders ssl smtp_server smtp_port new_unread_cmd);
+my @globalConfigKeys = qw();
 
 my @headerFields = qw(Date Subject From To);
 my $emailDir = "$ENV{HOME}/.cache/email";
@@ -1093,9 +1094,13 @@ sub readSecrets(){
   my @lines = `cat $secretsFile 2>/dev/null`;
   my $accounts = {};
   my $accOrder = [];
-  my $okConfigKeys = join "|", (@configKeys, @extraConfigKeys);
+  my $okAccConfigKeys = join "|", (@accConfigKeys, @accExtraConfigKeys);
+  my $okGlobalConfigKeys = join "|", (@globalConfigKeys);
+  my %globalConfig;
   for my $line(@lines){
-    if($line =~ /^$secretsPrefix\.(\w+)\.($okConfigKeys)\s*=\s*(.+)$/){
+    if($line =~ /^$secretsPrefix\.($okGlobalConfigKeys)\s*=\s*(.+)$/){
+      $globalConfig{$1} = $2;
+    }elsif($line =~ /^$secretsPrefix\.(\w+)\.($okAccConfigKeys)\s*=\s*(.+)$/){
       my ($accName, $key, $val)= ($1, $2, $3);
       if(not defined $$accounts{$accName}){
         $$accounts{$1} = {name => $accName};
@@ -1104,7 +1109,7 @@ sub readSecrets(){
       $$accounts{$accName}{$key} = $val;
     }
   }
-  return {accounts => $accounts, accOrder => $accOrder};
+  return {accounts => $accounts, accOrder => $accOrder, %globalConfig};
 }
 
 sub validateSecrets($){
@@ -1112,7 +1117,7 @@ sub validateSecrets($){
   my $accounts = $$config{accounts};
   for my $accName(keys %$accounts){
     my $acc = $$accounts{$accName};
-    for my $key(sort @configKeys){
+    for my $key(sort @accConfigKeys){
       die "Missing '$key' for '$accName' in $secretsFile\n" if not defined $$acc{$key};
     }
   }
@@ -1134,7 +1139,7 @@ sub modifySecrets($$){
     push @newLines, $line unless $skip;
   }
 
-  my $okConfigKeys = join "|", (@configKeys, @extraConfigKeys);
+  my $okConfigKeys = join "|", (@accConfigKeys, @accExtraConfigKeys);
   for my $key(sort keys %$config){
     die "Unknown config key: $key\n" if $key !~ /^($okConfigKeys)$/;
     push @newLines, "$secretsPrefix.$accName.$key = $$config{$key}\n";
