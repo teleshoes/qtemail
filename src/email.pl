@@ -316,7 +316,9 @@ sub main(@){
     mergeUnreadCounts $counts, @accOrder;
     writeStatusLineFile(@accOrder);
     if(defined $$config{update_cmd}){
-      system "$$config{update_cmd}";
+      my $cmd = $$config{update_cmd};
+      print "running update_cmd: $cmd\n";
+      system "$cmd";
     }
     for my $cmd(@newUnreadCommands){
       print "running new_unread_cmd: $cmd\n";
