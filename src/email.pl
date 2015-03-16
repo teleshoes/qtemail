@@ -60,6 +60,7 @@ my $statusLineFile = "$emailDir/status-line";
 
 my $VERBOSE = 0;
 my $DATE_FORMAT = "%Y-%m-%d %H:%M:%S";
+my $MAX_UNREAD_TO_CACHE = 100;
 
 my $settings = {
   Peek => 1,
@@ -303,7 +304,7 @@ sub main(@){
         my @unread = $c->unseen;
         $unreadCount += @unread;
 
-        cacheBodies($accName, $folderName, $c, undef, @unread);
+        cacheBodies($accName, $folderName, $c, $MAX_UNREAD_TO_CACHE, @unread);
 
         $c->close();
 
