@@ -50,7 +50,7 @@ my $TMP_DIR = "/var/tmp";
 my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
 my @accConfigKeys = qw(user password server port);
-my @accExtraConfigKeys = qw(inbox sent folders ssl smtp_server smtp_port new_unread_cmd);
+my @accExtraConfigKeys = qw(inbox sent folders ssl smtp_server smtp_port new_unread_cmd skip);
 my @globalConfigKeys = qw(update_cmd);
 
 my @headerFields = qw(Date Subject From To);
@@ -106,7 +106,7 @@ my $usage = "
     show this message
 
   $0 [--update] [ACCOUNT_NAME ACCOUNT_NAME ...]
-    -for each account specified, or all if none are specified:
+    -for each account specified {or all non-skipped accounts if none are specified}:
       -login to IMAP server, or create file $emailDir/ACCOUNT_NAME/error
       -for each FOLDER_NAME:
         -fetch and write all message UIDs to
@@ -254,7 +254,18 @@ sub main(@){
 
   if($cmd =~ /^(--update)$/){
     $VERBOSE = 1;
-    my @accNames = @_ == 0 ? @accOrder : @_;
+    my @accNames;
+    if(@_ == 0){
+      for my $accName(@accOrder){
+        my $skip = $$accounts{$accName}{skip};
+        if(not defined $skip or $skip !~ /^true$/i){
+          push @accNames, $accName;
+        }
+      }
+    }else{
+      @accNames = @_;
+    }
+
     my $counts = {};
     my $isError = 0;
     my @newUnreadCommands;
