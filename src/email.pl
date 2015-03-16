@@ -106,10 +106,10 @@ my $usage = "
   $0 -h|--help
     show this message
 
-  $0 [--update] [ACCOUNT_NAME ACCOUNT_NAME ...]
+  $0 [--update] [--folder=FOLDER_NAME_FILTER] [ACCOUNT_NAME ACCOUNT_NAME ...]
     -for each account specified {or all non-skipped accounts if none are specified}:
       -login to IMAP server, or create file $emailDir/ACCOUNT_NAME/error
-      -for each FOLDER_NAME:
+      -for each FOLDER_NAME {or just FOLDER_NAME_FILTER if specified}:
         -fetch and write all message UIDs to
           $emailDir/ACCOUNT_NAME/FOLDER_NAME/all
         -fetch and cache all message headers in
@@ -255,6 +255,11 @@ sub main(@){
 
   if($cmd =~ /^(--update)$/){
     $VERBOSE = 1;
+    my $folderNameFilter;
+    if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
+      $folderNameFilter = $1;
+      shift;
+    }
     my @accNames;
     if(@_ == 0){
       for my $accName(@accOrder){
@@ -288,6 +293,10 @@ sub main(@){
       my $unreadCount = 0;
       my $hasNewUnread = 0;
       for my $folderName(sort keys %$folders){
+        if(defined $folderNameFilter and $folderName ne $folderNameFilter){
+          print "skipping $folderName\n";
+          next;
+        }
         my $imapFolder = $$folders{$folderName};
         my $f = openFolder($imapFolder, $c, 0);
         if(not defined $f){
