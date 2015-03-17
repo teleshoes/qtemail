@@ -1193,7 +1193,7 @@ sub modifySecrets($$){
   for my $key(sort keys %$config){
     die "Unknown config key: $key\n" if $key !~ /^($okConfigKeys)$/;
     my $val = $$config{$key};
-    if(defined $encryptCmd and $key =~ /password/){
+    if(defined $encryptCmd and $key =~ /password/i){
       $val =~ s/'/'\\''/g;
       $val = `$encryptCmd '$val'`;
       die "error encrypting password\n" if $? != 0;
