@@ -135,7 +135,7 @@ class EmailManager():
   def readAccountConfig(self, accName):
     fields = [ "name",        "single-word account ID, e.g.: \"Work\""
              , "user",        "IMAP user, usually the full email address"
-             , "password",    "your password, stored in plaintext"
+             , "password",    "password, stored with optional encrypt_cmd"
              , "server",      "IMAP server, e.g.: \"imap.gmail.com\""
              , "port",        "IMAP port"
              , "sent",        "[OPT] sent folder, e.g: \"Sent\""
