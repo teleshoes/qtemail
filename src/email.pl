@@ -74,7 +74,7 @@ my $okCmds = join "|", qw(
   --mark-read --mark-unread
   --accounts --folders --print --summary --status-line
   --has-error --has-new-unread --has-unread
-  --read-config --write-config
+  --read-config --write-config --read-options --write-options
 );
 
 my $usage = "
@@ -212,6 +212,16 @@ my $usage = "
     for each KEY/VAL pair:
       removes any line that matches \"$secretsPrefix.ACCOUNT_NAME.KEY\\s*=\"
       adds a line at the end \"$secretsPrefix.ACCOUNT_NAME.KEY = VAL\"
+
+  $0 --read-options
+    reads $secretsFile
+    for each line of the form \"$secretsPrefix.KEY\\s*=\\s*VAL\"
+      print KEY=VAL
+
+  $0 --write-options KEY=VAL [KEY=VAL KEY=VAL]
+    reads $secretsFile
+    for each line of the form \"$secretsPrefix.KEY\\s*=\\s*VAL\"
+      print KEY=VAL
 ";
 
 sub main(@){
@@ -220,21 +230,35 @@ sub main(@){
 
   die $usage if @_ > 0 and $_[0] =~ /^(-h|--help)$/;
 
-  if($cmd =~ /^(--read-config)$/){
-    die $usage if @_ != 1;
-    my $accName = shift;
+  if($cmd =~ /^(--read-config|--read-options)$/){
+    my $configGroup;
+    if($cmd eq "--read-config"){
+      die $usage if @_ != 1;
+      $configGroup = shift;
+    }elsif($cmd eq "--read-options"){
+      die $usage if @_ != 0;
+      $configGroup = undef;
+    }
     my $config = readSecrets;
     my $accounts = $$config{accounts};
-    if(defined $$accounts{$accName}){
-      my $acc = $$accounts{$accName};
-      for my $key(keys %$acc){
-        print "$key=$$acc{$key}\n";
+    my $options = $$config{options};
+    my $vals = defined $configGroup ? $$accounts{$configGroup} : $options;
+    if(defined $vals){
+      for my $key(keys %$vals){
+        print "$key=$$vals{$key}\n";
       }
     }
     exit 0;
-  }elsif($cmd =~ /^(--write-config)$/){
-    my ($accName, @keyValPairs) = @_;
-    die $usage if not defined $accName or @keyValPairs == 0;
+  }elsif($cmd =~ /^(--write-config|--write-options)$/){
+    my $configGroup;
+    if($cmd eq "--read-config"){
+      die $usage if @_ < 2;
+      $configGroup = shift;
+    }elsif($cmd eq "--write-options"){
+      die $usage if @_ < 1;
+      $configGroup = undef;
+    }
+    my @keyValPairs = @_;
     my $config = {};
     for my $keyValPair(@keyValPairs){
       if($keyValPair =~ /^(\w+)=(.*)$/){
@@ -243,7 +267,7 @@ sub main(@){
         die "Malformed KEY=VAL pair: $keyValPair\n";
       }
     }
-    modifySecrets $accName, $config;
+    modifySecrets $configGroup, $config;
     exit 0;
   }
 
