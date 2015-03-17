@@ -1,3 +1,16 @@
+qtemail (0.1.1) UNRELEASED; urgency=low
+  * Config 'new_unread_cmd' for per-account alerts
+  * Config 'skip' config to ignore an account during --update
+  * Add non-account-specific options config
+  * Config 'encrypt_cmd'/'decrypt_cmd' for password storage
+  * Config 'update_cmd' for actively updating displays
+  * Show success/failure when saving config
+  * Fail on saving empty required config options
+  * Do not re-order config options when saving
+  * Add status-line file for passively updating displays
+  * Only auto-cache the bodies of 100 most recent unread emails
+ -- teleshoes <elliot.wolk@gmail.com>  Tue, 17 Mar 2015 00:10:01 -0400
+
 qtemail (0.1.0) UNRELEASED; urgency=low
   * Add a file-browser for selecting attachments in send
   * Fix smtp-cli path location
