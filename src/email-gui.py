@@ -176,6 +176,13 @@ class EmailManager():
     if accName != None:
       cmd = [EMAIL_BIN, "--read-config", accName]
     return self.readConfig(schema, cmd)
+  def readOptionsConfig(self):
+    schema = [ "update_cmd",     "[OPT] command to run after all updates"
+             , "encrypt_cmd",    "[OPT] command to encrypt passwords on disk"
+             , "decrypt_cmd",    "[OPT] command to decrypt saved passwords"
+             ]
+    cmd = [EMAIL_BIN, "--read-options"]
+    return self.readConfig(schema, cmd)
 
   def writeConfig(self, fieldValues, cmd):
     keyVals = []
@@ -193,6 +200,10 @@ class EmailManager():
       else:
         fieldValues.append(field)
     cmd = [EMAIL_BIN, "--write-config", accName]
+    self.writeConfig(fieldValues, cmd)
+  def writeOptionsConfig(self, fields):
+    fieldValues = fields
+    cmd = [EMAIL_BIN, "--write-options"]
     self.writeConfig(fieldValues, cmd)
 
   def getAccounts(self):
