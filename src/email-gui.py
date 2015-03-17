@@ -165,7 +165,9 @@ class EmailManager():
         value = config[fieldName]
       else:
         value = ""
-      fields.append(Field(fieldName, value, fieldDescriptions[fieldName]))
+      pwRegex = re.compile('password|pword|^pw$', re.IGNORECASE)
+      isPass = pwRegex.search(fieldName) != None
+      fields.append(Field(fieldName, isPass, value, fieldDescriptions[fieldName]))
     return fields
   def writeAccountConfig(self, fields):
     keyVals = []
@@ -845,19 +847,23 @@ class Header(QObject):
   IsLoading = Property(bool, IsLoading, notify=changed)
 
 class Field(QObject):
-  def __init__(self, fieldName_, value_, description_):
+  def __init__(self, fieldName_, isPassword_, value_, description_):
     QObject.__init__(self)
     self.fieldName_ = fieldName_
+    self.isPassword_ = isPassword_
     self.value_ = value_
     self.description_ = description_
   def FieldName(self):
     return self.fieldName_
+  def IsPassword(self):
+    return self.isPassword_
   def Value(self):
     return self.value_
   def Description(self):
     return self.description_
   changed = Signal()
   FieldName = Property(unicode, FieldName, notify=changed)
+  IsPassword = Property(bool, IsPassword, notify=changed)
   Value = Property(unicode, Value, notify=changed)
   Description = Property(unicode, Description, notify=changed)
 
