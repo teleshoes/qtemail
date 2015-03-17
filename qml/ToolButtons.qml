@@ -28,7 +28,10 @@ Item {
       property variant name: "config"
       property variant text: "config"
       property variant iconName: "settings"
-      onClicked: navToPage(configPage)
+      onClicked: {
+        controller.setConfigMode("account")
+        navToPage(configPage)
+      }
     }
     Item {
       signal clicked
