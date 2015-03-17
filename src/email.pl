@@ -1130,6 +1130,13 @@ sub readSecrets(){
   my $okAccConfigKeys = join "|", (@accConfigKeys, @accExtraConfigKeys);
   my $okGlobalConfigKeys = join "|", (@globalConfigKeys);
   my %globalConfig;
+  my $decryptCmd;
+  for my $line(@lines){
+    if($line =~ /^$secretsPrefix\.decrypt_cmd\s*=\s*(.*)$/){
+      $decryptCmd = $1;
+      last;
+    }
+  }
   for my $line(@lines){
     if($line =~ /^$secretsPrefix\.($okGlobalConfigKeys)\s*=\s*(.+)$/){
       $globalConfig{$1} = $2;
@@ -1138,6 +1145,12 @@ sub readSecrets(){
       if(not defined $$accounts{$accName}){
         $$accounts{$1} = {name => $accName};
         push @$accOrder, $accName;
+      }
+      if(defined $decryptCmd and $key =~ /password/){
+        $val =~ s/'/'\\''/g;
+        $val = `$decryptCmd '$val'`;
+        die "error encrypting password\n" if $? != 0;
+        chomp $val;
       }
       $$accounts{$accName}{$key} = $val;
     }
@@ -1161,7 +1174,11 @@ sub modifySecrets($$){
   die "invalid account name, must be a word i.e.: \\w+\n" if $accName !~ /^\w+$/;
   my @lines = `cat $secretsFile 2>/dev/null`;
   my @newLines;
+  my $encryptCmd;
   for my $line(@lines){
+    if(not defined $encryptCmd and $line =~ /^$secretsPrefix\.encrypt_cmd\s*=\s*(.*)$/){
+      $encryptCmd = $1;
+    }
     my $skip = 0;
     for my $key(sort keys %$config){
       if($line =~ /^$secretsPrefix\.$accName\.$key\s*=/){
@@ -1175,7 +1192,14 @@ sub modifySecrets($$){
   my $okConfigKeys = join "|", (@accConfigKeys, @accExtraConfigKeys);
   for my $key(sort keys %$config){
     die "Unknown config key: $key\n" if $key !~ /^($okConfigKeys)$/;
-    push @newLines, "$secretsPrefix.$accName.$key = $$config{$key}\n";
+    my $val = $$config{$key};
+    if(defined $encryptCmd and $key =~ /password/){
+      $val =~ s/'/'\\''/g;
+      $val = `$encryptCmd '$val'`;
+      die "error encrypting password\n" if $? != 0;
+      chomp $val;
+    }
+    push @newLines, "$secretsPrefix.$accName.$key = $val\n";
   }
 
   open FH, "> $secretsFile" or die "Could not write $secretsFile\n";
