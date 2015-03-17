@@ -133,15 +133,15 @@ class EmailManager():
     return self.emailRegex.findall(string)
 
   def readAccountConfig(self, accName):
-    fields = [ "name",        "single-word account ID, e.g.: \"Work\""
-             , "user",        "IMAP user, usually the full email address"
-             , "password",    "password, stored with optional encrypt_cmd"
-             , "server",      "IMAP server, e.g.: \"imap.gmail.com\""
-             , "port",        "IMAP port"
-             , "sent",        "[OPT] sent folder, e.g: \"Sent\""
-             , "ssl",         "[OPT] set to false if necessary"
-             , "smtp_server", "[OPT] SMTP server. e.g.: \"smtp.gmail.com\""
-             , "smtp_port",   "[OPT] SMTP port"
+    fields = [ "name",           "single-word account ID, e.g.: \"Work\""
+             , "user",           "IMAP user, usually the full email address"
+             , "password",       "password, stored with optional encrypt_cmd"
+             , "server",         "IMAP server, e.g.: \"imap.gmail.com\""
+             , "port",           "IMAP port"
+             , "sent",           "[OPT] sent folder, e.g: \"Sent\""
+             , "ssl",            "[OPT] set to false if necessary"
+             , "smtp_server",    "[OPT] SMTP server. e.g.: \"smtp.gmail.com\""
+             , "smtp_port",      "[OPT] SMTP port"
              ]
     fieldNames = fields[0::2]
     fieldDescriptions = dict(zip(fields[0::2], fields[1::2]))
