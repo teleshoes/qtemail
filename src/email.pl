@@ -1206,20 +1206,11 @@ sub modifySecrets($$){
   }
 
   my @lines = `cat $secretsFile 2>/dev/null`;
-  my @newLines;
   my $encryptCmd;
   for my $line(@lines){
     if(not defined $encryptCmd and $line =~ /^$secretsPrefix\.encrypt_cmd\s*=\s*(.*)$/){
       $encryptCmd = $1;
     }
-    my $skip = 0;
-    for my $key(sort keys %$config){
-      if($line =~ /^$prefix\.$key\s*=/){
-        $skip = 1;
-        last;
-      }
-    }
-    push @newLines, $line unless $skip;
   }
 
   my $okConfigKeys = join "|", (@accConfigKeys, @accExtraConfigKeys);
@@ -1237,11 +1228,19 @@ sub modifySecrets($$){
       die "error encrypting password\n" if $? != 0;
       chomp $val;
     }
-    push @newLines, "$prefix.$key = $val\n";
+    my $newLine = "$prefix.$key = $val\n";
+    my $found = 0;
+    for my $line(@lines){
+      if($line =~ s/^$prefix\.$key\s*=.*\n$/$newLine/){
+        $found = 1;
+        last;
+      }
+    }
+    push @lines, $newLine if not $found;
   }
 
   open FH, "> $secretsFile" or die "Could not write $secretsFile\n";
-  print FH @newLines;
+  print FH @lines;
   close FH;
 }
 
