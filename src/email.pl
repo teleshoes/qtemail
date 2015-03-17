@@ -51,7 +51,7 @@ my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
 my @accConfigKeys = qw(user password server port);
 my @accExtraConfigKeys = qw(inbox sent folders ssl smtp_server smtp_port new_unread_cmd skip);
-my @globalConfigKeys = qw(update_cmd encrypt_cmd decrypt_cmd);
+my @optionsConfigKeys = qw(update_cmd encrypt_cmd decrypt_cmd);
 
 my @headerFields = qw(Date Subject From To);
 my $emailDir = "$ENV{HOME}/.cache/email";
@@ -336,8 +336,8 @@ sub main(@){
     }
     mergeUnreadCounts $counts, @accOrder;
     writeStatusLineFile(@accOrder);
-    if(defined $$config{update_cmd}){
-      my $cmd = $$config{update_cmd};
+    if(defined $$config{options}{update_cmd}){
+      my $cmd = $$config{options}{update_cmd};
       print "running update_cmd: $cmd\n";
       system "$cmd";
     }
@@ -1128,8 +1128,8 @@ sub readSecrets(){
   my $accounts = {};
   my $accOrder = [];
   my $okAccConfigKeys = join "|", (@accConfigKeys, @accExtraConfigKeys);
-  my $okGlobalConfigKeys = join "|", (@globalConfigKeys);
-  my %globalConfig;
+  my $okOptionsConfigKeys = join "|", (@optionsConfigKeys);
+  my $optionsConfig = {};
   my $decryptCmd;
   for my $line(@lines){
     if($line =~ /^$secretsPrefix\.decrypt_cmd\s*=\s*(.*)$/){
@@ -1138,8 +1138,8 @@ sub readSecrets(){
     }
   }
   for my $line(@lines){
-    if($line =~ /^$secretsPrefix\.($okGlobalConfigKeys)\s*=\s*(.+)$/){
-      $globalConfig{$1} = $2;
+    if($line =~ /^$secretsPrefix\.($okOptionsConfigKeys)\s*=\s*(.+)$/){
+      $$optionsConfig{$1} = $2;
     }elsif($line =~ /^$secretsPrefix\.(\w+)\.($okAccConfigKeys)\s*=\s*(.+)$/){
       my ($accName, $key, $val)= ($1, $2, $3);
       if(not defined $$accounts{$accName}){
@@ -1155,7 +1155,7 @@ sub readSecrets(){
       $$accounts{$accName}{$key} = $val;
     }
   }
-  return {accounts => $accounts, accOrder => $accOrder, %globalConfig};
+  return {accounts => $accounts, accOrder => $accOrder, options => $optionsConfig};
 }
 
 sub validateSecrets($){
