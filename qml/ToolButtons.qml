@@ -2,7 +2,7 @@ import QtQuick 1.1
 
 Item {
   property variant pages: {
-    "accountPage": ["newAccount", "update"],
+    "accountPage": ["newAccount", "update", "options"],
     "folderPage": ["back"],
     "headerPage": ["back", "more", "wayMore", "all", "config", "send", "folder"],
     "bodyPage": ["back", "attachments", "toggleHtml", "reply", "forward"],
@@ -40,6 +40,16 @@ Item {
       property variant iconName: "add"
       onClicked: {
         controller.setConfigMode("account")
+        navToPage(configPage)
+      }
+    }
+    Item {
+      signal clicked
+      property variant name: "options"
+      property variant text: "options"
+      property variant iconName: "settings"
+      onClicked: {
+        controller.setConfigMode("options")
         navToPage(configPage)
       }
     }
