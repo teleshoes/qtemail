@@ -132,25 +132,13 @@ class EmailManager():
       return []
     return self.emailRegex.findall(string)
 
-  def readAccountConfig(self, accName):
-    fields = [ "name",           "single-word account ID, e.g.: \"Work\""
-             , "user",           "IMAP user, usually the full email address"
-             , "password",       "password, stored with optional encrypt_cmd"
-             , "server",         "IMAP server, e.g.: \"imap.gmail.com\""
-             , "port",           "IMAP port"
-             , "sent",           "[OPT] sent folder, e.g: \"Sent\""
-             , "ssl",            "[OPT] set to false if necessary"
-             , "smtp_server",    "[OPT] SMTP server. e.g.: \"smtp.gmail.com\""
-             , "smtp_port",      "[OPT] SMTP port"
-             , "new_unread_cmd", "[OPT] custom alert command"
-             , "skip",           "[OPT] set to true to skip during --update"
-             ]
-    fieldNames = fields[0::2]
-    fieldDescriptions = dict(zip(fields[0::2], fields[1::2]))
+  def readConfig(self, schema, cmd):
+    fieldNames = schema[0::2]
+    fieldDescriptions = dict(zip(schema[0::2], schema[1::2]))
 
     config = {}
-    if accName != None:
-      configOut = self.readProc([EMAIL_BIN, "--read-config", accName])
+    if cmd != None:
+      configOut = self.readProc(cmd)
       for line in configOut.splitlines():
         print line
         m = re.match("(\w+)=(.*)", line)
@@ -171,6 +159,24 @@ class EmailManager():
       isPass = pwRegex.search(fieldName) != None
       fields.append(Field(fieldName, isPass, value, fieldDescriptions[fieldName]))
     return fields
+  def readAccountConfig(self, accName):
+    schema = [ "name",           "single-word account ID, e.g.: \"Work\""
+             , "user",           "IMAP user, usually the full email address"
+             , "password",       "password, stored with optional encrypt_cmd"
+             , "server",         "IMAP server, e.g.: \"imap.gmail.com\""
+             , "port",           "IMAP port"
+             , "sent",           "[OPT] sent folder, e.g: \"Sent\""
+             , "ssl",            "[OPT] set to false if necessary"
+             , "smtp_server",    "[OPT] SMTP server. e.g.: \"smtp.gmail.com\""
+             , "smtp_port",      "[OPT] SMTP port"
+             , "new_unread_cmd", "[OPT] custom alert command"
+             , "skip",           "[OPT] set to true to skip during --update"
+             ]
+    cmd = None
+    if accName != None:
+      cmd = [EMAIL_BIN, "--read-config", accName]
+    return self.readConfig(schema, cmd)
+
   def writeAccountConfig(self, fields):
     keyVals = []
     accName = None
