@@ -1222,6 +1222,9 @@ sub modifySecrets($$){
       die "Unknown options key: $key\n" if $key !~ /^($okOptionsKeys)$/;
     }
     my $val = $$config{$key};
+    if($val =~ /^\s*$/){
+      next;
+    }
     if(defined $encryptCmd and $key =~ /password/i){
       $val =~ s/'/'\\''/g;
       $val = `$encryptCmd '$val'`;
