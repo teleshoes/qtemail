@@ -435,8 +435,13 @@ class Controller(QObject):
   def setupConfig(self):
     if self.configMode == "account":
       self.setupAccountConfig()
+    elif self.configMode == "options":
+      self.setupOptionsConfig()
   def setupAccountConfig(self):
     fields = self.emailManager.readAccountConfig(self.accountName)
+    self.configModel.setItems(fields)
+  def setupOptionsConfig(self):
+    fields = self.emailManager.readOptionsConfig()
     self.configModel.setItems(fields)
 
   @Slot(QObject, str)
@@ -447,6 +452,8 @@ class Controller(QObject):
     fields = self.configModel.getItems()
     if self.configMode == "account":
       self.emailManager.writeAccountConfig(fields)
+    elif self.configMode == "options":
+      self.emailManager.writeOptionsConfig(fields)
 
   @Slot(QObject)
   def accountSelected(self, account):
