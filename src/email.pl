@@ -1213,6 +1213,8 @@ sub modifySecrets($$){
     }
   }
 
+  my %requiredConfigKeys = map {$_ => 1} @accConfigKeys;
+
   my $okConfigKeys = join "|", (@accConfigKeys, @accExtraConfigKeys);
   my $okOptionsKeys = join "|", (@optionsConfigKeys);
   for my $key(sort keys %$config){
@@ -1223,7 +1225,11 @@ sub modifySecrets($$){
     }
     my $val = $$config{$key};
     if($val =~ /^\s*$/){
-      next;
+      if(defined $configGroup and defined $requiredConfigKeys{$key}){
+        die "must include '$key'\n";
+      }else{
+        next;
+      }
     }
     if(defined $encryptCmd and $key =~ /password/i){
       $val =~ s/'/'\\''/g;
