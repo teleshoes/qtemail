@@ -293,6 +293,7 @@ class Controller(QObject):
     self.configModel = configModel
     self.initialPageName = "account"
     self.htmlMode = False
+    self.configMode = None
     self.accountName = None
     self.folderName = None
     self.uid = None
@@ -416,9 +417,14 @@ class Controller(QObject):
     self.curSize = len(headers)
     self.updateCounterBox(counterBox)
     self.setHeaders(headers)
+  @Slot(str)
+  def setConfigMode(self, mode):
+    self.configMode = mode
   @Slot()
   def setupConfig(self):
-    config = self
+    if self.configMode == "account":
+      self.setupAccountConfig()
+  def setupAccountConfig(self):
     fields = self.emailManager.readAccountConfig(self.accountName)
     self.configModel.setItems(fields)
 
@@ -428,7 +434,8 @@ class Controller(QObject):
   @Slot()
   def saveConfig(self):
     fields = self.configModel.getItems()
-    self.emailManager.writeAccountConfig(fields)
+    if self.configMode == "account":
+      self.emailManager.writeAccountConfig(fields)
 
   @Slot(QObject)
   def accountSelected(self, account):
