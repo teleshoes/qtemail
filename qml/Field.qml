@@ -10,6 +10,7 @@ Rectangle {
   property real labelWidth: 0.30
   property int fontSize: 16
   property bool isDark: false
+  property bool isPassword: false
 
   property string bgColor: isDark ? "#444444" : "#666666"
   color: bgColor
@@ -60,6 +61,7 @@ Rectangle {
         id: edit
         anchors.fill: parent
         font.pointSize: fontSize
+        echoMode: isPassword ? TextInput.Password : TextInput.Normal
         Keys.onReturnPressed: {
           enterPressed()
         }

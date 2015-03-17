@@ -16,6 +16,7 @@ Rectangle {
       descriptionText: model.config.Description
       value: model.config.Value
       isDark: index % 2 == 0
+      isPassword: model.config.IsPassword
 
       onValueChanged: {
         controller.updateConfigFieldValue(model.config, value)
