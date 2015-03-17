@@ -1153,6 +1153,8 @@ sub readSecrets(){
         chomp $val;
       }
       $$accounts{$accName}{$key} = $val;
+    }elsif($line =~ /^$secretsPrefix\./){
+      die "unknown config entry: $line";
     }
   }
   return {accounts => $accounts, accOrder => $accOrder, options => $optionsConfig};
