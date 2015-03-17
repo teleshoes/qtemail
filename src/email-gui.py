@@ -451,13 +451,20 @@ class Controller(QObject):
   @Slot(QObject, str)
   def updateConfigFieldValue(self, field, value):
     field.value_ = value
-  @Slot()
-  def saveConfig(self):
+  @Slot(QObject, result=bool)
+  def saveConfig(self, notifier):
     fields = self.configModel.getItems()
     if self.configMode == "account":
-      self.emailManager.writeAccountConfig(fields)
+      res = self.emailManager.writeAccountConfig(fields)
     elif self.configMode == "options":
-      self.emailManager.writeOptionsConfig(fields)
+      res = self.emailManager.writeOptionsConfig(fields)
+
+    if res['exitCode'] == 0:
+      notifier.notify("saved config\n" + res['stdout'] + res['stderr'])
+      return True
+    else:
+      notifier.notify("FAILURE\n" + res['stdout'] + res['stderr'])
+      return False
 
   @Slot(QObject)
   def accountSelected(self, account):
