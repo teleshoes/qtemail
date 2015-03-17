@@ -1172,8 +1172,15 @@ sub validateSecrets($){
 }
 
 sub modifySecrets($$){
-  my ($accName, $config) = @_;
-  die "invalid account name, must be a word i.e.: \\w+\n" if $accName !~ /^\w+$/;
+  my ($configGroup, $config) = @_;
+  my $prefix = "$secretsPrefix";
+  if(defined $configGroup){
+    if($configGroup !~ /^\w+$/){
+      die "invalid account name, must be a word i.e.: \\w+\n";
+    }
+    $prefix .= ".$configGroup";
+  }
+
   my @lines = `cat $secretsFile 2>/dev/null`;
   my @newLines;
   my $encryptCmd;
@@ -1183,7 +1190,7 @@ sub modifySecrets($$){
     }
     my $skip = 0;
     for my $key(sort keys %$config){
-      if($line =~ /^$secretsPrefix\.$accName\.$key\s*=/){
+      if($line =~ /^$prefix\.$key\s*=/){
         $skip = 1;
         last;
       }
@@ -1192,8 +1199,13 @@ sub modifySecrets($$){
   }
 
   my $okConfigKeys = join "|", (@accConfigKeys, @accExtraConfigKeys);
+  my $okOptionsKeys = join "|", (@optionsConfigKeys);
   for my $key(sort keys %$config){
-    die "Unknown config key: $key\n" if $key !~ /^($okConfigKeys)$/;
+    if(defined $configGroup){
+      die "Unknown config key: $key\n" if $key !~ /^($okConfigKeys)$/;
+    }else{
+      die "Unknown options key: $key\n" if $key !~ /^($okOptionsKeys)$/;
+    }
     my $val = $$config{$key};
     if(defined $encryptCmd and $key =~ /password/i){
       $val =~ s/'/'\\''/g;
@@ -1201,7 +1213,7 @@ sub modifySecrets($$){
       die "error encrypting password\n" if $? != 0;
       chomp $val;
     }
-    push @newLines, "$secretsPrefix.$accName.$key = $val\n";
+    push @newLines, "$prefix.$key = $val\n";
   }
 
   open FH, "> $secretsFile" or die "Could not write $secretsFile\n";
