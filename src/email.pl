@@ -51,7 +51,7 @@ my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
 my @accConfigKeys = qw(user password server port);
 my @accExtraConfigKeys = qw(inbox sent folders ssl smtp_server smtp_port new_unread_cmd skip);
-my @globalConfigKeys = qw(update_cmd);
+my @globalConfigKeys = qw(update_cmd encrypt_cmd decrypt_cmd);
 
 my @headerFields = qw(Date Subject From To);
 my $emailDir = "$ENV{HOME}/.cache/email";
