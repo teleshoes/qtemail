@@ -177,17 +177,24 @@ class EmailManager():
       cmd = [EMAIL_BIN, "--read-config", accName]
     return self.readConfig(schema, cmd)
 
-  def writeAccountConfig(self, fields):
+  def writeConfig(self, fieldValues, cmd):
     keyVals = []
+    for field in fieldValues:
+      keyVals.append(field.FieldName + "=" + field.Value)
+
+    cmd += keyVals
+    subprocess.call(cmd)
+  def writeAccountConfig(self, fields):
+    fieldValues = []
     accName = None
     for field in fields:
       if field.FieldName == "name":
         accName = field.Value
       else:
-        keyVals.append(field.FieldName + "=" + field.Value)
+        fieldValues.append(field)
+    cmd = [EMAIL_BIN, "--write-config", accName]
+    self.writeConfig(fieldValues, cmd)
 
-    cmd = [EMAIL_BIN, "--write-config", accName] + keyVals
-    exitCode = subprocess.call(cmd)
   def getAccounts(self):
     accountOut = self.readProc([EMAIL_BIN, "--accounts"])
     accounts = []
