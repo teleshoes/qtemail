@@ -99,7 +99,11 @@ Item {
       property variant name: "submit"
       property variant text: "submit"
       property variant iconName: "done"
-      onClicked: controller.saveConfig()
+      onClicked: {
+        if(controller.saveConfig(notifier)){
+          main.backPage()
+        }
+      }
     }
     Item {
       signal clicked
