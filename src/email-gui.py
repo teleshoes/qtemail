@@ -142,6 +142,8 @@ class EmailManager():
              , "ssl",            "[OPT] set to false if necessary"
              , "smtp_server",    "[OPT] SMTP server. e.g.: \"smtp.gmail.com\""
              , "smtp_port",      "[OPT] SMTP port"
+             , "new_unread_cmd", "[OPT] custom alert command"
+             , "skip",           "[OPT] set to true to skip during --update"
              ]
     fieldNames = fields[0::2]
     fieldDescriptions = dict(zip(fields[0::2], fields[1::2]))
