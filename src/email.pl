@@ -251,7 +251,7 @@ sub main(@){
     exit 0;
   }elsif($cmd =~ /^(--write-config|--write-options)$/){
     my $configGroup;
-    if($cmd eq "--read-config"){
+    if($cmd eq "--write-config"){
       die $usage if @_ < 2;
       $configGroup = shift;
     }elsif($cmd eq "--write-options"){
