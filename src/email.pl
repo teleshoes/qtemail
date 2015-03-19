@@ -1028,7 +1028,14 @@ sub getCachedHeaderUids($$){
 sub getCachedBodyUids($$){
   my ($accName, $folderName) = @_;
   my $bodiesDir = "$emailDir/$accName/$folderName/bodies";
-  my @cachedBodies = `cd "$bodiesDir"; ls`;
+  opendir DIR, $bodiesDir or die "Could not list $bodiesDir\n";
+  my @cachedBodies;
+  while (my $file = readdir(DIR)) {
+    next if $file eq "." or $file eq "..";
+    die "malformed file: $bodiesDir/$file\n" if $file !~ /^\d+$/;
+    push @cachedBodies, $file;
+  }
+  closedir DIR;
   chomp foreach @cachedBodies;
   return @cachedBodies;
 }
