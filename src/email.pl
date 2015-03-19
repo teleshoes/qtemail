@@ -891,6 +891,8 @@ sub cacheBodies($$$$@){
   my $bodiesDir = "$emailDir/$accName/$folderName/bodies";
   system "mkdir", "-p", $bodiesDir;
 
+  local $| = 1;
+
   my %toSkip = map {$_ => 1} getCachedBodyUids($accName, $folderName);
   @messages = grep {not defined $toSkip{$_}} @messages;
   if(defined $maxCap and $maxCap > 0 and @messages > $maxCap){
@@ -900,9 +902,20 @@ sub cacheBodies($$$$@){
     @messages = splice @messages, 0, $maxCap;
     @messages = reverse @messages;
   }
-  print "caching bodies for " . @messages . " messages\n" if $VERBOSE;
+  print "caching bodies for " . @messages . " messages\n";
+  my $total = @messages;
+  my $count = 0;
+  my $segment = int($total/20);
+  $segment = 100 if $segment > 100;
 
   for my $uid(@messages){
+    $count++;
+    if($segment > 0 and $count % $segment == 0){
+      my $pct = int(0.5 + 100*$count/$total);
+      my $date = `date`;
+      chomp $date;
+      print "  {cached $count/$total bodies} $pct%  $date\n" if $VERBOSE;
+    }
     my $body = $c->message_string($uid);
     $body = "" if not defined $body;
     if($body =~ /^\s*$/){
