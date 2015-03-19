@@ -74,6 +74,7 @@ my $okCmds = join "|", qw(
   --mark-read --mark-unread
   --accounts --folders --print --summary --status-line
   --has-error --has-new-unread --has-unread
+  --cache-all-bodies
   --read-config --write-config --read-options --write-options
 );
 
@@ -516,6 +517,23 @@ sub main(@){
     }
     $c->close() if defined $c;
     $c->logout() if defined $c;
+  }elsif($cmd =~ /^(--cache-all-bodies)$/){
+    $VERBOSE = 1;
+    die $usage if @_ != 2;
+    my ($accName, $folderName) = @_;
+
+    my $acc = $$accounts{$accName};
+    die "Unknown account $accName\n" if not defined $acc;
+    my $c = getClient($acc);
+    die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
+
+    my $imapFolder = $accFolders{$accName}{$folderName};
+    die "Unknown folder $folderName\n" if not defined $imapFolder;
+    my $f = openFolder($imapFolder, $c, 0);
+    die "Error getting folder $folderName\n" if not defined $f;
+
+    my @messages = $c->messages;
+    cacheBodies($accName, $folderName, $c, undef, @messages);
   }elsif($cmd =~ /^(--print)$/){
     my $folderName = "inbox";
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
