@@ -134,11 +134,18 @@ class EmailManager():
       return []
     return self.emailRegex.findall(string)
 
-  def readConfig(self, schema, cmd):
-    fieldNames = schema[0::2]
-    fieldDescriptions = dict(zip(schema[0::2], schema[1::2]))
+  def readConfig(self, configMode, accName=None):
+    configValues = {}
+    cmd = [EMAIL_BIN]
+    if configMode == "account":
+      cmd.append("--read-config")
+      if accName != None:
+        cmd.append(accName)
+    elif configMode == "options":
+      cmd.append("--read-options")
+    else:
+      die("invalid config mode: " + configMode)
 
-    config = {}
     if cmd != None:
       configOut = self.readProc(cmd)
       for line in configOut.splitlines():
@@ -146,20 +153,24 @@ class EmailManager():
         if m:
           fieldName = m.group(1)
           value = m.group(2)
-          if fieldName in fieldNames:
-            config[m.group(1)] = m.group(2)
+          configValues[m.group(1)] = m.group(2)
+    return configValues
+
+  def getConfigFields(self, schema, configValues):
+    fieldNames = schema[0::2]
+    fieldDescriptions = dict(zip(schema[0::2], schema[1::2]))
 
     fields = []
     for fieldName in fieldNames:
-      if fieldName in config:
-        value = config[fieldName]
+      if fieldName in configValues:
+        value = configValues[fieldName]
       else:
         value = ""
       pwRegex = re.compile('password|pword|^pw$', re.IGNORECASE)
       isPass = pwRegex.search(fieldName) != None
       fields.append(Field(fieldName, isPass, value, fieldDescriptions[fieldName]))
     return fields
-  def readAccountConfig(self, accName):
+  def getAccountConfigFields(self, accName):
     schema = [ "name",           "single-word account ID, e.g.: \"Work\""
              , "user",           "IMAP user, usually the full email address"
              , "password",       "password, stored with optional encrypt_cmd"
@@ -172,17 +183,18 @@ class EmailManager():
              , "new_unread_cmd", "[OPT] custom alert command"
              , "skip",           "[OPT] set to true to skip during --update"
              ]
-    cmd = None
-    if accName != None:
-      cmd = [EMAIL_BIN, "--read-config", accName]
-    return self.readConfig(schema, cmd)
-  def readOptionsConfig(self):
+    if accName == None:
+      configValues = []
+    else:
+      configValues = self.readConfig("account", accName)
+    return self.getConfigFields(schema, configValues)
+  def getOptionsConfigFields(self):
     schema = [ "update_cmd",     "[OPT] command to run after all updates"
              , "encrypt_cmd",    "[OPT] command to encrypt passwords on disk"
              , "decrypt_cmd",    "[OPT] command to decrypt saved passwords"
              ]
-    cmd = [EMAIL_BIN, "--read-options"]
-    return self.readConfig(schema, cmd)
+    configValues = self.readConfig("options")
+    return self.getConfigFields(schema, configValues)
 
   def writeConfig(self, fieldValues, cmd):
     keyVals = []
@@ -442,10 +454,10 @@ class Controller(QObject):
     elif self.configMode == "options":
       self.setupOptionsConfig()
   def setupAccountConfig(self):
-    fields = self.emailManager.readAccountConfig(self.accountName)
+    fields = self.emailManager.getAccountConfigFields(self.accountName)
     self.configModel.setItems(fields)
   def setupOptionsConfig(self):
-    fields = self.emailManager.readOptionsConfig()
+    fields = self.emailManager.getOptionsConfigFields()
     self.configModel.setItems(fields)
 
   @Slot(QObject, str)
