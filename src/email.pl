@@ -59,6 +59,7 @@ my @accExtraConfigKeys = qw(
   smtp_port
   new_unread_cmd
   skip
+  preferHtml
 );
 my @optionsConfigKeys = qw(update_cmd encrypt_cmd decrypt_cmd);
 
@@ -169,9 +170,12 @@ my $usage = "
   $0 --body [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     download, format and print the body of the indicated message(s)
     if body is cached, skip download
+    if message has a plaintext and HTML component, only one is returned
+    if preferHtml is false, plaintext is returned, otherwise, HTML
+
 
   $0 --body-html [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
-    same as --body, but prefer HTML instead of plaintext
+    same as --body, but override preferHtml=true
 
   $0 --attachments [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_DIR UID [UID UID ...]
     download the body of the indicated message(s) and save any attachments to DEST_DIR
@@ -487,8 +491,10 @@ sub main(@){
         or not defined $destDir or not -d $destDir;
     }
 
-    my $preferHtml = $cmd =~ /body-html/;
     my $acc = $$accounts{$accName};
+    my $preferHtml = 1;
+    $preferHtml = 0 if defined $$acc{preferHtml} and $$acc{preferHtml} =~ /false/i;
+    $preferHtml = 1 if $cmd eq "--body-html";
     die "Unknown account $accName\n" if not defined $acc;
     my $imapFolder = $accFolders{$accName}{$folderName};
     die "Unknown folder $folderName\n" if not defined $imapFolder;
