@@ -47,6 +47,10 @@ usage = """Usage:
       default the message to UID {only useful with --page}
 """ % {"exec": sys.argv[0], "okPages": okPages}
 
+def die(msg):
+  print >> sys.stderr, msg
+  sys.exit(1)
+
 def main():
   args = sys.argv
   args.pop(0)
@@ -67,11 +71,9 @@ def main():
     elif uidMatch:
       opts['uid'] = uidMatch.group(1)
     else:
-      print >> sys.stderr, usage
-      sys.exit(2)
+      die(usage)
   if len(args) > 0:
-    print >> sys.stderr, usage
-    sys.exit(2)
+    die(usage)
 
   issue = open('/etc/issue').read().strip().lower()
   platform = None
