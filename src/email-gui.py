@@ -155,6 +155,24 @@ class EmailManager():
           value = m.group(2)
           configValues[m.group(1)] = m.group(2)
     return configValues
+  def writeConfig(self, configValues, configMode, accName=None):
+    cmd = [EMAIL_BIN]
+    if configMode == "account":
+      cmd.append("--write-config")
+      cmd.append(accName)
+    elif configMode == "options":
+      cmd.append("--write-options")
+    else:
+      die("invalid config mode: " + str(configMode))
+
+    for key in configValues.keys():
+      cmd.append(key + "=" + configValues[key])
+
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    (out, err) = process.communicate()
+    print >> sys.stdout, out
+    print >> sys.stderr, err
+    return {'exitCode': process.returncode, 'stdout': out, 'stderr': err}
 
   def getConfigFields(self, schema, configValues):
     fieldNames = schema[0::2]
@@ -196,24 +214,6 @@ class EmailManager():
     configValues = self.readConfig("options")
     return self.getConfigFields(schema, configValues)
 
-  def writeConfig(self, configValues, configMode, accName=None):
-    cmd = [EMAIL_BIN]
-    if configMode == "account":
-      cmd.append("--write-config")
-      cmd.append(accName)
-    elif configMode == "options":
-      cmd.append("--write-options")
-    else:
-      die("invalid config mode: " + str(configMode))
-
-    for key in configValues.keys():
-      cmd.append(key + "=" + configValues[key])
-
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    (out, err) = process.communicate()
-    print >> sys.stdout, out
-    print >> sys.stderr, err
-    return {'exitCode': process.returncode, 'stdout': out, 'stderr': err}
   def writeAccountConfig(self, fields):
     configValues = {}
     accName = None
