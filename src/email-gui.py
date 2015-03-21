@@ -142,12 +142,10 @@ class EmailManager():
     if cmd != None:
       configOut = self.readProc(cmd)
       for line in configOut.splitlines():
-        print line
         m = re.match("(\w+)=(.*)", line)
         if m:
           fieldName = m.group(1)
           value = m.group(2)
-          print fieldName + " => " + value
           if fieldName in fieldNames:
             config[m.group(1)] = m.group(2)
 
