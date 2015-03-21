@@ -155,8 +155,9 @@ QtObject {
         btnElem.setText(isHtml ? "text" : "html")
       }
       onClicked: {
-        controller.toggleIsHtml()
-        setIsHtml(controller.isHtml())
+        var wasHtml = controller.getHtmlMode()
+        controller.setHtmlMode(!wasHtml)
+        setIsHtml(!wasHtml)
         controller.fetchCurrentBodyText(notifier, bodyView, null)
       }
     },
