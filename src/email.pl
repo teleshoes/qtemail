@@ -915,12 +915,12 @@ sub cacheBodies($$$$@){
   @messages = grep {not defined $toSkip{$_}} @messages;
   if(defined $maxCap and $maxCap > 0 and @messages > $maxCap){
     my $count = @messages;
-    print "only caching $maxCap out of $count\n";
+    print "only caching $maxCap out of $count\n" if $VERBOSE;
     @messages = reverse @messages;
     @messages = splice @messages, 0, $maxCap;
     @messages = reverse @messages;
   }
-  print "caching bodies for " . @messages . " messages\n";
+  print "caching bodies for " . @messages . " messages\n" if $VERBOSE;
   my $total = @messages;
   my $count = 0;
   my $segment = int($total/20);
