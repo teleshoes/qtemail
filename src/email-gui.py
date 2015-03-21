@@ -196,12 +196,21 @@ class EmailManager():
     configValues = self.readConfig("options")
     return self.getConfigFields(schema, configValues)
 
-  def writeConfig(self, fieldValues, cmd):
+  def writeConfig(self, fieldValues, configMode, accName=None):
     keyVals = []
     for field in fieldValues:
       keyVals.append(field.FieldName + "=" + field.Value)
 
+    cmd = [EMAIL_BIN]
+    if configMode == "account":
+      cmd.append("--write-config")
+      cmd.append(accName)
+    elif configMode == "options":
+      cmd.append("--write-options")
+    else:
+      die("invalid config mode: " + str(configMode))
     cmd += keyVals
+
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (out, err) = process.communicate()
     print >> sys.stdout, out
@@ -215,12 +224,10 @@ class EmailManager():
         accName = field.Value
       else:
         fieldValues.append(field)
-    cmd = [EMAIL_BIN, "--write-config", accName]
-    return self.writeConfig(fieldValues, cmd)
+    return self.writeConfig(fieldValues, "account", accName)
   def writeOptionsConfig(self, fields):
     fieldValues = fields
-    cmd = [EMAIL_BIN, "--write-options"]
-    return self.writeConfig(fieldValues, cmd)
+    return self.writeConfig(fieldValues, "options")
 
   def getAccounts(self):
     accountOut = self.readProc([EMAIL_BIN, "--accounts"])
