@@ -16,7 +16,7 @@ Rectangle {
 
   Flickable {
     id: bodyFlickable
-    contentWidth: bodyText.paintedWidth
+    contentWidth: parent.width
     contentHeight: bodyText.paintedHeight
     anchors.fill: parent
     flickableDirection: Flickable.HorizontalAndVerticalFlick
@@ -26,7 +26,9 @@ Rectangle {
       color: "#FFFFFF"
       Text {
         id: bodyText
-        anchors.fill: parent
+        height: parent.height
+        width: parent.width
+        wrapMode: Text.Wrap
         font.pointSize: 24
         onLinkActivated: main.onLinkActivated(link)
       }
