@@ -330,6 +330,7 @@ class Controller(QObject):
     self.htmlMode = False
     self.configMode = None
     self.accountName = None
+    self.accountConfig = None
     self.folderName = None
     self.uid = None
     self.threads = []
@@ -490,6 +491,7 @@ class Controller(QObject):
   def accountSelected(self, account):
     self.setAccountName(account.Name)
     self.setFolderName("inbox")
+    self.setAccountConfig(self.emailManager.readConfig("account", account.Name))
   @Slot(QObject)
   def folderSelected(self, folder):
     self.setFolderName(folder.Name)
@@ -499,6 +501,12 @@ class Controller(QObject):
   @Slot()
   def clearAccount(self):
     self.reset()
+
+  @Slot(str, result=str)
+  def getAccountConfigValue(self, configKey):
+    if self.accountConfig != None and configKey in self.accountConfig:
+      return self.accountConfig[configKey]
+    return ''
 
   @Slot(result=str)
   def getInitialPageName(self):
@@ -512,8 +520,11 @@ class Controller(QObject):
     self.folderName = folderName
   def setUid(self, uid):
     self.uid = uid
+  def setAccountConfig(self, accountConfig):
+    self.accountConfig = accountConfig
   def reset(self):
     self.setAccountName(None)
+    self.setAccountConfig(None)
     self.setFolderName(None)
     self.setUid(None)
 
