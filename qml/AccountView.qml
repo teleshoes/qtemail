@@ -7,6 +7,13 @@ Rectangle {
     controller.updateAccount(null, messageBox, null)
   }
 
+  function initAccountConfig(){
+    var preferHtmlCfg = controller.getAccountConfigValue("preferHtml")
+    var isHtml = preferHtmlCfg != "false"
+    toolButtons.getButtonDefByName("toggleHtml").setIsHtml(isHtml)
+    controller.setHtmlMode(isHtml)
+  }
+
   ListView {
     id: accountFlickable
     spacing: 15
@@ -26,6 +33,7 @@ Rectangle {
           anchors.fill: parent
           onClicked: {
             controller.accountSelected(model.account)
+            initAccountConfig()
             navToPage(headerPage)
           }
         }
