@@ -599,12 +599,11 @@ class Controller(QObject):
     indicator.updateColor()
 
   @Slot(result=bool)
-  def isHtml(self):
+  def getHtmlMode(self):
     return self.htmlMode
-
-  @Slot()
-  def toggleIsHtml(self):
-    self.htmlMode = not self.htmlMode
+  @Slot(bool)
+  def setHtmlMode(self, htmlMode):
+    self.htmlMode = htmlMode
 
   @Slot(QObject, QObject, object)
   def fetchCurrentBodyText(self, notifier, bodyBox, transform):
