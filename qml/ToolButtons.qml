@@ -1,6 +1,6 @@
 import QtQuick 1.1
 
-Item {
+QtObject {
   property variant pages: {
     "accountPage": ["newAccount", "update", "options"],
     "folderPage": ["back"],
@@ -10,20 +10,19 @@ Item {
     "sendPage": ["back", "sendEmail"],
   }
 
-  function getButtons(){
-    return buttons.children
+  function getButtonDefs(){
+    return buttonDefs
   }
 
-  Item {
-    id: buttons
-    Item {
+  property list<QtObject> buttonDefs: [
+    QtObject {
       signal clicked
       property variant name: "back"
       property variant text: "back"
       property variant iconName: "tab-previous"
       onClicked: main.backPage()
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "config"
       property variant text: "config"
@@ -32,8 +31,8 @@ Item {
         controller.setConfigMode("account")
         navToPage(configPage)
       }
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "newAccount"
       property variant text: "new acc"
@@ -42,8 +41,8 @@ Item {
         controller.setConfigMode("account")
         navToPage(configPage)
       }
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "options"
       property variant text: "options"
@@ -52,15 +51,15 @@ Item {
         controller.setConfigMode("options")
         navToPage(configPage)
       }
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "send"
       property variant text: "write"
       property variant iconName: "new-email"
       onClicked: navToPage(sendPage)
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "reply"
       property variant text: "reply"
@@ -69,8 +68,8 @@ Item {
         controller.initSend("reply", sendView.getForm(), notifier)
         navToPage(sendPage)
       }
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "forward"
       property variant text: "forward"
@@ -79,22 +78,22 @@ Item {
         controller.initSend("forward", sendView.getForm(), notifier)
         navToPage(sendPage)
       }
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "sendEmail"
       property variant text: "send"
       property variant iconName: "done"
       onClicked: controller.sendEmail(sendView.getForm(), notifier)
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "update"
       property variant text: "update"
       property variant iconName: "refresh"
       onClicked: accountView.updateAllAccounts()
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "submit"
       property variant text: "submit"
@@ -104,36 +103,36 @@ Item {
           main.backPage()
         }
       }
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "more"
       property variant text: "more"
       property variant iconName: "down"
       onClicked: controller.moreHeaders(headerView, 0)
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "wayMore"
       property variant text: "+30%"
       property variant iconName: "down"
       onClicked: controller.moreHeaders(headerView, 30)
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "all"
       property variant text: "all"
       property variant iconName: "down"
       onClicked: controller.moreHeaders(headerView, 100)
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "folder"
       property variant text: "folders"
       property variant iconName: "directory"
       onClicked: navToPage(folderPage)
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "toggleHtml"
       property variant text: "html"
@@ -147,14 +146,14 @@ Item {
         setIsHtml(controller.isHtml())
         controller.fetchCurrentBodyText(notifier, bodyView, null)
       }
-    }
-    Item {
+    },
+    QtObject {
       signal clicked
       property variant name: "attachments"
       property variant text: "attach"
       property variant iconName: "attachment"
       onClicked: controller.saveCurrentAttachments(notifier)
     }
-  }
+  ]
 }
 

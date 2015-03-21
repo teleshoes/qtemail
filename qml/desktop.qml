@@ -156,7 +156,7 @@ Rectangle {
 
     spacing: 10
     Repeater {
-      model: toolButtons.getButtons()
+      model: toolButtons.getButtonDefs()
       Btn {
         function setText(text){
           this.text = text

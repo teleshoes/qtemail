@@ -172,7 +172,7 @@ PageStackWindow {
     id: toolBar
 
     Repeater {
-      model: toolButtons.getButtons()
+      model: toolButtons.getButtonDefs()
       ToolIcon {
         function setText(text){
           buttonTextArea.text = text
