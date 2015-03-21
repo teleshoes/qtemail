@@ -13,6 +13,16 @@ QtObject {
   function getButtonDefs(){
     return buttonDefs
   }
+  function getButtonDefByName(name){
+    for (var i = 0; i < buttonDefs.length; ++i){
+      var buttonDef = buttonDefs[i]
+      var btnName = buttonDef.name
+      if(name == btnName){
+        return buttonDef
+      }
+    }
+    return null
+  }
   function getButtonElemByName(name){
     return controller.findChild(toolBar, "toolbarButton-" + name)
   }
