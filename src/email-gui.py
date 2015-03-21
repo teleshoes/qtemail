@@ -605,10 +605,6 @@ class Controller(QObject):
   @Slot()
   def toggleIsHtml(self):
     self.htmlMode = not self.htmlMode
-    if self.htmlMode:
-      text = "text"
-    else:
-      text = "html"
 
   @Slot(QObject, QObject, object)
   def fetchCurrentBodyText(self, notifier, bodyBox, transform):
