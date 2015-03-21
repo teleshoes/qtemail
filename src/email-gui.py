@@ -214,7 +214,7 @@ class EmailManager():
     configValues = self.readConfig("options")
     return self.getConfigFields(schema, configValues)
 
-  def writeAccountConfig(self, fields):
+  def saveAccountConfigFields(self, fields):
     configValues = {}
     accName = None
     for field in fields:
@@ -223,7 +223,7 @@ class EmailManager():
       else:
         configValues[field.FieldName] = field.Value
     return self.writeConfig(configValues, "account", accName)
-  def writeOptionsConfig(self, fields):
+  def saveOptionsConfigFields(self, fields):
     configValues = {}
     for field in fields:
       configValues[field.FieldName] = field.Value
@@ -474,9 +474,9 @@ class Controller(QObject):
   def saveConfig(self, notifier):
     fields = self.configModel.getItems()
     if self.configMode == "account":
-      res = self.emailManager.writeAccountConfig(fields)
+      res = self.emailManager.saveAccountConfigFields(fields)
     elif self.configMode == "options":
-      res = self.emailManager.writeOptionsConfig(fields)
+      res = self.emailManager.saveOptionsConfigFields(fields)
 
     if res['exitCode'] == 0:
       notifier.notify("saved config\n" + res['stdout'] + res['stderr'])
