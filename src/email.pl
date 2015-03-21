@@ -79,7 +79,7 @@ my $settings = {
 };
 
 my $okCmds = join "|", qw(
-  --update --header --body --body-html --attachments
+  --update --header --body --body-plain --body-html --attachments
   --smtp
   --mark-read --mark-unread
   --accounts --folders --print --summary --status-line
@@ -173,6 +173,8 @@ my $usage = "
     if message has a plaintext and HTML component, only one is returned
     if preferHtml is false, plaintext is returned, otherwise, HTML
 
+  $0 --body-plain [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+    same as --body, but override preferHtml=false
 
   $0 --body-html [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but override preferHtml=true
@@ -473,7 +475,7 @@ sub main(@){
         print "$uid.$field: $$hdr{$field}\n";
       }
     }
-  }elsif($cmd =~ /^(--body|--body-html|--attachments)$/){
+  }elsif($cmd =~ /^(--body|--body-plain|--body-html|--attachments)$/){
     my $folderName = "inbox";
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
       $folderName = $1;
@@ -481,7 +483,7 @@ sub main(@){
     }
     die $usage if @_ < 2;
     my ($accName, $destDir, @uids);
-    if($cmd =~ /^(--body|--body-html)/){
+    if($cmd =~ /^(--body|--body-plain|--body-html)/){
       ($accName, @uids) = @_;
       $destDir = $TMP_DIR;
       die $usage if not defined $accName or @uids == 0;
@@ -494,6 +496,7 @@ sub main(@){
     my $acc = $$accounts{$accName};
     my $preferHtml = 1;
     $preferHtml = 0 if defined $$acc{preferHtml} and $$acc{preferHtml} =~ /false/i;
+    $preferHtml = 0 if $cmd eq "--body-plain";
     $preferHtml = 1 if $cmd eq "--body-html";
     die "Unknown account $accName\n" if not defined $acc;
     my $imapFolder = $accFolders{$accName}{$folderName};
@@ -519,7 +522,7 @@ sub main(@){
       if(not defined $body){
         die "No body found for $accName=>$folderName=>$uid\n";
       }
-      if($cmd =~ /^(--body|--body-html)/){
+      if($cmd =~ /^(--body|--body-plain|--body-html)$/){
         my $fmt = getBody($mimeParser, $body, $preferHtml);
         chomp $fmt;
         print "$fmt\n";
