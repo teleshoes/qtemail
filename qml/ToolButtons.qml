@@ -13,6 +13,9 @@ QtObject {
   function getButtonDefs(){
     return buttonDefs
   }
+  function getButtonElemByName(name){
+    return controller.findChild(toolBar, "toolbarButton-" + name)
+  }
 
   property list<QtObject> buttonDefs: [
     QtObject {
@@ -138,8 +141,8 @@ QtObject {
       property variant text: "html"
       property variant iconName: "jump-to-dimmed-white"
       function setIsHtml(isHtml){
-        var btn = controller.findChild(toolBar, "toolbarButton-" + name)
-        btn.setText(isHtml ? "text" : "html")
+        var btnElem = getButtonElemByName(name)
+        btnElem.setText(isHtml ? "text" : "html")
       }
       onClicked: {
         controller.toggleIsHtml()
