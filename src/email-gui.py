@@ -200,6 +200,7 @@ class EmailManager():
              , "smtp_port",      "[OPT] SMTP port"
              , "new_unread_cmd", "[OPT] custom alert command"
              , "skip",           "[OPT] set to true to skip during --update"
+             , "preferHtml",     "[OPT] set to false to prefer plaintext"
              ]
     if accName == None:
       configValues = []
