@@ -609,7 +609,7 @@ class Controller(QObject):
     if self.htmlMode:
       arg = "--body-html"
     else:
-      arg = "--body"
+      arg = "--body-plain"
 
     cmd = [EMAIL_BIN, arg,
       "--folder=" + self.folderName, self.accountName, str(self.uid)]
