@@ -612,6 +612,12 @@ class Controller(QObject):
     if self.header == None:
       notifier.notify("CURRENT MESSAGE NOT SET")
       return
+    bodyBox.setHeader(""
+      + "From: " + self.header.From + "\n"
+      + "Subject: " + self.header.Subject + "\n"
+      + "To: " + self.header.To + "\n"
+      + "Date: " + self.header.Date + "\n"
+    );
 
     if self.htmlMode:
       arg = "--body-html"
