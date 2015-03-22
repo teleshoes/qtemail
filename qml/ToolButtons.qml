@@ -158,7 +158,7 @@ QtObject {
         var wasHtml = controller.getHtmlMode()
         controller.setHtmlMode(!wasHtml)
         setIsHtml(!wasHtml)
-        controller.fetchCurrentBodyText(notifier, bodyView, null)
+        controller.fetchCurrentBodyText(notifier, bodyView, bodyView, null)
       }
     },
     QtObject {

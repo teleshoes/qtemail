@@ -46,7 +46,7 @@ PageStackWindow {
     }else if(curPage == folderPage){
       controller.setupFolders()
     }else if(curPage == bodyPage){
-      controller.fetchCurrentBodyText(notifier, bodyView, null)
+      controller.fetchCurrentBodyText(notifier, bodyView, bodyView, null)
     }else if(curPage == configPage){
       controller.setupConfig()
     }else if(curPage == sendPage){
