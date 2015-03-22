@@ -41,6 +41,8 @@ Rectangle {
     }
   }
   function setZoom(scale){
+    zoomDisplay.text = parseInt(scale*100) + "%"
+    zoomDisplay.visible = scale != 1
     bodyFlickable.scale = scale
   }
 
@@ -79,6 +81,13 @@ Rectangle {
         onLinkActivated: main.onLinkActivated(link)
       }
     }
+  }
+
+  Text {
+    id: zoomDisplay
+    visible: false
+    anchors.top: parent.top
+    anchors.right: parent.right
   }
 
   ScrollBar{
