@@ -163,6 +163,7 @@ Rectangle {
         }
         objectName: "toolbarButton-" + modelData.name
         text: modelData.text
+        imgSource: "/opt/qtemail/icons/buttons/" + modelData.name + ".png"
         onClicked: modelData.clicked()
         visible: false
       }
