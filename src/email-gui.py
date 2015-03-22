@@ -394,7 +394,7 @@ class Controller(QObject):
     sendForm.setBCC([])
     sendForm.setSubject(subject)
 
-    self.fetchCurrentBodyText(notifier, sendForm,
+    self.fetchCurrentBodyText(notifier, sendForm, None,
       lambda body: self.wrapBody(body, date, firstFrom))
 
   def wrapBody(self, body, date, author):
@@ -608,19 +608,20 @@ class Controller(QObject):
   def setHtmlMode(self, htmlMode):
     self.htmlMode = htmlMode
 
-  @Slot(QObject, QObject, object)
-  def fetchCurrentBodyText(self, notifier, bodyBox, transform):
+  @Slot(QObject, QObject, QObject, object)
+  def fetchCurrentBodyText(self, notifier, bodyBox, headerBox, transform):
     self.currentBodyText = None
     bodyBox.setBody("...loading body")
     if self.header == None:
       notifier.notify("CURRENT MESSAGE NOT SET")
       return
-    bodyBox.setHeader(""
-      + "From: " + self.header.From + "\n"
-      + "Subject: " + self.header.Subject + "\n"
-      + "To: " + self.header.To + "\n"
-      + "Date: " + self.header.Date + "\n"
-    );
+    if headerBox != None:
+      headerBox.setHeader(""
+        + "From: " + self.header.From + "\n"
+        + "Subject: " + self.header.Subject + "\n"
+        + "To: " + self.header.To + "\n"
+        + "Date: " + self.header.Date + "\n"
+      );
 
     if self.htmlMode:
       arg = "--body-html"
