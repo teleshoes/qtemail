@@ -334,6 +334,7 @@ class Controller(QObject):
     self.accountConfig = None
     self.folderName = None
     self.header = None
+    self.currentBodyText = None
     self.threads = []
     self.currentHeaders = []
     self.headerFilterRegex = None
@@ -528,6 +529,7 @@ class Controller(QObject):
     self.setAccountConfig(None)
     self.setFolderName(None)
     self.setHeader(None)
+    self.currentBodyText = None
 
   def filterHeader(self, header):
     return (self.headerFilterRegex == None
@@ -608,6 +610,7 @@ class Controller(QObject):
 
   @Slot(QObject, QObject, object)
   def fetchCurrentBodyText(self, notifier, bodyBox, transform):
+    self.currentBodyText = None
     bodyBox.setBody("...loading body")
     if self.header == None:
       notifier.notify("CURRENT MESSAGE NOT SET")
@@ -638,8 +641,10 @@ class Controller(QObject):
       body = output
 
     if isSuccess:
+      self.currentBodyText = body
       bodyBox.setBody(body)
     else:
+      self.currentBodyText = None
       bodyBox.setBody("ERROR FETCHING BODY\n")
 
   @Slot(QObject)
