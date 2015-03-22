@@ -649,8 +649,10 @@ class Controller(QObject):
       self.onSaveCurrentAttachmentsFinished, {'notifier': notifier})
   def onSaveCurrentAttachmentsFinished(self, isSuccess, output, extraArgs):
     notifier = extraArgs['notifier']
+    if output.strip() == "":
+      output = "{no attachments}"
     if isSuccess:
-      notifier.notify("saved attachments\n" + output)
+      notifier.notify("success:\n" + output)
     else:
       notifier.notify("ERROR: saving attachments failed\n")
 
