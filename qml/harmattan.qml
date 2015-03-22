@@ -183,6 +183,12 @@ PageStackWindow {
           text: modelData.text
           anchors.horizontalCenter: parent.horizontalCenter
         }
+        Image {
+          source: "/opt/qtemail/icons/buttons/" + modelData.name + ".png"
+          anchors.centerIn: parent
+          height: 48
+          width: 48
+        }
         onClicked: modelData.clicked()
         visible: false
       }
