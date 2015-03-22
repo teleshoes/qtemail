@@ -1,3 +1,13 @@
+qtemail (1.0.0) UNRELEASED; urgency=low
+  * Copy body text to clipboard
+  * Word-wrap email bodies
+  * Use one icon set in both desktop UI and harmattan UI
+  * Add explicit zoom buttons in addition to pinch
+  * Add header to body view
+  * Add preferHtml config
+  * CLI: --cache-all-bodies, improve body caching output
+ -- teleshoes <elliot.wolk@gmail.com>  Sun, 22 Mar 2015 13:25:46 -0400
+
 qtemail (0.1.1) UNRELEASED; urgency=low
   * Config 'new_unread_cmd' for per-account alerts
   * Config 'skip' config to ignore an account during --update
