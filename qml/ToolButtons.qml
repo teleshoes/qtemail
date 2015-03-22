@@ -5,7 +5,7 @@ QtObject {
     "accountPage": ["newAccount", "update", "options"],
     "folderPage": ["back"],
     "headerPage": ["back", "more", "wayMore", "all", "config", "send", "folder"],
-    "bodyPage": ["back", "attachments", "toggleHtml", "reply", "forward", "copy", "zoom-in", "zoom-out"],
+    "bodyPage": ["back", "attachments", "toggleHtml", "reply", "forward", "copy", "zoomIn", "zoomOut"],
     "configPage": ["back", "submit"],
     "sendPage": ["back", "sendEmail"],
   }
@@ -170,14 +170,14 @@ QtObject {
     },
     QtObject {
       signal clicked
-      property variant name: "zoom-in"
+      property variant name: "zoomIn"
       property variant text: "zoom in"
       property variant iconName: "next"
       onClicked: bodyView.zoomIn()
     },
     QtObject {
       signal clicked
-      property variant name: "zoom-out"
+      property variant name: "zoomOut"
       property variant text: "zoom out"
       property variant iconName: "previous"
       onClicked: bodyView.zoomOut()
