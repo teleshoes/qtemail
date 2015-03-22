@@ -10,9 +10,9 @@ FILE(GLOB qml qml/*.qml)
 INSTALL(FILES ${qml}
   DESTINATION /opt/qtemail/qml)
 
-FILE(GLOB images images/*)
-INSTALL(FILES ${images}
-  DESTINATION /opt/qtemail/images)
+FILE(GLOB icons icons/*.png)
+INSTALL(FILES ${icons}
+  DESTINATION /opt/qtemail/icons)
 
 INSTALL(FILES data/qtemail.desktop
   DESTINATION /usr/share/applications)

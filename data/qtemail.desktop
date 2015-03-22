@@ -1,5 +1,5 @@
 [Desktop Entry]
 Type=Application
 Name=qtemail
-Icon=/opt/qtemail/images/qtemail.png
+Icon=/opt/qtemail/icons/qtemail.png
 Exec=python /opt/qtemail/bin/email-gui.py
