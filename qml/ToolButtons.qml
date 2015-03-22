@@ -5,7 +5,7 @@ QtObject {
     "accountPage": ["newAccount", "update", "options"],
     "folderPage": ["back"],
     "headerPage": ["back", "more", "wayMore", "all", "config", "send", "folder"],
-    "bodyPage": ["back", "attachments", "toggleHtml", "reply", "forward", "zoom-in", "zoom-out"],
+    "bodyPage": ["back", "attachments", "toggleHtml", "reply", "forward", "copy", "zoom-in", "zoom-out"],
     "configPage": ["back", "submit"],
     "sendPage": ["back", "sendEmail"],
   }
@@ -160,6 +160,13 @@ QtObject {
         setIsHtml(!wasHtml)
         controller.fetchCurrentBodyText(notifier, bodyView, null)
       }
+    },
+    QtObject {
+      signal clicked
+      property variant name: "copy"
+      property variant text: "copy"
+      property variant iconName: "share"
+      onClicked: controller.copyBodyToClipboard(notifier)
     },
     QtObject {
       signal clicked
