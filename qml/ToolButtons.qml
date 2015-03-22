@@ -5,7 +5,7 @@ QtObject {
     "accountPage": ["newAccount", "update", "options"],
     "folderPage": ["back"],
     "headerPage": ["back", "more", "wayMore", "all", "config", "send", "folder"],
-    "bodyPage": ["back", "attachments", "toggleHtml", "reply", "forward"],
+    "bodyPage": ["back", "attachments", "toggleHtml", "reply", "forward", "zoom-in", "zoom-out"],
     "configPage": ["back", "submit"],
     "sendPage": ["back", "sendEmail"],
   }
@@ -160,6 +160,20 @@ QtObject {
         setIsHtml(!wasHtml)
         controller.fetchCurrentBodyText(notifier, bodyView, null)
       }
+    },
+    QtObject {
+      signal clicked
+      property variant name: "zoom-in"
+      property variant text: "zoom in"
+      property variant iconName: "next"
+      onClicked: bodyView.zoomIn()
+    },
+    QtObject {
+      signal clicked
+      property variant name: "zoom-out"
+      property variant text: "zoom out"
+      property variant iconName: "previous"
+      onClicked: bodyView.zoomOut()
     },
     QtObject {
       signal clicked
