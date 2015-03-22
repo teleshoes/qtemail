@@ -178,7 +178,6 @@ PageStackWindow {
           buttonTextArea.text = text
         }
         objectName: "toolbarButton-" + modelData.name
-        iconId: "toolbar-" + modelData.iconName
         Text{
           id: buttonTextArea
           text: modelData.text
