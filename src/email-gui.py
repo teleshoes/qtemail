@@ -101,7 +101,8 @@ def main():
   if 'folder' in opts:
     controller.setFolderName(opts['folder'])
   if 'uid' in opts:
-    controller.setUid(opts['uid'])
+    hdr = emailManager.getHeader(opts['account'], opts['folder'], opts['uid'])
+    controller.setHeader(hdr)
 
   app = QApplication([])
   widget = MainWindow(qmlFile, controller, accountModel, folderModel, headerModel, configModel)
@@ -332,7 +333,7 @@ class Controller(QObject):
     self.accountName = None
     self.accountConfig = None
     self.folderName = None
-    self.uid = None
+    self.header = None
     self.threads = []
     self.currentHeaders = []
     self.headerFilterRegex = None
@@ -351,11 +352,11 @@ class Controller(QObject):
 
   @Slot(str, QObject, QObject)
   def initSend(self, sendType, sendForm, notifier):
-    if self.accountName == None or self.folderName == None or self.uid == None:
+    if self.accountName == None or self.folderName == None or self.header == None:
       notifier.notify("Missing source email for " + sendType)
       return
 
-    header = self.emailManager.getHeader(self.accountName, self.folderName, self.uid)
+    header = self.emailManager.getHeader(self.accountName, self.folderName, self.Header.Uid)
     if header == None:
       notifier.notify("Could not parse headers for message")
       return
@@ -497,7 +498,7 @@ class Controller(QObject):
     self.setFolderName(folder.Name)
   @Slot(QObject)
   def headerSelected(self, header):
-    self.setUid(header.Uid)
+    self.setHeader(header)
   @Slot()
   def clearAccount(self):
     self.reset()
@@ -518,15 +519,15 @@ class Controller(QObject):
     self.accountName = accName
   def setFolderName(self, folderName):
     self.folderName = folderName
-  def setUid(self, uid):
-    self.uid = uid
+  def setHeader(self, header):
+    self.header = header
   def setAccountConfig(self, accountConfig):
     self.accountConfig = accountConfig
   def reset(self):
     self.setAccountName(None)
     self.setAccountConfig(None)
     self.setFolderName(None)
-    self.setUid(None)
+    self.setHeader(None)
 
   def filterHeader(self, header):
     return (self.headerFilterRegex == None
@@ -608,8 +609,8 @@ class Controller(QObject):
   @Slot(QObject, QObject, object)
   def fetchCurrentBodyText(self, notifier, bodyBox, transform):
     bodyBox.setBody("...loading body")
-    if self.uid == None:
-      notifier.notify("MISSING UID")
+    if self.header == None:
+      notifier.notify("CURRENT MESSAGE NOT SET")
       return
 
     if self.htmlMode:
@@ -618,7 +619,7 @@ class Controller(QObject):
       arg = "--body-plain"
 
     cmd = [EMAIL_BIN, arg,
-      "--folder=" + self.folderName, self.accountName, str(self.uid)]
+      "--folder=" + self.folderName, self.accountName, str(self.header.Uid)]
 
     self.startEmailCommandThread(cmd, None,
       self.onFetchCurrentBodyTextFinished, {'bodyBox': bodyBox, 'transform': transform})
@@ -637,13 +638,13 @@ class Controller(QObject):
 
   @Slot(QObject)
   def saveCurrentAttachments(self, notifier):
-    if self.uid == None:
-      notifier.notify("MISSING UID")
+    if self.header == None:
+      notifier.notify("MISSING CURRENT MESSAGE")
       return
 
     destDir = os.getenv("HOME")
     cmd = [EMAIL_BIN, "--attachments",
-      "--folder=" + self.folderName, self.accountName, destDir, str(self.uid)]
+      "--folder=" + self.folderName, self.accountName, destDir, str(self.Header.Uid)]
 
     self.startEmailCommandThread(cmd, None,
       self.onSaveCurrentAttachmentsFinished, {'notifier': notifier})
