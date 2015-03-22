@@ -8,6 +8,8 @@ smtp-cli is free software, released under the GPLv3
 Simple IMAP client with a QT gui and a CLI
 Minimal dependencies, currently minimal features
 
+icons:
+
 FILES
   src/email-gui.py
     simple python QT gui (pyside+QML)
