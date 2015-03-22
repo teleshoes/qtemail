@@ -357,7 +357,7 @@ class Controller(QObject):
       notifier.notify("Missing source email for " + sendType)
       return
 
-    header = self.emailManager.getHeader(self.accountName, self.folderName, self.Header.Uid)
+    header = self.emailManager.getHeader(self.accountName, self.folderName, self.header.Uid)
     if header == None:
       notifier.notify("Could not parse headers for message")
       return
