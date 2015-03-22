@@ -7,6 +7,40 @@ Rectangle {
     bodyText.text = body
   }
 
+  property variant scales: [0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 5, 10]
+
+  function zoomIn(){
+    setZoom(getNextScale("in"))
+  }
+  function zoomOut(){
+    setZoom(getNextScale("out"))
+  }
+  function getNextScale(dir){
+    var curScale = bodyFlickable.scale
+    for(var i=0; i<scales.length; ++i){
+      var scale
+      if(dir == "in"){
+        scale = scales[i]
+      }else if(dir == "out"){
+        scale = scales[scales.length - i]
+      }
+      console.log(scale)
+      if(dir == "in" && curScale < scale){
+        return scale
+      }else if(dir == "out" && curScale > scale){
+        return scale
+      }
+    }
+    if(dir == "in"){
+      return scales[scales.length - 1]
+    }else if(dir == "out"){
+      return scales[0]
+    }
+  }
+  function setZoom(scale){
+    bodyFlickable.scale = scale
+  }
+
   PinchFlick{
     anchors.fill: parent
     pinch.minimumScale: 0.1
