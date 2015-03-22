@@ -14,5 +14,9 @@ FILE(GLOB icons icons/*.png)
 INSTALL(FILES ${icons}
   DESTINATION /opt/qtemail/icons)
 
+FILE(GLOB buttonIcons icons/buttons/*.png)
+INSTALL(FILES ${buttonIcons}
+  DESTINATION /opt/qtemail/icons/buttons)
+
 INSTALL(FILES data/qtemail.desktop
   DESTINATION /usr/share/applications)
