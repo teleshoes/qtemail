@@ -3,6 +3,9 @@ import QtQuick 1.1
 Rectangle {
   anchors.fill: parent
   id: bodyView
+  function setHeader(header){
+    headerText.text = header
+  }
   function setBody(body){
     bodyText.text = body
   }
@@ -56,10 +59,19 @@ Rectangle {
     flickableDirection: Flickable.HorizontalAndVerticalFlick
     boundsBehavior: Flickable.DragOverBounds
     Rectangle{
-      anchors.fill: parent
+      width: parent.width
+      height: parent.height
       color: "#FFFFFF"
       Text {
+        id: headerText
+        color: "#0000FF"
+        width: parent.width
+        wrapMode: Text.Wrap
+        font.pointSize: 18
+      }
+      Text {
         id: bodyText
+        anchors.top: headerText.bottom
         height: parent.height
         width: parent.width
         wrapMode: Text.Wrap
