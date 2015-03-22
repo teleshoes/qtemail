@@ -648,6 +648,12 @@ class Controller(QObject):
       bodyBox.setBody("ERROR FETCHING BODY\n")
 
   @Slot(QObject)
+  def copyBodyToClipboard(self, notifier):
+    if self.currentBodyText != None:
+      QClipboard().setText(self.currentBodyText)
+    notifier.notify("Copied text to clipboard: " + self.currentBodyText)
+
+  @Slot(QObject)
   def saveCurrentAttachments(self, notifier):
     if self.header == None:
       notifier.notify("MISSING CURRENT MESSAGE")
