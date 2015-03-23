@@ -662,7 +662,7 @@ class Controller(QObject):
 
     destDir = os.getenv("HOME")
     cmd = [EMAIL_BIN, "--attachments",
-      "--folder=" + self.folderName, self.accountName, destDir, str(self.Header.Uid)]
+      "--folder=" + self.folderName, self.accountName, destDir, str(self.header.Uid)]
 
     self.startEmailCommandThread(cmd, None,
       self.onSaveCurrentAttachmentsFinished, {'notifier': notifier})
