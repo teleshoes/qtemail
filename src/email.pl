@@ -61,6 +61,8 @@ my @accExtraConfigKeys = qw(
   skip
   preferHtml
 );
+my %enums = (
+);
 my @optionsConfigKeys = qw(update_cmd encrypt_cmd decrypt_cmd);
 
 my @headerFields = qw(Date Subject From To);
@@ -1299,6 +1301,10 @@ sub modifySecrets($$){
         $found = 1;
         last;
       }
+    }
+    if(not $valEmpty and defined $enums{$key}){
+      my $okEnum = join '|', @{$enums{$key}};
+      die "invalid $key: $val\nexpects: $okEnum" if $val !~ /^($okEnum)$/;
     }
     push @lines, $newLine if not $found;
   }
