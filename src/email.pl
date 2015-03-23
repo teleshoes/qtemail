@@ -1280,11 +1280,10 @@ sub modifySecrets($$){
       die "Unknown options key: $key\n" if $key !~ /^($okOptionsKeys)$/;
     }
     my $val = $$config{$key};
-    if($val =~ /^\s*$/){
+    my $valEmpty = $val =~ /^\s*$/;
+    if($valEmpty){
       if(defined $configGroup and defined $requiredConfigKeys{$key}){
         die "must include '$key'\n";
-      }else{
-        next;
       }
     }
     if(defined $encryptCmd and $key =~ /password/i){
@@ -1293,7 +1292,7 @@ sub modifySecrets($$){
       die "error encrypting password\n" if $? != 0;
       chomp $val;
     }
-    my $newLine = "$prefix.$key = $val\n";
+    my $newLine = $valEmpty ? '' : "$prefix.$key = $val\n";
     my $found = 0;
     for my $line(@lines){
       if($line =~ s/^$prefix\.$key\s*=.*\n$/$newLine/){
