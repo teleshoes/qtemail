@@ -60,8 +60,10 @@ my @accExtraConfigKeys = qw(
   new_unread_cmd
   skip
   preferHtml
+  bodyCacheMode
 );
 my %enums = (
+  bodyCacheMode => [qw(all unread none)],
 );
 my @optionsConfigKeys = qw(update_cmd encrypt_cmd decrypt_cmd);
 
@@ -127,6 +129,11 @@ my $usage = "
           $emailDir/ACCOUNT_NAME/FOLDER_NAME/all
         -fetch and cache all message headers in
           $emailDir/ACCOUNT_NAME/FOLDER_NAME/headers/UID
+        -fetch and cache bodies according to bodyCacheMode config
+            all    => every header that was cached gets its body cached
+            unread => every unread message gets its body cached
+            none   => no bodies are cached
+          $emailDir/ACCOUNT_NAME/FOLDER_NAME/bodies/UID
         -fetch all unread messages and write their UIDs to
           $emailDir/ACCOUNT_NAME/FOLDER_NAME/unread
         -write all message UIDs that are now in unread and were not before
@@ -350,12 +357,23 @@ sub main(@){
           next;
         }
 
-        cacheAllHeaders($accName, $folderName, $c);
+        my @newMessages = cacheAllHeaders($accName, $folderName, $c);
 
         my @unread = $c->unseen;
         $unreadCount += @unread;
 
-        cacheBodies($accName, $folderName, $c, $MAX_UNREAD_TO_CACHE, @unread);
+        my @toCache;
+        my $bodyCacheMode = $$acc{bodyCacheMode};
+        $bodyCacheMode = 'unread' if not defined $bodyCacheMode;
+        if($bodyCacheMode eq "all"){
+          @toCache = @newMessages;
+        }elsif($bodyCacheMode eq "unread"){
+          @toCache = @unread;
+        }elsif($bodyCacheMode eq "none"){
+          @toCache = ();
+        }
+
+        cacheBodies($accName, $folderName, $c, $MAX_UNREAD_TO_CACHE, @toCache);
 
         $c->close();
 
@@ -904,6 +922,8 @@ sub cacheAllHeaders($$$){
     close FH;
   }
   print "\n" if $segment > 0 and $VERBOSE;
+
+  return @messages;
 }
 
 sub cacheBodies($$$$@){
