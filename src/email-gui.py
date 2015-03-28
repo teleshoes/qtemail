@@ -337,7 +337,7 @@ class Controller(QObject):
     self.currentBodyText = None
     self.threads = []
     self.currentHeaders = []
-    self.headerFilterRegex = None
+    self.headerFilters = []
     self.fileSystemController = FileSystemController()
 
   @Slot('QVariantList')
@@ -447,7 +447,7 @@ class Controller(QObject):
     self.folderModel.setItems(self.emailManager.getFolders(self.accountName))
   @Slot(QObject)
   def setupHeaders(self, counterBox):
-    self.headerFilterRegex = None
+    self.headerFilters = []
     (total, headers) = self.emailManager.fetchHeaders(
       self.accountName, self.folderName,
       limit=PAGE_INITIAL_SIZE, exclude=[])
@@ -532,13 +532,14 @@ class Controller(QObject):
     self.currentBodyText = None
 
   def filterHeader(self, header):
-    return (self.headerFilterRegex == None
-      or self.headerFilterRegex.search(header.subject_)
-      or self.headerFilterRegex.search(header.from_)
-      or self.headerFilterRegex.search(header.to_)
-    )
-  def setHeaderFilterRegex(self, regex):
-    self.headerFilterRegex = regex
+    for f in self.headerFilters:
+      if not f.filterHeader(header):
+        return False
+    return True
+  def setQuickFilterRegex(self, regex):
+    name = "quickFilter"
+    self.headerFilters = filter(lambda f: f.name != name, self.headerFilters)
+    self.headerFilters.append(HeaderFilterRegex(name, regex))
     self.setHeaders(self.currentHeaders)
   def setHeaders(self, headers):
     self.currentHeaders = headers
@@ -555,7 +556,7 @@ class Controller(QObject):
 
   @Slot(str)
   def onSearchTextChanged(self, searchText):
-    self.setHeaderFilterRegex(re.compile(searchText.strip(), re.IGNORECASE))
+    self.setQuickFilterRegex(re.compile(searchText.strip(), re.IGNORECASE))
 
   @Slot(QObject, QObject, QObject)
   def updateAccount(self, indicator, messageBox, account):
@@ -718,6 +719,26 @@ class Controller(QObject):
   def updateCounterBox(self, counterBox):
     counterBox.setCounterText(str(self.curSize) + " / " + str(self.totalSize))
 
+class HeaderFilter():
+  def __init__(self, name):
+    self.name = name
+  def filterHeader(self, header):
+    return True
+
+class HeaderFilterRegex(HeaderFilter):
+  def __init__(self, name, regex, fields=["subject", "from", "to"]):
+    HeaderFilter.__init__(self, name)
+    self.regex = regex
+    self.fields = fields
+  def filterHeader(self, header):
+    for field in self.fields:
+      if field == "subject" and self.regex.search(header.subject_):
+        return True
+      elif field == "from" and self.regex.search(header.from_):
+        return True
+      elif field == "to" and self.regex.search(header.to_):
+        return True
+    return False
 
 class FileSystemController(QObject):
   def __init__(self):
