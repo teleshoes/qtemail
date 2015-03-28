@@ -7,6 +7,10 @@ Rectangle {
     counterTextArea.text = text
   }
 
+  function resetFilterButtons(){
+    unreadFilterButton.checked = false
+  }
+
   Rectangle {
     id: counterBox
     anchors.left: parent.left
