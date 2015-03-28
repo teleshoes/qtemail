@@ -31,11 +31,31 @@ Rectangle {
     anchors.right: parent.right
     anchors.bottom: headerFlickable.top
     width: parent.width
-    height: searchBox.height
+    height: searchBox.height + filterToggleBox.height
     z: 10
 
     Column {
       anchors.fill: parent
+      Row {
+        id: filterToggleBox
+        width: parent.width
+        height: 30
+        Btn {
+          id: unreadFilterButton
+          height: parent.height
+          width: parent.width * 0.20
+
+          property bool checked: false
+          text: checked ? "=>read+unread" : "=>unread only"
+
+          onCheckedChanged: {
+            controller.setUnreadFilter(checked ? "unread-only" : "all")
+          }
+          onClicked: {
+            checked = !checked
+          }
+        }
+      }
       Rectangle {
         id: searchBox
         width: parent.width
