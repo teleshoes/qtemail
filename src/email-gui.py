@@ -541,6 +541,13 @@ class Controller(QObject):
     self.headerFilters = filter(lambda f: f.name != name, self.headerFilters)
     self.headerFilters.append(HeaderFilterRegex(name, regex))
     self.setHeaders(self.currentHeaders)
+  @Slot(str)
+  def setUnreadFilter(self, unreadFilter):
+    name = "unreadFilter"
+    self.headerFilters = filter(lambda f: f.name != name, self.headerFilters)
+    if unreadFilter == "unread-only":
+      self.headerFilters.append(HeaderFilterUnread(name))
+    self.setHeaders(self.currentHeaders)
   def setHeaders(self, headers):
     self.currentHeaders = headers
     filteredHeaders = filter(self.filterHeader, headers)
@@ -739,6 +746,11 @@ class HeaderFilterRegex(HeaderFilter):
       elif field == "to" and self.regex.search(header.to_):
         return True
     return False
+class HeaderFilterUnread(HeaderFilter):
+  def __init__(self, name):
+    HeaderFilter.__init__(self, name)
+  def filterHeader(self, header):
+    return not header.read_
 
 class FileSystemController(QObject):
   def __init__(self):
