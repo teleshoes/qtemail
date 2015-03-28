@@ -25,23 +25,32 @@ Rectangle {
   }
 
   Rectangle {
-    id: searchBox
+    id: filterBox
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: headerFlickable.top
     width: parent.width
-    height: 30
-    border.width: 2
+    height: searchBox.height
     z: 10
 
-    TextInput {
-      anchors.margins: 2
-      id: searchTextBox
+    Column {
       anchors.fill: parent
-      font.pointSize: 18
-      onTextChanged: {
-        controller.onSearchTextChanged(searchTextBox.text)
+      Rectangle {
+        id: searchBox
+        width: parent.width
+        height: 30
+        border.width: 2
+
+        TextInput {
+          anchors.margins: 2
+          id: searchTextBox
+          anchors.fill: parent
+          font.pointSize: 18
+          onTextChanged: {
+            controller.onSearchTextChanged(searchTextBox.text)
+          }
+        }
       }
     }
   }
@@ -49,11 +58,11 @@ Rectangle {
   ListView {
     id: headerFlickable
     anchors.bottom: parent.bottom
-    anchors.top: searchBox.bottom
+    anchors.top: filterBox.bottom
     anchors.left: parent.left
     anchors.right: parent.right
     width: parent.width
-    height: parent.height - searchBox.height
+    height: parent.height - filterBox.height
 
     spacing: 10
     model: headerModel
