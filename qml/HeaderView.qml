@@ -53,7 +53,12 @@ Rectangle {
           text: checked ? "=>read+unread" : "=>unread only"
 
           onCheckedChanged: {
-            controller.setUnreadFilter(checked ? "unread-only" : "all")
+            if(checked){
+              controller.replaceHeaderFilterStr("unread-only", "read=False")
+            }else{
+              controller.removeHeaderFilter("unread-only")
+            }
+            controller.refreshHeaderFilters()
           }
           onClicked: {
             checked = !checked
