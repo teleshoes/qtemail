@@ -575,8 +575,8 @@ class Controller(QObject):
     self.replaceHeaderFilterStr("quick-filter", searchText.strip())
     self.refreshHeaderFilters()
 
-  @Slot(QObject, QObject, QObject)
-  def updateAccount(self, indicator, messageBox, account):
+  @Slot(QObject, QObject)
+  def updateAccount(self, messageBox, account):
     if account == None:
       accMsg = "ALL ACCOUNTS WITHOUT SKIP"
     else:
@@ -584,9 +584,7 @@ class Controller(QObject):
     self.onAppendMessage(messageBox, "STARTING UPDATE FOR " + accMsg + "\n")
 
     if account != None:
-      account.isLoading_ = True
-    if indicator != None:
-      indicator.updateColor()
+      account.setLoading(True)
 
     cmd = [EMAIL_BIN, "--update"]
     if account != None:
@@ -1024,6 +1022,9 @@ class Account(QObject):
     return self.error_
   def IsLoading(self):
     return self.isLoading_
+  def setLoading(self, isLoading_):
+    self.isLoading_ = isLoading_
+    self.changed.emit()
   changed = Signal()
   Name = Property(unicode, Name, notify=changed)
   LastUpdated = Property(int, LastUpdated, notify=changed)
