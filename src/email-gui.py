@@ -346,6 +346,11 @@ class Controller(QObject):
     self.headerFilters = []
     self.fileSystemController = FileSystemController()
 
+    filterButtons = []
+    filterButtons.append(FilterButton(
+      'unread-filter', 'read=False', '=>read+unread', '=>unread-only', False))
+    self.filterButtonModel.setItems(filterButtons)
+
   @Slot('QVariantList')
   def runCommand(self, cmdArr):
     subprocess.Popen(cmdArr)
@@ -560,6 +565,11 @@ class Controller(QObject):
     name = headerFilter.name
     self.headerFilters = filter(lambda f: f.name != name, self.headerFilters)
     self.headerFilters.append(headerFilter)
+
+  @Slot()
+  def resetFilterButtons(self):
+    for filterButton in self.filterButtonModel.getItems():
+      filterButton.setChecked(False)
 
   def setHeaders(self, headers):
     self.currentHeaders = headers
@@ -1119,6 +1129,35 @@ class Field(QObject):
   IsPassword = Property(bool, IsPassword, notify=changed)
   Value = Property(unicode, Value, notify=changed)
   Description = Property(unicode, Description, notify=changed)
+
+class FilterButton(QObject):
+  def __init__(self, name_, filterString_, textChecked_, textUnchecked_, isChecked_):
+    QObject.__init__(self)
+    self.name_ = name_
+    self.filterString_ = filterString_
+    self.textChecked_ = textChecked_
+    self.textUnchecked_ = textUnchecked_
+    self.isChecked_ = isChecked_
+  def Name(self):
+    return self.name_
+  def FilterString(self):
+    return self.filterString_
+  def TextChecked(self):
+    return self.textChecked_
+  def TextUnchecked(self):
+    return self.textUnchecked_
+  def IsChecked(self):
+    return self.isChecked_
+  @Slot(bool)
+  def setChecked(self, isChecked_):
+    self.isChecked_ = isChecked_
+    self.changed.emit()
+  changed = Signal()
+  Name = Property(unicode, Name, notify=changed)
+  FilterString = Property(unicode, FilterString, notify=changed)
+  TextChecked = Property(unicode, TextChecked, notify=changed)
+  TextUnchecked = Property(unicode, TextUnchecked, notify=changed)
+  IsChecked = Property(bool, IsChecked, notify=changed)
 
 class MainWindow(QDeclarativeView):
   def __init__(self, qmlFile, controller,
