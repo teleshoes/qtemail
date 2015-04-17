@@ -111,19 +111,28 @@ QtObject {
       signal clicked
       property variant name: "more"
       property variant text: "more"
-      onClicked: controller.moreHeaders(headerView, 0)
+      onClicked: {
+        controller.moreHeaders(0)
+        controller.updateCounterBox(headerView.getCounterBox())
+      }
     },
     QtObject {
       signal clicked
       property variant name: "wayMore"
       property variant text: "+30%"
-      onClicked: controller.moreHeaders(headerView, 30)
+      onClicked: {
+        controller.moreHeaders(30)
+        controller.updateCounterBox(headerView.getCounterBox())
+      }
     },
     QtObject {
       signal clicked
       property variant name: "all"
       property variant text: "all"
-      onClicked: controller.moreHeaders(headerView, 100)
+      onClicked: {
+        controller.moreHeaders(100)
+        controller.updateCounterBox(headerView.getCounterBox())
+      }
     },
     QtObject {
       signal clicked

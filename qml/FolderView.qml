@@ -17,7 +17,8 @@ Rectangle {
           anchors.fill: parent
           onClicked: {
             controller.folderSelected(model.folder)
-            controller.setupHeaders(headerView)
+            controller.setupHeaders()
+            controller.updateCounterBox(headerView.getCounterBox())
             navToPage(headerPage)
           }
         }

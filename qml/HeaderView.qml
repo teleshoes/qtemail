@@ -3,8 +3,8 @@ import QtQuick 1.1
 Rectangle {
   anchors.fill: parent
 
-  function setCounterText(text){
-    counterTextArea.text = text
+  function getCounterBox(){
+    return counterBox
   }
 
   function resetFilterButtons(){
@@ -19,6 +19,10 @@ Rectangle {
     height: 30
     y: 0 - 30
     z: 10
+
+    function setCounterText(text){
+      counterTextArea.text = text
+    }
 
     Text {
       id: counterTextArea
