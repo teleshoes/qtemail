@@ -348,7 +348,7 @@ class Controller(QObject):
 
     filterButtons = []
     filterButtons.append(FilterButton(
-      'unread-filter', 'read=False', '=>read+unread', '=>unread-only', False))
+      'unread-filter', 'read=False', False))
     self.filterButtonModel.setItems(filterButtons)
 
   @Slot('QVariantList')
@@ -1135,21 +1135,15 @@ class Field(QObject):
   Description = Property(unicode, Description, notify=changed)
 
 class FilterButton(QObject):
-  def __init__(self, name_, filterString_, textChecked_, textUnchecked_, isChecked_):
+  def __init__(self, name_, filterString_, isChecked_):
     QObject.__init__(self)
     self.name_ = name_
     self.filterString_ = filterString_
-    self.textChecked_ = textChecked_
-    self.textUnchecked_ = textUnchecked_
     self.isChecked_ = isChecked_
   def Name(self):
     return self.name_
   def FilterString(self):
     return self.filterString_
-  def TextChecked(self):
-    return self.textChecked_
-  def TextUnchecked(self):
-    return self.textUnchecked_
   def IsChecked(self):
     return self.isChecked_
   @Slot(bool)
@@ -1159,8 +1153,6 @@ class FilterButton(QObject):
   changed = Signal()
   Name = Property(unicode, Name, notify=changed)
   FilterString = Property(unicode, FilterString, notify=changed)
-  TextChecked = Property(unicode, TextChecked, notify=changed)
-  TextUnchecked = Property(unicode, TextUnchecked, notify=changed)
   IsChecked = Property(bool, IsChecked, notify=changed)
 
 class MainWindow(QDeclarativeView):
