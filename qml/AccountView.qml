@@ -11,7 +11,7 @@ Rectangle {
     var preferHtmlCfg = controller.getAccountConfigValue("preferHtml")
     var isHtml = preferHtmlCfg != "false"
     toolButtons.getButtonDefByName("toggleHtml").setIsHtml(isHtml)
-    headerView.resetFilterButtons()
+    controller.resetFilterButtons()
     controller.setHtmlMode(isHtml)
   }
 

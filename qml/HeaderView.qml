@@ -7,10 +7,6 @@ Rectangle {
     return counterBox
   }
 
-  function resetFilterButtons(){
-    unreadFilterButton.checked = false
-  }
-
   Rectangle {
     id: counterBox
     anchors.left: parent.left
@@ -48,24 +44,42 @@ Rectangle {
         id: filterToggleBox
         width: parent.width
         height: 30
-        Btn {
-          id: unreadFilterButton
-          height: parent.height
-          width: parent.width * 0.20
+        ListView {
+          id: filterButtonList
+          model: filterButtonModel
+          delegate: Btn {
+            id: unreadFilterButton
+            height: 30
+            width: getSize()
 
-          property bool checked: false
-          text: checked ? "=>read+unread" : "=>unread only"
-
-          onCheckedChanged: {
-            if(checked){
-              controller.replaceHeaderFilterStr("unread-only", "read=False")
-            }else{
-              controller.removeHeaderFilter("unread-only")
+            function getSize(){
+              var maxLen
+              var checkedLen = model.filterButton.TextChecked.length
+              var uncheckedLen = model.filterButton.TextUnchecked.length
+              if(checkedLen > uncheckedLen){
+                maxLen = checkedLen
+              }else{
+                maxLen = uncheckedLen
+              }
+              return maxLen * 15
             }
-            controller.refreshHeaderFilters()
-          }
-          onClicked: {
-            checked = !checked
+
+            property bool checked: model.filterButton.IsChecked
+            text: checked ? model.filterButton.TextChecked : model.filterButton.TextUnchecked
+
+            onCheckedChanged: {
+              if(checked){
+                controller.replaceHeaderFilterStr(model.filterButton.Name,
+                  model.filterButton.FilterString)
+              }else{
+                controller.removeHeaderFilter(model.filterButton.Name)
+              }
+              controller.refreshHeaderFilters()
+            }
+
+            onClicked: {
+              model.filterButton.setChecked(!model.filterButton.IsChecked)
+            }
           }
         }
       }
