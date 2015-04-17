@@ -856,9 +856,27 @@ class HeaderFilterAll(HeaderFilter):
       msg += f.prettyFormat('| ' + indent)
     msg += indent + '|______' + "\n"
     return msg
+class HeaderFilterNot(HeaderFilter):
+  def __init__(self, name, filterList):
+    HeaderFilter.__init__(self, name)
+    self.filterList = filterList
+  def filterHeader(self, header):
+    for f in self.filterList:
+      if f.filterHeader(header):
+        return False
+    return True
+  def prettyFormat(self, indent=''):
+    msg = ""
+    msg += indent + 'Not____' + "\n"
+    for f in self.filterList:
+      msg += indent + "| \n"
+      msg += f.prettyFormat('| ' + indent)
+    msg += indent + '|______' + "\n"
+    return msg
+
 
 def getHeaderFilterFromStr(name, filterStr):
-  listRegex = "(Any|All)" + "\\(" + "(.*)" + "\\)"
+  listRegex = "(Any|All|Not)" + "\\(" + "(.*)" + "\\)"
   attRegex = "(\\w+)=(\\w+)"
   regexRegex = "(?:" + "(Subject|Header|From|To)" + "~)?" + "([^,]+)"
 
@@ -870,7 +888,7 @@ def getHeaderFilterFromStr(name, filterStr):
   listContentRegex = "(" + anyRegex + ")" + "(?:\\s*,\\s*|$)"
 
   if listMatcher:
-    anyAll = listMatcher.group(1).lower()
+    anyAllNot = listMatcher.group(1).lower()
     content = listMatcher.group(2)
 
     subfilterMatches = re.findall(listContentRegex, content)
@@ -879,10 +897,12 @@ def getHeaderFilterFromStr(name, filterStr):
       subfilter = subfilterMatch[0]
       subfilters.append(getHeaderFilterFromStr('subfilter', subfilter))
 
-    if anyAll == "any":
+    if anyAllNot == "any":
       return HeaderFilterAny(name, subfilters)
-    elif anyAll == "all":
+    elif anyAllNot == "all":
       return HeaderFilterAll(name, subfilters)
+    elif anyAllNot == "not":
+      return HeaderFilterNot(name, subfilters)
   elif attMatcher:
     att = attMatcher.group(1).lower()
     val = attMatcher.group(2).lower()
