@@ -748,7 +748,11 @@ class Controller(QObject):
   def updateCounterBox(self, counterBox):
     total = str(self.totalSize)
     cur = str(len(self.currentHeaders))
-    counterBox.setCounterText(cur + " / " + total)
+    if len(self.filteredHeaders) == len(self.currentHeaders):
+      filtered = ""
+    else:
+      filtered = "(" + str(len(self.filteredHeaders)) + " showing)  "
+    counterBox.setCounterText(filtered + cur + " / " + total)
 
 class HeaderFilter():
   def __init__(self, name):
