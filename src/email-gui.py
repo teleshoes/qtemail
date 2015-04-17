@@ -205,6 +205,7 @@ class EmailManager():
              , "new_unread_cmd", "[OPT] custom alert command"
              , "skip",           "[OPT] set to true to skip during --update"
              , "preferHtml",     "[OPT] set to false to prefer plaintext"
+             , "filters",        "[OPT] a CSV of filter buttons"
              ]
     if accName == None:
       configValues = []
@@ -344,12 +345,9 @@ class Controller(QObject):
     self.currentHeaders = []
     self.filteredHeaders = []
     self.headerFilters = []
+    self.filterButtons = []
     self.fileSystemController = FileSystemController()
-
-    filterButtons = []
-    filterButtons.append(FilterButton(
-      'unread-filter', 'read=False', False))
-    self.filterButtonModel.setItems(filterButtons)
+    self.setFilterButtons([])
 
   @Slot('QVariantList')
   def runCommand(self, cmdArr):
@@ -533,12 +531,37 @@ class Controller(QObject):
     self.header = header
   def setAccountConfig(self, accountConfig):
     self.accountConfig = accountConfig
+    if self.accountConfig == None:
+      filterButtons = []
+    else:
+      filterButtons = self.parseFilterButtons(self.accountConfig['filters'])
+    self.setFilterButtons(filterButtons)
   def reset(self):
     self.setAccountName(None)
     self.setAccountConfig(None)
     self.setFolderName(None)
     self.setHeader(None)
     self.currentBodyText = None
+
+  def parseFilterButtons(self, filterButtonStr):
+    filterButtonRegex = "(\\w+)=%(.+?)%\\s*"
+    usedNames = set()
+    filterButtons = []
+    print filterButtonStr
+    for f in re.findall(filterButtonRegex, filterButtonStr):
+      name = f[0]
+      filterStr = f[1]
+      if not name in usedNames:
+        filterButtons.append(FilterButton(name, filterStr, False))
+      usedNames.add(name)
+    return filterButtons
+  def setFilterButtons(self, filterButtons):
+    self.filterButtons = []
+    self.filterButtons.append(FilterButton(
+      'unread', 'read=False', False))
+    self.filterButtons += filterButtons
+    print len(self.filterButtons)
+    self.filterButtonModel.setItems(self.filterButtons)
 
   def filterHeader(self, header):
     for f in self.headerFilters:
