@@ -44,21 +44,12 @@ Rectangle {
           width: parent.width * 0.15
           anchors.right: parent.right
           anchors.bottom: parent.bottom
-          color: getColor()
-          function getColor(){
-            if(model.account.IsLoading){
-              return "#FF0000";
-            }else{
-              return "#666666"
-            }
-          }
-          function updateColor(){
-            this.color = getColor()
-          }
+          color: model.account.IsLoading ? "#FF0000" : "#666666"
+
           MouseArea {
             anchors.fill: parent
             onClicked: {
-              controller.updateAccount(updateIndicator, messageBox, model.account)
+              controller.updateAccount(messageBox, model.account)
             }
           }
         }
