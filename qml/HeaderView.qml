@@ -47,9 +47,13 @@ Rectangle {
         ListView {
           id: filterButtonList
           model: filterButtonModel
+          orientation: ListView.Horizontal
+          width: parent.width
+          height: parent.height
+          spacing: 10
           delegate: Btn {
-            height: 30
-            width: model.filterButton.Name.length * 12
+            height: parent.height
+            width: model.filterButton.Name.length * 16
 
             property bool checked: model.filterButton.IsChecked
             text: model.filterButton.Name
