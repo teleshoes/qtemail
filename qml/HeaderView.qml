@@ -50,22 +50,10 @@ Rectangle {
           delegate: Btn {
             id: unreadFilterButton
             height: 30
-            width: getSize()
-
-            function getSize(){
-              var maxLen
-              var checkedLen = model.filterButton.TextChecked.length
-              var uncheckedLen = model.filterButton.TextUnchecked.length
-              if(checkedLen > uncheckedLen){
-                maxLen = checkedLen
-              }else{
-                maxLen = uncheckedLen
-              }
-              return maxLen * 15
-            }
+            width: model.filterButton.Name.length * 12
 
             property bool checked: model.filterButton.IsChecked
-            text: checked ? model.filterButton.TextChecked : model.filterButton.TextUnchecked
+            text: model.filterButton.Name
 
             onCheckedChanged: {
               if(checked){
