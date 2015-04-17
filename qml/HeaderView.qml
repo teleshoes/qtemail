@@ -53,6 +53,8 @@ Rectangle {
 
             property bool checked: model.filterButton.IsChecked
             text: model.filterButton.Name
+            buttonColorDefault: checked ? "blue" : "gray"
+
 
             onCheckedChanged: {
               if(checked){
