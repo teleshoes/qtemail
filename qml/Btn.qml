@@ -15,6 +15,7 @@ Rectangle {
   property variant buttonColorGradient: "white"
   property variant buttonColor: buttonColorDefault
   MouseArea {
+    id: mouseArea
     hoverEnabled: true
     anchors.fill: parent
     onClicked: button.clicked()
@@ -27,10 +28,15 @@ Rectangle {
         parent.buttonColor = parent.buttonColorDefault
       }
     }
-    onEntered: setColor()
-    onExited: setColor()
-    onPressed: setColor()
-    onReleased: setColor()
+    Timer {
+      id: colorTimer
+      interval: 50;
+      onTriggered: mouseArea.setColor()
+    }
+    onEntered: colorTimer.start()
+    onExited: colorTimer.start()
+    onPressed: colorTimer.start()
+    onReleased: colorTimer.start()
   }
   gradient: Gradient {
     GradientStop { position: 0.0; color: buttonColor }
