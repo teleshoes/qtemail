@@ -75,6 +75,7 @@ Rectangle {
                 controller.removeHeaderFilter(model.filterButton.Name)
               }
               controller.refreshHeaderFilters()
+              controller.updateCounterBox(headerView.getCounterBox())
             }
 
             onClicked: {
@@ -96,6 +97,7 @@ Rectangle {
           font.pointSize: 18
           onTextChanged: {
             controller.onSearchTextChanged(searchTextBox.text)
+            controller.updateCounterBox(headerView.getCounterBox())
           }
         }
       }
