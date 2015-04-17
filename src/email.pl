@@ -61,6 +61,7 @@ my @accExtraConfigKeys = qw(
   skip
   preferHtml
   bodyCacheMode
+  filters
 );
 my %enums = (
   bodyCacheMode => [qw(all unread none)],
