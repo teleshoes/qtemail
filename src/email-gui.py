@@ -337,6 +337,7 @@ class Controller(QObject):
     self.currentBodyText = None
     self.threads = []
     self.currentHeaders = []
+    self.filteredHeaders = []
     self.headerFilters = []
     self.fileSystemController = FileSystemController()
 
@@ -445,15 +446,13 @@ class Controller(QObject):
   @Slot()
   def setupFolders(self):
     self.folderModel.setItems(self.emailManager.getFolders(self.accountName))
-  @Slot(QObject)
-  def setupHeaders(self, counterBox):
+  @Slot()
+  def setupHeaders(self):
     self.headerFilters = []
     (total, headers) = self.emailManager.fetchHeaders(
       self.accountName, self.folderName,
       limit=PAGE_INITIAL_SIZE, exclude=[])
     self.totalSize = total
-    self.curSize = len(headers)
-    self.updateCounterBox(counterBox)
     self.setHeaders(headers)
   @Slot(str)
   def setConfigMode(self, mode):
@@ -559,16 +558,17 @@ class Controller(QObject):
 
   def setHeaders(self, headers):
     self.currentHeaders = headers
-    filteredHeaders = filter(self.filterHeader, headers)
-    if len(filteredHeaders) == 0:
+    self.filteredHeaders = filter(self.filterHeader, headers)
+    if len(self.filteredHeaders) == 0:
       self.headerModel.clear()
     else:
-      self.headerModel.setItems(filteredHeaders)
+      self.headerModel.setItems(self.filteredHeaders)
   def appendHeaders(self, headers):
+    newFilteredHeaders = filter(self.filterHeader, headers)
     self.currentHeaders += headers
-    filteredHeaders = filter(self.filterHeader, headers)
-    if len(filteredHeaders) > 0:
-      self.headerModel.appendItems(filteredHeaders)
+    self.filteredHeaders += newFilteredHeaders
+    if len(newFilteredHeaders) > 0:
+      self.headerModel.appendItems(newFilteredHeaders)
 
   @Slot(str)
   def onSearchTextChanged(self, searchText):
@@ -718,8 +718,8 @@ class Controller(QObject):
       messageBox.append(message)
       messageBox.scrollToBottom()
 
-  @Slot(QObject, int)
-  def moreHeaders(self, counterBox, percentage):
+  @Slot(int)
+  def moreHeaders(self, percentage):
     if percentage != None:
       limit = int(self.totalSize * percentage / 100)
     else:
@@ -729,12 +729,13 @@ class Controller(QObject):
     (total, headers) = self.emailManager.fetchHeaders(
       self.accountName, self.folderName,
       limit=limit, exclude=self.currentHeaders)
-    self.curSize = len(self.currentHeaders) + len(headers)
     self.totalSize = total
-    self.updateCounterBox(counterBox)
     self.appendHeaders(headers)
+  @Slot(QObject)
   def updateCounterBox(self, counterBox):
-    counterBox.setCounterText(str(self.curSize) + " / " + str(self.totalSize))
+    total = str(self.totalSize)
+    cur = str(len(self.currentHeaders))
+    counterBox.setCounterText(cur + " / " + total)
 
 class HeaderFilter():
   def __init__(self, name):
