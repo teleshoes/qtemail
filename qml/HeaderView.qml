@@ -48,7 +48,6 @@ Rectangle {
           id: filterButtonList
           model: filterButtonModel
           delegate: Btn {
-            id: unreadFilterButton
             height: 30
             width: model.filterButton.Name.length * 12
 
