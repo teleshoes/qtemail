@@ -92,7 +92,9 @@ def main():
   folderModel = FolderModel()
   headerModel = HeaderModel()
   configModel = ConfigModel()
-  controller = Controller(emailManager, accountModel, folderModel, headerModel, configModel)
+  filterButtonModel = FilterButtonModel()
+  controller = Controller(emailManager,
+    accountModel, folderModel, headerModel, configModel, filterButtonModel)
 
   if 'page' in opts:
     controller.setInitialPageName(opts['page'])
@@ -105,7 +107,8 @@ def main():
     controller.setHeader(hdr)
 
   app = QApplication([])
-  widget = MainWindow(qmlFile, controller, accountModel, folderModel, headerModel, configModel)
+  widget = MainWindow(qmlFile, controller,
+    accountModel, folderModel, headerModel, configModel, filterButtonModel)
   if platform == PLATFORM_HARMATTAN:
     widget.window().showFullScreen()
   else:
@@ -320,13 +323,15 @@ class EmailManager():
     return stdout
 
 class Controller(QObject):
-  def __init__(self, emailManager, accountModel, folderModel, headerModel, configModel):
+  def __init__(self, emailManager,
+    accountModel, folderModel, headerModel, configModel, filterButtonModel):
     QObject.__init__(self)
     self.emailManager = emailManager
     self.accountModel = accountModel
     self.folderModel = folderModel
     self.headerModel = headerModel
     self.configModel = configModel
+    self.filterButtonModel = filterButtonModel
     self.initialPageName = "account"
     self.htmlMode = False
     self.configMode = None
@@ -998,6 +1003,12 @@ class ConfigModel(BaseListModel):
     BaseListModel.__init__(self)
     self.setRoleNames(dict(enumerate(ConfigModel.COLUMNS)))
 
+class FilterButtonModel(BaseListModel):
+  COLUMNS = ('filterButton',)
+  def __init__(self):
+    BaseListModel.__init__(self)
+    self.setRoleNames(dict(enumerate(FilterButtonModel.COLUMNS)))
+
 class Account(QObject):
   def __init__(self, name_, lastUpdated_, lastUpdatedRel_, unread_, total_, error_, isLoading_):
     QObject.__init__(self)
@@ -1110,13 +1121,15 @@ class Field(QObject):
   Description = Property(unicode, Description, notify=changed)
 
 class MainWindow(QDeclarativeView):
-  def __init__(self, qmlFile, controller, accountModel, folderModel, headerModel, configModel):
+  def __init__(self, qmlFile, controller,
+    accountModel, folderModel, headerModel, configModel, filterButtonModel):
     super(MainWindow, self).__init__(None)
     context = self.rootContext()
     context.setContextProperty('accountModel', accountModel)
     context.setContextProperty('folderModel', folderModel)
     context.setContextProperty('headerModel', headerModel)
     context.setContextProperty('configModel', configModel)
+    context.setContextProperty('filterButtonModel', filterButtonModel)
     context.setContextProperty('controller', controller)
     context.setContextProperty('fileSystemController', controller.fileSystemController)
 
