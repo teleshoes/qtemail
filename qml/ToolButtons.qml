@@ -72,7 +72,7 @@ QtObject {
       property variant name: "reply"
       property variant text: "reply"
       onClicked: {
-        controller.initSend("reply", sendView.getForm(), notifier)
+        controller.initSend("reply", sendView.getForm())
         navToPage(sendPage)
       }
     },
@@ -81,7 +81,7 @@ QtObject {
       property variant name: "forward"
       property variant text: "forward"
       onClicked: {
-        controller.initSend("forward", sendView.getForm(), notifier)
+        controller.initSend("forward", sendView.getForm())
         navToPage(sendPage)
       }
     },
@@ -89,7 +89,7 @@ QtObject {
       signal clicked
       property variant name: "sendEmail"
       property variant text: "send"
-      onClicked: controller.sendEmail(sendView.getForm(), notifier)
+      onClicked: controller.sendEmail(sendView.getForm())
     },
     QtObject {
       signal clicked
@@ -102,7 +102,7 @@ QtObject {
       property variant name: "submit"
       property variant text: "submit"
       onClicked: {
-        if(controller.saveConfig(notifier)){
+        if(controller.saveConfig()){
           main.backPage()
         }
       }
@@ -152,14 +152,14 @@ QtObject {
         var wasHtml = controller.getHtmlMode()
         controller.setHtmlMode(!wasHtml)
         setIsHtml(!wasHtml)
-        controller.fetchCurrentBodyText(notifier, bodyView, bodyView, null)
+        controller.fetchCurrentBodyText(bodyView, bodyView, null)
       }
     },
     QtObject {
       signal clicked
       property variant name: "copy"
       property variant text: "copy"
-      onClicked: controller.copyBodyToClipboard(notifier)
+      onClicked: controller.copyBodyToClipboard()
     },
     QtObject {
       signal clicked
@@ -177,7 +177,7 @@ QtObject {
       signal clicked
       property variant name: "attachments"
       property variant text: "attach"
-      onClicked: controller.saveCurrentAttachments(notifier)
+      onClicked: controller.saveCurrentAttachments()
     }
   ]
 }

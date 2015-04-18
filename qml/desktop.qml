@@ -57,7 +57,7 @@ Rectangle {
     }else if(curPage == folderPage){
       controller.setupFolders()
     }else if(curPage == bodyPage){
-      controller.fetchCurrentBodyText(notifier, bodyView, bodyView, null)
+      controller.fetchCurrentBodyText(bodyView, bodyView, null)
     }else if(curPage == configPage){
       controller.setupConfig()
     }else if(curPage == sendPage){
