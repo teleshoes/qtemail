@@ -177,18 +177,19 @@ my $usage = "
     prints each of [@headerFields]
       one per line, formatted \"UID.FIELD: VALUE\"
 
-  $0 --body [--no-download] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  $0 --body [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     download, format and print the body of the indicated message(s)
+    if -0 is specified, print a NUL character after each body instead of a newline
     if body is cached, skip download
     if body is not cached and --no-download is specified, use empty string for body
       instead of downloading the body
     if message has a plaintext and HTML component, only one is returned
     if preferHtml is false, plaintext is returned, otherwise, HTML
 
-  $0 --body-plain [--no-download] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  $0 --body-plain [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but override preferHtml=false
 
-  $0 --body-html [--no-download] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  $0 --body-html [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but override preferHtml=true
 
   $0 --attachments [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_DIR UID [UID UID ...]
@@ -501,8 +502,13 @@ sub main(@){
   }elsif($cmd =~ /^(--body|--body-plain|--body-html|--attachments)$/){
     my $folderName = "inbox";
     my $noDownload = 0;
+    my $nulSep = 0;
     if($cmd =~ /^--body/ and @_ > 0 and $_[0] =~ /^--no-download$/){
       $noDownload = 1;
+      shift;
+    }
+    if($cmd =~ /^--body/ and @_ > 0 and $_[0] =~ /^-0$/){
+      $nulSep = 1;
       shift;
     }
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
@@ -536,7 +542,7 @@ sub main(@){
     for my $uid(@uids){
       my $body = readCachedBody($accName, $folderName, $uid);
       if(not defined $body and $noDownload){
-        print "\n";
+        print $nulSep ? "\0" : "\n";
         next;
       }
       if(not defined $body){
@@ -557,7 +563,8 @@ sub main(@){
       if($cmd =~ /^(--body|--body-plain|--body-html)$/){
         my $fmt = getBody($mimeParser, $body, $preferHtml);
         chomp $fmt;
-        print "$fmt\n";
+        print $fmt;
+        print $nulSep ? "\0" : "\n";
       }elsif($cmd =~ /^(--attachments)$/){
         my @attachments = writeAttachments($mimeParser, $body);
         for my $attachment(@attachments){
