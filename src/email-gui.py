@@ -730,10 +730,9 @@ class Controller(QObject):
   def onUpdateAccountFinished(self, isSuccess, output, extraArgs):
     self.setupAccounts()
 
-  @Slot(QObject, QObject)
-  def toggleRead(self, indicator, header):
-    header.isLoading_ = True
-    indicator.updateColor()
+  @Slot(QObject)
+  def toggleRead(self, header):
+    header.setLoading(True)
 
     if header.read_:
       arg = "--mark-unread"
@@ -743,14 +742,12 @@ class Controller(QObject):
       "--folder=" + self.folderName, self.accountName, str(header.uid_)]
 
     self.startEmailCommandThread(cmd, None,
-      self.onToggleReadFinished, {'indicator': indicator, 'header': header})
-  def onToggleReadFinished(self, isSuccess, output, extraArgs):
-    indicator = extraArgs['indicator']
-    header = extraArgs['header']
+      self.onToggleReadFinished, header)
+  def onToggleReadFinished(self, isSuccess, output, header):
     header.isLoading_ = False
+    header.setLoading(False)
     if isSuccess:
-      header.read_ = not header.read_
-    indicator.updateColor()
+      header.setRead(not header.read_)
 
   @Slot(result=bool)
   def getHtmlMode(self):
@@ -1287,6 +1284,12 @@ class Header(QObject):
     return self.read_
   def IsLoading(self):
     return self.isLoading_
+  def setLoading(self, isLoading_):
+    self.isLoading_ = isLoading_
+    self.changed.emit()
+  def setRead(self, read_):
+    self.read_ = read_
+    self.changed.emit()
   changed = Signal()
   Uid = Property(int, Uid, notify=changed)
   Date = Property(unicode, Date, notify=changed)
