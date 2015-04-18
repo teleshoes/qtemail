@@ -98,6 +98,8 @@ def main():
   controller = Controller(emailManager, bodyCacheFactory,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel)
 
+  controller.setupAccounts()
+
   if 'page' in opts:
     controller.setInitialPageName(opts['page'])
   if 'account' in opts:
