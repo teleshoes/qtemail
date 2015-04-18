@@ -140,7 +140,7 @@ Rectangle {
           MouseArea {
             anchors.fill: parent
             onClicked: {
-              controller.toggleRead(readIndicator, model.header)
+              controller.toggleRead(model.header)
             }
           }
         }
