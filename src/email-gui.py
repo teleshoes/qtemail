@@ -885,12 +885,13 @@ class HeaderFilterAtt(HeaderFilter):
     return indent + self.att + "=" + str(self.value) + "\n"
 
 class HeaderFilterField(HeaderFilter):
-  def __init__(self, name, regex, fields=[]):
+  def __init__(self, name, regexStr, fields=[]):
     HeaderFilter.__init__(self, name)
-    self.regex = re.compile(regex, re.IGNORECASE)
+    self.regexStr = regexStr
     self.fields = fields
     if len(self.fields) == 0:
       self.fields = ["subject", "from", "to"]
+    self.regex = re.compile(self.regexStr, re.IGNORECASE)
 
   def filterHeader(self, header):
     for field in self.fields:
@@ -907,7 +908,7 @@ class HeaderFilterField(HeaderFilter):
       f = ""
     else:
       f = str(self.fields)
-    return indent + f + "~" + self.regex + "\n"
+    return indent + f + "~" + self.regexStr + "\n"
 
 class HeaderFilterAny(HeaderFilter):
   def __init__(self, name, filterList):
