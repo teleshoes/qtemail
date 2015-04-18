@@ -56,10 +56,10 @@ Rectangle {
   Flickable {
     id: bodyFlickable
     clip: true
+    width: parent.width - 30
     contentWidth: parent.width - 30
     contentHeight: headerText.paintedHeight + bodyText.paintedHeight
     anchors.fill: parent
-    anchors.rightMargin: 30
     flickableDirection: Flickable.HorizontalAndVerticalFlick
     boundsBehavior: Flickable.DragOverBounds
     Rectangle{
