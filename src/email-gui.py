@@ -101,7 +101,7 @@ def main():
   if 'page' in opts:
     controller.setInitialPageName(opts['page'])
   if 'account' in opts:
-    controller.setAccountName(opts['account'])
+    controller.accountSelected(opts['account'])
   if 'folder' in opts:
     controller.setFolderName(opts['folder'])
   if 'uid' in opts:
