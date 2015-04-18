@@ -1355,6 +1355,9 @@ class NotifierModel(QObject):
   def HideDelay(self):
     return self.hideDelay_
   def notify(self, text_, hideDelay_=True):
+    self.showing_ = False
+    self.changed.emit()
+
     self.text_ = text_
     self.showing_ = True
     self.hideDelay_ = hideDelay_
