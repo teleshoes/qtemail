@@ -93,9 +93,10 @@ def main():
   folderModel = FolderModel()
   headerModel = HeaderModel()
   configModel = ConfigModel()
+  notifierModel = NotifierModel()
   filterButtonModel = FilterButtonModel()
   controller = Controller(emailManager, bodyCacheFactory,
-    accountModel, folderModel, headerModel, configModel, filterButtonModel)
+    accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel)
 
   if 'page' in opts:
     controller.setInitialPageName(opts['page'])
@@ -109,7 +110,7 @@ def main():
 
   app = QApplication([])
   widget = MainWindow(qmlFile, controller,
-    accountModel, folderModel, headerModel, configModel, filterButtonModel)
+    accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel)
   if platform == PLATFORM_HARMATTAN:
     widget.window().showFullScreen()
   else:
@@ -407,7 +408,7 @@ class EmailManager():
 
 class Controller(QObject):
   def __init__(self, emailManager, bodyCacheFactory,
-    accountModel, folderModel, headerModel, configModel, filterButtonModel):
+    accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel):
     QObject.__init__(self)
     self.emailManager = emailManager
     self.bodyCacheFactory = bodyCacheFactory
@@ -416,6 +417,7 @@ class Controller(QObject):
     self.headerModel = headerModel
     self.configModel = configModel
     self.filterButtonModel = filterButtonModel
+    self.notifierModel = notifierModel
     self.initialPageName = "account"
     self.htmlMode = False
     self.configMode = None
@@ -1342,9 +1344,22 @@ class FilterButton(QObject):
   FilterString = Property(unicode, FilterString, notify=changed)
   IsChecked = Property(bool, IsChecked, notify=changed)
 
+class NotifierModel(QObject):
+  def __init__(self):
+    QObject.__init__(self)
+    self.text_ = ""
+    self.showing_ = False
+  def Text(self):
+    return self.text_
+  def Showing(self):
+    return self.showing_
+  changed = Signal()
+  Text = Property(unicode, Text, notify=changed)
+  Showing = Property(bool, Showing, notify=changed)
+
 class MainWindow(QDeclarativeView):
   def __init__(self, qmlFile, controller,
-    accountModel, folderModel, headerModel, configModel, filterButtonModel):
+    accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel):
     super(MainWindow, self).__init__(None)
     context = self.rootContext()
     context.setContextProperty('accountModel', accountModel)
@@ -1352,6 +1367,7 @@ class MainWindow(QDeclarativeView):
     context.setContextProperty('headerModel', headerModel)
     context.setContextProperty('configModel', configModel)
     context.setContextProperty('filterButtonModel', filterButtonModel)
+    context.setContextProperty('notifierModel', notifierModel)
     context.setContextProperty('controller', controller)
     context.setContextProperty('fileSystemController', controller.fileSystemController)
 
