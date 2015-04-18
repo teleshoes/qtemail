@@ -620,6 +620,11 @@ class Controller(QObject):
     else:
       filterButtons = self.parseFilterButtons(self.accountConfig['filters'])
     self.setFilterButtons(filterButtons)
+
+    preferHtml = "false"
+    if self.accountConfig != None and "preferHtml" in self.accountConfig.keys():
+      preferHtml = self.accountConfig["preferHtml"]
+    self.setHtmlMode(preferHtml != "false")
   def reset(self):
     self.setAccountName(None)
     self.setAccountConfig(None)
