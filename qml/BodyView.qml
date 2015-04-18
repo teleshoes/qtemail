@@ -4,9 +4,11 @@ Rectangle {
   anchors.fill: parent
   id: bodyView
   function setHeader(header){
+    setZoom(1.0)
     headerText.text = header
   }
   function setBody(body){
+    setZoom(1.0)
     bodyText.text = body
   }
 
