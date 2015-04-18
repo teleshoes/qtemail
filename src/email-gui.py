@@ -134,6 +134,30 @@ class BodyCache():
       return ""
     else:
       return cache[uid]
+  def cacheBodies(self, uids, isHtml):
+    if isHtml:
+      cache = self.htmlCache
+    else:
+      cache = self.plainCache
+
+    uidsToCache = []
+    for uid in uids:
+      if not uid in cache.keys():
+        uidsToCache.append(uid)
+    if len(uidsToCache) > 0:
+      bodies = self.fetchBodies(uidsToCache, isHtml)
+    else:
+      print "\n\nSKIPPING"
+      bodies = dict()
+
+    for uid in bodies.keys():
+      body = bodies[uid]
+      cache[uid] = body
+
+  def fetchBodies(self, uids, isHtml):
+    return self.emailManager.getCachedBodies(
+      self.accountName, self.folderName, uids, isHtml)
+
 
 class BodyCacheFactory():
   def __init__(self, emailManager):
@@ -352,6 +376,30 @@ class EmailManager():
       elif field == "Subject":
         hdrSubject = val
     return Header(uid, hdrDate, hdrFrom, hdrTo, hdrSubject, False, False, False)
+  def getCachedBodies(self, accountName, folderName, uids, isHtml):
+    if isHtml:
+      bodyArg = "--body-html"
+    else:
+      bodyArg = "--body-plain"
+    cmd = [EMAIL_BIN, bodyArg, "--no-download", "-0",
+      "--folder=" + folderName, accountName] + map(str,uids)
+    bodyNuls = self.readProc(cmd)
+    bodies = bodyNuls.split("\0")
+    if len(bodies) > 0 and bodies[-1] == "":
+      bodies.pop()
+    if len(bodies) != len(uids):
+      raise Exception("ERROR: could not read bodies")
+    uidBodies = dict(zip(uids, bodies))
+    for uid in uidBodies.keys():
+      body = uidBodies[uid]
+      try:
+        body = body.encode('utf-8')
+      except:
+        try:
+          body = body.decode('utf-8')
+        except:
+          body = re.sub(r'[^\x00-\x7F]', ' ', body).encode('utf-8')
+    return uidBodies
   def readProc(self, cmdArr):
     process = subprocess.Popen(cmdArr, stdout=subprocess.PIPE)
     (stdout, _) = process.communicate()
