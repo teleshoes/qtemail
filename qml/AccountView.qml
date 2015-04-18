@@ -33,7 +33,7 @@ Rectangle {
         MouseArea{
           anchors.fill: parent
           onClicked: {
-            controller.accountSelected(model.account)
+            controller.accountSelected(model.account.Name)
             initAccountConfig()
             navToPage(headerPage)
           }
