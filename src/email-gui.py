@@ -580,11 +580,11 @@ class Controller(QObject):
       self.notifierModel.notify("FAILURE\n" + res['stdout'] + res['stderr'])
       return False
 
-  @Slot(QObject)
-  def accountSelected(self, account):
-    self.setAccountName(account.Name)
+  @Slot(str)
+  def accountSelected(self, accountName):
+    self.setAccountName(accountName)
     self.setFolderName("inbox")
-    self.setAccountConfig(self.emailManager.readConfig("account", account.Name))
+    self.setAccountConfig(self.emailManager.readConfig("account", accountName))
   @Slot(QObject)
   def folderSelected(self, folder):
     self.setFolderName(folder.Name)
