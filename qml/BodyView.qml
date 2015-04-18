@@ -11,6 +11,9 @@ Rectangle {
   }
 
   property variant scales: [0.1, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 5.0, 10.0]
+  property real curScale: 1.0
+  property real minScale: 0.1
+  property real maxScale: 10.0
 
   function zoomIn(){
     setZoom(getNextScale("in"))
@@ -19,7 +22,6 @@ Rectangle {
     setZoom(getNextScale("out"))
   }
   function getNextScale(dir){
-    var curScale = bodyFlickable.scale
     for(var i=0; i<scales.length; ++i){
       var scale
       if(dir == "in"){
@@ -27,7 +29,6 @@ Rectangle {
       }else if(dir == "out"){
         scale = scales[scales.length - i]
       }
-      console.log(scale)
       if(dir == "in" && curScale < scale){
         return scale
       }else if(dir == "out" && curScale > scale){
@@ -40,10 +41,23 @@ Rectangle {
       return scales[0]
     }
   }
+
   function setZoom(scale){
-    zoomDisplay.text = parseInt(scale*100) + "%"
-    zoomDisplay.visible = scale != 1
-    bodyFlickable.scale = scale
+    if(scale < minScale){
+      scale = minScale
+    }
+    if(scale > maxScale){
+      scale = maxScale
+    }
+    curScale = scale
+  }
+
+  onCurScaleChanged: {
+    bodyFlickable.scale = curScale
+    zoomDisplay.text = parseInt(curScale*100) + "%"
+
+    var isZoomed = curScale != 1
+    zoomDisplay.visible = isZoomed
   }
 
   PinchFlick{
