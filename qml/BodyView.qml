@@ -59,6 +59,7 @@ Rectangle {
     var isZoomed = curScale != 1
     zoomDisplay.visible = isZoomed
     bodyFlickable.updateContentSize(!isZoomed)
+    bodyFlickable.clip = !isZoomed
   }
 
   PinchArea{
