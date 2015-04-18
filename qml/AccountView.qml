@@ -8,11 +8,9 @@ Rectangle {
   }
 
   function initAccountConfig(){
-    var preferHtmlCfg = controller.getAccountConfigValue("preferHtml")
-    var isHtml = preferHtmlCfg != "false"
+    var isHtml = controller.getHtmlMode()
     toolButtons.getButtonDefByName("toggleHtml").setIsHtml(isHtml)
     controller.resetFilterButtons()
-    controller.setHtmlMode(isHtml)
   }
 
   ListView {
