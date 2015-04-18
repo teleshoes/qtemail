@@ -513,7 +513,7 @@ class Controller(QObject):
       return
     firstTo = to.pop(0)
 
-    self.notifierModel.notify("sending...")
+    self.notifierModel.notify("sending...", False)
     cmd = [EMAIL_BIN, "--smtp", self.accountName, subject, body, firstTo]
     for email in to:
       cmd += ["--to", email]
@@ -528,9 +528,9 @@ class Controller(QObject):
       self.onSendEmailFinished, {})
   def onSendEmailFinished(self, isSuccess, output, extraArgs):
     if not isSuccess:
-      self.notifierModel.notify("\nFAILED\n\n" + output)
+      self.notifierModel.notify("\nFAILED\n\n" + output, False)
     else:
-      self.notifierModel.notify("\nSUCCESS\n\n" + output)
+      self.notifierModel.notify("\nSUCCESS\n\n" + output, False)
 
   @Slot()
   def setupAccounts(self):
