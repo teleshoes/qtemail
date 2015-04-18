@@ -1357,6 +1357,10 @@ class NotifierModel(QObject):
     self.text_ = text_
     self.showing_ = True
     self.changed.emit()
+  @Slot(bool)
+  def setShowing(self, showing_):
+    self.showing_ = showing_
+    self.changed.emit()
   changed = Signal()
   Text = Property(unicode, Text, notify=changed)
   Showing = Property(bool, Showing, notify=changed)
