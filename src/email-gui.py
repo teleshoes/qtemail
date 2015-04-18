@@ -448,12 +448,12 @@ class Controller(QObject):
   @Slot(str, QObject, QObject)
   def initSend(self, sendType, sendForm, notifier):
     if self.accountName == None or self.folderName == None or self.header == None:
-      notifier.notify("Missing source email for " + sendType)
+      self.notifierModel.notify("Missing source email for " + sendType)
       return
 
     header = self.emailManager.getHeader(self.accountName, self.folderName, self.header.Uid)
     if header == None:
-      notifier.notify("Could not parse headers for message")
+      self.notifierModel.notify("Could not parse headers for message")
       return
 
     toEmails = self.emailManager.parseEmails(header.To)
@@ -506,14 +506,14 @@ class Controller(QObject):
     body = sendForm.getBody()
     attachments = sendForm.getAttachments()
     if len(to) == 0:
-      notifier.notify("TO is empty\n")
+      self.notifierModel.notify("TO is empty\n")
       return
     if self.accountName == None:
-      notifier.notify("no FROM account selected\n")
+      self.notifierModel.notify("no FROM account selected\n")
       return
     firstTo = to.pop(0)
 
-    notifier.notify("sending...")
+    self.notifierModel.notify("sending...")
     cmd = [EMAIL_BIN, "--smtp", self.accountName, subject, body, firstTo]
     for email in to:
       cmd += ["--to", email]
@@ -529,9 +529,9 @@ class Controller(QObject):
   def onSendEmailFinished(self, isSuccess, output, extraArgs):
     notifier = extraArgs['notifier']
     if not isSuccess:
-      notifier.notify("\nFAILED\n\n" + output)
+      self.notifierModel.notify("\nFAILED\n\n" + output)
     else:
-      notifier.notify("\nSUCCESS\n\n" + output)
+      self.notifierModel.notify("\nSUCCESS\n\n" + output)
 
   @Slot()
   def setupAccounts(self):
@@ -575,10 +575,10 @@ class Controller(QObject):
       res = self.emailManager.saveOptionsConfigFields(fields)
 
     if res['exitCode'] == 0:
-      notifier.notify("saved config\n" + res['stdout'] + res['stderr'])
+      self.notifierModel.notify("saved config\n" + res['stdout'] + res['stderr'])
       return True
     else:
-      notifier.notify("FAILURE\n" + res['stdout'] + res['stderr'])
+      self.notifierModel.notify("FAILURE\n" + res['stdout'] + res['stderr'])
       return False
 
   @Slot(QObject)
@@ -763,7 +763,7 @@ class Controller(QObject):
     self.currentBodyText = None
     bodyBox.setBody("...loading body")
     if self.header == None:
-      notifier.notify("CURRENT MESSAGE NOT SET")
+      self.notifierModel.notify("CURRENT MESSAGE NOT SET")
       return
     if headerBox != None:
       headerBox.setHeader(""
@@ -802,12 +802,12 @@ class Controller(QObject):
   def copyBodyToClipboard(self, notifier):
     if self.currentBodyText != None:
       QClipboard().setText(self.currentBodyText)
-    notifier.notify("Copied text to clipboard: " + self.currentBodyText)
+    self.notifierModel.notify("Copied text to clipboard: " + self.currentBodyText)
 
   @Slot(QObject)
   def saveCurrentAttachments(self, notifier):
     if self.header == None:
-      notifier.notify("MISSING CURRENT MESSAGE")
+      self.notifierModel.notify("MISSING CURRENT MESSAGE")
       return
 
     destDir = os.getenv("HOME")
@@ -821,9 +821,9 @@ class Controller(QObject):
     if output.strip() == "":
       output = "{no attachments}"
     if isSuccess:
-      notifier.notify("success:\n" + output)
+      self.notifierModel.notify("success:\n" + output)
     else:
-      notifier.notify("ERROR: saving attachments failed\n")
+      self.notifierModel.notify("ERROR: saving attachments failed\n")
 
   def startEmailCommandThread(self, command, messageBox, finishedAction, extraArgs):
     thread = EmailCommandThread(
@@ -1353,6 +1353,10 @@ class NotifierModel(QObject):
     return self.text_
   def Showing(self):
     return self.showing_
+  def notify(self, text_):
+    self.text_ = text_
+    self.showing_ = True
+    self.changed.emit()
   changed = Signal()
   Text = Property(unicode, Text, notify=changed)
   Showing = Property(bool, Showing, notify=changed)
