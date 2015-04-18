@@ -88,12 +88,13 @@ def main():
     qmlFile = QML_DIR + "/desktop.qml"
 
   emailManager = EmailManager()
+  bodyCacheFactory = BodyCacheFactory(emailManager)
   accountModel = AccountModel()
   folderModel = FolderModel()
   headerModel = HeaderModel()
   configModel = ConfigModel()
   filterButtonModel = FilterButtonModel()
-  controller = Controller(emailManager,
+  controller = Controller(emailManager, bodyCacheFactory,
     accountModel, folderModel, headerModel, configModel, filterButtonModel)
 
   if 'page' in opts:
@@ -115,6 +116,39 @@ def main():
     widget.window().show()
 
   app.exec_()
+
+class BodyCache():
+  def __init__(self, emailManager, accountName, folderName):
+    self.emailManager = emailManager
+    self.accountName = accountName
+    self.folderName = folderName
+    self.htmlCache = dict()
+    self.plainCache = dict()
+  def getBody(self, uid, isHtml):
+    if isHtml:
+      cache = self.htmlCache
+    else:
+      cache = self.plainCache
+
+    if not uid in cache.keys():
+      return ""
+    else:
+      return cache[uid]
+
+class BodyCacheFactory():
+  def __init__(self, emailManager):
+    self.caches = dict()
+    self.emailManager = emailManager
+  def getBodyCache(self, accountName, folderName):
+    if accountName == None:
+      return None
+    if folderName == None:
+      folderName = "inbox"
+    key = accountName + "%" + folderName
+    if not key in self.caches.keys():
+      self.caches[key] = BodyCache(self.emailManager, accountName, folderName)
+
+    return self.caches[key]
 
 class EmailManager():
   def __init__(self):
@@ -324,10 +358,11 @@ class EmailManager():
     return stdout
 
 class Controller(QObject):
-  def __init__(self, emailManager,
+  def __init__(self, emailManager, bodyCacheFactory,
     accountModel, folderModel, headerModel, configModel, filterButtonModel):
     QObject.__init__(self)
     self.emailManager = emailManager
+    self.bodyCacheFactory = bodyCacheFactory
     self.accountModel = accountModel
     self.folderModel = folderModel
     self.headerModel = headerModel
@@ -563,6 +598,10 @@ class Controller(QObject):
     print len(self.filterButtons)
     self.filterButtonModel.setItems(self.filterButtons)
 
+  def getBodyCache(self):
+    return self.bodyCacheFactory.getBodyCache(
+      self.accountName, self.folderName)
+
   def filterHeader(self, header):
     for f in self.headerFilters:
       if not f.filterHeader(header):
@@ -572,7 +611,7 @@ class Controller(QObject):
   @Slot(str, str)
   def replaceHeaderFilterStr(self, name, headerFilterStr):
     try:
-      headerFilter = getHeaderFilterFromStr(name, headerFilterStr)
+      headerFilter = getHeaderFilterFromStr(name, headerFilterStr, self.getBodyCache())
       self.replaceHeaderFilter(headerFilter)
     except Exception as e:
       print "Error parsing filter string:", e
@@ -875,7 +914,7 @@ class HeaderFilterNot(HeaderFilter):
     return msg
 
 
-def getHeaderFilterFromStr(name, filterStr):
+def getHeaderFilterFromStr(name, filterStr, bodyCache):
   listRegex = "(Any|All|Not)" + "\\(" + "(.*)" + "\\)"
   attRegex = "(\\w+)=(\\w+)"
   fieldRegex = "(?:" + "(Subject|Header|From|To)" + "~)?" + "([^,]+)"
@@ -895,7 +934,7 @@ def getHeaderFilterFromStr(name, filterStr):
     subfilters = []
     for subfilterMatch in subfilterMatches:
       subfilter = subfilterMatch[0]
-      subfilters.append(getHeaderFilterFromStr('subfilter', subfilter))
+      subfilters.append(getHeaderFilterFromStr('subfilter', subfilter, bodyCache))
 
     if anyAllNot == "any":
       return HeaderFilterAny(name, subfilters)
