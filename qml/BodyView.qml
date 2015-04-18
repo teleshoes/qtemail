@@ -2,7 +2,6 @@ import QtQuick 1.1
 
 Rectangle {
   anchors.fill: parent
-  clip: true
   id: bodyView
   function setHeader(header){
     headerText.text = header
@@ -56,6 +55,7 @@ Rectangle {
 
   Flickable {
     id: bodyFlickable
+    clip: true
     contentWidth: parent.width - 30
     contentHeight: headerText.paintedHeight + bodyText.paintedHeight
     anchors.fill: parent
