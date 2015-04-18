@@ -614,7 +614,7 @@ class Controller(QObject):
     self.header = header
   def setAccountConfig(self, accountConfig):
     self.accountConfig = accountConfig
-    if self.accountConfig == None:
+    if self.accountConfig == None or not 'filters' in self.accountConfig.keys():
       filterButtons = []
     else:
       filterButtons = self.parseFilterButtons(self.accountConfig['filters'])
