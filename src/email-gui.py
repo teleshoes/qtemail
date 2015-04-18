@@ -769,7 +769,8 @@ class Controller(QObject):
         + "From: " + self.header.From + "\n"
         + "Subject: " + self.header.Subject + "\n"
         + "To: " + self.header.To + "\n"
-        + "Date: " + self.header.Date + "\n"
+        + "Date: " + self.header.Date
+        + "    (uid: " + str(self.header.Uid) + ")\n"
       );
 
     if self.htmlMode:
