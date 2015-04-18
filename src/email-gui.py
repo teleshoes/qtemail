@@ -630,7 +630,6 @@ class Controller(QObject):
     filterButtonRegex = "(\\w+)=%(.+?)%\\s*"
     usedNames = set()
     filterButtons = []
-    print filterButtonStr
     for f in re.findall(filterButtonRegex, filterButtonStr):
       name = f[0]
       filterStr = f[1]
@@ -643,7 +642,6 @@ class Controller(QObject):
     self.filterButtons.append(FilterButton(
       'unread', 'read=False', False))
     self.filterButtons += filterButtons
-    print len(self.filterButtons)
     self.filterButtonModel.setItems(self.filterButtons)
 
   def getBodyCache(self):
