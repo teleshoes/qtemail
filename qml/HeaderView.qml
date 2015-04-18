@@ -52,7 +52,7 @@ Rectangle {
           height: parent.height
           spacing: 10
           delegate: Btn {
-            height: parent.height
+            height: filterToggleBox.height
             width: model.filterButton.Name.length * 16
 
             property bool checked: model.filterButton.IsChecked
