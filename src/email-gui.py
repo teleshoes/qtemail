@@ -797,7 +797,7 @@ class HeaderFilterAtt(HeaderFilter):
   def prettyFormat(self, indent=''):
     return indent + self.att + "=" + str(self.value) + "\n"
 
-class HeaderFilterRegex(HeaderFilter):
+class HeaderFilterField(HeaderFilter):
   def __init__(self, name, regex, fields=[]):
     HeaderFilter.__init__(self, name)
     self.regex = re.compile(regex, re.IGNORECASE)
@@ -878,13 +878,13 @@ class HeaderFilterNot(HeaderFilter):
 def getHeaderFilterFromStr(name, filterStr):
   listRegex = "(Any|All|Not)" + "\\(" + "(.*)" + "\\)"
   attRegex = "(\\w+)=(\\w+)"
-  regexRegex = "(?:" + "(Subject|Header|From|To)" + "~)?" + "([^,]+)"
+  fieldRegex = "(?:" + "(Subject|Header|From|To)" + "~)?" + "([^,]+)"
 
   listMatcher = re.match("^" + listRegex + "$", filterStr)
   attMatcher = re.match("^" + attRegex + "$", filterStr)
-  regexMatcher = re.match("^" + regexRegex + "$", filterStr)
+  fieldMatcher = re.match("^" + fieldRegex + "$", filterStr)
 
-  anyRegex = listRegex + "|" + attRegex+ "|" + regexRegex
+  anyRegex = listRegex + "|" + attRegex+ "|" + fieldRegex
   listContentRegex = "(" + anyRegex + ")" + "(?:\\s*,\\s*|$)"
 
   if listMatcher:
@@ -911,14 +911,14 @@ def getHeaderFilterFromStr(name, filterStr):
     if val == "false":
       val = False
     return HeaderFilterAtt(name, att, val)
-  elif regexMatcher:
-    field = regexMatcher.group(1)
+  elif fieldMatcher:
+    field = fieldMatcher.group(1)
     if field == None:
       fieldList = []
     else:
       fieldList = [field]
-    regex = regexMatcher.group(2)
-    return HeaderFilterRegex(name, regex, fieldList)
+    regex = fieldMatcher.group(2)
+    return HeaderFilterField(name, regex, fieldList)
   else:
     raise Exception('Could not parse (sub)filter: ' + filterStr)
 
