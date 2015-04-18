@@ -867,6 +867,8 @@ class HeaderFilter():
     self.name = name
   def filterHeader(self, header):
     return True
+  def isBodyFilter(self):
+    return False
   def prettyFormat(self, indent=''):
     return indent + '<no pretty formatter available>' + "\n"
 
@@ -916,6 +918,11 @@ class HeaderFilterAny(HeaderFilter):
       if f.filterHeader(header):
         return True
     return False
+  def isBodyFilter(self):
+    for f in self.filterList:
+      if f.isBodyFilter():
+        return True
+    return False
   def prettyFormat(self, indent=''):
     msg = ""
     msg += indent + 'Any____' + "\n"
@@ -933,6 +940,11 @@ class HeaderFilterAll(HeaderFilter):
       if not f.filterHeader(header):
         return False
     return True
+  def isBodyFilter(self):
+    for f in self.filterList:
+      if f.isBodyFilter():
+        return True
+    return False
   def prettyFormat(self, indent=''):
     msg = ""
     msg += indent + 'All____' + "\n"
@@ -950,6 +962,11 @@ class HeaderFilterNot(HeaderFilter):
       if f.filterHeader(header):
         return False
     return True
+  def isBodyFilter(self):
+    for f in self.filterList:
+      if f.isBodyFilter():
+        return True
+    return False
   def prettyFormat(self, indent=''):
     msg = ""
     msg += indent + 'Not____' + "\n"
