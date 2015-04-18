@@ -587,6 +587,7 @@ class Controller(QObject):
     self.setAccountName(accountName)
     self.setFolderName("inbox")
     self.setAccountConfig(self.emailManager.readConfig("account", accountName))
+    self.setupFolders()
   @Slot(QObject)
   def folderSelected(self, folder):
     self.setFolderName(folder.Name)
