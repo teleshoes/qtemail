@@ -884,6 +884,26 @@ class HeaderFilterAtt(HeaderFilter):
   def prettyFormat(self, indent=''):
     return indent + self.att + "=" + str(self.value) + "\n"
 
+class HeaderFilterBody(HeaderFilter):
+  def __init__(self, name, regexStr, bodyCache):
+    HeaderFilter.__init__(self, name)
+    self.regexStr = regexStr
+    self.bodyCache = bodyCache
+    self.regex = re.compile(self.regexStr, re.IGNORECASE)
+
+  def filterHeader(self, header):
+    plain = self.bodyCache.getBody(header.uid_, False)
+    if self.regex.search(plain):
+      return True
+    #html = self.bodyCache.getBody(header.uid_, True)
+    #if self.regex.search(html):
+    #  return True
+    return False
+  def isBodyFilter(self):
+    return True
+  def prettyFormat(self, indent=''):
+    return indent + "Body" + "~" + self.regexStr + "\n"
+
 class HeaderFilterField(HeaderFilter):
   def __init__(self, name, regexStr, fields=[]):
     HeaderFilter.__init__(self, name)
@@ -981,13 +1001,15 @@ class HeaderFilterNot(HeaderFilter):
 def getHeaderFilterFromStr(name, filterStr, bodyCache):
   listRegex = "(Any|All|Not)" + "\\(" + "(.*)" + "\\)"
   attRegex = "(\\w+)=(\\w+)"
+  bodyRegex = "(Body)~" + "([^,]+)"
   fieldRegex = "(?:" + "(Subject|Header|From|To)" + "~)?" + "([^,]+)"
 
   listMatcher = re.match("^" + listRegex + "$", filterStr)
   attMatcher = re.match("^" + attRegex + "$", filterStr)
+  bodyMatcher = re.match("^" + bodyRegex + "$", filterStr)
   fieldMatcher = re.match("^" + fieldRegex + "$", filterStr)
 
-  anyRegex = listRegex + "|" + attRegex+ "|" + fieldRegex
+  anyRegex = listRegex + "|" + attRegex+ "|" + bodyRegex + "|" + fieldRegex
   listContentRegex = "(" + anyRegex + ")" + "(?:\\s*,\\s*|$)"
 
   if listMatcher:
@@ -1014,6 +1036,10 @@ def getHeaderFilterFromStr(name, filterStr, bodyCache):
     if val == "false":
       val = False
     return HeaderFilterAtt(name, att, val)
+  elif bodyMatcher:
+    bodyField = bodyMatcher.group(1)
+    regex = bodyMatcher.group(2)
+    return HeaderFilterBody(name, regex, bodyCache)
   elif fieldMatcher:
     field = fieldMatcher.group(1)
     if field == None:
