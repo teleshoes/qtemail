@@ -76,6 +76,12 @@ Rectangle {
     anchors.fill: parent
     flickableDirection: Flickable.HorizontalAndVerticalFlick
     boundsBehavior: Flickable.DragOverBounds
+
+    function updateContentSize(forceWidth){
+      contentWidth = forceWidth ? width : Math.max(
+        headerText.paintedWidth, bodyText.paintedWidth)
+    }
+
     Rectangle{
       width: parent.width
       height: parent.height
