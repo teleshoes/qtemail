@@ -21,7 +21,12 @@ Rectangle {
 
   function show(){
     notificationArea.visible = true
-    hideTimer.start()
+
+    if(notifierModel.HideDelay){
+      hideTimer.start()
+    }else{
+      hideTimer.stop()
+    }
   }
   function hide(){
     notificationArea.visible = false
