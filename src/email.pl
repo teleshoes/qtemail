@@ -177,16 +177,18 @@ my $usage = "
     prints each of [@headerFields]
       one per line, formatted \"UID.FIELD: VALUE\"
 
-  $0 --body [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  $0 --body [--no-download] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     download, format and print the body of the indicated message(s)
     if body is cached, skip download
+    if body is not cached and --no-download is specified, use empty string for body
+      instead of downloading the body
     if message has a plaintext and HTML component, only one is returned
     if preferHtml is false, plaintext is returned, otherwise, HTML
 
-  $0 --body-plain [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  $0 --body-plain [--no-download] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but override preferHtml=false
 
-  $0 --body-html [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  $0 --body-html [--no-download] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but override preferHtml=true
 
   $0 --attachments [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_DIR UID [UID UID ...]
@@ -498,6 +500,11 @@ sub main(@){
     }
   }elsif($cmd =~ /^(--body|--body-plain|--body-html|--attachments)$/){
     my $folderName = "inbox";
+    my $noDownload = 0;
+    if($cmd =~ /^--body/ and @_ > 0 and $_[0] =~ /^--no-download$/){
+      $noDownload = 1;
+      shift;
+    }
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
       $folderName = $1;
       shift;
@@ -528,6 +535,10 @@ sub main(@){
     $mimeParser->output_dir($destDir);
     for my $uid(@uids){
       my $body = readCachedBody($accName, $folderName, $uid);
+      if(not defined $body and $noDownload){
+        print "\n";
+        next;
+      }
       if(not defined $body){
         if(not defined $c){
           $c = getClient($acc);
