@@ -1347,13 +1347,18 @@ class NotifierModel(QObject):
     QObject.__init__(self)
     self.text_ = ""
     self.showing_ = False
+    self.hideDelay_ = True
   def Text(self):
     return self.text_
   def Showing(self):
     return self.showing_
-  def notify(self, text_):
+  def HideDelay(self):
+    return self.hideDelay_
+  def notify(self, text_, hideDelay_=True):
     self.text_ = text_
     self.showing_ = True
+    self.hideDelay_ = hideDelay_
+
     self.changed.emit()
   @Slot(bool)
   def setShowing(self, showing_):
@@ -1362,6 +1367,7 @@ class NotifierModel(QObject):
   changed = Signal()
   Text = Property(unicode, Text, notify=changed)
   Showing = Property(bool, Showing, notify=changed)
+  HideDelay = Property(bool, HideDelay, notify=changed)
 
 class MainWindow(QDeclarativeView):
   def __init__(self, qmlFile, controller,
