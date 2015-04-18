@@ -445,8 +445,8 @@ class Controller(QObject):
   def findChild(self, obj, name):
     return obj.findChild(QObject, name)
 
-  @Slot(str, QObject, QObject)
-  def initSend(self, sendType, sendForm, notifier):
+  @Slot(str, QObject)
+  def initSend(self, sendType, sendForm):
     if self.accountName == None or self.folderName == None or self.header == None:
       self.notifierModel.notify("Missing source email for " + sendType)
       return
@@ -488,7 +488,7 @@ class Controller(QObject):
     sendForm.setBCC([])
     sendForm.setSubject(subject)
 
-    self.fetchCurrentBodyText(notifier, sendForm, None,
+    self.fetchCurrentBodyText(sendForm, None,
       lambda body: self.wrapBody(body, date, firstFrom))
 
   def wrapBody(self, body, date, author):
@@ -497,8 +497,8 @@ class Controller(QObject):
     indentedBody = "\n".join(map(lambda line: "> " + line, lines)) + "\n"
     return bodyPrefix + indentedBody
 
-  @Slot(QObject, QObject)
-  def sendEmail(self, sendForm, notifier):
+  @Slot(QObject)
+  def sendEmail(self, sendForm):
     to = sendForm.getTo()
     cc = sendForm.getCC()
     bcc = sendForm.getBCC()
@@ -525,9 +525,8 @@ class Controller(QObject):
       cmd += ["--attach", att]
 
     self.startEmailCommandThread(cmd, None,
-      self.onSendEmailFinished, {'notifier': notifier})
+      self.onSendEmailFinished, {})
   def onSendEmailFinished(self, isSuccess, output, extraArgs):
-    notifier = extraArgs['notifier']
     if not isSuccess:
       self.notifierModel.notify("\nFAILED\n\n" + output)
     else:
@@ -566,8 +565,8 @@ class Controller(QObject):
   @Slot(QObject, str)
   def updateConfigFieldValue(self, field, value):
     field.value_ = value
-  @Slot(QObject, result=bool)
-  def saveConfig(self, notifier):
+  @Slot(result=bool)
+  def saveConfig(self):
     fields = self.configModel.getItems()
     if self.configMode == "account":
       res = self.emailManager.saveAccountConfigFields(fields)
@@ -758,8 +757,8 @@ class Controller(QObject):
   def setHtmlMode(self, htmlMode):
     self.htmlMode = htmlMode
 
-  @Slot(QObject, QObject, QObject, object)
-  def fetchCurrentBodyText(self, notifier, bodyBox, headerBox, transform):
+  @Slot(QObject, QObject, object)
+  def fetchCurrentBodyText(self, bodyBox, headerBox, transform):
     self.currentBodyText = None
     bodyBox.setBody("...loading body")
     if self.header == None:
@@ -798,14 +797,14 @@ class Controller(QObject):
       self.currentBodyText = None
       bodyBox.setBody("ERROR FETCHING BODY\n")
 
-  @Slot(QObject)
-  def copyBodyToClipboard(self, notifier):
+  @Slot()
+  def copyBodyToClipboard(self):
     if self.currentBodyText != None:
       QClipboard().setText(self.currentBodyText)
     self.notifierModel.notify("Copied text to clipboard: " + self.currentBodyText)
 
-  @Slot(QObject)
-  def saveCurrentAttachments(self, notifier):
+  @Slot()
+  def saveCurrentAttachments(self):
     if self.header == None:
       self.notifierModel.notify("MISSING CURRENT MESSAGE")
       return
@@ -815,9 +814,8 @@ class Controller(QObject):
       "--folder=" + self.folderName, self.accountName, destDir, str(self.header.Uid)]
 
     self.startEmailCommandThread(cmd, None,
-      self.onSaveCurrentAttachmentsFinished, {'notifier': notifier})
+      self.onSaveCurrentAttachmentsFinished, {})
   def onSaveCurrentAttachmentsFinished(self, isSuccess, output, extraArgs):
-    notifier = extraArgs['notifier']
     if output.strip() == "":
       output = "{no attachments}"
     if isSuccess:
