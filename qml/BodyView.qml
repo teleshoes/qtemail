@@ -58,6 +58,7 @@ Rectangle {
 
     var isZoomed = curScale != 1
     zoomDisplay.visible = isZoomed
+    bodyFlickable.updateContentSize(!isZoomed)
   }
 
   PinchArea{
@@ -87,6 +88,9 @@ Rectangle {
     function updateContentSize(forceWidth){
       contentWidth = forceWidth ? width : Math.max(
         headerText.paintedWidth, bodyText.paintedWidth)
+
+      transformOrigin = Item.TopLeft
+      resizeContent(contentWidth * scale, contentHeight * scale, Qt.point(0,0))
     }
 
     Rectangle{
