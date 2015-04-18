@@ -14,10 +14,17 @@ Rectangle {
   z: 100
   color: "#dddddd"
 
-  function notify(text){
-    notificationBox.text = text
+  property string text: notifierModel.Text
+  property bool showing: notifierModel.Showing
+
+  onShowingChanged: showing ? show() : hide()
+
+  function show(){
     notificationArea.visible = true
     hideTimer.start()
+  }
+  function hide(){
+    notificationArea.visible = false
   }
 
   MouseArea {
@@ -29,7 +36,9 @@ Rectangle {
     id: hideTimer
     interval: hideTimeout
     repeat: false
-    onTriggered: {notificationArea.visible = false}
+    onTriggered: {
+      notifierModel.setShowing(false)
+    }
   }
 
   Text {
@@ -37,6 +46,7 @@ Rectangle {
     width: parent.width
     wrapMode: Text.Wrap
     font.pointSize: 32
+    text: notificationArea.text
   }
 }
 
