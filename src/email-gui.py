@@ -648,6 +648,16 @@ class Controller(QObject):
     return self.bodyCacheFactory.getBodyCache(
       self.accountName, self.folderName)
 
+  def ensureBodiesForFilter(self):
+    for f in self.headerFilters:
+      if f.isBodyFilter():
+        uids = []
+        for h in self.currentHeaders:
+          uids.append(h.uid_)
+        self.getBodyCache().cacheBodies(uids, False)
+        #self.getBodyCache().cacheBodies(uids, True)
+        return
+
   def filterHeader(self, header):
     for f in self.headerFilters:
       if not f.filterHeader(header):
@@ -680,6 +690,7 @@ class Controller(QObject):
       filterButton.setChecked(False)
 
   def setHeaders(self, headers):
+    self.ensureBodiesForFilter()
     self.currentHeaders = headers
     self.filteredHeaders = filter(self.filterHeader, headers)
     if len(self.filteredHeaders) == 0:
@@ -687,6 +698,7 @@ class Controller(QObject):
     else:
       self.headerModel.setItems(self.filteredHeaders)
   def appendHeaders(self, headers):
+    self.ensureBodiesForFilter()
     newFilteredHeaders = filter(self.filterHeader, headers)
     self.currentHeaders += headers
     self.filteredHeaders += newFilteredHeaders
