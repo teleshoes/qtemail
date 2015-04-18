@@ -60,11 +60,18 @@ Rectangle {
     zoomDisplay.visible = isZoomed
   }
 
-  PinchFlick{
+  PinchArea{
     anchors.fill: parent
-    pinch.minimumScale: 0.1
-    pinch.maximumScale: 10
-    pinch.target: bodyFlickable
+    property real pinchStart: 1.0
+    onPinchStarted: {
+      pinchStart = curScale
+    }
+    onPinchUpdated: {
+      if (pinch.pointCount < 2){
+        return
+      }
+      setZoom(pinchStart * pinch.scale)
+    }
   }
 
   Flickable {
