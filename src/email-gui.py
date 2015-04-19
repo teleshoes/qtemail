@@ -331,11 +331,13 @@ class EmailManager():
     uids = f.read()
     f.close()
     return map(int, uids.splitlines())
-  def fetchHeaders(self, accName, folderName, limit=None, exclude=[]):
+  def fetchHeaders(self, accName, folderName, limit=None, exclude=[], minUid=None):
     uids = self.getUids(accName, folderName, "all")
     uids.sort()
     uids.reverse()
     total = len(uids)
+    if minUid != None:
+      uids = filter(lambda uid: uid >= minUid, uids)
     if len(exclude) > 0:
       exUids = set(map(lambda header: header.uid_, exclude))
       uids = filter(lambda uid: uid not in exUids, uids)
@@ -545,7 +547,7 @@ class Controller(QObject):
     self.headerFilters = []
     (total, headers) = self.emailManager.fetchHeaders(
       self.accountName, self.folderName,
-      limit=PAGE_INITIAL_SIZE, exclude=[])
+      limit=PAGE_INITIAL_SIZE, exclude=[], minUid=None)
     self.totalSize = total
     self.setHeaders(headers)
   @Slot(str)
@@ -870,7 +872,7 @@ class Controller(QObject):
       limit = PAGE_MORE_SIZE
     (total, headers) = self.emailManager.fetchHeaders(
       self.accountName, self.folderName,
-      limit=limit, exclude=self.currentHeaders)
+      limit=limit, exclude=self.currentHeaders, minUid=None)
     self.totalSize = total
     self.appendHeaders(headers)
   @Slot(QObject)
