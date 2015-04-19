@@ -4,7 +4,7 @@ Rectangle {
   anchors.fill: parent
 
   function updateAllAccounts(){
-    controller.updateAccount(null, messageBox, null)
+    controller.updateAccount(messageBox, null)
   }
 
   function initAccountConfig(){
