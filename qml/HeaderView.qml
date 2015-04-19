@@ -129,6 +129,7 @@ Rectangle {
         MouseArea {
           anchors.fill: parent
           onClicked: {
+            headerFlickable.currentIndex = index
             headerFlickable.selectHeader(model.header)
           }
         }
