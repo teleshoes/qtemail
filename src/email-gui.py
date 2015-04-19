@@ -869,6 +869,13 @@ class Controller(QObject):
       messageBox.append(message)
       messageBox.scrollToBottom()
 
+  def newHeaders(self):
+    minUid = min(map(lambda header: header.Uid, self.currentHeaders))
+    (total, headers) = self.emailManager.fetchHeaders(
+      self.accountName, self.folderName,
+      limit=None, exclude=self.currentHeaders, minUid=minUid)
+    self.totalSize = total
+    self.prependHeaders(headers)
   @Slot(int)
   def moreHeaders(self, percentage):
     if percentage != None:
