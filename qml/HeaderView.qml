@@ -169,7 +169,7 @@ Rectangle {
           MouseArea {
             anchors.fill: parent
             onClicked: {
-              toggleRead(model.header)
+              headerFlickable.toggleRead(model.header)
             }
           }
         }
