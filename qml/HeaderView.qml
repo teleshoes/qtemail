@@ -110,7 +110,7 @@ Rectangle {
     model: headerModel
     delegate: Component  {
       Rectangle {
-        color: "#AAAAAA"
+        color: model.header.Selected ? "#FF6666" : "#AAAAAA"
         height: 125
         width: parent.width
         MouseArea {
