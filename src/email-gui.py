@@ -615,7 +615,10 @@ class Controller(QObject):
   def setFolderName(self, folderName):
     self.folderName = folderName
   def setHeader(self, header):
+    if self.header != None:
+      self.header.setSelected(False)
     self.header = header
+    self.header.setSelected(True)
   def setAccountConfig(self, accountConfig):
     self.accountConfig = accountConfig
     if self.accountConfig == None or not 'filters' in self.accountConfig.keys():
@@ -1277,6 +1280,7 @@ class Header(QObject):
     self.isSent_ = isSent_
     self.read_ = read_
     self.isLoading_ = isLoading_
+    self.selected_ = False
   def Uid(self):
     return self.uid_
   def Date(self):
@@ -1293,11 +1297,16 @@ class Header(QObject):
     return self.read_
   def IsLoading(self):
     return self.isLoading_
+  def Selected(self):
+    return self.selected_
   def setLoading(self, isLoading_):
     self.isLoading_ = isLoading_
     self.changed.emit()
   def setRead(self, read_):
     self.read_ = read_
+    self.changed.emit()
+  def setSelected(self, selected_):
+    self.selected_ = selected_
     self.changed.emit()
   changed = Signal()
   Uid = Property(int, Uid, notify=changed)
@@ -1308,6 +1317,7 @@ class Header(QObject):
   IsSent = Property(bool, IsSent, notify=changed)
   Read = Property(bool, Read, notify=changed)
   IsLoading = Property(bool, IsLoading, notify=changed)
+  Selected = Property(bool, Selected, notify=changed)
 
 class Field(QObject):
   def __init__(self, fieldName_, isPassword_, value_, description_):
