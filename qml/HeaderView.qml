@@ -106,6 +106,9 @@ Rectangle {
     width: parent.width
     height: parent.height - filterBox.height
 
+    function toggleRead(header){
+      controller.toggleRead(header)
+    }
     spacing: 10
     model: headerModel
     delegate: Component  {
@@ -140,7 +143,7 @@ Rectangle {
           MouseArea {
             anchors.fill: parent
             onClicked: {
-              controller.toggleRead(model.header)
+              toggleRead(model.header)
             }
           }
         }
