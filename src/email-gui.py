@@ -711,6 +711,13 @@ class Controller(QObject):
       self.headerModel.clear()
     else:
       self.headerModel.setItems(self.filteredHeaders)
+  def prependHeaders(self, headers):
+    self.ensureBodiesForFilter()
+    newFilteredHeaders = filter(self.filterHeader, headers)
+    self.currentHeaders += headers
+    self.filteredHeaders += newFilteredHeaders
+    if len(newFilteredHeaders) > 0:
+      self.headerModel.prependItems(newFilteredHeaders)
   def appendHeaders(self, headers):
     self.ensureBodiesForFilter()
     newFilteredHeaders = filter(self.filterHeader, headers)
@@ -1170,6 +1177,10 @@ class BaseListModel(QAbstractListModel):
       self.endInsertRows()
     else:
       self.items = []
+  def prependItems(self, items):
+    self.beginInsertRows(QModelIndex(), 0, len(items) - 1)
+    self.items = items + self.items
+    self.endInsertRows()
   def appendItems(self, items):
     self.beginInsertRows(QModelIndex(), len(self.items), len(self.items))
     self.items.extend(items)
