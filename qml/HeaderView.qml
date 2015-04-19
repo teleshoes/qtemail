@@ -106,6 +106,10 @@ Rectangle {
     width: parent.width
     height: parent.height - filterBox.height
 
+    function curHeader(){
+      return currentItem.modelHeader
+    }
+
     function toggleRead(header){
       controller.toggleRead(header)
     }
@@ -118,6 +122,7 @@ Rectangle {
     model: headerModel
     delegate: Component  {
       Rectangle {
+        property variant modelHeader: model.header
         color: model.header.Selected ? "#FF6666" : "#AAAAAA"
         height: 125
         width: parent.width
