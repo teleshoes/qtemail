@@ -109,6 +109,11 @@ Rectangle {
     function toggleRead(header){
       controller.toggleRead(header)
     }
+    function selectHeader(header){
+      controller.headerSelected(header)
+      navToPage(bodyPage)
+    }
+
     spacing: 10
     model: headerModel
     delegate: Component  {
@@ -119,8 +124,7 @@ Rectangle {
         MouseArea {
           anchors.fill: parent
           onClicked: {
-            controller.headerSelected(model.header)
-            navToPage(bodyPage)
+            headerFlickable.selectHeader(model.header)
           }
         }
         Rectangle {
