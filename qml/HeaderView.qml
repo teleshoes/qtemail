@@ -115,6 +115,9 @@ Rectangle {
         incrementCurrentIndex()
         selectHeader(curHeader())
         event.accepted = true
+      } else if (event.key == Qt.Key_Space){
+        toggleRead(curHeader())
+        event.accepted = true
       }
     }
 
