@@ -750,6 +750,8 @@ class Controller(QObject):
       self.onUpdateAccountFinished, {})
   def onUpdateAccountFinished(self, isSuccess, output, extraArgs):
     self.setupAccounts()
+    if self.accountName != None:
+      self.newHeaders()
 
   @Slot(QObject)
   def toggleRead(self, header):
