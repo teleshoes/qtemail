@@ -106,6 +106,18 @@ Rectangle {
     width: parent.width
     height: parent.height - filterBox.height
 
+    Keys.onPressed:{
+      if (event.key == Qt.Key_Up){
+        decrementCurrentIndex()
+        selectHeader(curHeader())
+        event.accepted = true
+      } else if (event.key == Qt.Key_Down){
+        incrementCurrentIndex()
+        selectHeader(curHeader())
+        event.accepted = true
+      }
+    }
+
     function curHeader(){
       return currentItem.modelHeader
     }
