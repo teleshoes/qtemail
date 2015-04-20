@@ -51,6 +51,23 @@ Rectangle {
             }
           }
         }
+
+        Timer {
+          id: updateTimer
+          interval: model.account.UpdateInterval * 1000
+          running: model.account.UpdateInterval > 0
+          repeat: true
+
+          onTriggered: {
+            if(model.account.IsLoading){
+              console.log("skipping overlapping update")
+            }else{
+              console.log("updating account " + model.account.Name)
+              controller.updateAccount(messageBox, model.account)
+            }
+          }
+        }
+
         Text {
           anchors.left: parent.left
           anchors.margins: 2
