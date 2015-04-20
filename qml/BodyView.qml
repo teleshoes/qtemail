@@ -105,7 +105,7 @@ Rectangle {
         color: "#0000FF"
         width: parent.width
         wrapMode: Text.Wrap
-        font.pointSize: 18
+        font.pointSize: 16
       }
       Text {
         id: bodyText

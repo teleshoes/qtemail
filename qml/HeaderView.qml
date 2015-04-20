@@ -87,7 +87,7 @@ Rectangle {
           anchors.margins: 2
           id: searchTextBox
           anchors.fill: parent
-          font.pointSize: 18
+          font.pointSize: 16
           onTextChanged: {
             controller.onSearchTextChanged(searchTextBox.text)
             controller.updateCounterBox(headerView.getCounterBox())
