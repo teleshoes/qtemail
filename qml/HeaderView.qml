@@ -101,7 +101,7 @@ Rectangle {
   ListView {
     id: headerFlickable
     model: headerModel
-    spacing: 10
+    spacing: isWideView ? 1 : 10
     anchors.bottom: parent.bottom
     anchors.top: filterBox.bottom
     anchors.left: parent.left
@@ -182,21 +182,26 @@ Rectangle {
         id: wideView
         visible: headerFlickable.isWideView
         width: parent.width
-        height: 30
-        Text {
-          id: wideAddressLabel
-          text: model.header.IsSent ? "=>" + model.header.To : model.header.From
-          font.pointSize: main.fontLarge
-        }
-        Text {
-          id: wideDateLabel
-          text: model.header.Date
-          font.pointSize: main.fontMedium
-        }
+        height: Math.max(wideSubjectLabel.paintedHeight, wideDateLabel.paintedHeight, wideAddressLabel.paintedHeight)
+        spacing: 10
         Text {
           id: wideSubjectLabel
           text: model.header.Subject
           font.pointSize: main.fontSmall
+          width: parent.width * 0.5
+          clip: true
+        }
+        Text {
+          id: wideDateLabel
+          text: model.header.Date
+          font.pointSize: main.fontSmall
+          width: 200
+        }
+        Text {
+          id: wideAddressLabel
+          text: model.header.IsSent ? "=>" + model.header.To : model.header.From
+          font.pointSize: main.fontSmall
+          width: parent.width - wideSubjectLabel.width - wideDateLabel.width
         }
       }
       Column {
