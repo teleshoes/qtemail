@@ -138,61 +138,61 @@ Rectangle {
     }
 
     delegate: Rectangle {
-        property variant modelHeader: model.header
-        color: model.header.Selected ? "#FF6666" : "#AAAAAA"
-        height: addressLabel.paintedHeight + dateLabel.paintedHeight + subjectLabel.paintedHeight
-        width: parent.width
+      property variant modelHeader: model.header
+      color: model.header.Selected ? "#FF6666" : "#AAAAAA"
+      height: addressLabel.paintedHeight + dateLabel.paintedHeight + subjectLabel.paintedHeight
+      width: parent.width
+      MouseArea {
+        anchors.fill: parent
+        onClicked: {
+          headerFlickable.focus = true
+          headerFlickable.currentIndex = index
+          headerFlickable.selectHeader(model.header)
+        }
+      }
+      Rectangle {
+        id: readIndicator
+        height: parent.height
+        width: parent.width * 0.15
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        color: getColor()
+        function getColor(){
+          if(model.header.IsLoading){
+            return "#FF0000";
+          }else{
+            return model.header.Read ? "#E1D6A1" : "#666666"
+          }
+        }
+        function updateColor(){
+          this.color = getColor()
+        }
         MouseArea {
           anchors.fill: parent
           onClicked: {
-            headerFlickable.focus = true
-            headerFlickable.currentIndex = index
-            headerFlickable.selectHeader(model.header)
+            headerFlickable.toggleRead(model.header)
           }
         }
-        Rectangle {
-          id: readIndicator
-          height: parent.height
-          width: parent.width * 0.15
-          anchors.right: parent.right
-          anchors.bottom: parent.bottom
-          color: getColor()
-          function getColor(){
-            if(model.header.IsLoading){
-              return "#FF0000";
-            }else{
-              return model.header.Read ? "#E1D6A1" : "#666666"
-            }
-          }
-          function updateColor(){
-            this.color = getColor()
-          }
-          MouseArea {
-            anchors.fill: parent
-            onClicked: {
-              headerFlickable.toggleRead(model.header)
-            }
-          }
+      }
+      Column {
+        id: col
+        anchors.fill: parent
+        Text {
+          id: addressLabel
+          text: model.header.IsSent ? "=>" + model.header.To : model.header.From
+          font.pointSize: main.fontLarge
         }
-        Column {
-          id: col
-          anchors.fill: parent
-          Text {
-            id: addressLabel
-            text: model.header.IsSent ? "=>" + model.header.To : model.header.From
-            font.pointSize: main.fontLarge
-          }
-          Text {
-            id: dateLabel
-            text: model.header.Date
-            font.pointSize: main.fontMedium
-          }
-          Text {
-            id: subjectLabel
-            text: model.header.Subject
-            font.pointSize: main.fontSmall
-          }
+        Text {
+          id: dateLabel
+          text: model.header.Date
+          font.pointSize: main.fontMedium
         }
+        Text {
+          id: subjectLabel
+          text: model.header.Subject
+          font.pointSize: main.fontSmall
+        }
+      }
     }
   }
 
