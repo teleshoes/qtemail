@@ -541,6 +541,7 @@ class Controller(QObject):
   @Slot()
   def setupAccounts(self):
     self.accountModel.setItems(self.emailManager.getAccounts())
+    self.ensureAccountModelSelected()
   @Slot()
   def setupFolders(self):
     self.folderModel.setItems(self.emailManager.getFolders(self.accountName))
@@ -592,6 +593,7 @@ class Controller(QObject):
     self.setFolderName("inbox")
     self.setAccountConfig(self.emailManager.readConfig("account", accountName))
     self.setupFolders()
+    self.ensureAccountModelSelected()
   @Slot(QObject)
   def folderSelected(self, folder):
     self.setFolderName(folder.Name)
@@ -601,6 +603,10 @@ class Controller(QObject):
   @Slot()
   def clearAccount(self):
     self.reset()
+
+  def ensureAccountModelSelected(self):
+    for account in self.accountModel.getItems():
+      account.setSelected(account.Name == self.accountName)
 
   @Slot(str, result=str)
   def getAccountConfigValue(self, configKey):
@@ -1251,6 +1257,7 @@ class Account(QObject):
     self.total_ = total_
     self.error_ = error_
     self.isLoading_ = isLoading_
+    self.selected_ = False
   def Name(self):
     return self.name_
   def LastUpdated(self):
@@ -1267,8 +1274,13 @@ class Account(QObject):
     return self.error_
   def IsLoading(self):
     return self.isLoading_
+  def Selected(self):
+    return self.selected_
   def setLoading(self, isLoading_):
     self.isLoading_ = isLoading_
+    self.changed.emit()
+  def setSelected(self, selected_):
+    self.selected_ = selected_
     self.changed.emit()
   changed = Signal()
   Name = Property(unicode, Name, notify=changed)
@@ -1279,6 +1291,7 @@ class Account(QObject):
   Total = Property(int, Total, notify=changed)
   Error = Property(unicode, Error, notify=changed)
   IsLoading = Property(bool, IsLoading, notify=changed)
+  Selected = Property(bool, Selected, notify=changed)
 
 class Folder(QObject):
   def __init__(self, name_, unread_, total_):
