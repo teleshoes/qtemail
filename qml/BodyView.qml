@@ -105,7 +105,7 @@ Rectangle {
         color: "#0000FF"
         width: parent.width
         wrapMode: Text.Wrap
-        font.pointSize: 16
+        font.pointSize: main.fontSmall
       }
       Text {
         id: bodyText
@@ -113,7 +113,7 @@ Rectangle {
         height: parent.height
         width: parent.width
         wrapMode: Text.Wrap
-        font.pointSize: 24
+        font.pointSize: main.fontLarge
         onLinkActivated: main.onLinkActivated(link)
       }
     }

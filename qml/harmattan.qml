@@ -4,6 +4,12 @@ import com.nokia.meego 1.1
 PageStackWindow {
   id: main
 
+  property int fontHuge: 32
+  property int fontLarge: 24
+  property int fontMedium: 20
+  property int fontSmall: 16
+  property int fontTiny: 12
+
   // NAVIGATION
   Component.onCompleted: navToPageByName(controller.getInitialPageName())
   property variant curPage: null

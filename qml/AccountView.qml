@@ -75,19 +75,19 @@ Rectangle {
           anchors.left: parent.left
           anchors.margins: 2
           text: model.account.Name + ": " + model.account.Unread
-          font.pointSize: 32
+          font.pointSize: main.fontHuge
         }
         Text {
           anchors.right: parent.right
           anchors.rightMargin: parent.width * 0.15
           text: model.account.LastUpdatedRel
-          font.pointSize: 24
+          font.pointSize: main.fontLarge
         }
         Text {
           anchors.left: parent.left
           anchors.bottom: parent.bottom
           text: model.account.Error
-          font.pointSize: 24
+          font.pointSize: main.fontLarge
         }
       }
     }

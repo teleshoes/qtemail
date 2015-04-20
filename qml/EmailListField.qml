@@ -28,7 +28,7 @@ Rectangle {
 
   Field {
     id: textField
-    fontSize: 20
+    fontSize: main.fontMedium
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
@@ -80,7 +80,7 @@ Rectangle {
           id: emailListLabel
           width: parent.width * 0.90
           text: model['email']
-          font.pointSize: 16
+          font.pointSize: main.fontSmall
         }
         Btn {
           anchors {left: emailListLabel.right}

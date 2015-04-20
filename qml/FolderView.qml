@@ -25,7 +25,7 @@ Rectangle {
         Text {
           anchors.centerIn: parent
           text: model.folder.Name + ": " + model.folder.Unread + "/" + model.folder.Total
-          font.pointSize: 32
+          font.pointSize: main.fontHuge
         }
       }
     }

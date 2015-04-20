@@ -40,7 +40,7 @@ Rectangle {
     Text {
       id: label
       height: parent.height
-      font.pointSize: 20
+      font.pointSize: main.fontMedium
       font.weight: Font.DemiBold
     }
     Btn {
@@ -130,7 +130,7 @@ Rectangle {
             id: fileListLabel
             width: parent.width * 0.90
             text: model['file']
-            font.pointSize: 16
+            font.pointSize: main.fontSmall
           }
           Btn {
             anchors {left: fileListLabel.right}

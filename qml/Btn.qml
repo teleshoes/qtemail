@@ -45,7 +45,7 @@ Rectangle {
 
   Text {
     text: button.text
-    font.pointSize: 16
+    font.pointSize: main.fontSmall
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter
   }

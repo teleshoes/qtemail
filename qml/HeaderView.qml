@@ -24,7 +24,7 @@ Rectangle {
       id: counterTextArea
       anchors.margins: 5
       anchors.right: parent.right
-      font.pointSize: 12
+      font.pointSize: main.fontTiny
     }
   }
 
@@ -87,7 +87,7 @@ Rectangle {
           anchors.margins: 2
           id: searchTextBox
           anchors.fill: parent
-          font.pointSize: 16
+          font.pointSize: main.fontSmall
           onTextChanged: {
             controller.onSearchTextChanged(searchTextBox.text)
             controller.updateCounterBox(headerView.getCounterBox())
@@ -178,15 +178,15 @@ Rectangle {
           anchors.fill: parent
           Text {
             text: model.header.IsSent ? "=>" + model.header.To : model.header.From
-            font.pointSize: 24
+            font.pointSize: main.fontLarge
           }
           Text {
             text: model.header.Date
-            font.pointSize: 20
+            font.pointSize: main.fontMedium
           }
           Text {
             text: model.header.Subject
-            font.pointSize: 16
+            font.pointSize: main.fontSmall
           }
         }
       }

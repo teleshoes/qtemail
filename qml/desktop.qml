@@ -4,6 +4,12 @@ Rectangle {
   id: main
   width: 1; height: 1 //retarded hack to get resizing to work
 
+  property int fontHuge: 32
+  property int fontLarge: 24
+  property int fontMedium: 20
+  property int fontSmall: 16
+  property int fontTiny: 12
+
   // NAVIGATION
   Component.onCompleted: navToPageByName(controller.getInitialPageName())
   property bool isMain: true

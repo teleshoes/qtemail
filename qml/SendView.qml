@@ -96,7 +96,7 @@ Rectangle {
       id: subject
       labelText: "SUBJECT"
       isDark: false
-      fontSize: 20
+      fontSize: main.fontMedium
     }
     MultiLineField {
       anchors {left: parent.left; right: parent.right; top: subject.bottom}
@@ -104,7 +104,7 @@ Rectangle {
       labelText: "BODY"
       isDark: true
       cursorFollow: sendFlickable
-      fontSize: 20
+      fontSize: main.fontMedium
     }
   }
 
