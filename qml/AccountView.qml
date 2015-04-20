@@ -1,6 +1,7 @@
 import QtQuick 1.1
 
 Rectangle {
+  id: accountView
   anchors.fill: parent
 
   function updateAllAccounts(){
@@ -61,6 +62,8 @@ Rectangle {
           onTriggered: {
             if(model.account.IsLoading){
               console.log("skipping overlapping update")
+            }else if(!accountView.visible){
+              console.log("skipping update, account view is not visible")
             }else{
               console.log("updating account " + model.account.Name)
               controller.updateAccount(messageBox, model.account)
