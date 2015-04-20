@@ -137,8 +137,7 @@ Rectangle {
       navToPage(bodyPage)
     }
 
-    delegate: Component  {
-      Rectangle {
+    delegate: Rectangle {
         property variant modelHeader: model.header
         color: model.header.Selected ? "#FF6666" : "#AAAAAA"
         height: addressLabel.paintedHeight + dateLabel.paintedHeight + subjectLabel.paintedHeight
@@ -194,7 +193,6 @@ Rectangle {
             font.pointSize: main.fontSmall
           }
         }
-      }
     }
   }
 
