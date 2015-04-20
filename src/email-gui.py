@@ -267,6 +267,7 @@ class EmailManager():
              , "skip",           "[OPT] set to true to skip during --update"
              , "preferHtml",     "[OPT] set to false to prefer plaintext"
              , "filters",        "[OPT] a CSV of filter buttons"
+             , "updateInterval", "[OPT] seconds between account updates in GUI"
              ]
     if accName == None:
       configValues = []
@@ -300,14 +301,15 @@ class EmailManager():
     accountOut = self.readProc([EMAIL_BIN, "--accounts"])
     accounts = []
     for line in accountOut.splitlines():
-      m = re.match("(\w+):(\d+):([a-z0-9_\- ]+):(\d+)/(\d+):(.*)", line)
+      m = re.match("(\w+):(\d+):([a-z0-9_\- ]+):(\d+)s:(\d+)/(\d+):(.*)", line)
       if m:
         accName = m.group(1)
         lastUpdated = int(m.group(2))
         lastUpdatedRel = m.group(3)
-        unreadCount = int(m.group(4))
-        totalCount = int(m.group(5))
-        error = m.group(6)
+        updateInterval = int(m.group(4))
+        unreadCount = int(m.group(5))
+        totalCount = int(m.group(6))
+        error = m.group(7)
         accounts.append(Account(
           accName, lastUpdated, lastUpdatedRel, unreadCount, totalCount, error, False))
     return accounts
