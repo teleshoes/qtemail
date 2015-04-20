@@ -690,7 +690,10 @@ class Controller(QObject):
   def replaceHeaderFilterStr(self, name, headerFilterStr):
     try:
       headerFilter = getHeaderFilterFromStr(name, headerFilterStr, self.getBodyCache())
-      self.replaceHeaderFilter(headerFilter)
+      if headerFilter == None:
+        self.removeHeaderFilter(name)
+      else:
+        self.replaceHeaderFilter(headerFilter)
     except Exception as e:
       print "Error parsing filter string:", e
       self.removeHeaderFilter(name)
@@ -1044,8 +1047,10 @@ class HeaderFilterNot(HeaderFilter):
     msg += indent + '|______' + "\n"
     return msg
 
-
 def getHeaderFilterFromStr(name, filterStr, bodyCache):
+  if filterStr.strip() == "":
+    return None
+
   listRegex = "(Any|All|Not)" + "\\(" + "(.*)" + "\\)"
   attRegex = "(\\w+)=(\\w+)"
   bodyRegex = "(Body)~" + "([^,]+)"
@@ -1067,7 +1072,9 @@ def getHeaderFilterFromStr(name, filterStr, bodyCache):
     subfilters = []
     for subfilterMatch in subfilterMatches:
       subfilter = subfilterMatch[0]
-      subfilters.append(getHeaderFilterFromStr('subfilter', subfilter, bodyCache))
+      headerFilter = getHeaderFilterFromStr('subfilter', subfilter, bodyCache)
+      if headerFilter != None:
+        subfilters.append(headerFilter)
 
     if anyAllNot == "any":
       return HeaderFilterAny(name, subfilters)
