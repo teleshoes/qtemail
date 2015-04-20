@@ -12,7 +12,7 @@ Rectangle {
     anchors.left: parent.left
     anchors.right: parent.right
     width: parent.width
-    height: 30
+    height: counterTextArea.height
     y: 0 - 30
     z: 10
 
@@ -80,13 +80,14 @@ Rectangle {
       Rectangle {
         id: searchBox
         width: parent.width
-        height: 30
+        height: searchTextBox.height
         border.width: 2
 
         TextInput {
           anchors.margins: 2
           id: searchTextBox
-          anchors.fill: parent
+          width: parent.width
+          height: font.pointSize * 2
           font.pointSize: main.fontSmall
           onTextChanged: {
             controller.onSearchTextChanged(searchTextBox.text)
@@ -139,7 +140,7 @@ Rectangle {
       Rectangle {
         property variant modelHeader: model.header
         color: model.header.Selected ? "#FF6666" : "#AAAAAA"
-        height: 125
+        height: addressLabel.paintedHeight + dateLabel.paintedHeight + subjectLabel.paintedHeight
         width: parent.width
         MouseArea {
           anchors.fill: parent
@@ -177,14 +178,17 @@ Rectangle {
           id: col
           anchors.fill: parent
           Text {
+            id: addressLabel
             text: model.header.IsSent ? "=>" + model.header.To : model.header.From
             font.pointSize: main.fontLarge
           }
           Text {
+            id: dateLabel
             text: model.header.Date
             font.pointSize: main.fontMedium
           }
           Text {
+            id: subjectLabel
             text: model.header.Subject
             font.pointSize: main.fontSmall
           }
