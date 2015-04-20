@@ -6,61 +6,65 @@ Rectangle {
 
   // NAVIGATION
   Component.onCompleted: navToPageByName(controller.getInitialPageName())
-  property variant curPage: null
+  property bool isMain: true
 
   function navToPageByName(pageName){
     navToPage(controller.findChild(main, pageName + "Page"))
   }
   function navToPage(page){
-    accountPage.visible = false
-    folderPage.visible = false
-    headerPage.visible = false
-    bodyPage.visible = false
-    configPage.visible = false
-    sendPage.visible = false
+    setIsMain(page != configPage && page != sendPage)
 
-    page.visible = true
-    curPage = page
-    initPage()
+    configPage.visible = page == configPage
+    sendPage.visible = page == sendPage
+
+    if(page == accountPage){
+      controller.setupAccounts()
+    }else if(page == headerPage){
+      controller.setupHeaders()
+      controller.updateCounterBox(headerView.getCounterBox())
+    }else if(page == folderPage){
+      controller.setupFolders()
+    }else if(page == bodyPage){
+      controller.fetchCurrentBodyText(bodyView, bodyView, null)
+    }else if(page == configPage){
+      controller.setupConfig()
+    }else if(page == sendPage){
+    }
+
+    initToolBar()
+  }
+
+  function setIsMain(newIsMain){
+    isMain = newIsMain
+
+    if(isMain){
+      configPage.visible = false
+      sendPage.visible = false
+    }
+
+    leftColumn.visible = isMain
+    rightColumn.visible = isMain
   }
   function backPage(){
-    if(headerPage.visible){
-      navToPage(accountPage);
-    }else if(bodyPage.visible){
-      navToPage(headerPage);
-    }else if(folderPage.visible){
-      navToPage(headerPage);
-    }else if(configPage.visible){
-      navToPage(accountPage);
-    }else if(sendPage.visible){
-      navToPage(headerPage);
-    }
+    setIsMain(true)
+    initToolBar()
   }
-  function initPage(){
+  function initToolBar(){
     for (var i = 0; i < toolBar.children.length; ++i){
       toolBar.children[i].visible = false
     }
-    var pageName = curPage.objectName
-    var buttonNames = toolButtons.pages[pageName]
-    for (var i = 0; i < buttonNames.length; ++i){
-      var objectName = "toolbarButton-" + buttonNames[i]
-      var btn = controller.findChild(main, objectName)
-      btn.visible = true
-    }
-
-    if(curPage == accountPage){
-      controller.clearAccount()
-      controller.setupAccounts()
-    }else if(curPage == headerPage){
-      controller.setupHeaders()
-      controller.updateCounterBox(headerView.getCounterBox())
-    }else if(curPage == folderPage){
-      controller.setupFolders()
-    }else if(curPage == bodyPage){
-      controller.fetchCurrentBodyText(bodyView, bodyView, null)
-    }else if(curPage == configPage){
-      controller.setupConfig()
-    }else if(curPage == sendPage){
+    var pages = [accountPage, headerPage, folderPage, bodyPage, configPage, sendPage]
+    for (var pageIndex = 0; pageIndex < pages.length; ++pageIndex){
+      var p = pages[pageIndex]
+      if(p.visible){
+        var pageName = p.objectName
+        var buttonNames = toolButtons.pages[pageName]
+        for (var i = 0; i < buttonNames.length; ++i){
+          var objectName = "toolbarButton-" + buttonNames[i]
+          var btn = controller.findChild(main, objectName)
+          btn.visible = true
+        }
+      }
     }
   }
 
@@ -78,47 +82,75 @@ Rectangle {
     anchors.bottom: toolBar.top
     clip: true
 
-    // ACCOUNT PAGE
-    Rectangle {
-      id: accountPage
-      objectName: "accountPage"
+    Row {
+      id: mainView
       anchors.fill: parent
-      visible: false
-      anchors.margins: 30
+      anchors.bottomMargin: 5
+      height: parent.height
+      width: parent.width
 
-      AccountView{ id: accountView }
-    }
+      Column {
+        id: leftColumn
+        height: parent.height
+        width: Math.max(parent.width * 0.3, 450)
 
-    // FOLDER PAGE
-    Rectangle {
-      id: folderPage
-      objectName: "folderPage"
-      anchors.fill: parent
-      visible: false
-      anchors.margins: 30
+        // ACCOUNT PAGE
+        Rectangle {
+          id: accountPage
+          objectName: "accountPage"
+          border.width: 1
+          height: parent.height * 0.5
+          width: parent.width - 30*2
+          anchors.margins: 30
 
-      FolderView{ id: folderView }
-    }
+          AccountView{ id: accountView }
+        }
 
-    // HEADER PAGE
-    Rectangle {
-      id: headerPage
-      objectName: "headerPage"
-      anchors.fill: parent
-      visible: false
-      anchors.margins: 30
-      HeaderView{ id: headerView }
-    }
+        // FOLDER PAGE
+        Rectangle {
+          id: folderPage
+          objectName: "folderPage"
+          border.width: 1
+          height: parent.height * 0.5
+          width: parent.width - 30*2
+          anchors.margins: 30
 
-    // BODY PAGE
-    Rectangle {
-      id: bodyPage
-      objectName: "bodyPage"
-      visible: false
-      anchors.fill: parent
-      anchors.margins: 30
+          FolderView{ id: folderView }
+        }
+      }
 
-      BodyView{ id: bodyView }
+      Column {
+        id: rightColumn
+        height: parent.height
+        width: parent.width - leftColumn.width
+
+        // HEADER PAGE
+        Rectangle {
+          id: headerPage
+          objectName: "headerPage"
+          border.width: 1
+          height: parent.height * 0.5
+          width: parent.width - 30*2
+          anchors.margins: 30
+          HeaderView{ id: headerView }
+        }
+
+        // BODY PAGE
+        Rectangle {
+          id: bodyPage
+          objectName: "bodyPage"
+          border.width: 1
+          height: parent.height * 0.5
+          width: parent.width - 30*2
+          anchors.margins: 30
+
+          Rectangle {
+            anchors.fill: parent
+            anchors.margins: 1
+            BodyView{ id: bodyView }
+          }
+        }
+      }
     }
 
     // CONFIG PAGE
