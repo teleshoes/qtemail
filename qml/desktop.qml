@@ -4,10 +4,10 @@ Rectangle {
   id: main
   width: 1; height: 1 //retarded hack to get resizing to work
 
-  property int fontHuge: 32
-  property int fontLarge: 24
-  property int fontMedium: 20
-  property int fontSmall: 16
+  property int fontHuge: 20
+  property int fontLarge: 18
+  property int fontMedium: 16
+  property int fontSmall: 14
   property int fontTiny: 12
 
   // NAVIGATION
