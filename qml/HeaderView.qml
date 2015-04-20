@@ -110,6 +110,8 @@ Rectangle {
     height: parent.height - filterBox.height
     clip: true
 
+    property bool isWideView: width > 800
+
     Keys.onPressed:{
       if (event.key == Qt.Key_Up){
         decrementCurrentIndex()
@@ -140,8 +142,10 @@ Rectangle {
     delegate: Rectangle {
       property variant modelHeader: model.header
       color: model.header.Selected ? "#FF6666" : "#AAAAAA"
-      height: addressLabel.paintedHeight + dateLabel.paintedHeight + subjectLabel.paintedHeight
+
+      height: headerFlickable.isWideView ? wideView.height : narrowView.height
       width: parent.width
+
       MouseArea {
         anchors.fill: parent
         onClicked: {
@@ -174,21 +178,44 @@ Rectangle {
           }
         }
       }
-      Column {
-        id: col
-        anchors.fill: parent
+      Row {
+        id: wideView
+        visible: headerFlickable.isWideView
+        width: parent.width
+        height: 30
         Text {
-          id: addressLabel
+          id: wideAddressLabel
           text: model.header.IsSent ? "=>" + model.header.To : model.header.From
           font.pointSize: main.fontLarge
         }
         Text {
-          id: dateLabel
+          id: wideDateLabel
           text: model.header.Date
           font.pointSize: main.fontMedium
         }
         Text {
-          id: subjectLabel
+          id: wideSubjectLabel
+          text: model.header.Subject
+          font.pointSize: main.fontSmall
+        }
+      }
+      Column {
+        id: narrowView
+        visible: !headerFlickable.isWideView
+        width: parent.width
+        height: narrowAddressLabel.paintedHeight + narrowDateLabel.paintedHeight + narrowSubjectLabel.paintedHeight
+        Text {
+          id: narrowAddressLabel
+          text: model.header.IsSent ? "=>" + model.header.To : model.header.From
+          font.pointSize: main.fontLarge
+        }
+        Text {
+          id: narrowDateLabel
+          text: model.header.Date
+          font.pointSize: main.fontMedium
+        }
+        Text {
+          id: narrowSubjectLabel
           text: model.header.Subject
           font.pointSize: main.fontSmall
         }
