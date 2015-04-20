@@ -100,12 +100,15 @@ Rectangle {
 
   ListView {
     id: headerFlickable
+    model: headerModel
+    spacing: 10
     anchors.bottom: parent.bottom
     anchors.top: filterBox.bottom
     anchors.left: parent.left
     anchors.right: parent.right
     width: parent.width
     height: parent.height - filterBox.height
+    clip: true
 
     Keys.onPressed:{
       if (event.key == Qt.Key_Up){
@@ -134,8 +137,6 @@ Rectangle {
       navToPage(bodyPage)
     }
 
-    spacing: 10
-    model: headerModel
     delegate: Component  {
       Rectangle {
         property variant modelHeader: model.header
@@ -195,7 +196,6 @@ Rectangle {
         }
       }
     }
-    clip: true
   }
 
   ScrollBar{
