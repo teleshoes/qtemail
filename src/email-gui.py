@@ -1051,6 +1051,8 @@ def getHeaderFilterFromStr(name, filterStr, bodyCache):
   if filterStr.strip() == "":
     return None
 
+  filterStr = escapeFilter(filterStr)
+
   listRegex = "(Any|All|Not)" + "\\(" + "(.*)" + "\\)"
   attRegex = "(\\w+)=(\\w+)"
   bodyRegex = "(Body)~" + "([^,]+)"
@@ -1065,13 +1067,14 @@ def getHeaderFilterFromStr(name, filterStr, bodyCache):
   listContentRegex = "(" + anyRegex + ")" + "(?:\\s*,\\s*|$)"
 
   if listMatcher:
-    anyAllNot = listMatcher.group(1).lower()
+    anyAllNot = unescapeFilter(listMatcher.group(1).lower())
     content = listMatcher.group(2)
 
     subfilterMatches = re.findall(listContentRegex, content)
     subfilters = []
     for subfilterMatch in subfilterMatches:
       subfilter = subfilterMatch[0]
+      subfilter = unescapeFilter(subfilter)
       headerFilter = getHeaderFilterFromStr('subfilter', subfilter, bodyCache)
       if headerFilter != None:
         subfilters.append(headerFilter)
@@ -1083,27 +1086,47 @@ def getHeaderFilterFromStr(name, filterStr, bodyCache):
     elif anyAllNot == "not":
       return HeaderFilterNot(name, subfilters)
   elif attMatcher:
-    att = attMatcher.group(1).lower()
-    val = attMatcher.group(2).lower()
+    att = unescapeFilter(attMatcher.group(1).lower())
+    val = unescapeFilter(attMatcher.group(2).lower())
     if val == "true":
       val = False
     if val == "false":
       val = False
     return HeaderFilterAtt(name, att, val)
   elif bodyMatcher:
-    bodyField = bodyMatcher.group(1)
-    regex = bodyMatcher.group(2)
+    bodyField = unescapeFilter(bodyMatcher.group(1))
+    regex = unescapeFilter(bodyMatcher.group(2))
     return HeaderFilterBody(name, regex, bodyCache)
   elif fieldMatcher:
-    field = fieldMatcher.group(1)
+    field = unescapeFilter(fieldMatcher.group(1))
     if field == None:
       fieldList = []
     else:
       fieldList = [field]
-    regex = fieldMatcher.group(2)
+    regex = unescapeFilter(fieldMatcher.group(2))
     return HeaderFilterField(name, regex, fieldList)
   else:
     raise Exception('Could not parse (sub)filter: ' + filterStr)
+
+def escapeFilter(filterStr):
+  if filterStr == None:
+    return None
+  filterStr = filterStr.replace('@', '@at@')
+  filterStr = filterStr.replace('\\\\', '@backslash@')
+  filterStr = filterStr.replace('\\,', '@comma@')
+  filterStr = filterStr.replace('\\(', '@lparen@')
+  filterStr = filterStr.replace('\\)', '@rparen@')
+  return filterStr
+def unescapeFilter(filterStr):
+  if filterStr == None:
+    return None
+  filterStr = filterStr.replace('@backslash@', '\\')
+  filterStr = filterStr.replace('@lparen@', '(')
+  filterStr = filterStr.replace('@rparen@', ')')
+  filterStr = filterStr.replace('@comma@', ',')
+  filterStr = filterStr.replace('@at@', '@')
+  return filterStr
+
 
 class FileSystemController(QObject):
   def __init__(self):
