@@ -8,7 +8,7 @@ Rectangle {
   property alias value: edit.text
 
   property real labelWidth: 0.30
-  property int fontSize: main.fontSmall
+  property int fontSize: 16
   property bool isDark: false
   property bool isPassword: false
 

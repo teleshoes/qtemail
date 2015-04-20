@@ -6,7 +6,7 @@ Rectangle {
   property alias labelText: label.text
   property alias value: edit.text
 
-  property int fontSize: main.fontSmall
+  property int fontSize: 16
   property bool isDark: false
 
   property string bgColor: isDark ? "#444444" : "#666666"
