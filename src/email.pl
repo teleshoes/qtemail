@@ -62,6 +62,7 @@ my @accExtraConfigKeys = qw(
   preferHtml
   bodyCacheMode
   filters
+  updateInterval
 );
 my %enums = (
   bodyCacheMode => [qw(all unread none)],
@@ -166,7 +167,7 @@ my $usage = "
 
   $0 --accounts
     format and print information about each account
-    \"ACCOUNT_NAME:<timestamp>:<relative_time>:<unread_count>/<total_count>:<error>\"
+    \"ACCOUNT_NAME:<timestamp>:<relative_time>:<update_interval>s:<unread_count>/<total_count>:<error>\"
 
   $0 --folders ACCOUNT_NAME
     format and print information about each folder for the given account
@@ -472,7 +473,12 @@ sub main(@){
         $totalCount += readUidFileCounts $accName, $folderName, "all";
       }
       $lastUpdated = 0 if not defined $lastUpdated;
-      print "$accName:$lastUpdated:$lastUpdatedRel:$unreadCount/$totalCount:$error\n";
+      my $updateInterval = $$accounts{$accName}{updateInterval};
+      if(not defined $updateInterval){
+        $updateInterval = 0;
+      }
+      $updateInterval .= "s";
+      print "$accName:$lastUpdated:$lastUpdatedRel:$updateInterval:$unreadCount/$totalCount:$error\n";
     }
   }elsif($cmd =~ /^(--folders)$/){
     die $usage if @_ != 1;
