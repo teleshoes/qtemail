@@ -28,7 +28,7 @@ Rectangle {
       Rectangle {
         height: 100
         width: parent.width
-        color: "gray"
+        color: model.account.Selected ? "#FF6666" : "#AAAAAA"
         MouseArea{
           anchors.fill: parent
           onClicked: {
