@@ -311,7 +311,7 @@ class EmailManager():
         totalCount = int(m.group(6))
         error = m.group(7)
         accounts.append(Account(
-          accName, lastUpdated, lastUpdatedRel, unreadCount, totalCount, error, False))
+          accName, lastUpdated, lastUpdatedRel, updateInterval, unreadCount, totalCount, error, False))
     return accounts
   def getFolders(self, accountName):
     folderOut = self.readProc([EMAIL_BIN, "--folders", accountName])
@@ -1241,11 +1241,12 @@ class FilterButtonModel(BaseListModel):
     self.setRoleNames(dict(enumerate(FilterButtonModel.COLUMNS)))
 
 class Account(QObject):
-  def __init__(self, name_, lastUpdated_, lastUpdatedRel_, unread_, total_, error_, isLoading_):
+  def __init__(self, name_, lastUpdated_, lastUpdatedRel_, updateInterval_, unread_, total_, error_, isLoading_):
     QObject.__init__(self)
     self.name_ = name_
     self.lastUpdated_ = lastUpdated_
     self.lastUpdatedRel_ = lastUpdatedRel_
+    self.updateInterval_ = updateInterval_
     self.unread_ = unread_
     self.total_ = total_
     self.error_ = error_
@@ -1256,6 +1257,8 @@ class Account(QObject):
     return self.lastUpdated_
   def LastUpdatedRel(self):
     return self.lastUpdatedRel_
+  def UpdateInterval(self):
+    return self.updateInterval_
   def Unread(self):
     return self.unread_
   def Total(self):
@@ -1271,6 +1274,7 @@ class Account(QObject):
   Name = Property(unicode, Name, notify=changed)
   LastUpdated = Property(int, LastUpdated, notify=changed)
   LastUpdatedRel = Property(unicode, LastUpdatedRel, notify=changed)
+  UpdateInterval = Property(int, UpdateInterval, notify=changed)
   Unread = Property(int, Unread, notify=changed)
   Total = Property(int, Total, notify=changed)
   Error = Property(unicode, Error, notify=changed)
