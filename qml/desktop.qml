@@ -94,6 +94,7 @@ Rectangle {
       anchors.bottomMargin: 5
       height: parent.height
       width: parent.width
+      anchors.margins: 30
 
       Column {
         id: leftColumn
@@ -107,7 +108,6 @@ Rectangle {
           border.width: 1
           height: parent.height * 0.5
           width: parent.width - 30*2
-          anchors.margins: 30
 
           AccountView{ id: accountView }
         }
@@ -119,7 +119,6 @@ Rectangle {
           border.width: 1
           height: parent.height * 0.5
           width: parent.width - 30*2
-          anchors.margins: 30
 
           FolderView{ id: folderView }
         }
@@ -137,7 +136,6 @@ Rectangle {
           border.width: 1
           height: parent.height * 0.5
           width: parent.width - 30*2
-          anchors.margins: 30
           HeaderView{ id: headerView }
         }
 
@@ -148,7 +146,6 @@ Rectangle {
           border.width: 1
           height: parent.height * 0.5
           width: parent.width - 30*2
-          anchors.margins: 30
 
           Rectangle {
             anchors.fill: parent
