@@ -110,7 +110,7 @@ Rectangle {
     height: parent.height - filterBox.height
     clip: true
 
-    property bool isWideView: width > 800
+    property bool isWideView: width > 700
 
     Keys.onPressed:{
       if (event.key == Qt.Key_Up){
