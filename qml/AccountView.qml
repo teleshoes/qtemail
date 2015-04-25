@@ -26,7 +26,7 @@ Rectangle {
     model: accountModel
     delegate: Component  {
       Rectangle {
-        height: 100
+        height: Math.max(nameUnreadLabel.paintedHeight, lastUpdatedLabel.paintedHeight) + errorLabel.paintedHeight
         width: parent.width
         color: model.account.Selected ? "#FF6666" : "#AAAAAA"
         MouseArea{
@@ -72,18 +72,21 @@ Rectangle {
         }
 
         Text {
+          id: nameUnreadLabel
           anchors.left: parent.left
           anchors.margins: 2
           text: model.account.Name + ": " + model.account.Unread
           font.pointSize: main.fontHuge
         }
         Text {
+          id: lastUpdatedLabel
           anchors.right: parent.right
           anchors.rightMargin: parent.width * 0.15
           text: model.account.LastUpdatedRel
           font.pointSize: main.fontLarge
         }
         Text {
+          id: errorLabel
           anchors.left: parent.left
           anchors.bottom: parent.bottom
           text: model.account.Error
