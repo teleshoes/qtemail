@@ -9,7 +9,7 @@ use Date::Parse qw(str2time);
 use Date::Format qw(time2str);
 
 sub setFlagStatus($$$$);
-sub writeStatusLineFile(@);
+sub writeStatusFiles(@);
 sub formatStatusLine($@);
 sub formatStatusShort($@);
 sub padtrim($$);
@@ -75,6 +75,7 @@ my @headerFields = qw(Date Subject From To);
 my $emailDir = "$ENV{HOME}/.cache/email";
 my $unreadCountsFile = "$emailDir/unread-counts";
 my $statusLineFile = "$emailDir/status-line";
+my $statusShortFile = "$emailDir/status-short";
 
 my $VERBOSE = 0;
 my $DATE_FORMAT = "%Y-%m-%d %H:%M:%S";
@@ -206,6 +207,7 @@ my $usage = "
     format and print cached unread message headers
 
   $0 --status-line [ACCOUNT_NAME ACCOUNT_NAME ...]
+    {cached in $statusLineFile when $unreadCountsFile or error files change}
     does not fetch anything, merely reads $unreadCountsFile
     format and print $unreadCountsFile
     the string is a space-separated list of the first character of
@@ -216,6 +218,7 @@ my $usage = "
     e.g.: A3 G6
 
   $0 --status-short [ACCOUNT_NAME ACCOUNT_NAME ...]
+    {cached in $statusShortFile when $unreadCountsFile or error files change}
     does not fetch anything, merely reads $unreadCountsFile
     format and print $unreadCountsFile
     if accounts are specified, all but those are omitted
@@ -368,7 +371,7 @@ sub main(@){
         my $msg = "ERROR: Could not authenticate $$acc{name} ($$acc{user})\n";
         warn $msg;
         writeError $accName, $msg;
-        writeStatusLineFile(@accOrder);
+        writeStatusFiles(@accOrder);
         next;
       }
 
@@ -387,7 +390,7 @@ sub main(@){
           my $msg = "ERROR: Could not open folder $folderName\n";
           warn $msg;
           writeError $accName, $msg;
-          writeStatusLineFile(@accOrder);
+          writeStatusFiles(@accOrder);
           next;
         }
 
@@ -429,7 +432,7 @@ sub main(@){
       }
     }
     mergeUnreadCounts $counts, @accOrder;
-    writeStatusLineFile(@accOrder);
+    writeStatusFiles(@accOrder);
     if(defined $$config{options}{update_cmd}){
       my $cmd = $$config{options}{update_cmd};
       print "running update_cmd: $cmd\n";
@@ -484,7 +487,7 @@ sub main(@){
     writeUidFile $$acc{name}, $folderName, "unread", @unread;
     my $count = @unread;
     mergeUnreadCounts {$accName => $count}, @accOrder;
-    writeStatusLineFile(@accOrder);
+    writeStatusFiles(@accOrder);
     $c->close();
     $c->logout();
   }elsif($cmd =~ /^(--accounts)$/){
@@ -741,13 +744,18 @@ sub setFlagStatus($$$$){
   }
 }
 
-sub writeStatusLineFile(@){
+sub writeStatusFiles(@){
   my @accNames = @_;
   my $counts = readUnreadCounts();
 
   my $fmt;
   $fmt = formatStatusLine $counts, @accNames;
   open FH, "> $statusLineFile" or die "Could not write $statusLineFile\n";
+  print FH $fmt;
+  close FH;
+
+  $fmt = formatStatusShort $counts, @accNames;
+  open FH, "> $statusShortFile" or die "Could not write $statusShortFile\n";
   print FH $fmt;
   close FH;
 }
