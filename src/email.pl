@@ -11,6 +11,8 @@ use Date::Format qw(time2str);
 sub setFlagStatus($$$$);
 sub writeStatusLineFile(@);
 sub formatStatusLine($@);
+sub formatStatusShort($@);
+sub padtrim($$);
 sub mergeUnreadCounts($@);
 sub readUnreadCounts();
 sub writeUnreadCounts($@);
@@ -88,7 +90,7 @@ my $okCmds = join "|", qw(
   --update --header --body --body-plain --body-html --attachments
   --smtp
   --mark-read --mark-unread
-  --accounts --folders --print --summary --status-line
+  --accounts --folders --print --summary --status-line --status-short
   --has-error --has-new-unread --has-unread
   --cache-all-bodies
   --read-config --write-config --read-options --write-options
@@ -212,6 +214,33 @@ my $usage = "
     if the count is zero for a given account, it is omitted
     if accounts are specified, all but those are omitted
     e.g.: A3 G6
+
+  $0 --status-short [ACCOUNT_NAME ACCOUNT_NAME ...]
+    does not fetch anything, merely reads $unreadCountsFile
+    format and print $unreadCountsFile
+    if accounts are specified, all but those are omitted
+    omits accounts with unread-count of 0
+
+    the string is two lines, each always containing exactly three characters
+    no line can be longer than 3, and if it is shorter, it is left-padded with spaces
+    each line ends in a newline character
+
+    if any account has error, prints:
+      \"ERR\", \"<total>\"
+    if any account has more then 99 emails, prints
+      \"big\", \"<total>\"
+    if more than two accounts have a positive unread-count, prints:
+      \"all\", \"<total>\"
+    if exactly two accounts have a positive unread-count, prints:
+      \"<acc><count>\", \"<acc><count>\"
+    if exactly one account has a positive unread-count, prints:
+      \"<acc><count>\", \"\"
+    otherwise, prints:
+      \"\", \"\"
+
+    <total> = total of all unread counts if less than 1000, or '!!!' otherwise
+    <acc> = first character of a given account name
+    <count> = unread count for the indicated account
 
   $0 --has-error [ACCOUNT_NAME ACCOUNT_NAME ...]
     checks if $emailDir/ACCOUNT_NAME/error exists
@@ -650,10 +679,14 @@ sub main(@){
           ;
       }
     }
-  }elsif($cmd =~ /^(--status-line)$/){
+  }elsif($cmd =~ /^(--status-line|--status-short)$/){
     my @accNames = @_ == 0 ? @accOrder : @_;
     my $counts = readUnreadCounts();
-    print formatStatusLine($counts, @accNames);
+    if($cmd eq "--status-line"){
+      print formatStatusLine($counts, @accNames);
+    }elsif($cmd eq "--status-short"){
+      print formatStatusShort($counts, @accNames);
+    }
   }elsif($cmd =~ /^(--has-error)$/){
     my @accNames = @_ == 0 ? @accOrder : @_;
     for my $accName(@accNames){
@@ -734,6 +767,46 @@ sub formatStatusLine($@){
     }
   }
   return "@fmts\n";
+}
+sub formatStatusShort($@){
+  my ($counts, @accNames) = @_;
+  my $isError = 0;
+  my $isTooLarge = 0;
+  my $total = 0;
+  my @fmts;
+
+  for my $accName(@accNames){
+    die "Unknown account $accName\n" if not defined $$counts{$accName};
+    my $count = $$counts{$accName};
+    my $errorFile = "$emailDir/$accName/error";
+    my $nameDisplay = substr($accName, 0, 1);
+    my $fmt = $nameDisplay . $count;
+    $isTooLarge = 1 if $count > 99;
+    $isError = 1 if -f $errorFile;
+    $total += $count;
+    push @fmts, $fmt if $count > 0;
+  }
+
+  $total = "!!!" if $total > 999;
+
+  my ($top, $bot);
+  if($isError){
+    ($top, $bot) = ("ERR", $total);
+  }elsif($isTooLarge){
+    ($top, $bot) = ("big", $total);
+  }elsif(@fmts > 2){
+    ($top, $bot) = ("all", $total);
+  }else{
+    ($top, $bot) = @fmts;
+  }
+  return (padtrim 3, $top) . "\n" . (padtrim 3, $bot) . "\n";
+}
+sub padtrim($$){
+  my ($len, $s) = @_;
+  $s = "" if not defined $s;
+  $s = substr($s, 0, $len);
+  $s = ' ' x ($len - length $s) . $s;
+  return $s;
 }
 
 sub mergeUnreadCounts($@){
