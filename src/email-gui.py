@@ -879,7 +879,8 @@ class Controller(QObject):
       messageBox.setText(message)
   def onAppendMessage(self, messageBox, message):
     if messageBox != None:
-      messageBox.append(message)
+      oldText = messageBox.getText()
+      messageBox.setText(oldText + message)
       messageBox.scrollToBottom()
 
   def newHeaders(self):
