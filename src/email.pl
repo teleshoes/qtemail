@@ -10,7 +10,7 @@ use Date::Format qw(time2str);
 
 sub setFlagStatus($$$$);
 sub writeStatusLineFile(@);
-sub formatStatusLine(@);
+sub formatStatusLine($@);
 sub mergeUnreadCounts($@);
 sub readUnreadCounts();
 sub writeUnreadCounts($@);
@@ -652,8 +652,8 @@ sub main(@){
     }
   }elsif($cmd =~ /^(--status-line)$/){
     my @accNames = @_ == 0 ? @accOrder : @_;
-    my $line = formatStatusLine(@accNames);
-    print $line;
+    my $counts = readUnreadCounts();
+    print formatStatusLine($counts, @accNames);
   }elsif($cmd =~ /^(--has-error)$/){
     my @accNames = @_ == 0 ? @accOrder : @_;
     for my $accName(@accNames){
@@ -710,20 +710,23 @@ sub setFlagStatus($$$$){
 
 sub writeStatusLineFile(@){
   my @accNames = @_;
-  my $line = formatStatusLine @accNames;
+  my $counts = readUnreadCounts();
+
+  my $fmt;
+  $fmt = formatStatusLine $counts, @accNames;
   open FH, "> $statusLineFile" or die "Could not write $statusLineFile\n";
-  print FH $line;
+  print FH $fmt;
   close FH;
 }
-sub formatStatusLine(@){
-  my @accNames = @_;
-  my $counts = readUnreadCounts();
+sub formatStatusLine($@){
+  my ($counts, @accNames) = @_;
   my @fmts;
   for my $accName(@accNames){
     die "Unknown account $accName\n" if not defined $$counts{$accName};
     my $count = $$counts{$accName};
     my $errorFile = "$emailDir/$accName/error";
-    my $fmt = substr($accName, 0, 1) . $count;
+    my $nameDisplay = substr($accName, 0, 1);
+    my $fmt = $nameDisplay . $count;
     if(-f $errorFile){
       push @fmts, "$fmt!err";
     }else{
