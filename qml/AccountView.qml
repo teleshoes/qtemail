@@ -106,8 +106,8 @@ Rectangle {
     height: parent.height * 0.30
     clip: true
 
-    function append(text) {
-      messageBoxTextArea.text = messageBoxTextArea.text + text
+    function getText() {
+      return messageBoxTextArea.text
     }
     function setText(text) {
        messageBoxTextArea.text = text
