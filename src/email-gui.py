@@ -880,6 +880,11 @@ class Controller(QObject):
   def onAppendMessage(self, messageBox, message):
     if messageBox != None:
       oldText = messageBox.getText()
+      lines = oldText.splitlines()
+      maxLines = 500
+      if len(lines) > maxLines:
+        lines = lines[0-maxLines:]
+      oldText = "\n".join(lines) + "\n"
       messageBox.setText(oldText + message)
       messageBox.scrollToBottom()
 
