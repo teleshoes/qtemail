@@ -434,7 +434,6 @@ class Controller(QObject):
     self.currentBodyText = None
     self.threads = []
     self.currentHeaders = []
-    self.filteredHeaders = []
     self.headerFilters = []
     self.filterButtons = []
     self.fileSystemController = FileSystemController()
@@ -717,23 +716,21 @@ class Controller(QObject):
   def setHeaders(self, headers):
     self.ensureBodiesForFilter()
     self.currentHeaders = headers
-    self.filteredHeaders = filter(self.filterHeader, headers)
-    if len(self.filteredHeaders) == 0:
+    filteredHeaders = filter(self.filterHeader, headers)
+    if len(filteredHeaders) == 0:
       self.headerModel.clear()
     else:
-      self.headerModel.setItems(self.filteredHeaders)
+      self.headerModel.setItems(filteredHeaders)
   def prependHeaders(self, headers):
     self.ensureBodiesForFilter()
     newFilteredHeaders = filter(self.filterHeader, headers)
     self.currentHeaders += headers
-    self.filteredHeaders += newFilteredHeaders
     if len(newFilteredHeaders) > 0:
       self.headerModel.prependItems(newFilteredHeaders)
   def appendHeaders(self, headers):
     self.ensureBodiesForFilter()
     newFilteredHeaders = filter(self.filterHeader, headers)
     self.currentHeaders += headers
-    self.filteredHeaders += newFilteredHeaders
     if len(newFilteredHeaders) > 0:
       self.headerModel.appendItems(newFilteredHeaders)
 
@@ -910,13 +907,14 @@ class Controller(QObject):
     self.appendHeaders(headers)
   @Slot(QObject)
   def updateCounterBox(self, counterBox):
-    total = str(self.totalSize)
-    cur = str(len(self.currentHeaders))
-    if len(self.filteredHeaders) == len(self.currentHeaders):
-      filtered = ""
-    else:
-      filtered = "(" + str(len(self.filteredHeaders)) + " showing)  "
-    counterBox.setCounterText(filtered + cur + " / " + total)
+    totalLen = self.totalSize
+    curLen = len(self.currentHeaders)
+    showingLen = len(self.headerModel.getItems())
+    msg = ""
+    if showingLen != curLen:
+      msg += "(" + str(showingLen) + " showing)  "
+    msg += str(curLen) + " / " + str(totalLen)
+    counterBox.setCounterText(msg)
 
 class HeaderFilter():
   def __init__(self, name):
