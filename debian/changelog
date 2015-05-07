@@ -1,3 +1,18 @@
+qtemail (1.2) UNRELEASED; urgency=low
+  * Display more headers using list-view if width > 700px (e.g.: landscape)
+  * Massive update to desktop UI (e.g.: multiple screens open at once)
+  * Add updateInterval config for auto-updating in the GUI
+  * Add more powerful searching
+    (subject/from/to/body regexes, read/unread, all/any lists)
+  * Custom email filter buttons using search strings in config
+    e.g.: email.GMAIL.filters = mary=%All(From~mary, read=false)%
+  * Show filtered-message count
+  * Add bodyCacheMode to control what gets cached (all, unread, none)
+  * Make success/failure sent-notifications stay until dismissed
+  * Explicitly include UID in body display
+  * Large style/ui fixes (especially body view), bug fixes
+ -- teleshoes <elliot.wolk@gmail.com>  Thu, 07 May 2015 14:42:46 -0400
+
 qtemail (1.0.0) UNRELEASED; urgency=low
   * Copy body text to clipboard
   * Word-wrap email bodies
