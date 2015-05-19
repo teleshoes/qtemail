@@ -11,7 +11,14 @@ Rectangle {
     setZoom(1.0)
     bodyText.text = body
   }
+  function setSelectable(isSelectable){
+    selectable = isSelectable
+  }
+  function getSelectedText(){
+    return bodyText.selectedText
+  }
 
+  property bool selectable: false
   property variant scales: [0.1, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 5.0, 10.0]
   property real curScale: 1.0
   property real minScale: 0.1
@@ -114,6 +121,7 @@ Rectangle {
         height: parent.height
         width: parent.width
         wrapMode: TextEdit.Wrap
+        selectByMouse: bodyView.selectable
         font.pointSize: main.fontLarge
         onLinkActivated: main.onLinkActivated(link)
       }
