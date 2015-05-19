@@ -175,7 +175,7 @@ QtObject {
       signal clicked
       property variant name: "copy"
       property variant text: "copy"
-      onClicked: controller.copyBodyToClipboard()
+      onClicked: controller.copyBodyToClipboard(bodyView)
     },
     QtObject {
       signal clicked
