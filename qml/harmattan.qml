@@ -18,7 +18,6 @@ PageStackWindow {
     navToPage(controller.findChild(main, pageName + "Page"))
   }
   function navToPage(page){
-    hideKb()
     pageStack.push(page)
     curPage = pageStack.currentPage
     initPage()
@@ -33,6 +32,7 @@ PageStackWindow {
     initPage()
   }
   function initPage(){
+    hideKb()
     for (var i = 0; i < toolBar.children.length; ++i){
       toolBar.children[i].visible = false
     }
@@ -161,10 +161,13 @@ PageStackWindow {
 
   // HACK TO HIDE KEYBOARD
   function hideKb(){
+    hideKbDummyEdit.focus = true
     hideKbDummyEdit.closeSoftwareInputPanel()
+    hideKbDummyEdit.focus = false
   }
-  TextEdit {
+  TextInput {
     id: hideKbDummyEdit
+    activeFocusOnPress: false
     width: 0
     height: 0
   }
