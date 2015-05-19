@@ -828,11 +828,19 @@ class Controller(QObject):
       self.currentBodyText = None
       bodyBox.setBody("ERROR FETCHING BODY\n")
 
-  @Slot()
-  def copyBodyToClipboard(self):
-    if self.currentBodyText != None:
-      QClipboard().setText(self.currentBodyText)
-    self.notifierModel.notify("Copied text to clipboard: " + self.currentBodyText)
+  @Slot(QObject)
+  def copyBodyToClipboard(self, bodyView):
+    curBody = self.currentBodyText
+    curSel = bodyView.getSelectedText()
+    text = None
+    if curSel != None and len(curSel) > 0:
+      text = curSel
+    elif curBody != None and len(curBody) > 0:
+      text = curBody
+
+    if text != None:
+      QClipboard().setText(text)
+    self.notifierModel.notify("Copied text to clipboard: " + text)
 
   @Slot()
   def saveCurrentAttachments(self):
