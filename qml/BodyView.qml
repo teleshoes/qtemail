@@ -107,12 +107,13 @@ Rectangle {
         wrapMode: Text.Wrap
         font.pointSize: main.fontSmall
       }
-      Text {
+      TextEdit {
         id: bodyText
+        readOnly: true
         anchors.top: headerText.bottom
         height: parent.height
         width: parent.width
-        wrapMode: Text.Wrap
+        wrapMode: TextEdit.Wrap
         font.pointSize: main.fontLarge
         onLinkActivated: main.onLinkActivated(link)
       }
