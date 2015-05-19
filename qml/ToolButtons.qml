@@ -5,7 +5,7 @@ QtObject {
     "accountPage": ["newAccount", "update", "options"],
     "folderPage": ["back"],
     "headerPage": ["back", "more", "wayMore", "all", "config", "send", "folder"],
-    "bodyPage": ["back", "attachments", "toggleHtml", "reply", "forward", "copy", "zoomIn", "zoomOut"],
+    "bodyPage": ["back", "attachments", "toggleHtml", "toggleSelectable", "reply", "forward", "copy", "zoomIn", "zoomOut"],
     "configPage": ["back", "submit"],
     "sendPage": ["back", "sendEmail"],
   }
@@ -153,6 +153,22 @@ QtObject {
         controller.setHtmlMode(!wasHtml)
         setIsHtml(!wasHtml)
         controller.fetchCurrentBodyText(bodyView, bodyView, null)
+      }
+    },
+    QtObject {
+      signal clicked
+      property variant name: "toggleSelectable"
+      property variant text: "select on"
+      function getIsSelectable(){
+        return bodyView.selectable
+      }
+      function setIsSelectable(isSelectable){
+        var btnElem = getButtonElemByName(name)
+        btnElem.setText(isSelectable ? "select off" : "select on")
+        bodyView.selectable = isSelectable
+      }
+      onClicked: {
+        setIsSelectable(!getIsSelectable())
       }
     },
     QtObject {
