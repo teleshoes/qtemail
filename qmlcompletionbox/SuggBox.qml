@@ -5,9 +5,7 @@ Rectangle {
     height: 480
     color: "black"
 
-    Suggestions {
-        id: suggestions
-    }
+    property variant suggModel
 
     Item {
         id: contents
@@ -53,12 +51,12 @@ Rectangle {
 
         SuggestionsPreview {
             // just to show you what you can type in
-            model: suggestions
+            model: suggModel
         }
 
         SuggestionBox {
             id: suggestionsBox
-            model: suggestions
+            model: suggModel
             width: 200
             anchors.top: inputField.bottom
             anchors.left: inputField.left
