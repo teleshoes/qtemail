@@ -35,13 +35,7 @@ Rectangle {
     onEnterPressed: {
       add.clicked()
     }
-    suggModel: ListModel {
-      ListElement { name: "apple" }
-      ListElement { name: "apricot" }
-      ListElement { name: "danana" }
-      ListElement { name: "orange" }
-      ListElement { name: "kiwi" }
-    }
+    suggModel: addressBookModel
   }
 
   Btn {
