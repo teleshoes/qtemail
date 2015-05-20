@@ -1,18 +1,13 @@
 import QtQuick 1.1
 
 Rectangle {
-    width: 640
-    height: 480
-    color: "black"
     property alias text: inputField.text
 
     property variant suggModel
 
     Item {
         id: contents
-        width: parent.width - 100
-        height: parent.height - 100
-        anchors.centerIn: parent
+        anchors.fill: parent
 
         LineEdit {
             id: inputField
@@ -58,7 +53,7 @@ Rectangle {
         SuggestionBox {
             id: suggestionsBox
             model: suggModel
-            width: 200
+            width: parent.width
             anchors.top: inputField.bottom
             anchors.left: inputField.left
             filter: inputField.textInput.text
