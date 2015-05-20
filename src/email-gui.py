@@ -472,9 +472,7 @@ class Controller(QObject):
     self.filterButtons = []
     self.fileSystemController = FileSystemController()
     self.setFilterButtons([])
-
-    abc = [Suggestion("apples"), Suggestion("cherries")]
-    self.addressBookModel.setItems(abc)
+    self.addressBook = None
 
   @Slot('QVariantList')
   def runCommand(self, cmdArr):
@@ -630,6 +628,7 @@ class Controller(QObject):
     self.setAccountConfig(self.emailManager.readConfig("account", accountName))
     self.setupFolders()
     self.ensureAccountModelSelected()
+    self.ensureAddressBook()
   @Slot(QObject)
   def folderSelected(self, folder):
     self.setFolderName(folder.Name)
@@ -643,6 +642,23 @@ class Controller(QObject):
   def ensureAccountModelSelected(self):
     for account in self.accountModel.getItems():
       account.setSelected(account.Name == self.accountName)
+
+  def ensureAddressBook(self):
+    if self.addressBook == None:
+      self.addressBook = self.emailManager.getAddressBook()
+
+    if self.addressBook == None:
+      accEmails = None
+    else:
+      accEmails = self.addressBook[self.accountName]
+
+    if accEmails == None or len(accEmails) == 0:
+      self.addressBookModel.clear()
+    else:
+      items = []
+      for emailAddress in accEmails:
+        items.append(Suggestion(emailAddress))
+      self.addressBookModel.setItems(items)
 
   @Slot(str, result=str)
   def getAccountConfigValue(self, configKey):
