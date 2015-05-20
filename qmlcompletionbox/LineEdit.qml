@@ -71,7 +71,7 @@ FocusScope {
             width: 16
             height: 16
             anchors.centerIn: parent
-            source: "resources/icons/clear-text-rtl.png"
+            source: "../icons/clear-text-rtl.png"
         }
     }
 
