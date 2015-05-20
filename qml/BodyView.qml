@@ -116,7 +116,6 @@ Rectangle {
       }
       TextEdit {
         id: bodyText
-        readOnly: true
         anchors.top: headerText.bottom
         height: parent.height
         width: parent.width
@@ -124,6 +123,34 @@ Rectangle {
         selectByMouse: bodyView.selectable
         font.pointSize: main.fontLarge
         onLinkActivated: main.onLinkActivated(link)
+        onFocusChanged: cursorVisible = false
+        activeFocusOnPress: false
+        MouseArea {
+          onClicked: {
+            bodyText.clicked(mouse)
+            bodyText.cursorVisible = false
+          }
+          onPressed: {
+            if(bodyView.selectable){
+              bodyText.pressed(mouse)
+            }
+          }
+          onReleased: {
+            if(bodyView.selectable){
+              bodyText.released(mouse)
+            }
+          }
+          onPositionChanged: {
+            if(bodyView.selectable){
+              bodyText.positionChanged(mouse)
+            }
+          }
+          onPressAndHold: {
+            if(bodyView.selectable){
+              bodyText.pressAndHold(mouse)
+            }
+          }
+        }
       }
     }
   }
