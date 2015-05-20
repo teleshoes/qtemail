@@ -1255,6 +1255,7 @@ class BaseListModel(QAbstractListModel):
     self.items.extend(items)
     self.endInsertRows()
     self.changed.emit()
+  @Slot(result=int)
   def rowCount(self, parent=QModelIndex()):
     return len(self.items)
   def count(self):
