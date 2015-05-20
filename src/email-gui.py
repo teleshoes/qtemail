@@ -29,6 +29,7 @@ PAGE_INITIAL_SIZE = 200
 PAGE_MORE_SIZE = 200
 
 EMAIL_DIR = os.getenv("HOME") + "/.cache/email"
+CONFIG_DIR = os.getenv("HOME") + "/.config/qtemail"
 
 pages = ["account", "header", "config", "send", "folder", "body"]
 okPages = "|".join(pages)
@@ -47,8 +48,10 @@ usage = """Usage:
       default the message to UID {only useful with --page}
 """ % {"exec": sys.argv[0], "okPages": okPages}
 
-def die(msg):
+def warn(msg):
   print >> sys.stderr, msg
+def die(msg):
+  warn(msg)
   sys.exit(1)
 
 def main():
@@ -410,6 +413,32 @@ class EmailManager():
         except:
           body = re.sub(r'[^\x00-\x7F]', ' ', body).encode('utf-8')
     return uidBodies
+  def getAddressBook(self):
+    filePath = CONFIG_DIR + "/" + "addressbook"
+    if not os.path.isfile(filePath):
+      return []
+    f = open(filePath, 'r')
+    addressBookContents = f.read()
+    f.close()
+    commentRegex = re.compile("^\\s*#|^\\s*$")
+    accNameRegex = re.compile("^\\s*=\\s*(\\w+)\\s*=\\s*$")
+    addressBook = dict()
+    curAccName = None
+    for line in addressBookContents.splitlines():
+      if re.match(commentRegex, line):
+        continue
+      accNameMatcher = re.match(accNameRegex, line)
+      if accNameMatcher:
+        curAccName = accNameMatcher.group(1)
+      else:
+        if curAccName == None:
+          warn("error reading address book, missing account name\n")
+          return []
+        if curAccName not in addressBook:
+          addressBook[curAccName] = []
+        addressBook[curAccName].append(line)
+    return addressBook
+
   def readProc(self, cmdArr):
     process = subprocess.Popen(cmdArr, stdout=subprocess.PIPE)
     (stdout, _) = process.communicate()
