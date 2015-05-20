@@ -95,8 +95,10 @@ def main():
   configModel = ConfigModel()
   notifierModel = NotifierModel()
   filterButtonModel = FilterButtonModel()
+  addressBookModel = AddressBookModel()
   controller = Controller(emailManager, bodyCacheFactory,
-    accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel)
+    accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
+    addressBookModel)
 
   controller.setupAccounts()
 
@@ -112,7 +114,8 @@ def main():
 
   app = QApplication([])
   widget = MainWindow(qmlFile, controller,
-    accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel)
+    accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
+    addressBookModel)
   if platform == PLATFORM_HARMATTAN:
     widget.window().showFullScreen()
   else:
@@ -414,7 +417,8 @@ class EmailManager():
 
 class Controller(QObject):
   def __init__(self, emailManager, bodyCacheFactory,
-    accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel):
+    accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
+    addressBookModel):
     QObject.__init__(self)
     self.emailManager = emailManager
     self.bodyCacheFactory = bodyCacheFactory
@@ -424,6 +428,7 @@ class Controller(QObject):
     self.configModel = configModel
     self.filterButtonModel = filterButtonModel
     self.notifierModel = notifierModel
+    self.addressBookModel = addressBookModel
     self.initialPageName = "account"
     self.htmlMode = False
     self.configMode = None
@@ -438,6 +443,9 @@ class Controller(QObject):
     self.filterButtons = []
     self.fileSystemController = FileSystemController()
     self.setFilterButtons([])
+
+    abc = [Suggestion("apples"), Suggestion("cherries")]
+    self.addressBookModel.setItems(abc)
 
   @Slot('QVariantList')
   def runCommand(self, cmdArr):
@@ -1288,6 +1296,12 @@ class FilterButtonModel(BaseListModel):
     BaseListModel.__init__(self)
     self.setRoleNames(dict(enumerate(FilterButtonModel.COLUMNS)))
 
+class AddressBookModel(BaseListModel):
+  COLUMNS = ('address',)
+  def __init__(self):
+    BaseListModel.__init__(self)
+    self.setRoleNames(dict(enumerate(AddressBookModel.COLUMNS)))
+
 class Account(QObject):
   def __init__(self, name_, lastUpdated_, lastUpdatedRel_, updateInterval_, unread_, total_, error_, isLoading_):
     QObject.__init__(self)
@@ -1474,9 +1488,19 @@ class NotifierModel(QObject):
   Showing = Property(bool, Showing, notify=changed)
   HideDelay = Property(bool, HideDelay, notify=changed)
 
+class Suggestion(QObject):
+  def __init__(self, suggestionText_):
+    QObject.__init__(self)
+    self.suggestionText_ = suggestionText_
+  def name(self):
+    return self.suggestionText_
+  changed = Signal()
+  name = Property(unicode, name, notify=changed)
+
 class MainWindow(QDeclarativeView):
   def __init__(self, qmlFile, controller,
-    accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel):
+    accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
+    addressBookModel):
     super(MainWindow, self).__init__(None)
     context = self.rootContext()
     context.setContextProperty('accountModel', accountModel)
@@ -1485,6 +1509,7 @@ class MainWindow(QDeclarativeView):
     context.setContextProperty('configModel', configModel)
     context.setContextProperty('filterButtonModel', filterButtonModel)
     context.setContextProperty('notifierModel', notifierModel)
+    context.setContextProperty('addressBookModel', addressBookModel)
     context.setContextProperty('controller', controller)
     context.setContextProperty('fileSystemController', controller.fileSystemController)
 
