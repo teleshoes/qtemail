@@ -1260,6 +1260,9 @@ class BaseListModel(QAbstractListModel):
     return len(self.items)
   def count(self):
     return len(self.items)
+  @Slot(int, result=QObject)
+  def get(self, index):
+    return self.items[index]
   def data(self, index, role):
     if role == Qt.DisplayRole:
       return self.items[index.row()]
