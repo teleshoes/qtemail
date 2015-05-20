@@ -11,6 +11,7 @@ FocusScope {
     property bool hasClearButton: true
     property alias clearButton: clearButtonComponent
     property alias textInput: textInputComponent
+    property alias text: textInputComponent.text
 
     // --- signals
     signal accepted

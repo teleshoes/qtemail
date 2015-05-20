@@ -4,6 +4,7 @@ Rectangle {
     width: 640
     height: 480
     color: "black"
+    property alias text: inputField.text
 
     property variant suggModel
 
