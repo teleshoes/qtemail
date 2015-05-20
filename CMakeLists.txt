@@ -10,6 +10,10 @@ FILE(GLOB qml qml/*.qml)
 INSTALL(FILES ${qml}
   DESTINATION /opt/qtemail/qml)
 
+FILE(GLOB qmlcb qmlcompletionbox/*.qml)
+INSTALL(FILES ${qmlcb}
+  DESTINATION /opt/qtemail/qml)
+
 FILE(GLOB icons icons/*.png)
 INSTALL(FILES ${icons}
   DESTINATION /opt/qtemail/icons)
