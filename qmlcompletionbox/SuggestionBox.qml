@@ -69,7 +69,7 @@ Rectangle {
 
 
         property int selectedIndex: -1
-        property variant selectedItem: selectedIndex === -1 ? undefined : model.get(selectedIndex)
+        property variant selectedItem: selectedIndex === -1 ? undefined : filterItem.model.get(selectedIndex)
         signal suggestionClicked(variant suggestion)
 
         opacity: container.visible ? 1.0 : 0
