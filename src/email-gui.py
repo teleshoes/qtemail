@@ -1244,15 +1244,20 @@ class BaseListModel(QAbstractListModel):
       self.endInsertRows()
     else:
       self.items = []
+    self.changed.emit()
   def prependItems(self, items):
     self.beginInsertRows(QModelIndex(), 0, len(items) - 1)
     self.items = items + self.items
     self.endInsertRows()
+    self.changed.emit()
   def appendItems(self, items):
     self.beginInsertRows(QModelIndex(), len(self.items), len(self.items))
     self.items.extend(items)
     self.endInsertRows()
+    self.changed.emit()
   def rowCount(self, parent=QModelIndex()):
+    return len(self.items)
+  def count(self):
     return len(self.items)
   def data(self, index, role):
     if role == Qt.DisplayRole:
@@ -1265,6 +1270,9 @@ class BaseListModel(QAbstractListModel):
       del self.items[firstRow]
       rowCount -= 1
     self.endRemoveRows()
+    self.changed.emit()
+  changed = Signal()
+  count = Property(int, count, notify=changed)
 
 class AccountModel(BaseListModel):
   COLUMNS = ('account',)
