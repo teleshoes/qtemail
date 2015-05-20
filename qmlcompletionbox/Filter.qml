@@ -4,6 +4,7 @@ Item {
     id: component
     property alias model: filterModel
 
+    property bool prefixOnly: true
     property QtObject sourceModel: undefined
     property string filter: ""
     property string property: ""
@@ -46,7 +47,12 @@ Item {
         if (item[this.property] === undefined)
             return false
 
-        if (item[this.property].match(this.filter) === null) {
+        var suggFilter = this.filter
+        if(prefixOnly){
+          suggFilter = "^" + suggFilter
+        }
+
+        if (item[this.property].match(suggFilter) === null) {
             return false
         }
 
