@@ -5,6 +5,13 @@ smtp-cli Copyright Michal Ludvig 2003-2014
 smtp-cli is free software, released under the GPLv3
   small changes to smtp-cli Copyright 2015 Elliot Wolk
 
+qmlcompletionbox Copyright 2013 Vyacheslav Blinov
+qmlcompletionbox is free software, released under the GPLv2
+qmlcompletionbox is based on SuggestionBox.qml from liquid browser
+
+liquid Copyright 2011 Jocelyn Turcotte
+liquid is free software, released under the GPLv2
+
 Simple IMAP client with a QT gui and a CLI
 Minimal dependencies, currently minimal features
 

@@ -6,3 +6,6 @@ smtp-cli:
 
 ScrollBar.qml:
   Thomas BOUTROUE
+
+qmlcompletionbox:
+  Vyacheslav Blinov
