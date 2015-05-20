@@ -1,9 +1,11 @@
 import QtQuick 1.1
 
 Rectangle {
+    id: suggBox
     property alias text: inputField.text
 
     property variant suggModel
+    property bool showPreview: false
 
     Item {
         id: contents
@@ -48,6 +50,7 @@ Rectangle {
         SuggestionsPreview {
             // just to show you what you can type in
             model: suggModel
+            visible: suggBox.showPreview
         }
 
         SuggestionBox {
