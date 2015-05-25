@@ -746,7 +746,7 @@ class Controller(QObject):
         self.removeHeaderFilter(name)
       else:
         self.replaceHeaderFilter(headerFilter)
-    except Exception as e:
+    except Exception, e:
       print "Error parsing filter string:", e
       self.removeHeaderFilter(name)
   @Slot(str)
