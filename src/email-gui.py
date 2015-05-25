@@ -22,6 +22,7 @@ QML_DIR = "/opt/qtemail/qml"
 
 PLATFORM_OTHER = 0
 PLATFORM_HARMATTAN = 1
+PLATFORM_FREMANTLE = 2
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -82,11 +83,15 @@ def main():
   platform = None
   if "harmattan" in issue:
     platform = PLATFORM_HARMATTAN
+  elif "maemo 5" in issue:
+    platform = PLATFORM_FREMANTLE
   else:
     platform = PLATFORM_OTHER
 
   if platform == PLATFORM_HARMATTAN:
     qmlFile = QML_DIR + "/harmattan.qml"
+  elif platform == PLATFORM_FREMANTLE:
+    qmlFile = QML_DIR + "/desktop-small.qml"
   else:
     qmlFile = QML_DIR + "/desktop.qml"
 
