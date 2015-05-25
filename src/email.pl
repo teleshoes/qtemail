@@ -841,7 +841,9 @@ sub writeUnreadCounts($@){
   my ($counts , @accOrder)= @_;
   open FH, "> $unreadCountsFile" or die "Could not write $unreadCountsFile\n";
   for my $accName(@accOrder){
-    print FH "$$counts{$accName}:$accName\n";
+    my $count = $$counts{$accName};
+    $count = 0 if not defined $count;
+    print FH "$count:$accName\n";
   }
   close FH;
 }
