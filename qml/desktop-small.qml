@@ -164,6 +164,8 @@ Rectangle {
     Repeater {
       model: toolButtons.getButtonDefs()
       Btn {
+        width: 80
+        height: 80
         function setText(text){
           this.text = text
         }
