@@ -831,8 +831,9 @@ class Controller(QObject):
       "--folder=" + self.folderName, self.accountName, str(header.uid_)]
 
     self.startEmailCommandThread(cmd, None,
-      self.onToggleReadFinished, header)
-  def onToggleReadFinished(self, isSuccess, output, header):
+      self.onToggleReadFinished, {'header': header})
+  def onToggleReadFinished(self, isSuccess, output, extraArgs):
+    header = extraArgs['header']
     header.isLoading_ = False
     header.setLoading(False)
     if isSuccess:
