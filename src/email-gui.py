@@ -836,6 +836,7 @@ class Controller(QObject):
     if isSuccess:
       for header in self.headerModel.getItems():
         header.setRead(True)
+    self.setupAccounts()
 
   @Slot(QObject)
   def toggleRead(self, header):
@@ -856,6 +857,7 @@ class Controller(QObject):
     header.setLoading(False)
     if isSuccess:
       header.setRead(not header.read_)
+    self.setupAccounts()
 
   @Slot(result=bool)
   def getHtmlMode(self):
