@@ -819,6 +819,24 @@ class Controller(QObject):
     if self.accountName != None:
       self.newHeaders()
 
+  @Slot()
+  def markAllRead(self):
+    uids = []
+    for header in self.headerModel.getItems():
+      header.setLoading(True)
+      uids.append(str(header.uid_))
+
+    cmd = [EMAIL_BIN, "--mark-read",
+      "--folder=" + self.folderName, self.accountName] + uids
+
+    self.startEmailCommandThread(cmd, None, self.onMarkAllReadFinished, {})
+  def onMarkAllReadFinished(self, isSuccess, output, extraArgs):
+    for header in self.headerModel.getItems():
+      header.setLoading(False)
+    if isSuccess:
+      for header in self.headerModel.getItems():
+        header.setRead(True)
+
   @Slot(QObject)
   def toggleRead(self, header):
     header.setLoading(True)
