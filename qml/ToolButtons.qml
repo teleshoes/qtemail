@@ -4,7 +4,7 @@ QtObject {
   property variant pages: {
     "accountPage": ["newAccount", "update", "options"],
     "folderPage": ["back"],
-    "headerPage": ["back", "more", "wayMore", "all", "config", "send", "folder"],
+    "headerPage": ["back", "more", "wayMore", "all", "markAllRead", "config", "send", "folder"],
     "bodyPage": ["back", "attachments", "toggleHtml", "toggleSelectable", "reply", "forward", "copy", "zoomIn", "zoomOut"],
     "configPage": ["back", "submit"],
     "sendPage": ["back", "sendEmail"],
@@ -132,6 +132,14 @@ QtObject {
       onClicked: {
         controller.moreHeaders(100)
         controller.updateCounterBox(headerView.getCounterBox())
+      }
+    },
+    QtObject {
+      signal clicked
+      property variant name: "markAllRead"
+      property variant text: "all=>read"
+      onClicked: {
+        controller.markAllRead()
       }
     },
     QtObject {
