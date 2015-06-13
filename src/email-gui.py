@@ -819,7 +819,7 @@ class Controller(QObject):
   def onUpdateAccountFinished(self, isSuccess, output, extraArgs):
     self.setupAccounts()
     if self.accountName != None:
-      self.newHeaders()
+      self.ensureHeadersUpToDate()
 
   @Slot()
   def markAllRead(self):
@@ -979,7 +979,8 @@ class Controller(QObject):
       messageBox.setText(oldText + message)
       messageBox.scrollToBottom()
 
-  def newHeaders(self):
+  @Slot()
+  def ensureHeadersUpToDate(self):
     minUid = min(map(lambda header: header.Uid, self.currentHeaders))
     (total, headers) = self.emailManager.fetchHeaders(
       self.accountName, self.folderName,
