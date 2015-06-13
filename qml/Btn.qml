@@ -52,10 +52,10 @@ Rectangle {
   Image {
     source: button.imgSource
     anchors.fill: parent
-    anchors.topMargin: 10
-    anchors.bottomMargin: 30
-    anchors.leftMargin: 10
-    anchors.rightMargin: 10
+    anchors.topMargin: button.height / 12
+    anchors.bottomMargin: button.height / 4
+    anchors.leftMargin: button.width / 10
+    anchors.rightMargin: button.width / 10
   }
 }
 
