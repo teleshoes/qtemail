@@ -65,6 +65,7 @@ my @accExtraConfigKeys = qw(
   bodyCacheMode
   filters
   updateInterval
+  refreshInterval
 );
 my %enums = (
   bodyCacheMode => [qw(all unread none)],
@@ -510,7 +511,12 @@ sub main(@){
         $updateInterval = 0;
       }
       $updateInterval .= "s";
-      print "$accName:$lastUpdated:$lastUpdatedRel:$updateInterval:$unreadCount/$totalCount:$error\n";
+      my $refreshInterval = $$accounts{$accName}{refreshInterval};
+      if(not defined $refreshInterval){
+        $refreshInterval = 0;
+      }
+      $refreshInterval .= "s";
+      print "$accName:$lastUpdated:$lastUpdatedRel:$updateInterval:$refreshInterval:$unreadCount/$totalCount:$error\n";
     }
   }elsif($cmd =~ /^(--folders)$/){
     die $usage if @_ != 1;
