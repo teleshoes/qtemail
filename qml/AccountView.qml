@@ -70,6 +70,23 @@ Rectangle {
             }
           }
         }
+        Timer {
+          id: refreshTimer
+          interval: model.account.RefreshInterval * 1000
+          running: model.account.RefreshInterval > 0
+          repeat: true
+
+          onTriggered: {
+            if(model.account.Selected){
+              if(model.account.IsLoading){
+                console.log("skipping refresh while updating")
+              }else{
+                console.log("refreshing account " + model.account.Name)
+                controller.setupAccounts()
+              }
+            }
+          }
+        }
 
         Text {
           id: nameUnreadLabel
