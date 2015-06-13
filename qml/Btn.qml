@@ -7,6 +7,7 @@ Rectangle {
   signal clicked()
   property string imgSource: ""
   property string text: ""
+  property int textSize: main.fontSmall
 
   border.color: "black"
   border.width: 5
@@ -45,7 +46,7 @@ Rectangle {
 
   Text {
     text: button.text
-    font.pointSize: main.fontSmall
+    font.pointSize: button.textSize
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter
   }
