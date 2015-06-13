@@ -83,6 +83,7 @@ Rectangle {
               }else{
                 console.log("refreshing account " + model.account.Name)
                 controller.setupAccounts()
+                controller.ensureHeadersUpToDate()
               }
             }
           }
