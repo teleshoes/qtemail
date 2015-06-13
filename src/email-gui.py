@@ -279,6 +279,7 @@ class EmailManager():
              , "preferHtml",     "[OPT] set to false to prefer plaintext"
              , "filters",        "[OPT] a CSV of filter buttons"
              , "updateInterval", "[OPT] seconds between account updates in GUI"
+             , "refreshInterval","[OPT] seconds between account refresh in GUI"
              ]
     if accName == None:
       configValues = []
@@ -312,17 +313,18 @@ class EmailManager():
     accountOut = self.readProc([EMAIL_BIN, "--accounts"])
     accounts = []
     for line in accountOut.splitlines():
-      m = re.match("(\w+):(\d+):([a-z0-9_\- ]+):(\d+)s:(\d+)/(\d+):(.*)", line)
+      m = re.match("(\w+):(\d+):([a-z0-9_\- ]+):(\d+)s:(\d+)s:(\d+)/(\d+):(.*)", line)
       if m:
         accName = m.group(1)
         lastUpdated = int(m.group(2))
         lastUpdatedRel = m.group(3)
         updateInterval = int(m.group(4))
-        unreadCount = int(m.group(5))
-        totalCount = int(m.group(6))
-        error = m.group(7)
+        refreshInterval = int(m.group(5))
+        unreadCount = int(m.group(6))
+        totalCount = int(m.group(7))
+        error = m.group(8)
         accounts.append(Account(
-          accName, lastUpdated, lastUpdatedRel, updateInterval, unreadCount, totalCount, error, False))
+          accName, lastUpdated, lastUpdatedRel, updateInterval, refreshInterval, unreadCount, totalCount, error, False))
     return accounts
   def getFolders(self, accountName):
     folderOut = self.readProc([EMAIL_BIN, "--folders", accountName])
@@ -1391,12 +1393,13 @@ class AddressBookModel(BaseListModel):
     self.setRoleNames(dict(enumerate(AddressBookModel.COLUMNS)))
 
 class Account(QObject):
-  def __init__(self, name_, lastUpdated_, lastUpdatedRel_, updateInterval_, unread_, total_, error_, isLoading_):
+  def __init__(self, name_, lastUpdated_, lastUpdatedRel_, updateInterval_, refreshInterval_, unread_, total_, error_, isLoading_):
     QObject.__init__(self)
     self.name_ = name_
     self.lastUpdated_ = lastUpdated_
     self.lastUpdatedRel_ = lastUpdatedRel_
     self.updateInterval_ = updateInterval_
+    self.refreshInterval_ = refreshInterval_
     self.unread_ = unread_
     self.total_ = total_
     self.error_ = error_
@@ -1410,6 +1413,8 @@ class Account(QObject):
     return self.lastUpdatedRel_
   def UpdateInterval(self):
     return self.updateInterval_
+  def RefreshInterval(self):
+    return self.refreshInterval_
   def Unread(self):
     return self.unread_
   def Total(self):
@@ -1431,6 +1436,7 @@ class Account(QObject):
   LastUpdated = Property(int, LastUpdated, notify=changed)
   LastUpdatedRel = Property(unicode, LastUpdatedRel, notify=changed)
   UpdateInterval = Property(int, UpdateInterval, notify=changed)
+  RefreshInterval = Property(int, RefreshInterval, notify=changed)
   Unread = Property(int, Unread, notify=changed)
   Total = Property(int, Total, notify=changed)
   Error = Property(unicode, Error, notify=changed)
