@@ -56,7 +56,7 @@ Rectangle {
   Flickable {
     id: sendFlickable
     contentWidth: parent.width
-    contentHeight: to.height + cc.height + bcc.height + subject.height + attachments.height + body.height
+    contentHeight: to.height + cc.height + bcc.height + subject.height + attachments.height + body.height + sendBtn.height
     anchors.fill: parent
     flickableDirection: Flickable.VerticalFlick
     boundsBehavior: Flickable.DragOverBounds
@@ -105,6 +105,15 @@ Rectangle {
       isDark: true
       cursorFollow: sendFlickable
       fontSize: main.fontMedium
+    }
+    Btn{
+      text: "Send"
+      id: sendBtn
+      anchors {left: parent.left; top: body.bottom}
+      height: 50
+      width: 100
+
+      onClicked: controller.sendEmail(sendView.getForm())
     }
   }
 
