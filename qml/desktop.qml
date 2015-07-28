@@ -42,6 +42,7 @@ Rectangle {
     }else if(page == configPage){
       controller.setupConfig()
     }else if(page == sendPage){
+      controller.showSendWindow()
     }
 
     initToolBar()
