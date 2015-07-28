@@ -707,7 +707,8 @@ class Controller(QObject):
     if self.header != None:
       self.header.setSelected(False)
     self.header = header
-    self.header.setSelected(True)
+    if self.header != None:
+      self.header.setSelected(True)
   def setAccountConfig(self, accountConfig):
     self.accountConfig = accountConfig
     if self.accountConfig == None or not 'filters' in self.accountConfig.keys():
