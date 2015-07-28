@@ -815,8 +815,13 @@ class Controller(QObject):
 
   @Slot(str)
   def onSearchTextChanged(self, searchText):
-    self.replaceHeaderFilterStr("quick-filter", searchText.strip())
+    filterStr = self.convertSearchTextToFilterStr(searchText)
+    self.replaceHeaderFilterStr("quick-filter", filterStr)
     self.refreshHeaderFilters()
+
+  def convertSearchTextToFilterStr(self, searchText):
+    filterStr = searchText.strip()
+    return filterStr
 
   @Slot(QObject, QObject)
   def updateAccount(self, messageBox, account):
