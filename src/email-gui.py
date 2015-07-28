@@ -121,13 +121,13 @@ def main():
     controller.setHeader(hdr)
 
   app = QApplication([])
-  widget = MainWindow(qmlFile, controller,
+  mainWindow = MainWindow(qmlFile, controller,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
     addressBookModel)
   if platform == PLATFORM_HARMATTAN:
-    widget.window().showFullScreen()
+    mainWindow.window().showFullScreen()
   else:
-    widget.window().show()
+    mainWindow.window().show()
 
   app.exec_()
 
