@@ -14,14 +14,21 @@ Rectangle {
   Component.onCompleted: navToPageByName(controller.getInitialPageName())
   property bool isMain: true
 
+  // SEND PAGE
+  // dummy placeholder
+  Rectangle {
+    id: sendPage
+    objectName: "sendPage"
+    visible: false
+  }
+
   function navToPageByName(pageName){
     navToPage(controller.findChild(main, pageName + "Page"))
   }
   function navToPage(page){
-    setIsMain(page != configPage && page != sendPage)
+    setIsMain(page != configPage)
 
     configPage.visible = page == configPage
-    sendPage.visible = page == sendPage
 
     if(page == accountPage){
       controller.setupAccounts()
@@ -45,7 +52,6 @@ Rectangle {
 
     if(isMain){
       configPage.visible = false
-      sendPage.visible = false
     }
 
     leftColumn.visible = isMain
@@ -165,17 +171,6 @@ Rectangle {
       anchors.margins: 30
 
       ConfigView{ id: configView }
-    }
-
-    // SEND PAGE
-    Rectangle {
-      id: sendPage
-      objectName: "sendPage"
-      anchors.fill: parent
-      visible: false
-      anchors.margins: 30
-
-      SendView{ id: sendView }
     }
   }
 
