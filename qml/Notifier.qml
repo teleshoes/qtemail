@@ -14,12 +14,16 @@ Rectangle {
   z: 100
   color: "#dddddd"
 
+  property bool enabled: true
   property string text: notifierModel.Text
   property bool showing: notifierModel.Showing
 
   onShowingChanged: showing ? show() : hide()
 
   function show(){
+    if(!enabled){
+      return
+    }
     notificationArea.visible = true
 
     if(notifierModel.HideDelay){

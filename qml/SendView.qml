@@ -5,6 +5,15 @@ Rectangle {
   anchors.fill: parent
   width: 1; height: 1 //retarded hack to get resizing to work
 
+  // NOTIFIER
+  Notifier {
+    id: sendNotifier
+    enabled: false
+  }
+
+  function setNotifierEnabled(enabled){
+    sendNotifier.enabled = enabled
+  }
 
   function getForm(){
     return form
