@@ -129,7 +129,9 @@ def main():
     sendWindow = SendWindow(QML_DIR + "/SendView.qml", controller, mainWindow.rootObject(),
       accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
       addressBookModel)
-    sendWindow.rootObject().setNotifierEnabled(True)
+    sendView = sendWindow.rootObject()
+    mainWindow.rootContext().setContextProperty('sendView', sendView)
+    sendView.setNotifierEnabled(True)
 
     controller.setSendWindow(sendWindow)
 
