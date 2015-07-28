@@ -426,14 +426,15 @@ $ehlo_ok-- if ($text !~ /ESMTP/);
 &say_hello ($sock, $ehlo_ok, $hello_host, \%features) or exit (1);
 
 # Run the SMTP session
-&run_smtp ();
+my $smtpSuccess = &run_smtp ();
+my $exitCode = $smtpSuccess ? 0 : 1;
 
 # Good bye...
 &send_line ($sock, "QUIT\n");
 ($code, $text) = &get_line ($sock);
 die ("Unknown QUIT response '$code'.\n") if ($code != 221);
 
-exit 0;
+exit $exitCode;
 
 # This is the main SMTP "engine".
 sub run_smtp
