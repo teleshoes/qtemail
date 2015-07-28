@@ -14,6 +14,7 @@ import os
 import os.path
 import re
 import signal
+import shlex
 import sys
 import subprocess
 
@@ -821,6 +822,17 @@ class Controller(QObject):
 
   def convertSearchTextToFilterStr(self, searchText):
     filterStr = searchText.strip()
+    tokens = []
+    try:
+      tokens = shlex.split(filterStr)
+    except:
+      return filterStr
+
+    if len(tokens) == 0:
+      return filterStr
+
+    filterStr = "All(" + ",".join(tokens) + ")"
+
     return filterStr
 
   @Slot(QObject, QObject)
