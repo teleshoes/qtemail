@@ -124,6 +124,14 @@ def main():
   mainWindow = MainWindow(qmlFile, controller,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
     addressBookModel)
+
+  if platform == PLATFORM_OTHER:
+    sendWindow = SendWindow(QML_DIR + "/SendView.qml", controller, mainWindow.rootObject(),
+      accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
+      addressBookModel)
+
+    controller.setSendWindow(sendWindow)
+
   if platform == PLATFORM_HARMATTAN:
     mainWindow.window().showFullScreen()
   else:
@@ -480,6 +488,14 @@ class Controller(QObject):
     self.fileSystemController = FileSystemController()
     self.setFilterButtons([])
     self.addressBook = None
+    self.sendWindow = None
+
+  def setSendWindow(self, sendWindow):
+    self.sendWindow = sendWindow
+
+  @Slot()
+  def showSendWindow(self):
+    self.sendWindow.show()
 
   @Slot('QVariantList')
   def runCommand(self, cmdArr):
@@ -1598,6 +1614,26 @@ class MainWindow(QDeclarativeView):
     addressBookModel):
     super(MainWindow, self).__init__(None)
     context = self.rootContext()
+    context.setContextProperty('accountModel', accountModel)
+    context.setContextProperty('folderModel', folderModel)
+    context.setContextProperty('headerModel', headerModel)
+    context.setContextProperty('configModel', configModel)
+    context.setContextProperty('filterButtonModel', filterButtonModel)
+    context.setContextProperty('notifierModel', notifierModel)
+    context.setContextProperty('addressBookModel', addressBookModel)
+    context.setContextProperty('controller', controller)
+    context.setContextProperty('fileSystemController', controller.fileSystemController)
+
+    self.setResizeMode(QDeclarativeView.SizeRootObjectToView)
+    self.setSource(qmlFile)
+
+class SendWindow(QDeclarativeView):
+  def __init__(self, qmlFile, controller, main,
+    accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
+    addressBookModel):
+    super(SendWindow, self).__init__(None)
+    context = self.rootContext()
+    context.setContextProperty('main', main)
     context.setContextProperty('accountModel', accountModel)
     context.setContextProperty('folderModel', folderModel)
     context.setContextProperty('headerModel', headerModel)
