@@ -826,7 +826,10 @@ class Controller(QObject):
     filterStr = searchText.strip()
     tokens = []
     try:
-      tokens = shlex.split(filterStr)
+      if platform[0] == PLATFORM_HARMATTAN:
+        tokens = filterStr.split(" ")
+      else:
+        tokens = shlex.split(filterStr)
     except:
       return filterStr
 
