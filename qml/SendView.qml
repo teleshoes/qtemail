@@ -3,6 +3,8 @@ import QtQuick 1.1
 Rectangle {
   id: sendView
   anchors.fill: parent
+  width: 1; height: 1 //retarded hack to get resizing to work
+
 
   function getForm(){
     return form
