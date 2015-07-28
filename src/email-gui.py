@@ -24,6 +24,7 @@ QML_DIR = "/opt/qtemail/qml"
 PLATFORM_OTHER = 0
 PLATFORM_HARMATTAN = 1
 PLATFORM_FREMANTLE = 2
+platform = [None]
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -81,17 +82,17 @@ def main():
     die(usage)
 
   issue = open('/etc/issue').read().strip().lower()
-  platform = None
+  platform[0] = None
   if "harmattan" in issue:
-    platform = PLATFORM_HARMATTAN
+    platform[0] = PLATFORM_HARMATTAN
   elif "maemo 5" in issue:
-    platform = PLATFORM_FREMANTLE
+    platform[0] = PLATFORM_FREMANTLE
   else:
-    platform = PLATFORM_OTHER
+    platform[0] = PLATFORM_OTHER
 
-  if platform == PLATFORM_HARMATTAN:
+  if platform[0] == PLATFORM_HARMATTAN:
     qmlFile = QML_DIR + "/harmattan.qml"
-  elif platform == PLATFORM_FREMANTLE:
+  elif platform[0] == PLATFORM_FREMANTLE:
     qmlFile = QML_DIR + "/desktop-small.qml"
   else:
     qmlFile = QML_DIR + "/desktop.qml"
@@ -126,7 +127,7 @@ def main():
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
     addressBookModel)
 
-  if platform == PLATFORM_OTHER:
+  if platform[0] == PLATFORM_OTHER:
     sendWindow = SendWindow(QML_DIR + "/SendView.qml", controller, mainWindow.rootObject(),
       accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
       addressBookModel)
@@ -136,7 +137,7 @@ def main():
 
     controller.setSendWindow(sendWindow)
 
-  if platform == PLATFORM_HARMATTAN:
+  if platform[0] == PLATFORM_HARMATTAN:
     mainWindow.window().showFullScreen()
   else:
     mainWindow.window().show()
