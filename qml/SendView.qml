@@ -66,7 +66,7 @@ Rectangle {
       id: to
       labelText: "TO"
       isDark: false
-      height: 150
+      height: 100
       width: parent.width
     }
     EmailListField {
@@ -74,7 +74,7 @@ Rectangle {
       id: cc
       labelText: "CC"
       isDark: true
-      height: 150
+      height: 100
       width: parent.width
     }
     EmailListField {
@@ -82,7 +82,7 @@ Rectangle {
       id: bcc
       labelText: "BCC"
       isDark: false
-      height: 150
+      height: 100
       width: parent.width
     }
     FileSelectorField {

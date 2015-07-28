@@ -43,9 +43,8 @@ Rectangle {
     anchors.left: parent.left
     anchors.top: textField.bottom
     width: parent.width * textField.labelWidth - 20
-    height: emailListContainer.height - 20
-    anchors.margins: 10
-    text: "{" + emailListView.model.count + " email(s)}\n\nadd more"
+    height: emailListContainer.height
+    text: "Add Email\n" + emailListView.model.count + " email(s)"
     onClicked: {
       if(textField.value){
         addEmail(textField.value)

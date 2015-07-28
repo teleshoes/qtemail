@@ -16,7 +16,7 @@ Rectangle {
   property string bgColor: isDark ? "#444444" : "#666666"
   color: bgColor
 
-  height: (fontSize * 2) * 2
+  height: fontSize * 2
   width: parent.width
 
   function getValue(){
@@ -30,7 +30,7 @@ Rectangle {
   Rectangle {
     id: labelContainer
     width: parent.width * labelWidth
-    height: parent.height / 2
+    height: parent.height
     color: bgColor
     anchors.margins: 2
 
@@ -47,7 +47,7 @@ Rectangle {
     id: editContainer
     anchors.left: labelContainer.right
     width: parent.width * (1 - labelWidth)
-    height: parent.height / 2
+    height: parent.height
     color: bgColor
     Rectangle {
       anchors.centerIn: parent
