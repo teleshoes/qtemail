@@ -831,7 +831,22 @@ class Controller(QObject):
     if len(tokens) == 0:
       return filterStr
 
-    filterStr = "All(" + ",".join(tokens) + ")"
+    chunks = []
+    curChunk = []
+    for token in tokens:
+      if token.strip() == "++":
+        if len(curChunk) > 0:
+          chunks.append(curChunk)
+        curChunk = []
+      else:
+        curChunk.append(token)
+    if len(curChunk) > 0:
+      chunks.append(curChunk)
+
+    chunkFmt = []
+    for chunk in chunks:
+      chunkFmt.append("All(" + ",".join(chunk) + ")")
+    filterStr = "Any(" + ",".join(chunkFmt) + ")"
 
     return filterStr
 
