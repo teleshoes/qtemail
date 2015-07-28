@@ -1181,21 +1181,33 @@ def getHeaderFilterFromStr(name, filterStr, bodyCache):
   bodyMatcher = re.match("^" + bodyRegex + "$", filterStr)
   fieldMatcher = re.match("^" + fieldRegex + "$", filterStr)
 
-  anyRegex = listRegex + "|" + attRegex+ "|" + bodyRegex + "|" + fieldRegex
-  listContentRegex = "(" + anyRegex + ")" + "(?:\\s*,\\s*|$)"
-
   if listMatcher:
     anyAllNot = unescapeFilter(listMatcher.group(1).lower())
     content = listMatcher.group(2)
 
-    subfilterMatches = re.findall(listContentRegex, content)
+    subfilterStrs = []
+    cur = ""
+    parensCount = 0
+    for c in content:
+      if c == "(":
+        parensCount+=1
+      if c == ")":
+        parensCount-=1
+      if parensCount == 0 and c == ",":
+        if len(cur) > 0:
+          subfilterStrs.append(cur)
+        cur = ""
+      else:
+        cur += c
+    if len(cur) > 0:
+      subfilterStrs.append(cur)
+
     subfilters = []
-    for subfilterMatch in subfilterMatches:
-      subfilter = subfilterMatch[0]
-      subfilter = unescapeFilter(subfilter)
-      headerFilter = getHeaderFilterFromStr('subfilter', subfilter, bodyCache)
-      if headerFilter != None:
-        subfilters.append(headerFilter)
+    for subfilterStr in subfilterStrs:
+      subfilterStr = unescapeFilter(subfilterStr)
+      subfilter = getHeaderFilterFromStr('subfilter', subfilterStr, bodyCache)
+      if subfilter != None:
+        subfilters.append(subfilter)
 
     if anyAllNot == "any":
       return HeaderFilterAny(name, subfilters)
