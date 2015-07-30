@@ -208,6 +208,10 @@ my $usage = "
 
   $0 --print [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers and bodies
+    fetches bodies like \"$0 --body-plain --no-download\",
+      similarly converting HTML to plaintext
+    formats whitespace in bodies, compressing multiple empty lines to a max of 2,
+      and prepending every line with 2 spaces
 
   $0 --summary [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers
@@ -658,8 +662,13 @@ sub main(@){
         my $cachedBody = readCachedBody($accName, $folderName, $uid);
         my $body = getBody($mimeParser, $cachedBody, 0);
         $body = "" if not defined $body;
-        $body = "[NO BODY]\n" if $body =~ /^\s*$/;
+        $body = "[NO BODY]" if $body =~ /^[ \t\n]*$/;
+        $body = html2text($body);
+        $body =~ s/^\n(\s*\n)*//;
+        $body =~ s/\n(\s*\n)*$//;
+        $body =~ s/\n\s*\n(\s*\n)+/\n\n/g;
         $body =~ s/^/  /mg;
+        my $bodySep = "="x30;
         print "\n"
           . "ACCOUNT: $accName\n"
           . "UID: $uid\n"
@@ -667,7 +676,7 @@ sub main(@){
           . "FROM: $$hdr{From}\n"
           . "TO: $$hdr{To}\n"
           . "SUBJECT: $$hdr{Subject}\n"
-          . "BODY:\n$body\n"
+          . "BODY:\n$bodySep\n$body\n$bodySep\n"
           . "\n"
           ;
       }
