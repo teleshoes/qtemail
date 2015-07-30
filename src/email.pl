@@ -13,6 +13,7 @@ sub writeStatusFiles(@);
 sub formatStatusLine($@);
 sub formatStatusShort($@);
 sub padtrim($$);
+sub html2text($);
 sub mergeUnreadCounts($@);
 sub readUnreadCounts();
 sub writeUnreadCounts($@);
@@ -77,6 +78,8 @@ my $emailDir = "$ENV{HOME}/.cache/email";
 my $unreadCountsFile = "$emailDir/unread-counts";
 my $statusLineFile = "$emailDir/status-line";
 my $statusShortFile = "$emailDir/status-short";
+
+my $html2textExec = "/usr/bin/html2text";
 
 my $VERBOSE = 0;
 my $DATE_FORMAT = "%Y-%m-%d %H:%M:%S";
@@ -192,7 +195,9 @@ my $usage = "
     if preferHtml is false, plaintext is returned, otherwise, HTML
 
   $0 --body-plain [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
-    same as --body, but override preferHtml=false
+    same as --body, but override preferHtml=false,
+      and attempt to convert the result to plaintext if it appears to be HTML
+      (uses $html2textExec if available, or just strips out the tags)
 
   $0 --body-html [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but override preferHtml=true
@@ -607,6 +612,7 @@ sub main(@){
       if($cmd =~ /^(--body|--body-plain|--body-html)$/){
         my $fmt = getBody($mimeParser, $body, $preferHtml);
         chomp $fmt;
+        $fmt = html2text $fmt if $cmd =~ /^(--body-plain)$/;
         print $fmt;
         print $nulSep ? "\0" : "\n";
       }elsif($cmd =~ /^(--attachments)$/){
@@ -821,6 +827,26 @@ sub padtrim($$){
   $s = substr($s, 0, $len);
   $s = ' ' x ($len - length $s) . $s;
   return $s;
+}
+sub html2text($){
+  my ($html) = @_;
+  if($html !~ /<(html|body|head|table)(\s+[^>]*)?>/){
+    return $html;
+  }
+  if(-x $html2textExec){
+    my $tmpFile = "/tmp/email_tmp_" . int(time*1000) . ".html";
+    open FH, "> $tmpFile" or die "Could not write to $tmpFile\n";
+    print FH $html;
+    close FH;
+    my $text = `$html2textExec $tmpFile`;
+    system "rm", $tmpFile;
+    return $text;
+  }else{
+    $html =~ s/<[^>]*>//g;
+    $html =~ s/\n(\s*\n)+/\n/g;
+    $html =~ s/^\s+//mg;
+    return $html;
+  }
 }
 
 sub mergeUnreadCounts($@){
