@@ -827,9 +827,8 @@ class Controller(QObject):
     tokens = []
     try:
       if platform[0] == PLATFORM_HARMATTAN:
-        tokens = filterStr.split(" ")
-      else:
-        tokens = shlex.split(filterStr)
+        filterStr = filterStr.encode('utf-8')
+      tokens = shlex.split(filterStr)
     except:
       return filterStr
 
