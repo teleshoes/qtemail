@@ -26,6 +26,7 @@ my @headerFields = qw(
 );
 my @cols = ("uid", map {"header_$_"} @headerFields);
 my @colTypes = ("uid number", map {"header_$_ varchar"} @headerFields);
+my $dbChunkSize = 100;
 
 my $usage = "Usage:
   $0 --updatedb ACCOUNT_NAME FOLDER_NAME LIMIT
@@ -91,6 +92,10 @@ sub updateDb($$$){
     my $rowMap = fetchHeaderRowMap $accName, $folderName, $uid;
     my $insert = rowMapToInsert $rowMap;
     push @curInserts, $insert;
+    if(@curInserts >= $dbChunkSize){
+      runSql $accName, $folderName, join ";\n", @curInserts;
+      @curInserts = ();
+    }
   }
   if(@curInserts > 0){
     runSql $accName, $folderName, join ";\n", @curInserts;
