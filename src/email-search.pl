@@ -3,14 +3,37 @@ use strict;
 use warnings;
 use Time::HiRes qw(time);
 
+sub createDb($$);
 sub runSql($$$);
 
 my $emailDir = "$ENV{HOME}/.cache/email";
+
+my $emailTable = "email";
+my @headerFields = qw(
+  date
+  from
+  subject
+  to
+  raw_date
+  raw_from
+  raw_subject
+  raw_to
+);
+my @cols = ("uid", map {"header_$_"} @headerFields);
+my @colTypes = ("uid number", map {"header_$_ varchar"} @headerFields);
 
 my $usage = "Usage:
 ";
 
 sub main(@){
+}
+
+sub createDb($$){
+  my ($accName, $folderName) = @_;
+  my $db = "$emailDir/$accName/$folderName/db";
+  die "database already exists $db\n" if -e $db;
+  runSql $accName, $folderName,
+    "create table $emailTable (" . join(", ", @colTypes) . ")";
 }
 
 sub runSql($$$){
