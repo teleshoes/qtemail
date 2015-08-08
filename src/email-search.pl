@@ -6,6 +6,8 @@ use Time::HiRes qw(time);
 sub updateDb($$$);
 sub createDb($$);
 sub runSql($$$);
+sub getAllUids($$);
+sub getCachedUids($$);
 
 my $emailDir = "$ENV{HOME}/.cache/email";
 
@@ -52,6 +54,36 @@ sub updateDb($$$){
     createDb $accName, $folderName;
   }
   die "missing database $db\n" if not -f $db;
+
+  my @cachedUids = getCachedUids $accName, $folderName;
+  my $cachedUidsCount = @cachedUids;
+
+  my @allUids = getAllUids $accName, $folderName;
+  my $allUidsCount = @allUids;
+
+  my %isCachedUid = map {$_ => 1} @cachedUids;
+  my @uncachedUids = reverse grep {not defined $isCachedUid{$_}} @allUids;
+  my $uncachedUidsCount = @uncachedUids;
+
+  $limit = $uncachedUidsCount if $limit =~ /^(all)$/;
+
+  my @uidsToAdd = @uncachedUids;
+  @uidsToAdd = @uidsToAdd[0 .. $limit-1] if @uidsToAdd > $limit;
+  my $uidsToAddCount = @uidsToAdd;
+
+  my $limitUidsToAddCount = @uidsToAdd;
+  print "updatedb:"
+    . " all:$allUidsCount"
+    . " cached:$cachedUidsCount"
+    . " uncached:$uncachedUidsCount"
+    . " adding:$uidsToAddCount"
+    . "\n";
+
+  if($uidsToAddCount == 0){
+    print "no UIDs to add\n";
+    return;
+  }
+
 }
 
 sub createDb($$){
@@ -84,6 +116,24 @@ sub runSql($$$){
   system "rm", $tmpSqlFile;
 
   return join '', @lines;
+}
+
+sub getAllUids($$){
+  my ($accName, $folderName) = @_;
+  my $file = "$emailDir/$accName/$folderName/all";
+
+  return () if not -f $file;
+
+  my @uids = `cat "$file"`;
+  chomp foreach @uids;
+  return @uids;
+}
+
+sub getCachedUids($$){
+  my ($accName, $folderName) = @_;
+  my $output = runSql $accName, $folderName, "select uid from $emailTable";
+  my @uids = split /\n/, $output;
+  return @uids;
 }
 
 &main(@ARGV);
