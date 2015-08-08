@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Time::HiRes qw(time);
 
+sub updateDb($$$);
 sub createDb($$);
 sub runSql($$$);
 
@@ -23,9 +24,34 @@ my @cols = ("uid", map {"header_$_"} @headerFields);
 my @colTypes = ("uid number", map {"header_$_ varchar"} @headerFields);
 
 my $usage = "Usage:
+  $0 --updatedb ACCOUNT_NAME FOLDER_NAME LIMIT
+    create sqlite database if it doesnt exist
+    updates database incrementally
+
+    LIMIT
+      maximum number of headers to update at once
+      can be 'all' or a positive integer
 ";
 
 sub main(@){
+  my $cmd = shift;
+  die $usage if not defined $cmd;
+  if($cmd =~ /^(--updatedb)$/ and @_ == 3){
+    my ($accName, $folderName, $limit) = @_;
+    die $usage if $limit !~ /^(all|[1-9]\d+)$/;
+    updateDb($accName, $folderName, $limit);
+  }else{
+    die $usage;
+  }
+}
+
+sub updateDb($$$){
+  my ($accName, $folderName, $limit) = @_;
+  my $db = "$emailDir/$accName/$folderName/db";
+  if(not -f $db){
+    createDb $accName, $folderName;
+  }
+  die "missing database $db\n" if not -f $db;
 }
 
 sub createDb($$){
