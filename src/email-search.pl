@@ -6,6 +6,8 @@ use Time::HiRes qw(time);
 sub updateDb($$$);
 sub createDb($$);
 sub runSql($$$);
+sub fetchHeaderRowMap($$$);
+sub rowMapToInsert($);
 sub getAllUids($$);
 sub getCachedUids($$);
 
@@ -84,6 +86,16 @@ sub updateDb($$$){
     return;
   }
 
+  my @curInserts;
+  for my $uid(@uidsToAdd){
+    my $rowMap = fetchHeaderRowMap $accName, $folderName, $uid;
+    my $insert = rowMapToInsert $rowMap;
+    push @curInserts, $insert;
+  }
+  if(@curInserts > 0){
+    runSql $accName, $folderName, join ";\n", @curInserts;
+    @curInserts = ();
+  }
 }
 
 sub createDb($$){
@@ -116,6 +128,37 @@ sub runSql($$$){
   system "rm", $tmpSqlFile;
 
   return join '', @lines;
+}
+
+sub fetchHeaderRowMap($$$){
+  my ($accName, $folderName, $uid) = @_;
+  my $hdr = `cat $emailDir/$accName/$folderName/headers/$uid`;
+  my $rowMap = {};
+  $$rowMap{"uid"} = $uid;
+  for my $field(@headerFields){
+    my $val = $1 if $hdr =~ /^$field:\s*(.*)$/im;
+    $val =~ s/'/''/g;
+    $val =~ s/\x00//g;
+    $val =~ s/[\r\n]/ /g;
+    $val = "'$val'";
+
+    my $col = "header_$field";
+    $$rowMap{$col} = $val;
+  }
+  return $rowMap;
+}
+
+sub rowMapToInsert($){
+  my ($rowMap) = @_;
+
+  my @cols = sort keys %$rowMap;
+  my @vals = (map {$$rowMap{$_}} sort keys %$rowMap);
+  return ""
+    . "insert into $emailTable"
+    . " (" . join(',', @cols) . ")"
+    . " values(" . join(',', @vals) . ")"
+    . ";"
+    ;
 }
 
 sub getAllUids($$){
