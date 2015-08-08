@@ -85,6 +85,9 @@ my $VERBOSE = 0;
 my $DATE_FORMAT = "%Y-%m-%d %H:%M:%S";
 my $MAX_UNREAD_TO_CACHE = 100;
 
+my $EMAIL_SEARCH_EXEC = "/opt/qtemail/bin/email-search.pl";
+my $UPDATEDB_LIMIT = 100;
+
 my $settings = {
   Peek => 1,
   Uid => 1,
@@ -147,6 +150,7 @@ my $usage = "
           $emailDir/ACCOUNT_NAME/FOLDER_NAME/unread
         -write all message UIDs that are now in unread and were not before
           $emailDir/ACCOUNT_NAME/FOLDER_NAME/new-unread
+        -run $EMAIL_SEARCH_EXEC --updatedb ACCOUNT_NAME FOLDER_NAME $UPDATEDB_LIMIT
     -update global unread counts file $unreadCountsFile
       ignored or missing accounts are preserved in $unreadCountsFile
 
@@ -429,6 +433,9 @@ sub main(@){
         my @newUnread = grep {not defined $oldUnread{$_}} @unread;
         writeUidFile $accName, $folderName, "new-unread", @newUnread;
         $hasNewUnread = 1 if @newUnread > 0;
+
+        print "running updatedb\n";
+        system $EMAIL_SEARCH_EXEC, "--updatedb", $accName, $folderName, $UPDATEDB_LIMIT;
       }
       $c->logout();
       $$counts{$accName} = $unreadCount;
