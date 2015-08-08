@@ -87,8 +87,16 @@ sub updateDb($$$){
     return;
   }
 
+  my $msgChunk = int($uidsToAddCount/50);
+  $msgChunk = 5 if $msgChunk < 5;
+
+  my $count = 0;
   my @curInserts;
   for my $uid(@uidsToAdd){
+    if($count % $msgChunk == 0 or $count == 0 or $count == $uidsToAddCount-1){
+      my $pct = sprintf "%d", $count/$uidsToAddCount*100;
+      print " $pct%";
+    }
     my $rowMap = fetchHeaderRowMap $accName, $folderName, $uid;
     my $insert = rowMapToInsert $rowMap;
     push @curInserts, $insert;
@@ -96,7 +104,9 @@ sub updateDb($$$){
       runSql $accName, $folderName, join ";\n", @curInserts;
       @curInserts = ();
     }
+    $count++;
   }
+  print "\n";
   if(@curInserts > 0){
     runSql $accName, $folderName, join ";\n", @curInserts;
     @curInserts = ();
