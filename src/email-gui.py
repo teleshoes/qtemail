@@ -719,7 +719,17 @@ class Controller(QObject):
       self.replaceHeaderFilter(headerFilter)
       self.refreshHeaderFilters()
     else:
-      cmd = [EMAIL_SEARCH_BIN, "--search", "--folder="+self.folderName, self.accountName, headerFilterStr]
+      headers = self.headerModel.getItems()
+      minUid = None
+      maxUid = None
+      for header in headers:
+        if minUid == None or header.uid_ < minUid:
+          minUid = header.uid_
+        if maxUid == None or header.uid_ > maxUid:
+          maxUid = header.uid_
+      cmd = [EMAIL_SEARCH_BIN, "--search", "--folder="+self.folderName,
+        "--minuid=" + str(minUid), "--maxuid=" + str(maxUid),
+        self.accountName, headerFilterStr]
       self.notifierModel.notify("searching: " + str(cmd), False)
       self.startEmailCommandThread(cmd, None, self.onEmailSearchFinished, {"headerFilterName": name})
   def onEmailSearchFinished(self, isSuccess, output, extraArgs):
