@@ -53,8 +53,12 @@ my $usageFormat = "Usage:
   $0 --format WORD [WORD WORD..]
     parse and format QUERY=\"WORD WORD WORD\" for testing
 
-  $0 --search [--folder=FOLDER_NAME] ACCOUNT_NAME WORD [WORD WORD..]
+  $0 --search [OPTIONS] ACCOUNT_NAME WORD [WORD WORD..]
     print UIDs of emails matching QUERY=\"WORD WORD WORD ..\"
+
+    OPTIONS:
+      --folder=FOLDER_NAME
+        use FOLDER_NAME instead of \"inbox\"
 
     SEARCH FORMAT:
       -all words separated by spaces must match one of subject/date/from/to
@@ -133,9 +137,13 @@ sub main(@){
     print prettyPrintQueryStr $query;
   }elsif($cmd =~ /^(--search)$/ and @_ >= 2){
     my $folderName = "inbox";
-    if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
-      $folderName = $1;
-      shift;
+    while(@_ > 0 and $_[0] =~ /^-/){
+      my $arg = shift;
+      if($arg =~ /^--folder=([a-z]+)$/){
+        $folderName = $1;
+      }else{
+        die usage();
+      }
     }
     my $accName = shift;
     die usage() if @_ == 0 or not defined $accName;
