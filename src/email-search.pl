@@ -60,19 +60,19 @@ my $usageFormat = "Usage:
       -all words separated by spaces must match one of subject/date/from/to
         apple banana
         => emails where subject/from/to/date matches both 'apple' AND 'banana'
-      -you can specify an individual field of subject/date/from/to like this:
+      -specify an individual field of subject/date/from/to with a '~'
         from~mary
         => emails from 'mary'
-      -you can specify that the body must match like this:
+      -specify that the body must match with a '~'
         body~bus
         => emails where the cached body matches 'bus'
-      -you can specify disjunction with '++'
+      -specify disjunction with '++'
         from~mary ++ from~john ++ from~sue
         => emails from 'mary' PLUS emails from 'john' PLUS emails from 'sue'
-      -you can group space or ++ separated words with parantheses
+      -group space or ++ separated words with parentheses
         (from~mary a) ++ (from~john b)
         => emails from 'mary' that match 'a' PLUS emails from 'john' that match 'b'
-      -parantheses can nest arbitrarily deep
+      -parentheses can nest arbitrarily deep
         (a ++ (b (c ++ d)))
         => emails that match 'a', PLUS emails that match 'b' AND match 'c' or 'd'
       -special characters can be escaped with backslash
