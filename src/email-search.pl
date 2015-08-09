@@ -644,7 +644,8 @@ sub runQuery($$$@){
     my $content = $$query{content};
     my $regex = $content;
     my $dir = "$emailDir/$accName/$folderName/bodies";
-    my @cmd = ("grep", "-i", "-l", $regex);
+    my $matchOp = $$query{negated} ? "-L" : "-l";
+    my @cmd = ("grep", "-P", "-i", $matchOp, $regex);
     if(@uids < 1000){
       push @cmd, "$dir/$_" foreach @uids;
     }else{
