@@ -727,9 +727,12 @@ class Controller(QObject):
           minUid = header.uid_
         if maxUid == None or header.uid_ > maxUid:
           maxUid = header.uid_
-      cmd = [EMAIL_SEARCH_BIN, "--search", "--folder="+self.folderName,
-        "--minuid=" + str(minUid), "--maxuid=" + str(maxUid),
-        self.accountName, headerFilterStr]
+      cmd = [EMAIL_SEARCH_BIN, "--search", "--folder="+self.folderName]
+      if minUid != None:
+        cmd += ["--minuid=" + str(minUid)]
+      if maxUid != None:
+        cmd += ["--maxuid=" + str(maxUid)]
+      cmd += [self.accountName, headerFilterStr]
       self.notifierModel.notify("searching: " + str(cmd), False)
       self.startEmailCommandThread(cmd, None, self.onEmailSearchFinished, {"headerFilterName": name})
   def onEmailSearchFinished(self, isSuccess, output, extraArgs):
