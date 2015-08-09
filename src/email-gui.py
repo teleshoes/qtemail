@@ -19,6 +19,7 @@ import sys
 import subprocess
 
 EMAIL_BIN = "/opt/qtemail/bin/email.pl"
+EMAIL_SEARCH_BIN = "/opt/qtemail/bin/email-search.pl"
 QML_DIR = "/opt/qtemail/qml"
 
 PLATFORM_OTHER = 0
@@ -701,8 +702,30 @@ class Controller(QObject):
 
   @Slot(str, str)
   def replaceHeaderFilterStr(self, name, headerFilterStr):
+    headerFilterStr = headerFilterStr.strip()
+    print headerFilterStr
+    attMatch = re.match("^(read)=(true|false)$", headerFilterStr, re.IGNORECASE)
+    if headerFilterStr == "":
+      self.removeHeaderFilter(name)
+      self.refreshHeaderFilters()
+    elif attMatch:
+      att = attMatch.group(1)
+      val = attMatch.group(2)
+      if val.lower() == "true":
+        val = True
+      if val.lower() == "false":
+        val = False
+      headerFilter = HeaderFilterAtt(name, att, val)
+      self.replaceHeaderFilter(headerFilter)
+      self.refreshHeaderFilters()
+    else:
+      cmd = [EMAIL_SEARCH_BIN, "--search", "--folder="+self.folderName, self.accountName, headerFilterStr]
+      self.startEmailCommandThread(cmd, None, self.onEmailSearchFinished, {"headerFilterName": name})
+  def onEmailSearchFinished(self, isSuccess, output, extraArgs):
     try:
-      headerFilter = getHeaderFilterFromStr(name, headerFilterStr)
+      uids = map(int, output.splitlines())
+      name = extraArgs["headerFilterName"]
+      headerFilter = HeaderFilterWhitelist(name, uids)
       if headerFilter == None:
         self.removeHeaderFilter(name)
       else:
@@ -710,6 +733,7 @@ class Controller(QObject):
     except Exception, e:
       print "Error parsing filter string:", e
       self.removeHeaderFilter(name)
+    self.refreshHeaderFilters()
   @Slot(str)
   def removeHeaderFilter(self, name):
     self.headerFilters = filter(lambda f: f.name != name, self.headerFilters)
@@ -750,41 +774,7 @@ class Controller(QObject):
 
   @Slot(str)
   def onSearchTextChanged(self, searchText):
-    filterStr = self.convertSearchTextToFilterStr(searchText)
-    self.replaceHeaderFilterStr("quick-filter", filterStr)
-    self.refreshHeaderFilters()
-
-  def convertSearchTextToFilterStr(self, searchText):
-    filterStr = searchText.strip()
-    tokens = []
-    try:
-      if platform[0] == PLATFORM_HARMATTAN:
-        filterStr = filterStr.encode('utf-8')
-      tokens = shlex.split(filterStr)
-    except:
-      return filterStr
-
-    if len(tokens) == 0:
-      return filterStr
-
-    chunks = []
-    curChunk = []
-    for token in tokens:
-      if token.strip() == "++":
-        if len(curChunk) > 0:
-          chunks.append(curChunk)
-        curChunk = []
-      else:
-        curChunk.append(token)
-    if len(curChunk) > 0:
-      chunks.append(curChunk)
-
-    chunkFmt = []
-    for chunk in chunks:
-      chunkFmt.append("All(" + ",".join(chunk) + ")")
-    filterStr = "Any(" + ",".join(chunkFmt) + ")"
-
-    return filterStr
+    self.replaceHeaderFilterStr("quick-filter", searchText)
 
   @Slot(QObject, QObject)
   def updateAccount(self, messageBox, account):
@@ -1004,8 +994,14 @@ class HeaderFilter():
     self.name = name
   def filterHeader(self, header):
     return True
-  def prettyFormat(self, indent=''):
-    return indent + '<no pretty formatter available>' + "\n"
+
+class HeaderFilterWhitelist(HeaderFilter):
+  def __init__(self, name, uids):
+    HeaderFilter.__init__(self, name)
+    self.name = name
+    self.okUids = set(uids)
+  def filterHeader(self, header):
+    return header.uid_ in self.okUids
 
 class HeaderFilterAtt(HeaderFilter):
   def __init__(self, name, att, value):
@@ -1016,188 +1012,6 @@ class HeaderFilterAtt(HeaderFilter):
     if self.att == "read":
       return header.read_ == self.value
     return True
-  def prettyFormat(self, indent=''):
-    return indent + self.att + "=" + str(self.value) + "\n"
-
-class HeaderFilterField(HeaderFilter):
-  def __init__(self, name, regexStr, fields=[]):
-    HeaderFilter.__init__(self, name)
-    self.regexStr = regexStr
-    self.fields = fields
-    if len(self.fields) == 0:
-      self.fields = ["subject", "from", "to"]
-    self.regex = re.compile(self.regexStr, re.IGNORECASE)
-
-  def filterHeader(self, header):
-    for field in self.fields:
-      field = field.lower()
-      if field == "subject" and self.regex.search(header.subject_):
-        return True
-      elif field == "from" and self.regex.search(header.from_):
-        return True
-      elif field == "to" and self.regex.search(header.to_):
-        return True
-    return False
-  def prettyFormat(self, indent=''):
-    if len(self.fields) == 0:
-      f = ""
-    else:
-      f = str(self.fields)
-    return indent + f + "~" + self.regexStr + "\n"
-
-class HeaderFilterAny(HeaderFilter):
-  def __init__(self, name, filterList):
-    HeaderFilter.__init__(self, name)
-    self.filterList = filterList
-  def filterHeader(self, header):
-    for f in self.filterList:
-      if f.filterHeader(header):
-        return True
-    return False
-  def isBodyFilter(self):
-    for f in self.filterList:
-      if f.isBodyFilter():
-        return True
-    return False
-  def prettyFormat(self, indent=''):
-    msg = ""
-    msg += indent + 'Any____' + "\n"
-    for f in self.filterList:
-      msg += indent + "| \n"
-      msg += f.prettyFormat('| ' + indent)
-    msg += indent + '|______' + "\n"
-    return msg
-class HeaderFilterAll(HeaderFilter):
-  def __init__(self, name, filterList):
-    HeaderFilter.__init__(self, name)
-    self.filterList = filterList
-  def filterHeader(self, header):
-    for f in self.filterList:
-      if not f.filterHeader(header):
-        return False
-    return True
-  def isBodyFilter(self):
-    for f in self.filterList:
-      if f.isBodyFilter():
-        return True
-    return False
-  def prettyFormat(self, indent=''):
-    msg = ""
-    msg += indent + 'All____' + "\n"
-    for f in self.filterList:
-      msg += indent + "| \n"
-      msg += f.prettyFormat('| ' + indent)
-    msg += indent + '|______' + "\n"
-    return msg
-class HeaderFilterNot(HeaderFilter):
-  def __init__(self, name, filterList):
-    HeaderFilter.__init__(self, name)
-    self.filterList = filterList
-  def filterHeader(self, header):
-    for f in self.filterList:
-      if f.filterHeader(header):
-        return False
-    return True
-  def isBodyFilter(self):
-    for f in self.filterList:
-      if f.isBodyFilter():
-        return True
-    return False
-  def prettyFormat(self, indent=''):
-    msg = ""
-    msg += indent + 'Not____' + "\n"
-    for f in self.filterList:
-      msg += indent + "| \n"
-      msg += f.prettyFormat('| ' + indent)
-    msg += indent + '|______' + "\n"
-    return msg
-
-def getHeaderFilterFromStr(name, filterStr):
-  if filterStr.strip() == "":
-    return None
-
-  filterStr = escapeFilter(filterStr)
-
-  listRegex = "(Any|All|Not)" + "\\(" + "(.*)" + "\\)"
-  attRegex = "(\\w+)=(\\w+)"
-  fieldRegex = "(?:" + "(Subject|Header|From|To)" + "~)?" + "([^,]+)"
-
-  listMatcher = re.match("^" + listRegex + "$", filterStr)
-  attMatcher = re.match("^" + attRegex + "$", filterStr)
-  fieldMatcher = re.match("^" + fieldRegex + "$", filterStr)
-
-  if listMatcher:
-    anyAllNot = unescapeFilter(listMatcher.group(1).lower())
-    content = listMatcher.group(2)
-
-    subfilterStrs = []
-    cur = ""
-    parensCount = 0
-    for c in content:
-      if c == "(":
-        parensCount+=1
-      if c == ")":
-        parensCount-=1
-      if parensCount == 0 and c == ",":
-        if len(cur) > 0:
-          subfilterStrs.append(cur)
-        cur = ""
-      else:
-        cur += c
-    if len(cur) > 0:
-      subfilterStrs.append(cur)
-
-    subfilters = []
-    for subfilterStr in subfilterStrs:
-      subfilterStr = unescapeFilter(subfilterStr)
-      subfilter = getHeaderFilterFromStr('subfilter', subfilterStr)
-      if subfilter != None:
-        subfilters.append(subfilter)
-
-    if anyAllNot == "any":
-      return HeaderFilterAny(name, subfilters)
-    elif anyAllNot == "all":
-      return HeaderFilterAll(name, subfilters)
-    elif anyAllNot == "not":
-      return HeaderFilterNot(name, subfilters)
-  elif attMatcher:
-    att = unescapeFilter(attMatcher.group(1).lower())
-    val = unescapeFilter(attMatcher.group(2).lower())
-    if val == "true":
-      val = False
-    if val == "false":
-      val = False
-    return HeaderFilterAtt(name, att, val)
-  elif fieldMatcher:
-    field = unescapeFilter(fieldMatcher.group(1))
-    if field == None:
-      fieldList = []
-    else:
-      fieldList = [field]
-    regex = unescapeFilter(fieldMatcher.group(2))
-    return HeaderFilterField(name, regex, fieldList)
-  else:
-    raise Exception('Could not parse (sub)filter: ' + filterStr)
-
-def escapeFilter(filterStr):
-  if filterStr == None:
-    return None
-  filterStr = filterStr.replace('@', '@at@')
-  filterStr = filterStr.replace('\\\\', '@backslash@')
-  filterStr = filterStr.replace('\\,', '@comma@')
-  filterStr = filterStr.replace('\\(', '@lparen@')
-  filterStr = filterStr.replace('\\)', '@rparen@')
-  return filterStr
-def unescapeFilter(filterStr):
-  if filterStr == None:
-    return None
-  filterStr = filterStr.replace('@backslash@', '\\')
-  filterStr = filterStr.replace('@lparen@', '(')
-  filterStr = filterStr.replace('@rparen@', ')')
-  filterStr = filterStr.replace('@comma@', ',')
-  filterStr = filterStr.replace('@at@', '@')
-  return filterStr
-
 
 class FileSystemController(QObject):
   def __init__(self):
