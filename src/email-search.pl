@@ -329,7 +329,7 @@ sub search($$$$$){
   my @allUids = getAllUids $accName, $folderName;
   @allUids = grep {$_ >= $minUid} @allUids if defined $minUid;
   @allUids = grep {$_ <= $maxUid} @allUids if defined $maxUid;
-  @allUids = sort @allUids;
+  @allUids = sort {$a <=> $b} @allUids;
   my @uids = runQuery $accName, $folderName, $query, @allUids;
   return @uids;
 }
