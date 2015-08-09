@@ -22,6 +22,7 @@ sub escapeQueryStr($$);
 sub unescapeQueryStr($$);
 sub unescapeQuery($$);
 sub reduceQuery($);
+sub runQuery($$$@);
 
 my $emailDir = "$ENV{HOME}/.cache/email";
 
@@ -292,6 +293,7 @@ sub search($$$){
   my $query = buildQuery $queryStr;
 
   my @allUids = getAllUids $accName, $folderName;
+  my @uids = runQuery $accName, $folderName, $query, @allUids;
   return @uids;
 }
 
@@ -532,6 +534,70 @@ sub reduceQuery($){
   }else{
     die "unknown type: $type\n";
   }
+}
+
+sub runQuery($$$@){
+  my ($accName, $folderName, $query, @uids) = @_;
+  return () if @uids == 0;
+
+  my $type = $$query{type};
+  if($type =~ /and|or/){
+    my @parts = @{$$query{parts}};
+    if($type eq "and"){
+      for my $part(@parts){
+        @uids = runQuery $accName, $folderName, $part, @uids;
+      }
+    }elsif($type eq "or"){
+      my @unknownUids = @uids;
+      my @okUids;
+      for my $part(@parts){
+        my @newOkUids = runQuery $accName, $folderName, $part, @unknownUids;
+        my %isOk = map {$_ => 1} @newOkUids;
+        @unknownUids = grep {not defined $isOk{$_}} @unknownUids;
+        @okUids = (@okUids, @newOkUids);
+      }
+      @uids = @okUids;
+    }
+  }elsif($type =~ /^(header)$/){
+    my @fields = @{$$query{fields}};
+    my $content = $$query{content};
+    my @conds;
+    $content =~ s/'/''/g;
+    $content =~ s/\\/\\\\/g;
+    $content =~ s/%/\\%/g;
+    $content =~ s/_/\\_/g;
+    for my $field(@fields){
+      push @conds, "header_$field like '%$content%' escape '\\'";
+    };
+    my $sql = "select uid from email where " . join(" or ", @conds);
+    my $output = runSql $accName, $folderName, $sql;
+    my @newUids = split /\n/, $output;
+    my %okUids = map {$_ => 1} @uids;
+    @newUids = grep {defined $okUids{$_}} @newUids;
+    @uids = @newUids;
+  }elsif($type =~ /^(body)$/){
+    my @fields = @{$$query{fields}};
+    my $content = $$query{content};
+    my $regex = $content;
+    my $dir = "$emailDir/$accName/$folderName/bodies";
+    my @cmd = ("grep", "-i", "-l", $regex);
+    if(@uids < 1000){
+      push @cmd, "$dir/$_" foreach @uids;
+    }else{
+      @cmd = (@cmd, "-R", $dir);
+    }
+    open GREP, "-|", @cmd;
+    my @newUids = <GREP>;
+    close GREP;
+    @newUids = map {/(\d+)$/; $1} @newUids;
+    if(@uids < 1000){
+      my %okUids = map {$_ => 1} @uids;
+      @newUids = grep {defined $okUids{$_}} @newUids;
+    }
+    @uids = @newUids;
+  }
+
+  return @uids;
 }
 
 &main(@ARGV);
