@@ -17,6 +17,7 @@ sub parseFlatQueryStr($);
 sub escapeQueryStr($$);
 sub unescapeQueryStr($$);
 sub unescapeQuery($$);
+sub reduceQuery($);
 
 my $emailDir = "$ENV{HOME}/.cache/email";
 
@@ -208,6 +209,7 @@ sub buildQuery($){
 
   my $query = parseQueryStr $queryStr;
   $query = unescapeQuery $query, $quotes;
+  $query = reduceQuery $query;
   return $query;
 }
 
@@ -353,6 +355,33 @@ sub unescapeQuery($$){
     die "unknown type: $type\n";
   }
   return $query;
+}
+
+sub reduceQuery($$){
+  my ($query) = @_;
+
+  my $type = $$query{type};
+  if($type =~ /and|or/){
+    my @parts = @{$$query{parts}};
+    @parts = map {reduceQuery $_} @parts;
+    @parts = grep {defined $_} @parts;
+
+    if(@parts == 0){
+      return undef;
+    }else{
+      return {type => $type, parts => [@parts]};
+    }
+  }elsif($type =~ /^(header|body)$/){
+    my $content = $$query{content};
+    my @fields = @{$$query{fields}};
+    if($content =~ /^\s*$/){
+      return undef;
+    }else{
+      return {type => $type, fields => [@fields], content => $content};
+    }
+  }else{
+    die "unknown type: $type\n";
+  }
 }
 
 &main(@ARGV);
