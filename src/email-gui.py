@@ -494,6 +494,11 @@ class Controller(QObject):
     self.setFilterButtons([])
     self.addressBook = None
     self.sendWindow = None
+    self.counterBox = None
+
+  @Slot(QObject)
+  def setCounterBox(self, counterBox):
+    self.counterBox = counterBox
 
   def setSendWindow(self, sendWindow):
     self.sendWindow = sendWindow
@@ -803,18 +808,21 @@ class Controller(QObject):
       self.headerModel.clear()
     else:
       self.headerModel.setItems(filteredHeaders)
+    self.updateCounterBox()
   def prependHeaders(self, headers):
     self.ensureBodiesForFilter()
     newFilteredHeaders = filter(self.filterHeader, headers)
     self.currentHeaders += headers
     if len(newFilteredHeaders) > 0:
       self.headerModel.prependItems(newFilteredHeaders)
+    self.updateCounterBox()
   def appendHeaders(self, headers):
     self.ensureBodiesForFilter()
     newFilteredHeaders = filter(self.filterHeader, headers)
     self.currentHeaders += headers
     if len(newFilteredHeaders) > 0:
       self.headerModel.appendItems(newFilteredHeaders)
+    self.updateCounterBox()
 
   @Slot(str)
   def onSearchTextChanged(self, searchText):
@@ -1055,8 +1063,9 @@ class Controller(QObject):
       limit=limit, exclude=self.currentHeaders, minUid=None)
     self.totalSize = total
     self.appendHeaders(headers)
-  @Slot(QObject)
-  def updateCounterBox(self, counterBox):
+  def updateCounterBox(self):
+    if self.counterBox == None:
+      return
     totalLen = self.totalSize
     curLen = len(self.currentHeaders)
     showingLen = len(self.headerModel.getItems())
@@ -1064,7 +1073,7 @@ class Controller(QObject):
     if showingLen != curLen:
       msg += "(" + str(showingLen) + " showing)  "
     msg += str(curLen) + " / " + str(totalLen)
-    counterBox.setCounterText(msg)
+    self.counterBox.setCounterText(msg)
 
 class HeaderFilter():
   def __init__(self, name):
