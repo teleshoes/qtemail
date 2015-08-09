@@ -13,6 +13,8 @@ sub getCachedUids($$);
 
 sub search($$$);
 sub buildQuery($);
+sub prettyPrintQueryStr($);
+sub formatQuery($;$);
 sub parseQueryStr($);
 sub parseFlatQueryStr($);
 sub escapeQueryStr($$);
@@ -36,6 +38,14 @@ my @headerFields = qw(
 my @cols = ("uid", map {"header_$_"} @headerFields);
 my @colTypes = ("uid number", map {"header_$_ varchar"} @headerFields);
 my $dbChunkSize = 100;
+
+my $examples = join '', map {prettyPrintQueryStr $_} (
+  'from~mary',
+  'mary smith',
+  '((a b) ++ (c d) ++ (e f))',
+  'subject~b ++ "subject~b"',
+  '"a ++ b"',
+);
 
 my $usage = "Usage:
   $0 --updatedb ACCOUNT_NAME FOLDER_NAME LIMIT
@@ -74,6 +84,9 @@ my $usage = "Usage:
       -doublequoted strings are treated as words
         \"this is a (single ++ w~ord)\"
         => emails where subject/from/to/date matches 'this is a (single ++ w~ord)'
+
+    EXAMPLES:
+      =====\n$examples
 ";
 
 sub main(@){
@@ -264,6 +277,46 @@ sub buildQuery($){
   $query = unescapeQuery $query, $quotes;
   $query = reduceQuery $query;
   return $query;
+}
+
+sub prettyPrintQueryStr($){
+  my ($queryStr) = @_;
+  my $indent = "      ";
+  my $query = buildQuery $queryStr;
+  my $fmt = "$indent$queryStr\n";
+  $fmt .= formatQuery $query, $indent . "  ";
+  $fmt .= "$indent=====\n";
+  return $fmt;
+}
+
+sub formatQuery($;$){
+  my ($query, $indent) = @_;
+  $indent = "" if not defined $indent;
+  my $fmt = "";
+
+  my $noDashIndent = $indent;
+  $noDashIndent =~ s/-/ /g;
+
+  my $type = $$query{type};
+  if($type =~ /and|or/){
+    my $typeFmt = $type eq "and" ? "ALL" : "ANY";
+    my $typeFmtSpacer = ' ' x length($typeFmt);
+    my @parts = @{$$query{parts}};
+    $fmt .= "$indent$typeFmt(\n";
+    my $newIndent = $noDashIndent . $typeFmtSpacer . "|--";
+    for my $part(@parts){
+      $fmt .= formatQuery $part, $newIndent;
+    }
+    $fmt .= $noDashIndent . "$typeFmtSpacer)\n";
+  }elsif($$query{type} =~ /header/){
+    my $content = $$query{content};
+    my @fields = @{$$query{fields}};
+    $fmt .= $indent . "[@fields] LIKE $$query{content}\n";
+  }elsif($$query{type} =~ /body/){
+    my $content = $$query{content};
+    $fmt .= $indent . "[body] LIKE $$query{content}\n";
+  }
+  return $fmt;
 }
 
 sub parseQueryStr($){
