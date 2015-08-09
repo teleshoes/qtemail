@@ -48,6 +48,32 @@ my $usage = "Usage:
 
   $0 --search [--folder=FOLDER_NAME] ACCOUNT_NAME QUERY [QUERY QUERY..]
     print UIDs of emails matching \"QUERY QUERY QUERY\"
+
+    SEARCH FORMAT:
+      -all words separated by spaces must match one of subject/date/from/to
+        apple banana
+        => emails where subject/from/to/date matches both 'apple' AND 'banana'
+      -you can specify an individual field of subject/date/from/to like this:
+        from~mary
+        => emails from 'mary'
+      -you can specify that the body must match like this:
+        body~bus
+        => emails where the cached body matches 'bus'
+      -you can specify disjunction with '++'
+        from~mary ++ from~john ++ from~sue
+        => emails from 'mary' PLUS emails from 'john' PLUS emails from 'sue'
+      -you can group space or ++ separated words with parantheses
+        (from~mary a) ++ (from~john b)
+        => emails from 'mary' that match 'a' PLUS emails from 'john' that match 'b'
+      -parantheses can nest arbitrarily deep
+        (a ++ (b (c ++ d)))
+        => emails that match 'a', PLUS emails that match 'b' AND match 'c' or 'd'
+      -special characters can be escaped with backslash
+        subject\\~fish\\ table
+        => emails where subject/from/to/date matches 'subject~fish table'
+      -doublequoted strings are treated as words
+        \"this is a (single ++ w~ord)\"
+        => emails where subject/from/to/date matches 'this is a (single ++ w~ord)'
 ";
 
 sub main(@){
