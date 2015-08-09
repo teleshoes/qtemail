@@ -33,8 +33,8 @@ Rectangle {
     if(page == accountPage){
       controller.setupAccounts()
     }else if(page == headerPage){
+      controller.setCounterBox(headerView.getCounterBox())
       controller.setupHeaders()
-      controller.updateCounterBox(headerView.getCounterBox())
     }else if(page == folderPage){
       controller.setupFolders()
     }else if(page == bodyPage){
