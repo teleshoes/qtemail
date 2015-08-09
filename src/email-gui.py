@@ -705,6 +705,8 @@ class Controller(QObject):
     headerFilterStr = headerFilterStr.strip()
     print headerFilterStr
     attMatch = re.match("^(read)=(true|false)$", headerFilterStr, re.IGNORECASE)
+    headers = self.currentHeaders
+
     if headerFilterStr == "":
       self.removeHeaderFilter(name)
       self.refreshHeaderFilters()
@@ -719,7 +721,6 @@ class Controller(QObject):
       self.replaceHeaderFilter(headerFilter)
       self.refreshHeaderFilters()
     else:
-      headers = self.headerModel.getItems()
       minUid = None
       maxUid = None
       for header in headers:
