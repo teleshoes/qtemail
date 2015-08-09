@@ -63,9 +63,15 @@ my $usageFormat = "Usage:
       -specify an individual field of subject/date/from/to with a '~'
         from~mary
         => emails from 'mary'
+      -negate a header field query with '!~' instead of '~'
+        from!~mary
+        => emails from everyone EXCEPT 'mary'
       -specify that the body must match with a '~'
         body~bus
         => emails where the cached body matches 'bus'
+      -negate a body query with '!~' instead of '~'
+        body!~bus
+        => emails where the cached body does NOT match 'bus'
       -specify disjunction with '++'
         from~mary ++ from~john ++ from~sue
         => emails from 'mary' PLUS emails from 'john' PLUS emails from 'sue'
@@ -86,8 +92,10 @@ my $usageFormat = "Usage:
       QUERY = <LIST_AND>
             | <LIST_OR>
             | <HEADER_QUERY>
+            | <NEGATED_HEADER_QUERY>
             | <SIMPLE_HEADER_QUERY>
             | <BODY_QUERY>
+            | <NEGATED_BODY_QUERY>
             | (<QUERY>)
         return emails that match this QUERY
       LIST_AND = <QUERY> <QUERY>
@@ -96,10 +104,14 @@ my $usageFormat = "Usage:
         return emails that match either QUERY or both
       HEADER_QUERY = <HEADER_FIELD>~<PATTERN>
         return emails where the indicated header field matches the pattern
+      NEGATED_HEADER_QUERY = <HEADER_FIELD>!~<PATTERN>
+        return emails where the indicated header field does NOT match the pattern
       SIMPLE_HEADER_QUERY = <PATTERN>
         return emails with at least one header field that matches the pattern
       BODY_QUERY = body~<PATTERN>
         return emails where the body matches the pattern
+      NEGATED_BODY_QUERY = body!~<PATTERN>
+        return emails where the body does NOT match the pattern
       HEADER_FIELD = subject | from | to | date | body
         restricts the fields that PATTERN can match
       PATTERN = <string> | <string>\"<string>\"<string>
@@ -141,6 +153,7 @@ sub usage(){
     'mary smith',
     '((a b) ++ (c d) ++ (e f))',
     'subject~b ++ "subject~b"',
+    'from!~bob ++ subject!~math',
     '"a ++ b"',
   );
   return sprintf $usageFormat, $examples;
@@ -346,10 +359,12 @@ sub formatQuery($;$){
   }elsif($$query{type} =~ /header/){
     my $content = $$query{content};
     my @fields = @{$$query{fields}};
-    $fmt .= $indent . "[@fields] LIKE $$query{content}\n";
+    my $like = $$query{negated} ? "NOT LIKE" : "LIKE";
+    $fmt .= $indent . "[@fields] $like $$query{content}\n";
   }elsif($$query{type} =~ /body/){
     my $content = $$query{content};
-    $fmt .= $indent . "[body] LIKE $$query{content}\n";
+    my $like = $$query{negated} ? "NOT LIKE" : "LIKE";
+    $fmt .= $indent . "[body] $like $$query{content}\n";
   }
   return $fmt;
 }
@@ -423,23 +438,28 @@ sub parseFlatQueryStr($){
     for my $and(@ands){
       my $type;
       my @fields;
+      my $negated;
       my $content;
-      if($and =~ /(to|from|subject)~(.*)/i){
+      if($and =~ /(to|from|subject)(!?)~(.*)/i){
         $type = "header";
         @fields = (lc $1);
-        $content = $2;
-      }elsif($and =~ /(body)~(.*)/i){
+        $negated = $2 eq "!" ? 1 : 0;
+        $content = $3;
+      }elsif($and =~ /(body)(!?)~(.*)/i){
         $type = "body";
         @fields = ();
-        $content = $2;
+        $negated = $2 eq "!" ? 1 : 0;
+        $content = $3;
       }else{
         $type = "header";
         @fields = qw(to from subject);
+        $negated = 0;
         $content = $and;
       }
       push @{$$innerQuery{parts}}, {
         type => $type,
         fields => [@fields],
+        negated => $negated,
         content => $content,
       };
     }
@@ -455,6 +475,7 @@ sub escapeQueryStr($$){
   $queryStr =~ s/\\ /%ws%/g;
   $queryStr =~ s/\\\+/%plus%/g;
   $queryStr =~ s/\\~/%tilde%/g;
+  $queryStr =~ s/\\!/%bang%/g;
   $queryStr =~ s/\\"/%dblquote%/g;
 
   my %quotes;
@@ -475,6 +496,7 @@ sub unescapeQueryStr($$){
   $queryStr =~ s/%(quote\d+)%/$$quotes{$1}/g;
 
   $queryStr =~ s/%dblquote%/"/g;
+  $queryStr =~ s/%bang%/!/g;
   $queryStr =~ s/%tilde%/~/g;
   $queryStr =~ s/%plus%/+/g;
   $queryStr =~ s/%ws%/ /g;
@@ -530,12 +552,13 @@ sub reduceQuery($){
       return {type => $type, parts => [@parts]};
     }
   }elsif($type =~ /^(header|body)$/){
-    my $content = $$query{content};
     my @fields = @{$$query{fields}};
+    my $negated = $$query{negated};
+    my $content = $$query{content};
     if($content =~ /^\s*$/){
       return undef;
     }else{
-      return {type => $type, fields => [@fields], content => $content};
+      return {type => $type, fields => [@fields], negated => $negated, content => $content};
     }
   }else{
     die "unknown type: $type\n";
@@ -572,8 +595,9 @@ sub runQuery($$$@){
     $content =~ s/\\/\\\\/g;
     $content =~ s/%/\\%/g;
     $content =~ s/_/\\_/g;
+    my $like = $$query{negated} == 1 ? "not like" : "like";
     for my $field(@fields){
-      push @conds, "header_$field like '%$content%' escape '\\'";
+      push @conds, "header_$field $like '%$content%' escape '\\'";
     };
     my $sql = "select uid from email where " . join(" or ", @conds);
     my $output = runSql $accName, $folderName, $sql;
