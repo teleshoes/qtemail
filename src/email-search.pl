@@ -78,6 +78,29 @@ my $usageFormat = "Usage:
         \"this is a (single ++ w~ord)\"
         => emails where subject/from/to/date matches 'this is a (single ++ w~ord)'
 
+    GRAMMAR:
+      QUERY = <LIST_AND>
+            | <LIST_OR>
+            | <HEADER_QUERY>
+            | <SIMPLE_HEADER_QUERY>
+            | <BODY_QUERY>
+            | (<QUERY>)
+        return emails that match this QUERY
+      LIST_AND = <QUERY> <QUERY>
+        return only emails that match both QUERYs
+      LIST_OR = <QUERY> ++ <QUERY>
+        return emails that match either QUERY or both
+      HEADER_QUERY = <HEADER_FIELD>~<PATTERN>
+        return emails where the indicated header field matches the pattern
+      SIMPLE_HEADER_QUERY = <PATTERN>
+        return emails with at least one header field that matches the pattern
+      BODY_QUERY = body~<PATTERN>
+        return emails where the body matches the pattern
+      HEADER_FIELD = subject | from | to | date | body
+        restricts the fields that PATTERN can match
+      PATTERN = <string> | <string>\"<string>\"<string>
+        can be any string, supports doublequote quoting and backslash escaping
+
     EXAMPLES:
       =====\n%s
 ";
