@@ -12,7 +12,7 @@ sub rowMapToInsert($);
 sub getAllUids($$);
 sub getCachedUids($$);
 
-sub search($$$);
+sub search($$$$$);
 sub buildQuery($);
 sub prettyPrintQueryStr($;$);
 sub formatQuery($;$);
@@ -59,6 +59,10 @@ my $usageFormat = "Usage:
     OPTIONS:
       --folder=FOLDER_NAME
         use FOLDER_NAME instead of \"inbox\"
+      --minuid=MIN_UID
+        ignore all UIDs below MIN_UID
+      --maxuid=MAX_UID
+        ignore all UIDs above MAX_UID
 
     SEARCH FORMAT:
       -all words separated by spaces must match one of subject/date/from/to
@@ -136,11 +140,17 @@ sub main(@){
     my $query = "@_";
     print prettyPrintQueryStr $query;
   }elsif($cmd =~ /^(--search)$/ and @_ >= 2){
+    my $minUid = undef;
+    my $maxUid = undef;
     my $folderName = "inbox";
     while(@_ > 0 and $_[0] =~ /^-/){
       my $arg = shift;
       if($arg =~ /^--folder=([a-z]+)$/){
         $folderName = $1;
+      }elsif($arg =~ /^--minuid=(\d+)$/){
+        $minUid = $1;
+      }elsif($arg =~ /^--maxuid=(\d+)$/){
+        $maxUid = $1;
       }else{
         die usage();
       }
@@ -148,7 +158,7 @@ sub main(@){
     my $accName = shift;
     die usage() if @_ == 0 or not defined $accName;
     my $query = "@_";
-    my @uids = search $accName, $folderName, $query;
+    my @uids = search $accName, $folderName, $minUid, $maxUid, $query;
     print (map { "$_\n" } @uids);
   }else{
     die usage();
@@ -312,14 +322,17 @@ sub getCachedUids($$){
 }
 
 
-sub search($$$){
-  my ($accName, $folderName, $queryStr) = @_;
+sub search($$$$$){
+  my ($accName, $folderName, $minUid, $maxUid, $queryStr) = @_;
   if($queryStr =~ /^\s*$/){
     return ();
   }
   my $query = buildQuery $queryStr;
 
   my @allUids = getAllUids $accName, $folderName;
+  @allUids = grep {$_ >= $minUid} @allUids if defined $minUid;
+  @allUids = grep {$_ <= $maxUid} @allUids if defined $maxUid;
+  @allUids = sort @allUids;
   my @uids = runQuery $accName, $folderName, $query, @allUids;
   return @uids;
 }
@@ -577,6 +590,9 @@ sub runQuery($$$@){
   my ($accName, $folderName, $query, @uids) = @_;
   return () if @uids == 0;
 
+  my $minUid = $uids[0];
+  my $maxUid = $uids[-1];
+
   my $type = $$query{type};
   if($type =~ /and|or/){
     my @parts = @{$$query{parts}};
@@ -593,7 +609,7 @@ sub runQuery($$$@){
         @unknownUids = grep {not defined $isOk{$_}} @unknownUids;
         @okUids = (@okUids, @newOkUids);
       }
-      @uids = @okUids;
+      @uids = sort @okUids;
     }
   }elsif($type =~ /^(header)$/){
     my @fields = @{$$query{fields}};
@@ -607,12 +623,19 @@ sub runQuery($$$@){
     for my $field(@fields){
       push @conds, "header_$field $like '%$content%' escape '\\'";
     };
-    my $sql = "select uid from email where " . join(" or ", @conds);
+    my $sql = ""
+      . " select uid"
+      . " from email"
+      . " where"
+      . "   uid <= $maxUid"
+      . "   and uid >= $minUid"
+      . "   and (" . join(" or ", @conds) . ")"
+      ;
     my $output = runSql $accName, $folderName, $sql;
     my @newUids = split /\n/, $output;
     my %okUids = map {$_ => 1} @uids;
     @newUids = grep {defined $okUids{$_}} @newUids;
-    @uids = @newUids;
+    @uids = sort @newUids;
   }elsif($type =~ /^(body)$/){
     my @fields = @{$$query{fields}};
     my $content = $$query{content};
