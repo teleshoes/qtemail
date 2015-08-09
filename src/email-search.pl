@@ -11,6 +11,7 @@ sub rowMapToInsert($);
 sub getAllUids($$);
 sub getCachedUids($$);
 
+sub search($$$);
 sub buildQuery($);
 sub parseQueryStr($);
 sub parseFlatQueryStr($);
@@ -44,6 +45,9 @@ my $usage = "Usage:
     LIMIT
       maximum number of headers to update at once
       can be 'all' or a positive integer
+
+  $0 --search [--folder=FOLDER_NAME] ACCOUNT_NAME QUERY [QUERY QUERY..]
+    print UIDs of emails matching \"QUERY QUERY QUERY\"
 ";
 
 sub main(@){
@@ -53,6 +57,17 @@ sub main(@){
     my ($accName, $folderName, $limit) = @_;
     die $usage if $limit !~ /^(all|[1-9]\d+)$/;
     updateDb($accName, $folderName, $limit);
+  }elsif($cmd =~ /^(--search)$/ and @_ >= 2){
+    my $folderName = "inbox";
+    if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
+      $folderName = $1;
+      shift;
+    }
+    my $accName = shift;
+    die $usage if @_ == 0 or not defined $accName;
+    my $query = "@_";
+    my @uids = search $accName, $folderName, $query;
+    print (map { "$_\n" } @uids);
   }else{
     die $usage;
   }
@@ -199,6 +214,18 @@ sub getCachedUids($$){
   my ($accName, $folderName) = @_;
   my $output = runSql $accName, $folderName, "select uid from $emailTable";
   my @uids = split /\n/, $output;
+  return @uids;
+}
+
+
+sub search($$$){
+  my ($accName, $folderName, $queryStr) = @_;
+  if($queryStr =~ /^\s*$/){
+    return ();
+  }
+  my $query = buildQuery $queryStr;
+
+  my @allUids = getAllUids $accName, $folderName;
   return @uids;
 }
 
