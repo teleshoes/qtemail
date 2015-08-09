@@ -96,11 +96,11 @@ my $settings = {
 
 my $okCmds = join "|", qw(
   --update --header --body --body-plain --body-html --attachments
+  --cache-all-bodies
   --smtp
   --mark-read --mark-unread
   --accounts --folders --print --summary --status-line --status-short
   --has-error --has-new-unread --has-unread
-  --cache-all-bodies
   --read-config --write-config --read-options --write-options
 );
 
@@ -209,6 +209,9 @@ my $usage = "
   $0 --attachments [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_DIR UID [UID UID ...]
     download the body of the indicated message(s) and save any attachments to DEST_DIR
     if body is cached, skip download
+
+  $0 --cache-all-bodies ACCOUNT_NAME FOLDER_NAME
+    attempt to download the body of all uncached bodies
 
   $0 --print [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers and bodies
