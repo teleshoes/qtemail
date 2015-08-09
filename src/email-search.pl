@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Time::HiRes qw(time);
 
+sub usage();
 sub updateDb($$$);
 sub createDb($$);
 sub runSql($$$);
@@ -39,15 +40,7 @@ my @cols = ("uid", map {"header_$_"} @headerFields);
 my @colTypes = ("uid number", map {"header_$_ varchar"} @headerFields);
 my $dbChunkSize = 100;
 
-my $examples = join '', map {prettyPrintQueryStr $_} (
-  'from~mary',
-  'mary smith',
-  '((a b) ++ (c d) ++ (e f))',
-  'subject~b ++ "subject~b"',
-  '"a ++ b"',
-);
-
-my $usage = "Usage:
+my $usageFormat = "Usage:
   $0 --updatedb ACCOUNT_NAME FOLDER_NAME LIMIT
     create sqlite database if it doesnt exist
     updates database incrementally
@@ -86,15 +79,15 @@ my $usage = "Usage:
         => emails where subject/from/to/date matches 'this is a (single ++ w~ord)'
 
     EXAMPLES:
-      =====\n$examples
+      =====\n%s
 ";
 
 sub main(@){
   my $cmd = shift;
-  die $usage if not defined $cmd;
+  die usage() if not defined $cmd;
   if($cmd =~ /^(--updatedb)$/ and @_ == 3){
     my ($accName, $folderName, $limit) = @_;
-    die $usage if $limit !~ /^(all|[1-9]\d+)$/;
+    die usage() if $limit !~ /^(all|[1-9]\d+)$/;
     updateDb($accName, $folderName, $limit);
   }elsif($cmd =~ /^(--search)$/ and @_ >= 2){
     my $folderName = "inbox";
@@ -103,13 +96,24 @@ sub main(@){
       shift;
     }
     my $accName = shift;
-    die $usage if @_ == 0 or not defined $accName;
+    die usage() if @_ == 0 or not defined $accName;
     my $query = "@_";
     my @uids = search $accName, $folderName, $query;
     print (map { "$_\n" } @uids);
   }else{
-    die $usage;
+    die usage();
   }
+}
+
+sub usage(){
+  my $examples = join '', map {prettyPrintQueryStr $_} (
+    'from~mary',
+    'mary smith',
+    '((a b) ++ (c d) ++ (e f))',
+    'subject~b ++ "subject~b"',
+    '"a ++ b"',
+  );
+  return sprintf $usageFormat, $examples;
 }
 
 sub updateDb($$$){
