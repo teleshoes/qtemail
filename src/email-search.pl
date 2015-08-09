@@ -12,7 +12,7 @@ sub rowMapToInsert($);
 sub getAllUids($$);
 sub getCachedUids($$);
 
-sub search($$$$$);
+sub search($$$$$$);
 sub buildQuery($);
 sub prettyPrintQueryStr($;$);
 sub formatQuery($;$);
@@ -63,6 +63,8 @@ my $usageFormat = "Usage:
         ignore all UIDs below MIN_UID
       --maxuid=MAX_UID
         ignore all UIDs above MAX_UID
+      --limit=UID_LIMIT
+        ignore all except the last UID_LIMIT UIDs
 
     SEARCH FORMAT:
       -all words separated by spaces must match one of subject/date/from/to
@@ -142,6 +144,7 @@ sub main(@){
   }elsif($cmd =~ /^(--search)$/ and @_ >= 2){
     my $minUid = undef;
     my $maxUid = undef;
+    my $limit = undef;
     my $folderName = "inbox";
     while(@_ > 0 and $_[0] =~ /^-/){
       my $arg = shift;
@@ -151,6 +154,8 @@ sub main(@){
         $minUid = $1;
       }elsif($arg =~ /^--maxuid=(\d+)$/){
         $maxUid = $1;
+      }elsif($arg =~ /^--limit=(\d+)$/){
+        $limit = $1;
       }else{
         die usage();
       }
@@ -158,7 +163,7 @@ sub main(@){
     my $accName = shift;
     die usage() if @_ == 0 or not defined $accName;
     my $query = "@_";
-    my @uids = search $accName, $folderName, $minUid, $maxUid, $query;
+    my @uids = search $accName, $folderName, $minUid, $maxUid, $limit, $query;
     print (map { "$_\n" } @uids);
   }else{
     die usage();
@@ -322,14 +327,15 @@ sub getCachedUids($$){
 }
 
 
-sub search($$$$$){
-  my ($accName, $folderName, $minUid, $maxUid, $queryStr) = @_;
+sub search($$$$$$){
+  my ($accName, $folderName, $minUid, $maxUid, $limit, $queryStr) = @_;
   my $query = buildQuery $queryStr;
 
   my @allUids = getAllUids $accName, $folderName;
   @allUids = grep {$_ >= $minUid} @allUids if defined $minUid;
   @allUids = grep {$_ <= $maxUid} @allUids if defined $maxUid;
   @allUids = sort {$a <=> $b} @allUids;
+  @allUids = @allUids[0-$limit .. -1] if defined $limit and @allUids > $limit;
   my @uids = runQuery $accName, $folderName, $query, @allUids;
   return @uids;
 }
