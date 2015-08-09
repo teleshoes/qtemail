@@ -357,7 +357,7 @@ sub unescapeQuery($$){
   return $query;
 }
 
-sub reduceQuery($$){
+sub reduceQuery($){
   my ($query) = @_;
 
   my $type = $$query{type};
@@ -368,6 +368,8 @@ sub reduceQuery($$){
 
     if(@parts == 0){
       return undef;
+    }elsif(@parts == 1){
+      return $parts[0];
     }else{
       return {type => $type, parts => [@parts]};
     }
