@@ -98,7 +98,6 @@ def main():
     qmlFile = QML_DIR + "/desktop.qml"
 
   emailManager = EmailManager()
-  bodyCacheFactory = BodyCacheFactory(emailManager)
   accountModel = AccountModel()
   folderModel = FolderModel()
   headerModel = HeaderModel()
@@ -106,7 +105,7 @@ def main():
   notifierModel = NotifierModel()
   filterButtonModel = FilterButtonModel()
   addressBookModel = AddressBookModel()
-  controller = Controller(emailManager, bodyCacheFactory,
+  controller = Controller(emailManager,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
     addressBookModel)
 
@@ -143,63 +142,6 @@ def main():
     mainWindow.window().show()
 
   app.exec_()
-
-class BodyCache():
-  def __init__(self, emailManager, accountName, folderName):
-    self.emailManager = emailManager
-    self.accountName = accountName
-    self.folderName = folderName
-    self.htmlCache = dict()
-    self.plainCache = dict()
-  def getBody(self, uid, isHtml):
-    if isHtml:
-      cache = self.htmlCache
-    else:
-      cache = self.plainCache
-
-    if not uid in cache.keys():
-      return ""
-    else:
-      return cache[uid]
-  def cacheBodies(self, uids, isHtml):
-    if isHtml:
-      cache = self.htmlCache
-    else:
-      cache = self.plainCache
-
-    uidsToCache = []
-    for uid in uids:
-      if not uid in cache.keys():
-        uidsToCache.append(uid)
-    if len(uidsToCache) > 0:
-      bodies = self.fetchBodies(uidsToCache, isHtml)
-    else:
-      print "\n\nSKIPPING"
-      bodies = dict()
-
-    for uid in bodies.keys():
-      body = bodies[uid]
-      cache[uid] = body
-
-  def fetchBodies(self, uids, isHtml):
-    return self.emailManager.getCachedBodies(
-      self.accountName, self.folderName, uids, isHtml)
-
-
-class BodyCacheFactory():
-  def __init__(self, emailManager):
-    self.caches = dict()
-    self.emailManager = emailManager
-  def getBodyCache(self, accountName, folderName):
-    if accountName == None:
-      return None
-    if folderName == None:
-      folderName = "inbox"
-    key = accountName + "%" + folderName
-    if not key in self.caches.keys():
-      self.caches[key] = BodyCache(self.emailManager, accountName, folderName)
-
-    return self.caches[key]
 
 class EmailManager():
   def __init__(self):
@@ -465,12 +407,11 @@ class EmailManager():
     return stdout
 
 class Controller(QObject):
-  def __init__(self, emailManager, bodyCacheFactory,
+  def __init__(self, emailManager,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
     addressBookModel):
     QObject.__init__(self)
     self.emailManager = emailManager
-    self.bodyCacheFactory = bodyCacheFactory
     self.accountModel = accountModel
     self.folderModel = folderModel
     self.headerModel = headerModel
@@ -752,20 +693,6 @@ class Controller(QObject):
     self.filterButtons += filterButtons
     self.filterButtonModel.setItems(self.filterButtons)
 
-  def getBodyCache(self):
-    return self.bodyCacheFactory.getBodyCache(
-      self.accountName, self.folderName)
-
-  def ensureBodiesForFilter(self):
-    for f in self.headerFilters:
-      if f.isBodyFilter():
-        uids = []
-        for h in self.currentHeaders:
-          uids.append(h.uid_)
-        self.getBodyCache().cacheBodies(uids, False)
-        #self.getBodyCache().cacheBodies(uids, True)
-        return
-
   def filterHeader(self, header):
     for f in self.headerFilters:
       if not f.filterHeader(header):
@@ -775,7 +702,7 @@ class Controller(QObject):
   @Slot(str, str)
   def replaceHeaderFilterStr(self, name, headerFilterStr):
     try:
-      headerFilter = getHeaderFilterFromStr(name, headerFilterStr, self.getBodyCache())
+      headerFilter = getHeaderFilterFromStr(name, headerFilterStr)
       if headerFilter == None:
         self.removeHeaderFilter(name)
       else:
@@ -801,7 +728,6 @@ class Controller(QObject):
       filterButton.setChecked(False)
 
   def setHeaders(self, headers):
-    self.ensureBodiesForFilter()
     self.currentHeaders = headers
     filteredHeaders = filter(self.filterHeader, headers)
     if len(filteredHeaders) == 0:
@@ -810,14 +736,12 @@ class Controller(QObject):
       self.headerModel.setItems(filteredHeaders)
     self.updateCounterBox()
   def prependHeaders(self, headers):
-    self.ensureBodiesForFilter()
     newFilteredHeaders = filter(self.filterHeader, headers)
     self.currentHeaders += headers
     if len(newFilteredHeaders) > 0:
       self.headerModel.prependItems(newFilteredHeaders)
     self.updateCounterBox()
   def appendHeaders(self, headers):
-    self.ensureBodiesForFilter()
     newFilteredHeaders = filter(self.filterHeader, headers)
     self.currentHeaders += headers
     if len(newFilteredHeaders) > 0:
@@ -1080,8 +1004,6 @@ class HeaderFilter():
     self.name = name
   def filterHeader(self, header):
     return True
-  def isBodyFilter(self):
-    return False
   def prettyFormat(self, indent=''):
     return indent + '<no pretty formatter available>' + "\n"
 
@@ -1096,26 +1018,6 @@ class HeaderFilterAtt(HeaderFilter):
     return True
   def prettyFormat(self, indent=''):
     return indent + self.att + "=" + str(self.value) + "\n"
-
-class HeaderFilterBody(HeaderFilter):
-  def __init__(self, name, regexStr, bodyCache):
-    HeaderFilter.__init__(self, name)
-    self.regexStr = regexStr
-    self.bodyCache = bodyCache
-    self.regex = re.compile(self.regexStr, re.IGNORECASE)
-
-  def filterHeader(self, header):
-    plain = self.bodyCache.getBody(header.uid_, False)
-    if self.regex.search(plain):
-      return True
-    #html = self.bodyCache.getBody(header.uid_, True)
-    #if self.regex.search(html):
-    #  return True
-    return False
-  def isBodyFilter(self):
-    return True
-  def prettyFormat(self, indent=''):
-    return indent + "Body" + "~" + self.regexStr + "\n"
 
 class HeaderFilterField(HeaderFilter):
   def __init__(self, name, regexStr, fields=[]):
@@ -1210,7 +1112,7 @@ class HeaderFilterNot(HeaderFilter):
     msg += indent + '|______' + "\n"
     return msg
 
-def getHeaderFilterFromStr(name, filterStr, bodyCache):
+def getHeaderFilterFromStr(name, filterStr):
   if filterStr.strip() == "":
     return None
 
@@ -1218,12 +1120,10 @@ def getHeaderFilterFromStr(name, filterStr, bodyCache):
 
   listRegex = "(Any|All|Not)" + "\\(" + "(.*)" + "\\)"
   attRegex = "(\\w+)=(\\w+)"
-  bodyRegex = "(Body)~" + "([^,]+)"
   fieldRegex = "(?:" + "(Subject|Header|From|To)" + "~)?" + "([^,]+)"
 
   listMatcher = re.match("^" + listRegex + "$", filterStr)
   attMatcher = re.match("^" + attRegex + "$", filterStr)
-  bodyMatcher = re.match("^" + bodyRegex + "$", filterStr)
   fieldMatcher = re.match("^" + fieldRegex + "$", filterStr)
 
   if listMatcher:
@@ -1250,7 +1150,7 @@ def getHeaderFilterFromStr(name, filterStr, bodyCache):
     subfilters = []
     for subfilterStr in subfilterStrs:
       subfilterStr = unescapeFilter(subfilterStr)
-      subfilter = getHeaderFilterFromStr('subfilter', subfilterStr, bodyCache)
+      subfilter = getHeaderFilterFromStr('subfilter', subfilterStr)
       if subfilter != None:
         subfilters.append(subfilter)
 
@@ -1268,10 +1168,6 @@ def getHeaderFilterFromStr(name, filterStr, bodyCache):
     if val == "false":
       val = False
     return HeaderFilterAtt(name, att, val)
-  elif bodyMatcher:
-    bodyField = unescapeFilter(bodyMatcher.group(1))
-    regex = unescapeFilter(bodyMatcher.group(2))
-    return HeaderFilterBody(name, regex, bodyCache)
   elif fieldMatcher:
     field = unescapeFilter(fieldMatcher.group(1))
     if field == None:
