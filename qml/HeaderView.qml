@@ -88,7 +88,7 @@ Rectangle {
           width: parent.width
           height: font.pointSize * 2
           font.pointSize: main.fontSmall
-          onTextChanged: {
+          Keys.onReturnPressed: {
             controller.onSearchTextChanged(searchTextBox.text)
           }
         }
