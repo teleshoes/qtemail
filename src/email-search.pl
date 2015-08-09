@@ -14,6 +14,9 @@ sub getCachedUids($$);
 sub buildQuery($);
 sub parseQueryStr($);
 sub parseFlatQueryStr($);
+sub escapeQueryStr($$);
+sub unescapeQueryStr($$);
+sub unescapeQuery($$);
 
 my $emailDir = "$ENV{HOME}/.cache/email";
 
@@ -200,8 +203,11 @@ sub getCachedUids($$){
 
 sub buildQuery($){
   my ($queryStr) = @_;
+  my $quotes = {};
+  $queryStr = escapeQueryStr $queryStr, $quotes;
 
   my $query = parseQueryStr $queryStr;
+  $query = unescapeQuery $query, $quotes;
   return $query;
 }
 
@@ -297,6 +303,56 @@ sub parseFlatQueryStr($){
     push @{$$outerQuery{parts}}, $innerQuery;
   }
   return $outerQuery;
+}
+
+sub escapeQueryStr($$){
+  my ($queryStr, $quotes) = @_;
+  $queryStr =~ s/[\t\n\r]/ /g;
+  $queryStr =~ s/%/%boing%/g;
+  $queryStr =~ s/\\ /%ws%/g;
+  $queryStr =~ s/\\\+/%plus%/g;
+  $queryStr =~ s/\\~/%tilde%/g;
+  $queryStr =~ s/\\"/%dblquote%/g;
+
+  my %quotes;
+  my $quoteId = 0;
+  while($queryStr =~ s/"([^"]*)"/%quote$quoteId%/){
+    $$quotes{"quote$quoteId"} = $1;
+    $quoteId++;
+  }
+
+  $queryStr =~ s/\+\+/%or%/g;
+  $queryStr =~ s/\+/%plus%/g;
+  $queryStr =~ s/%or%/+/g;
+
+  return $queryStr;
+}
+sub unescapeQueryStr($$){
+  my ($queryStr, $quotes) = @_;
+  $queryStr =~ s/%(quote\d+)%/$$quotes{$1}/g;
+
+  $queryStr =~ s/%dblquote%/"/g;
+  $queryStr =~ s/%tilde%/~/g;
+  $queryStr =~ s/%plus%/+/g;
+  $queryStr =~ s/%ws%/ /g;
+  $queryStr =~ s/%boing%/%/g;
+
+  return $queryStr;
+}
+
+sub unescapeQuery($$){
+  my ($query, $quotes) = @_;
+  my $type = $$query{type};
+  if($type =~ /^(and|or)$/){
+    my @parts = @{$$query{parts}};
+    @parts = map {unescapeQuery $_, $quotes} @parts;
+    $$query{parts} = [@parts];
+  }elsif($type =~ /^(header|body)$/){
+    $$query{content} = unescapeQueryStr $$query{content}, $quotes;
+  }else{
+    die "unknown type: $type\n";
+  }
+  return $query;
 }
 
 &main(@ARGV);
