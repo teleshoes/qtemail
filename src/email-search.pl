@@ -49,8 +49,8 @@ my $usageFormat = "Usage:
       maximum number of headers to update at once
       can be 'all' or a positive integer
 
-  $0 --search [--folder=FOLDER_NAME] ACCOUNT_NAME QUERY [QUERY QUERY..]
-    print UIDs of emails matching \"QUERY QUERY QUERY\"
+  $0 --search [--folder=FOLDER_NAME] ACCOUNT_NAME WORD [WORD WORD..]
+    print UIDs of emails matching QUERY=\"WORD WORD WORD ..\"
 
     SEARCH FORMAT:
       -all words separated by spaces must match one of subject/date/from/to
