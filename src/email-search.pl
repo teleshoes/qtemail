@@ -360,6 +360,8 @@ sub prettyPrintQueryStr($;$){
 
 sub formatQuery($;$){
   my ($query, $indent) = @_;
+  return $indent."<empty, matches anything>\n" if not defined $query;
+
   $indent = "" if not defined $indent;
   my $fmt = "";
 
@@ -589,6 +591,7 @@ sub reduceQuery($){
 sub runQuery($$$@){
   my ($accName, $folderName, $query, @uids) = @_;
   return () if @uids == 0;
+  return @uids if not defined $query;
 
   my $minUid = $uids[0];
   my $maxUid = $uids[-1];
