@@ -324,9 +324,6 @@ sub getCachedUids($$){
 
 sub search($$$$$){
   my ($accName, $folderName, $minUid, $maxUid, $queryStr) = @_;
-  if($queryStr =~ /^\s*$/){
-    return ();
-  }
   my $query = buildQuery $queryStr;
 
   my @allUids = getAllUids $accName, $folderName;
