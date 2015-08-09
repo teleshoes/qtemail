@@ -720,8 +720,13 @@ class Controller(QObject):
       self.refreshHeaderFilters()
     else:
       cmd = [EMAIL_SEARCH_BIN, "--search", "--folder="+self.folderName, self.accountName, headerFilterStr]
+      self.notifierModel.notify("searching: " + str(cmd), False)
       self.startEmailCommandThread(cmd, None, self.onEmailSearchFinished, {"headerFilterName": name})
   def onEmailSearchFinished(self, isSuccess, output, extraArgs):
+    self.notifierModel.hide()
+    if not isSuccess:
+      self.notifierModel.notify("\nSEARCH FAILED\n\n" + output, False)
+      return
     try:
       uids = map(int, output.splitlines())
       name = extraArgs["headerFilterName"]
@@ -1360,6 +1365,8 @@ class NotifierModel(QObject):
     self.hideDelay_ = hideDelay_
 
     self.changed.emit()
+  def hide(self):
+    self.setShowing(False)
   @Slot(bool)
   def setShowing(self, showing_):
     self.showing_ = showing_
