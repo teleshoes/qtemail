@@ -14,7 +14,7 @@ sub getCachedUids($$);
 
 sub search($$$);
 sub buildQuery($);
-sub prettyPrintQueryStr($);
+sub prettyPrintQueryStr($;$);
 sub formatQuery($;$);
 sub parseQueryStr($);
 sub parseFlatQueryStr($);
@@ -49,6 +49,9 @@ my $usageFormat = "Usage:
     LIMIT
       maximum number of headers to update at once
       can be 'all' or a positive integer
+
+  $0 --format WORD [WORD WORD..]
+    parse and format QUERY=\"WORD WORD WORD\" for testing
 
   $0 --search [--folder=FOLDER_NAME] ACCOUNT_NAME WORD [WORD WORD..]
     print UIDs of emails matching QUERY=\"WORD WORD WORD ..\"
@@ -113,6 +116,9 @@ sub main(@){
     my ($accName, $folderName, $limit) = @_;
     die usage() if $limit !~ /^(all|[1-9]\d+)$/;
     updateDb($accName, $folderName, $limit);
+  }elsif($cmd =~ /^(--format)$/ and @_ >= 1){
+    my $query = "@_";
+    print prettyPrintQueryStr $query;
   }elsif($cmd =~ /^(--search)$/ and @_ >= 2){
     my $folderName = "inbox";
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
@@ -130,7 +136,7 @@ sub main(@){
 }
 
 sub usage(){
-  my $examples = join '', map {prettyPrintQueryStr $_} (
+  my $examples = join '', map {prettyPrintQueryStr $_, "      "} (
     'from~mary',
     'mary smith',
     '((a b) ++ (c d) ++ (e f))',
@@ -308,9 +314,9 @@ sub buildQuery($){
   return $query;
 }
 
-sub prettyPrintQueryStr($){
-  my ($queryStr) = @_;
-  my $indent = "      ";
+sub prettyPrintQueryStr($;$){
+  my ($queryStr, $indent) = @_;
+  $indent = "" if not defined $indent;
   my $query = buildQuery $queryStr;
   my $fmt = "$indent$queryStr\n";
   $fmt .= formatQuery $query, $indent . "  ";
