@@ -366,6 +366,21 @@ sub reduceQuery($){
     @parts = map {reduceQuery $_} @parts;
     @parts = grep {defined $_} @parts;
 
+    # a OR (b OR c) == a OR b OR c
+    my @newParts;
+    for my $part(@parts){
+      my $partType = $$part{type};
+      if($partType eq $type){
+        my @partParts = @{$$part{parts}};
+        @partParts = map {reduceQuery $_} @partParts;
+        @partParts = grep {defined $_} @partParts;
+        @newParts = (@newParts, @partParts);
+      }else{
+        push @newParts, $part;
+      }
+    }
+    @parts = @newParts;
+
     if(@parts == 0){
       return undef;
     }elsif(@parts == 1){
