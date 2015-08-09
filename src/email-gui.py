@@ -707,7 +707,7 @@ class Controller(QObject):
     attMatch = re.match("^(read)=(true|false)$", headerFilterStr, re.IGNORECASE)
     headers = self.currentHeaders
 
-    if headerFilterStr == "":
+    if headerFilterStr == "" or len(headers) == 0:
       self.removeHeaderFilter(name)
       self.refreshHeaderFilters()
     elif attMatch:
