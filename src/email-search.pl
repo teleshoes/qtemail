@@ -11,6 +11,10 @@ sub rowMapToInsert($);
 sub getAllUids($$);
 sub getCachedUids($$);
 
+sub buildQuery($);
+sub parseQueryStr($);
+sub parseFlatQueryStr($);
+
 my $emailDir = "$ENV{HOME}/.cache/email";
 
 my $emailTable = "email";
@@ -192,6 +196,107 @@ sub getCachedUids($$){
   my $output = runSql $accName, $folderName, "select uid from $emailTable";
   my @uids = split /\n/, $output;
   return @uids;
+}
+
+sub buildQuery($){
+  my ($queryStr) = @_;
+
+  my $query = parseQueryStr $queryStr;
+  return $query;
+}
+
+sub parseQueryStr($){
+  my ($queryStr) = @_;
+
+  if($queryStr !~ /\(.*\)/){
+    return parseFlatQueryStr $queryStr;
+  }
+
+  my @orGroups;
+  my @parensGroups;
+  my $cur = "";
+  my $parens = 0;
+  for my $ch(split //, $queryStr){
+    if($ch eq "("){
+      if($parens == 0){
+        push @parensGroups, $cur;
+        $cur = "";
+      }else{
+        $cur .= $ch;
+      }
+      $parens++;
+    }elsif($ch eq ")"){
+      $parens--;
+      if($parens == 0){
+        push @parensGroups, $cur;
+        $cur = "";
+      }else{
+        $cur .= $ch;
+      }
+      $parens = 0 if $parens < 0; #ignore unmatched ')'
+    }elsif($ch eq "+"){
+      if($parens == 0){
+        push @parensGroups, $cur;
+        $cur = "";
+        push @orGroups, [@parensGroups];
+        @parensGroups = ();
+      }else{
+        $cur .= $ch;
+      }
+    }else{
+      $cur .= $ch;
+    }
+  }
+  push @parensGroups, $cur; #ignore unmatched '('
+  push @orGroups, [@parensGroups];
+
+  my $outerQuery = {type => "or", parts => []};
+  for my $orGroup(@orGroups){
+    next if @$orGroup == 0;
+    my $innerQuery = {type => "and", parts => []};
+    for my $parensGroup(@$orGroup){
+      next if length $parensGroup == 0;
+      push @{$$innerQuery{parts}}, parseQueryStr $parensGroup;
+    }
+    push @{$$outerQuery{parts}}, $innerQuery;
+  }
+
+  return $outerQuery;
+}
+
+sub parseFlatQueryStr($){
+  my $flatQueryStr = shift;
+  my @ors = split /\+/, $flatQueryStr;
+  my $outerQuery = {type => "or", parts=>[]};
+  for my $or(@ors){
+    my $innerQuery = {type => "and", parts=>[]};
+    my @ands = split /\s+/, $or;
+    for my $and(@ands){
+      my $type;
+      my @fields;
+      my $content;
+      if($and =~ /(to|from|subject)~(.*)/i){
+        $type = "header";
+        @fields = (lc $1);
+        $content = $2;
+      }elsif($and =~ /(body)~(.*)/i){
+        $type = "body";
+        @fields = ();
+        $content = $2;
+      }else{
+        $type = "header";
+        @fields = qw(to from subject);
+        $content = $and;
+      }
+      push @{$$innerQuery{parts}}, {
+        type => $type,
+        fields => [@fields],
+        content => $content,
+      };
+    }
+    push @{$$outerQuery{parts}}, $innerQuery;
+  }
+  return $outerQuery;
 }
 
 &main(@ARGV);
