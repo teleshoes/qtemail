@@ -58,6 +58,10 @@ sub email(@){
   my @folderOptExamples = qw(--folder=inbox --folder=sent);
   my @accountExamples = qw(GMAIL YAHOO);
   my @uidExamples = qw(10000 20000 30000 40000 50000);
+  my @subjectExamples = ("1subject", "2subject");
+  my @bodyExamples = ("1body", "2body");
+  my @toExamples = ("1email-to", "2email-to");
+  my @smtpArgExamples = ("--to=", "--cc=", "--bcc=");
 
   if($cmdArg eq "" and @opts == 0 and @args == 0){
     @complete = (@complete, @cmdArgs);
@@ -98,6 +102,20 @@ sub email(@){
       @complete = (@complete, @accountExamples);
     }else{
       @complete = (@complete, @uidExamples);
+    }
+  }
+
+  if($cmdArg =~ /^(--smtp)$/){
+    if(@args == 0){
+      @complete = (@complete, @accountExamples);
+    }elsif(@args == 1){
+      @complete = (@complete, @subjectExamples);
+    }elsif(@args == 2){
+      @complete = (@complete, @bodyExamples);
+    }elsif(@args == 3){
+      @complete = (@complete, @toExamples);
+    }elsif(@args == 4){
+      @complete = (@complete, @smtpArgExamples);
     }
   }
 
