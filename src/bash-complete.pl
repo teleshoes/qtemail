@@ -57,6 +57,7 @@ sub email(@){
 
   my @folderOptExamples = qw(--folder=inbox --folder=sent);
   my @accountExamples = qw(GMAIL YAHOO);
+  my @uidExamples = qw(10000 20000 30000 40000 50000);
 
   if($cmdArg eq "" and @opts == 0 and @args == 0){
     @complete = (@complete, @cmdArgs);
@@ -87,6 +88,17 @@ sub email(@){
   );
   if($cmdArg =~ /^($okAccList)$/){
     @complete = (@complete, @accountExamples);
+  }
+
+  my $okAccUidList = join "|", qw(
+    --mark-read --mark-unread --header --body --body-plain --body-html --attachments
+  );
+  if($cmdArg =~ /^($okAccUidList)/){
+    if(@args == 0){
+      @complete = (@complete, @accountExamples);
+    }else{
+      @complete = (@complete, @uidExamples);
+    }
   }
 
   return @complete;
