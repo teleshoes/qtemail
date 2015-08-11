@@ -44,6 +44,21 @@ sub email(@){
 
   my @complete;
 
+  my @cmdArgs = qw(
+    -h --help
+    --update --header --body --body-plain --body-html --attachments
+    --cache-all-bodies
+    --smtp
+    --mark-read --mark-unread
+    --accounts --folders --print --summary --status-line --status-short
+    --has-error --has-new-unread --has-unread
+    --read-config --write-config --read-options --write-options
+  );
+
+  if($cmdArg eq "" and @opts == 0 and @args == 0){
+    @complete = (@complete, @cmdArgs);
+  }
+
   return @complete;
 }
 
