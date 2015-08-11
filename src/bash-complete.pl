@@ -68,6 +68,18 @@ sub email(@){
     @complete = (@complete, @folderOptExamples);
   }
 
+  if($cmdArg =~ /^(--body|--body-plain|body-html)$/ and @args == 0){
+    if(@opts == 0){
+      @complete = (@complete, "--no-download", "-0", @folderOptExamples);
+    }elsif(@opts == 1 and $opts[0] =~ /^(--no-download)$/){
+      @complete = (@complete, "-0", @folderOptExamples);
+    }elsif(@opts == 1 and $opts[0] =~ /^(-0)$/){
+      @complete = (@complete, @folderOptExamples);
+    }elsif(@opts == 2 and $opts[0] =~ /^(--no-download)$/ and $opts[1] =~ /^(-0)$/){
+      @complete = (@complete, @folderOptExamples);
+    }
+  }
+
   return @complete;
 }
 
