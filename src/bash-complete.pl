@@ -36,6 +36,12 @@ sub email(@){
   shift @words;
   my $cur = pop @words if not $isNewWord;
 
+  my $cmdArg = shift @words;
+  $cmdArg = "" if not defined $cmdArg;
+  my @opts;
+  push @opts, shift @words while @words > 0 and $words[0] =~ /^-/;
+  my @args = @words;
+
   my @complete;
 
   return @complete;
