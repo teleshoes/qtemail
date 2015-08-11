@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 sub email(@);
+sub getAccounts(@);
 
 my $usage = "Usage:
   $0 --email COMP_LINE COMP_POINT
@@ -11,6 +12,8 @@ my $usage = "Usage:
   COMP_LINE  - the full cmdline as a string
   COMP_POINT - the cursor position in the cmdline
 ";
+
+my $EMAIL_EXEC = "/opt/qtemail/bin/email.pl";
 
 sub main(@){
   my $script = shift;
@@ -101,7 +104,7 @@ sub email(@){
     --has-error --has-new-unread --has-unread
   );
   if($cmdArg =~ /^($okAccList)$/){
-    @complete = (@complete, @accountExamples);
+    @complete = (@complete, getAccounts(@accountExamples));
   }
 
   my $okAccUidList = join "|", qw(
@@ -109,7 +112,7 @@ sub email(@){
   );
   if($cmdArg =~ /^($okAccUidList)/){
     if(@args == 0){
-      @complete = (@complete, @accountExamples);
+      @complete = (@complete, getAccounts(@accountExamples));
     }else{
       @complete = (@complete, @uidExamples);
     }
@@ -117,7 +120,7 @@ sub email(@){
 
   if($cmdArg =~ /^(--smtp)$/){
     if(@args == 0){
-      @complete = (@complete, @accountExamples);
+      @complete = (@complete, getAccounts(@accountExamples));
     }elsif(@args == 1){
       @complete = (@complete, @subjectExamples);
     }elsif(@args == 2){
@@ -131,19 +134,19 @@ sub email(@){
 
   if($cmdArg =~ /^(--cache-all-bodies)$/){
     if(@args == 0){
-      @complete = (@complete, @accountExamples);
+      @complete = (@complete, getAccounts(@accountExamples));
     }elsif(@args == 1){
       @complete = (@complete, @folderArgExamples);
     }
   }
 
   if($cmdArg =~ /^(--folders|--read-config)$/ and @args == 0){
-    @complete = (@complete, @accountExamples);
+    @complete = (@complete, getAccounts(@accountExamples));
   }
 
   if($cmdArg =~ /^(--write-config)$/){
     if(@args == 0){
-      @complete = (@complete, @accountExamples);
+      @complete = (@complete, getAccounts(@accountExamples));
     }else{
       @complete = (@complete, @configOpts);
     }
@@ -151,13 +154,24 @@ sub email(@){
 
   if($cmdArg =~ /^(--write-options)$/){
     if(@args == 0){
-      @complete = (@complete, @accountExamples);
+      @complete = (@complete, getAccounts(@accountExamples));
     }else{
       @complete = (@complete, @optionOpts);
     }
   }
 
   return @complete;
+}
+
+sub getAccounts(@){
+  my @accountExamples = @_;
+  my @lines = `$EMAIL_EXEC --accounts 2>/dev/null | sed s/:.*//`;
+  chomp foreach @lines;
+  if(@lines == 0){
+    return @accountExamples;
+  }else{
+    return @lines;
+  }
 }
 
 # -h|--help
