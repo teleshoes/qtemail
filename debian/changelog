@@ -1,3 +1,19 @@
+qtemail (1.3) UNRELEASED; urgency=low
+  * Add support for fremantle/n900 with generic desktop-small platform
+  * Add faster, more powerful email-search.pl sqlite database tool
+    search in GUI now uses email-search.pl
+  * Add simple address book at ~/.config/qtemail/addressbook
+    add SuggestBox widget for to/from/cc (based on work by dant3 and jturcotte)
+  * Add email body text selection, copy selection
+  * Open send-email view in a new window on desktop
+  * Allow clicking links in body
+  * Add mark-all-read button
+  * Add bash completion for email.pl
+  * Refresh account view based on new refreshInterval config
+  * Fix harmattan keyboard hiding bug
+  * Fix unread-counts initialization
+-- teleshoes <elliot.wolk@gmail.com>  Tue, 11 Aug 2015 15:22:13 -0400
+
 qtemail (1.2) UNRELEASED; urgency=low
   * Display more headers using list-view if width > 700px (e.g.: landscape)
   * Massive update to desktop UI (e.g.: multiple screens open at once)
