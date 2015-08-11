@@ -1,0 +1,12 @@
+_qtemail_email(){
+  local cur
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  words=$( /opt/qtemail/bin/bash-complete.pl --email "$COMP_LINE" "$COMP_POINT" )
+  oldifs="$IFS"
+  IFS=$'\n'
+
+  COMPREPLY=( $(compgen -W "$words" -- $cur) )
+
+  IFS="$oldifs"
+}
+complete -F _qtemail_email email.pl /opt/qtemail/bin/email.pl
