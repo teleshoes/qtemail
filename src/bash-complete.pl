@@ -56,6 +56,7 @@ sub email(@){
   );
 
   my @folderOptExamples = qw(--folder=inbox --folder=sent);
+  my @accountExamples = qw(GMAIL YAHOO);
 
   if($cmdArg eq "" and @opts == 0 and @args == 0){
     @complete = (@complete, @cmdArgs);
@@ -78,6 +79,14 @@ sub email(@){
     }elsif(@opts == 2 and $opts[0] =~ /^(--no-download)$/ and $opts[1] =~ /^(-0)$/){
       @complete = (@complete, @folderOptExamples);
     }
+  }
+
+  my $okAccList = join "|", qw(
+    --update --print --summary --status-line --status-short
+    --has-error --has-new-unread --has-unread
+  );
+  if($cmdArg =~ /^($okAccList)$/){
+    @complete = (@complete, @accountExamples);
   }
 
   return @complete;
