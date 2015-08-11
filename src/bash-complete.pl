@@ -128,6 +128,10 @@ sub email(@){
     }
   }
 
+  if($cmdArg =~ /^(--folders|--read-config)$/ and @args == 0){
+    @complete = (@complete, @accountExamples);
+  }
+
   return @complete;
 }
 
