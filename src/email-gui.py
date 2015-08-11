@@ -14,7 +14,6 @@ import os
 import os.path
 import re
 import signal
-import shlex
 import sys
 import subprocess
 
