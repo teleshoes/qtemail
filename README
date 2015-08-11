@@ -427,3 +427,17 @@ Usage:
       "a ++ b"
         [to from subject] LIKE a ++ b
       =====
+
+===== email-gui.py =====
+
+  /opt/qtemail/bin/email-gui.py [OPTS]
+
+  OPTS:
+    --page=[account|header|config|send|folder|body]
+      start on the indicated page
+    --account=ACCOUNT_NAME
+      default the account to ACCOUNT_NAME {only useful with --page}
+    --folder=FOLDER_NAME
+      default the folder to ACCOUNT_NAME {only useful with --page}
+    --uid=UID
+      default the message to UID {only useful with --page}
