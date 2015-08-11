@@ -125,10 +125,10 @@ Usage:
   FOLDER_NAME     "inbox", "sent" or one of the names from "folders"
   UID             an IMAP UID {UIDVALIDITY is assumed to never change}
 
-  /usr/bin/email.pl -h|--help
+  /opt/qtemail/bin/email.pl -h|--help
     show this message
 
-  /usr/bin/email.pl [--update] [--folder=FOLDER_NAME_FILTER] [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /opt/qtemail/bin/email.pl [--update] [--folder=FOLDER_NAME_FILTER] [ACCOUNT_NAME ACCOUNT_NAME ...]
     -for each account specified {or all non-skipped accounts if none are specified}:
       -login to IMAP server, or create file ~/.cache/email/ACCOUNT_NAME/error
       -for each FOLDER_NAME {or just FOLDER_NAME_FILTER if specified}:
@@ -154,7 +154,7 @@ Usage:
             6:GMAIL
             0:WORK_GMAIL
 
-  /usr/bin/email.pl --smtp ACCOUNT_NAME SUBJECT BODY TO [ARG ARG ..]
+  /opt/qtemail/bin/email.pl --smtp ACCOUNT_NAME SUBJECT BODY TO [ARG ARG ..]
     simple wrapper around smtp-cli. {you can add extra recipients with --to}
     calls:
       /opt/qtemail/bin/smtp-cli \
@@ -165,26 +165,26 @@ Usage:
         --to=TO \
         ARG ARG ..
 
-  /usr/bin/email.pl --mark-read [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  /opt/qtemail/bin/email.pl --mark-read [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     login and mark the indicated message(s) as read
 
-  /usr/bin/email.pl --mark-unread [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  /opt/qtemail/bin/email.pl --mark-unread [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     login mark the indicated message(s) as unread
 
-  /usr/bin/email.pl --accounts
+  /opt/qtemail/bin/email.pl --accounts
     format and print information about each account
     "ACCOUNT_NAME:<timestamp>:<relative_time>:<update_interval>s:<unread_count>/<total_count>:<error>"
 
-  /usr/bin/email.pl --folders ACCOUNT_NAME
+  /opt/qtemail/bin/email.pl --folders ACCOUNT_NAME
     format and print information about each folder for the given account
     "FOLDER_NAME:<unread_count>/<total_count>"
 
-  /usr/bin/email.pl --header [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  /opt/qtemail/bin/email.pl --header [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     format and print the header of the indicated message(s)
     prints each of [Date Subject From To]
       one per line, formatted "UID.FIELD: VALUE"
 
-  /usr/bin/email.pl --body [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  /opt/qtemail/bin/email.pl --body [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     download, format and print the body of the indicated message(s)
     if -0 is specified, print a NUL character after each body instead of a newline
     if body is cached, skip download
@@ -193,32 +193,32 @@ Usage:
     if message has a plaintext and HTML component, only one is returned
     if preferHtml is false, plaintext is returned, otherwise, HTML
 
-  /usr/bin/email.pl --body-plain [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  /opt/qtemail/bin/email.pl --body-plain [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but override preferHtml=false,
       and attempt to convert the result to plaintext if it appears to be HTML
       (uses /usr/bin/html2text if available, or just strips out the tags)
 
-  /usr/bin/email.pl --body-html [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  /opt/qtemail/bin/email.pl --body-html [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but override preferHtml=true
 
-  /usr/bin/email.pl --attachments [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_DIR UID [UID UID ...]
+  /opt/qtemail/bin/email.pl --attachments [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_DIR UID [UID UID ...]
     download the body of the indicated message(s) and save any attachments to DEST_DIR
     if body is cached, skip download
 
-  /usr/bin/email.pl --cache-all-bodies ACCOUNT_NAME FOLDER_NAME
+  /opt/qtemail/bin/email.pl --cache-all-bodies ACCOUNT_NAME FOLDER_NAME
     attempt to download the body of all uncached bodies
 
-  /usr/bin/email.pl --print [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /opt/qtemail/bin/email.pl --print [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers and bodies
-    fetches bodies like "/usr/bin/email.pl --body-plain --no-download",
+    fetches bodies like "/opt/qtemail/bin/email.pl --body-plain --no-download",
       similarly converting HTML to plaintext
     formats whitespace in bodies, compressing multiple empty lines to a max of 2,
       and prepending every line with 2 spaces
 
-  /usr/bin/email.pl --summary [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /opt/qtemail/bin/email.pl --summary [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers
 
-  /usr/bin/email.pl --status-line [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /opt/qtemail/bin/email.pl --status-line [ACCOUNT_NAME ACCOUNT_NAME ...]
     {cached in ~/.cache/email/status-line when ~/.cache/email/unread-counts or error files change}
     does not fetch anything, merely reads ~/.cache/email/unread-counts
     format and print ~/.cache/email/unread-counts
@@ -229,7 +229,7 @@ Usage:
     if accounts are specified, all but those are omitted
     e.g.: A3 G6
 
-  /usr/bin/email.pl --status-short [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /opt/qtemail/bin/email.pl --status-short [ACCOUNT_NAME ACCOUNT_NAME ...]
     {cached in ~/.cache/email/status-short when ~/.cache/email/unread-counts or error files change}
     does not fetch anything, merely reads ~/.cache/email/unread-counts
     format and print ~/.cache/email/unread-counts
@@ -257,42 +257,42 @@ Usage:
     <acc> = first character of a given account name
     <count> = unread count for the indicated account
 
-  /usr/bin/email.pl --has-error [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /opt/qtemail/bin/email.pl --has-error [ACCOUNT_NAME ACCOUNT_NAME ...]
     checks if ~/.cache/email/ACCOUNT_NAME/error exists
     print "yes" and exit with zero exit code if it does
     otherwise, print "no" and exit with non-zero exit code
 
-  /usr/bin/email.pl --has-new-unread [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /opt/qtemail/bin/email.pl --has-new-unread [ACCOUNT_NAME ACCOUNT_NAME ...]
     checks for any NEW unread emails, in any account
       {UIDs in ~/.cache/email/ACCOUNT_NAME/new-unread}
     if accounts are specified, all but those are ignored
     print "yes" and exit with zero exit code if there are new unread emails
     otherwise, print "no" and exit with non-zero exit code
 
-  /usr/bin/email.pl --has-unread [ACCOUNT_NAME ACCOUNT_NAME ...]
+  /opt/qtemail/bin/email.pl --has-unread [ACCOUNT_NAME ACCOUNT_NAME ...]
     checks for any unread emails, in any account
       {UIDs in ~/.cache/email/ACCOUNT_NAME/unread}
     if accounts are specified, all but those are ignored
     print "yes" and exit with zero exit code if there are unread emails
     otherwise, print "no" and exit with non-zero exit code
 
-  /usr/bin/email.pl --read-config ACCOUNT_NAME
+  /opt/qtemail/bin/email.pl --read-config ACCOUNT_NAME
     reads ~/.secrets
     for each line of the form "email.ACCOUNT_NAME.KEY\s*=\s*VAL"
       print KEY=VAL
 
-  /usr/bin/email.pl --write-config ACCOUNT_NAME KEY=VAL [KEY=VAL KEY=VAL]
+  /opt/qtemail/bin/email.pl --write-config ACCOUNT_NAME KEY=VAL [KEY=VAL KEY=VAL]
     modifies ~/.secrets
     for each KEY/VAL pair:
       removes any line that matches "email.ACCOUNT_NAME.KEY\s*="
       adds a line at the end "email.ACCOUNT_NAME.KEY = VAL"
 
-  /usr/bin/email.pl --read-options
+  /opt/qtemail/bin/email.pl --read-options
     reads ~/.secrets
     for each line of the form "email.KEY\s*=\s*VAL"
       print KEY=VAL
 
-  /usr/bin/email.pl --write-options KEY=VAL [KEY=VAL KEY=VAL]
+  /opt/qtemail/bin/email.pl --write-options KEY=VAL [KEY=VAL KEY=VAL]
     reads ~/.secrets
     for each line of the form "email.KEY\s*=\s*VAL"
       print KEY=VAL
