@@ -136,10 +136,16 @@ Usage:
           ~/.cache/email/ACCOUNT_NAME/FOLDER_NAME/all
         -fetch and cache all message headers in
           ~/.cache/email/ACCOUNT_NAME/FOLDER_NAME/headers/UID
+        -fetch and cache bodies according to bodyCacheMode config
+            all    => every header that was cached gets its body cached
+            unread => every unread message gets its body cached
+            none   => no bodies are cached
+          ~/.cache/email/ACCOUNT_NAME/FOLDER_NAME/bodies/UID
         -fetch all unread messages and write their UIDs to
           ~/.cache/email/ACCOUNT_NAME/FOLDER_NAME/unread
         -write all message UIDs that are now in unread and were not before
           ~/.cache/email/ACCOUNT_NAME/FOLDER_NAME/new-unread
+        -run /opt/qtemail/bin/email-search.pl --updatedb ACCOUNT_NAME FOLDER_NAME 100
     -update global unread counts file ~/.cache/email/unread-counts
       ignored or missing accounts are preserved in ~/.cache/email/unread-counts
 
@@ -167,7 +173,7 @@ Usage:
 
   /usr/bin/email.pl --accounts
     format and print information about each account
-    "ACCOUNT_NAME:<timestamp>:<relative_time>:<unread_count>/<total_count>:<error>"
+    "ACCOUNT_NAME:<timestamp>:<relative_time>:<update_interval>s:<unread_count>/<total_count>:<error>"
 
   /usr/bin/email.pl --folders ACCOUNT_NAME
     format and print information about each folder for the given account
@@ -178,24 +184,42 @@ Usage:
     prints each of [Date Subject From To]
       one per line, formatted "UID.FIELD: VALUE"
 
-  /usr/bin/email.pl --body [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+  /usr/bin/email.pl --body [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     download, format and print the body of the indicated message(s)
+    if -0 is specified, print a NUL character after each body instead of a newline
     if body is cached, skip download
+    if body is not cached and --no-download is specified, use empty string for body
+      instead of downloading the body
+    if message has a plaintext and HTML component, only one is returned
+    if preferHtml is false, plaintext is returned, otherwise, HTML
 
-  /usr/bin/email.pl --body-html [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
-    same as --body, but prefer HTML instead of plaintext
+  /usr/bin/email.pl --body-plain [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+    same as --body, but override preferHtml=false,
+      and attempt to convert the result to plaintext if it appears to be HTML
+      (uses /usr/bin/html2text if available, or just strips out the tags)
+
+  /usr/bin/email.pl --body-html [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+    same as --body, but override preferHtml=true
 
   /usr/bin/email.pl --attachments [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_DIR UID [UID UID ...]
     download the body of the indicated message(s) and save any attachments to DEST_DIR
     if body is cached, skip download
 
+  /usr/bin/email.pl --cache-all-bodies ACCOUNT_NAME FOLDER_NAME
+    attempt to download the body of all uncached bodies
+
   /usr/bin/email.pl --print [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers and bodies
+    fetches bodies like "/usr/bin/email.pl --body-plain --no-download",
+      similarly converting HTML to plaintext
+    formats whitespace in bodies, compressing multiple empty lines to a max of 2,
+      and prepending every line with 2 spaces
 
   /usr/bin/email.pl --summary [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers
 
   /usr/bin/email.pl --status-line [ACCOUNT_NAME ACCOUNT_NAME ...]
+    {cached in ~/.cache/email/status-line when ~/.cache/email/unread-counts or error files change}
     does not fetch anything, merely reads ~/.cache/email/unread-counts
     format and print ~/.cache/email/unread-counts
     the string is a space-separated list of the first character of
@@ -204,6 +228,34 @@ Usage:
     if the count is zero for a given account, it is omitted
     if accounts are specified, all but those are omitted
     e.g.: A3 G6
+
+  /usr/bin/email.pl --status-short [ACCOUNT_NAME ACCOUNT_NAME ...]
+    {cached in ~/.cache/email/status-short when ~/.cache/email/unread-counts or error files change}
+    does not fetch anything, merely reads ~/.cache/email/unread-counts
+    format and print ~/.cache/email/unread-counts
+    if accounts are specified, all but those are omitted
+    omits accounts with unread-count of 0
+
+    the string is two lines, each always containing exactly three characters
+    no line can be longer than 3, and if it is shorter, it is left-padded with spaces
+    each line ends in a newline character
+
+    if any account has error, prints:
+      "ERR", "<total>"
+    if any account has more then 99 emails, prints
+      "big", "<total>"
+    if more than two accounts have a positive unread-count, prints:
+      "all", "<total>"
+    if exactly two accounts have a positive unread-count, prints:
+      "<acc><count>", "<acc><count>"
+    if exactly one account has a positive unread-count, prints:
+      "<acc><count>", ""
+    otherwise, prints:
+      "", ""
+
+    <total> = total of all unread counts if less than 1000, or '!!!' otherwise
+    <acc> = first character of a given account name
+    <count> = unread count for the indicated account
 
   /usr/bin/email.pl --has-error [ACCOUNT_NAME ACCOUNT_NAME ...]
     checks if ~/.cache/email/ACCOUNT_NAME/error exists
@@ -234,3 +286,13 @@ Usage:
     for each KEY/VAL pair:
       removes any line that matches "email.ACCOUNT_NAME.KEY\s*="
       adds a line at the end "email.ACCOUNT_NAME.KEY = VAL"
+
+  /usr/bin/email.pl --read-options
+    reads ~/.secrets
+    for each line of the form "email.KEY\s*=\s*VAL"
+      print KEY=VAL
+
+  /usr/bin/email.pl --write-options KEY=VAL [KEY=VAL KEY=VAL]
+    reads ~/.secrets
+    for each line of the form "email.KEY\s*=\s*VAL"
+      print KEY=VAL
