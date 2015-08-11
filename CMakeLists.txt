@@ -24,3 +24,6 @@ INSTALL(FILES ${buttonIcons}
 
 INSTALL(FILES data/qtemail.desktop
   DESTINATION /usr/share/applications)
+
+INSTALL(FILES bashcompletion/qtemail
+  DESTINATION /etc/bash_completion.d)
