@@ -99,6 +99,7 @@ Dependencies:
 
 
 Usage:
+===== email.pl =====
 
   Simple IMAP client. {--smtp command is a convenience wrapper around smtp-cli}
   Configuration is in ~/.secrets
@@ -296,3 +297,133 @@ Usage:
     reads ~/.secrets
     for each line of the form "email.KEY\s*=\s*VAL"
       print KEY=VAL
+
+===== email-search.pl =====
+
+  /opt/qtemail/bin/email-search.pl --updatedb ACCOUNT_NAME FOLDER_NAME LIMIT
+    create sqlite database if it doesnt exist
+    updates database incrementally
+
+    LIMIT
+      maximum number of headers to update at once
+      can be 'all' or a positive integer
+
+  /opt/qtemail/bin/email-search.pl --format WORD [WORD WORD..]
+    parse and format QUERY="WORD WORD WORD" for testing
+
+  /opt/qtemail/bin/email-search.pl --search [OPTIONS] ACCOUNT_NAME WORD [WORD WORD..]
+    print UIDs of emails matching QUERY="WORD WORD WORD .."
+
+    OPTIONS:
+      --folder=FOLDER_NAME
+        use FOLDER_NAME instead of "inbox"
+      --minuid=MIN_UID
+        ignore all UIDs below MIN_UID
+      --maxuid=MAX_UID
+        ignore all UIDs above MAX_UID
+      --limit=UID_LIMIT
+        ignore all except the last UID_LIMIT UIDs
+
+    SEARCH FORMAT:
+      -all words separated by spaces must match one of subject/date/from/to
+        apple banana
+        => emails where subject/from/to/date matches both 'apple' AND 'banana'
+      -specify an individual field of subject/date/from/to with a '~'
+        from~mary
+        => emails from 'mary'
+      -negate a header field query with '!~' instead of '~'
+        from!~mary
+        => emails from everyone EXCEPT 'mary'
+      -specify that the body must match with a '~'
+        body~bus
+        => emails where the cached body matches 'bus'
+      -negate a body query with '!~' instead of '~'
+        body!~bus
+        => emails where the cached body does NOT match 'bus'
+      -specify disjunction with '++'
+        from~mary ++ from~john ++ from~sue
+        => emails from 'mary' PLUS emails from 'john' PLUS emails from 'sue'
+      -group space or ++ separated words with parentheses
+        (from~mary a) ++ (from~john b)
+        => emails from 'mary' that match 'a' PLUS emails from 'john' that match 'b'
+      -parentheses can nest arbitrarily deep
+        (a ++ (b (c ++ d)))
+        => emails that match 'a', PLUS emails that match 'b' AND match 'c' or 'd'
+      -special characters can be escaped with backslash
+        subject\~fish\ table
+        => emails where subject/from/to/date matches 'subject~fish table'
+      -doublequoted strings are treated as words
+        "this is a (single ++ w~ord)"
+        => emails where subject/from/to/date matches 'this is a (single ++ w~ord)'
+
+    GRAMMAR:
+      QUERY = <LIST_AND>
+            | <LIST_OR>
+            | <HEADER_QUERY>
+            | <NEGATED_HEADER_QUERY>
+            | <SIMPLE_HEADER_QUERY>
+            | <BODY_QUERY>
+            | <NEGATED_BODY_QUERY>
+            | (<QUERY>)
+        return emails that match this QUERY
+      LIST_AND = <QUERY> <QUERY>
+        return only emails that match both QUERYs
+      LIST_OR = <QUERY> ++ <QUERY>
+        return emails that match either QUERY or both
+      HEADER_QUERY = <HEADER_FIELD>~<PATTERN>
+        return emails where the indicated header field matches the pattern
+      NEGATED_HEADER_QUERY = <HEADER_FIELD>!~<PATTERN>
+        return emails where the indicated header field does NOT match the pattern
+      SIMPLE_HEADER_QUERY = <PATTERN>
+        return emails with at least one header field that matches the pattern
+      BODY_QUERY = body~<PATTERN>
+        return emails where the body matches the pattern
+      NEGATED_BODY_QUERY = body!~<PATTERN>
+        return emails where the body does NOT match the pattern
+      HEADER_FIELD = subject | from | to | date | body
+        restricts the fields that PATTERN can match
+      PATTERN = <string> | <string>"<string>"<string>
+        can be any string, supports doublequote quoting and backslash escaping
+
+    EXAMPLES:
+      =====
+      from~mary
+        [from] LIKE mary
+      =====
+      mary smith
+        ALL(
+           |--[to from subject] LIKE mary
+           |--[to from subject] LIKE smith
+           )
+      =====
+      ((a b) ++ (c d) ++ (e f))
+        ANY(
+           |--ALL(
+           |     |--[to from subject] LIKE a
+           |     |--[to from subject] LIKE b
+           |     )
+           |--ALL(
+           |     |--[to from subject] LIKE c
+           |     |--[to from subject] LIKE d
+           |     )
+           |--ALL(
+           |     |--[to from subject] LIKE e
+           |     |--[to from subject] LIKE f
+           |     )
+           )
+      =====
+      subject~b ++ "subject~b"
+        ANY(
+           |--[subject] LIKE b
+           |--[to from subject] LIKE subject~b
+           )
+      =====
+      from!~bob ++ subject!~math
+        ANY(
+           |--[from] NOT LIKE bob
+           |--[subject] NOT LIKE math
+           )
+      =====
+      "a ++ b"
+        [to from subject] LIKE a ++ b
+      =====
