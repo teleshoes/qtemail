@@ -2,10 +2,43 @@
 use strict;
 use warnings;
 
+sub email(@);
+
 my $usage = "Usage:
+  $0 --email COMP_LINE COMP_POINT
+     print a list of words for bash completion for email.pl, one per line
+
+  COMP_LINE  - the full cmdline as a string
+  COMP_POINT - the cursor position in the cmdline
 ";
 
 sub main(@){
+  my $script = shift;
+  die $usage if not defined $script or @_ != 2;
+
+  my @words;
+  if($script =~ /^(--email)$/){
+    @words = email $_[0], $_[1];
+  }else{
+    die $usage;
+  }
+  print map {"$_\n"} @words;
+}
+
+sub email(@){
+  my ($cmdLine, $pos) = @_;
+  my $cmd = substr $cmdLine, 0, $pos;
+  my $isNewWord = $cmd =~ /\s$/;
+  $cmd =~ s/^\s+//;
+  $cmd =~ s/\s+$//;
+
+  my @words = split /\s+/, $cmd;
+  shift @words;
+  my $cur = pop @words if not $isNewWord;
+
+  my @complete;
+
+  return @complete;
 }
 
 # -h|--help
