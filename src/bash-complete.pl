@@ -60,6 +60,9 @@ sub email(@){
     preferHtml bodyCacheMode
     filters skip
   );
+  my @optionOpts = map {"$_="} qw(
+    update_cmd encrypt_cmd decrypt_cmd
+  );
 
   my @folderOptExamples = qw(--folder=inbox --folder=sent);
   my @folderArgExamples = qw(inbox sent);
@@ -143,6 +146,14 @@ sub email(@){
       @complete = (@complete, @accountExamples);
     }else{
       @complete = (@complete, @configOpts);
+    }
+  }
+
+  if($cmdArg =~ /^(--write-options)$/){
+    if(@args == 0){
+      @complete = (@complete, @accountExamples);
+    }else{
+      @complete = (@complete, @optionOpts);
     }
   }
 
