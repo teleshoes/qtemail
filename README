@@ -90,6 +90,12 @@ FILES
     SMTP command line client, written by Michal Ludvig
     https://github.com/mludvig/smtp-cli
 
+  src/bash-complete.pl
+    helper script that generates bash completion words
+
+  bashcompletion/qtemail
+    bash completion script that invokes bash-complete.pl
+
   ~/.secrets
     Account config goes here. See "Usage" below.
 
