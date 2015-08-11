@@ -55,8 +55,17 @@ sub email(@){
     --read-config --write-config --read-options --write-options
   );
 
+  my @folderOptExamples = qw(--folder=inbox --folder=sent);
+
   if($cmdArg eq "" and @opts == 0 and @args == 0){
     @complete = (@complete, @cmdArgs);
+  }
+
+  my $okFolderCmdArgs = join "|", qw(
+    --update --mark-read --mark-unread --header --attachments --print --summary
+  );
+  if(@opts == 0 and @args == 0 and $cmdArg =~ /^($okFolderCmdArgs)$/){
+    @complete = (@complete, @folderOptExamples);
   }
 
   return @complete;
