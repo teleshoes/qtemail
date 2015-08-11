@@ -75,6 +75,17 @@ FILES
       > email.pl --body-html G 35870 | grep -o '<div>' | wc -l
       12
 
+  src/email-search.pl
+    builds and queries a sqlite database for header information like subject/to/from
+    e.g.:
+      > email-search.pl --updatedb G inbox all
+      updatedb: all:19128 cached:19128 uncached:0 adding:0
+      no UIDs to add
+      > email-search.pl --search G 'bananas'
+      23654
+      23741
+      23777
+
   src/smtp-cli
     SMTP command line client, written by Michal Ludvig
     https://github.com/mludvig/smtp-cli
@@ -96,6 +107,7 @@ Dependencies:
   pyside
   qt
   qtquick 1.1
+  sqlite
 
 
 Usage:
