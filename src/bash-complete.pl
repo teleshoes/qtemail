@@ -54,6 +54,12 @@ sub email(@){
     --has-error --has-new-unread --has-unread
     --read-config --write-config --read-options --write-options
   );
+  my @configOpts = map {"$_="} qw(
+    user password server sent port ssl smtp_server smtp_port
+    new_unread_cmd updateInterval refreshInterval
+    preferHtml bodyCacheMode
+    filters skip
+  );
 
   my @folderOptExamples = qw(--folder=inbox --folder=sent);
   my @folderArgExamples = qw(inbox sent);
@@ -130,6 +136,14 @@ sub email(@){
 
   if($cmdArg =~ /^(--folders|--read-config)$/ and @args == 0){
     @complete = (@complete, @accountExamples);
+  }
+
+  if($cmdArg =~ /^(--write-config)$/){
+    if(@args == 0){
+      @complete = (@complete, @accountExamples);
+    }else{
+      @complete = (@complete, @configOpts);
+    }
   }
 
   return @complete;
