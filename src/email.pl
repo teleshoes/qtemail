@@ -28,6 +28,7 @@ sub readUidFileCounts($$$);
 sub readUidFile($$$);
 sub writeUidFile($$$@);
 sub cacheAllHeaders($$$);
+sub cacheHeader($$$$$$$);
 sub cacheBodies($$$$@);
 sub getBody($$$);
 sub writeAttachments($$);
@@ -1077,52 +1078,8 @@ sub cacheAllHeaders($$$){
       print "#$pct%\n" if $VERBOSE;
     }
     my $hdr = $$headers{$uid};
-    my @fmtLines;
-    my @rawLines;
-    for my $field(@headerFields){
-      my $vals = $$hdr{$field};
-      my $val;
-      if(not defined $vals or @$vals == 0){
-        $$missingFields{$field} = {} if not defined $$missingFields{$field};
-        $$missingFields{$field}{$uid} = 1;
-        warn "  $uid missing $field\n" unless $field =~ /^(CC|BCC)$/;
-        $val = "";
-      }else{
-        die "FATAL: too many '$field' values for $uid in $accName\n" if @$vals != 1;
-        $val = $$vals[0];
-      }
-      my $rawVal = $val;
-      if($rawVal =~ s/\n/\\n/g){
-        $$newlineFields{$field} = {} if not defined $$newlineFields{$field};
-        $$newlineFields{$field}{$uid} = 1;
-        warn "  $uid newlines in $field\n";
-      }
-      if($rawVal =~ s/\x00//g){
-        $$nullFields{$field} = {} if not defined $$nullFields{$field};
-        $$nullFields{$field}{$uid} = 1;
-        warn "  $uid NULs in $field\n";
-      }
-
-      my $fmtVal = formatHeaderField($field, $rawVal);
-      $fmtVal =~ s/\n+$//; #silently remove trailing newlines
-      if($fmtVal =~ s/\n/\\n/g){
-        $$newlineFields{$field} = {} if not defined $$newlineFields{$field};
-        $$newlineFields{$field}{$uid} = 1;
-        warn "  $uid newlines in $field\n";
-      }
-      if($fmtVal =~ s/\x00//g){
-        $$nullFields{$field} = {} if not defined $$nullFields{$field};
-        $$nullFields{$field}{$uid} = 1;
-        warn "  $uid NULs in $field\n";
-      }
-
-      push @fmtLines, "$field: $fmtVal\n";
-      push @rawLines, "raw_$field: $rawVal\n";
-    }
-    open FH, "> $headersDir/$uid";
-    binmode FH, ':utf8';
-    print FH (@fmtLines, @rawLines);
-    close FH;
+    cacheHeader $hdr, $uid, $accName, $headersDir,
+      $missingFields, $newlineFields, $nullFields;
   }
 
   for my $field(keys %$missingFields){
@@ -1141,6 +1098,57 @@ sub cacheAllHeaders($$$){
   print "\n" if $segment > 0 and $VERBOSE;
 
   return @messages;
+}
+
+sub cacheHeader($$$$$$$){
+  my ($hdr, $uid, $accName, $headersDir,
+    $missingFields, $newlineFields, $nullFields) = @_;
+  my @fmtLines;
+  my @rawLines;
+  for my $field(@headerFields){
+    my $vals = $$hdr{$field};
+    my $val;
+    if(not defined $vals or @$vals == 0){
+      $$missingFields{$field} = {} if not defined $$missingFields{$field};
+      $$missingFields{$field}{$uid} = 1;
+      warn "  $uid missing $field\n" unless $field =~ /^(CC|BCC)$/;
+      $val = "";
+    }else{
+      die "FATAL: too many '$field' values for $uid in $accName\n" if @$vals != 1;
+      $val = $$vals[0];
+    }
+    my $rawVal = $val;
+    if($rawVal =~ s/\n/\\n/g){
+      $$newlineFields{$field} = {} if not defined $$newlineFields{$field};
+      $$newlineFields{$field}{$uid} = 1;
+      warn "  $uid newlines in $field\n";
+    }
+    if($rawVal =~ s/\x00//g){
+      $$nullFields{$field} = {} if not defined $$nullFields{$field};
+      $$nullFields{$field}{$uid} = 1;
+      warn "  $uid NULs in $field\n";
+    }
+
+    my $fmtVal = formatHeaderField($field, $rawVal);
+    $fmtVal =~ s/\n+$//; #silently remove trailing newlines
+    if($fmtVal =~ s/\n/\\n/g){
+      $$newlineFields{$field} = {} if not defined $$newlineFields{$field};
+      $$newlineFields{$field}{$uid} = 1;
+      warn "  $uid newlines in $field\n";
+    }
+    if($fmtVal =~ s/\x00//g){
+      $$nullFields{$field} = {} if not defined $$nullFields{$field};
+      $$nullFields{$field}{$uid} = 1;
+      warn "  $uid NULs in $field\n";
+    }
+
+    push @fmtLines, "$field: $fmtVal\n";
+    push @rawLines, "raw_$field: $rawVal\n";
+  }
+  open FH, "> $headersDir/$uid";
+  binmode FH, ':utf8';
+  print FH (@fmtLines, @rawLines);
+  close FH;
 }
 
 sub cacheBodies($$$$@){
