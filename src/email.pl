@@ -1088,6 +1088,7 @@ sub cacheAllHeaders($$$){
         warn "  $uid missing $field\n" unless $field =~ /^(CC|BCC)$/;
         $val = "";
       }else{
+        die "FATAL: too many '$field' values for $uid in $accName\n" if @$vals != 1;
         $val = $$vals[0];
       }
       my $rawVal = $val;
