@@ -285,7 +285,7 @@ class EmailManager():
     folderOut = self.readProc([EMAIL_BIN, "--folders", accountName])
     folders = []
     for line in folderOut.splitlines():
-      m = re.match("([a-z]+):(\d+)/(\d+)", line)
+      m = re.match("([a-zA-Z_]+):(\d+)/(\d+)", line)
       if m:
         folderName = m.group(1)
         unreadCount = int(m.group(2))
