@@ -1098,6 +1098,22 @@ sub cacheAllHeaders($$$){
   }
   print "\n" if $segment > 0 and $VERBOSE;
 
+  my @cachedBodyUids = getCachedBodyUids($accName, $folderName);
+  my %okCachedHeaderUids = map {$_ => 1} getCachedHeaderUids($accName, $folderName);
+  for my $uid(@cachedBodyUids){
+    if(not defined $okCachedHeaderUids{$uid}){
+      warn "\n!!!!!\nDELETED MESSAGE: $uid is cached in bodies, but not on server\n";
+      my $mimeParser = MIME::Parser->new();
+      $mimeParser->output_dir($TMP_DIR);
+
+      my $cachedBody = readCachedBody($accName, $folderName, $uid);
+
+      my $hdr = getHeaderFromBody($mimeParser, $cachedBody);
+      cacheHeader $hdr, $uid, $accName, $headersDir, {}, {}, {};
+      warn "  cached $uid using MIME entity in body cache\n\n";
+    }
+  }
+
   return @messages;
 }
 
