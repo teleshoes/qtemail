@@ -32,10 +32,14 @@ my @headerFields = qw(
   from
   subject
   to
+  cc
+  bcc
   raw_date
   raw_from
   raw_subject
   raw_to
+  raw_cc
+  raw_bcc
 );
 my @cols = ("uid", map {"header_$_"} @headerFields);
 my @colTypes = ("uid number", map {"header_$_ varchar"} @headerFields);
@@ -67,10 +71,10 @@ my $usageFormat = "Usage:
         ignore all except the last UID_LIMIT UIDs
 
     SEARCH FORMAT:
-      -all words separated by spaces must match one of subject/date/from/to
+      -all words separated by spaces must match one of subject/date/from/to/cc/bcc
         apple banana
-        => emails where subject/from/to/date matches both 'apple' AND 'banana'
-      -specify an individual field of subject/date/from/to with a '~'
+        => emails where subject/from/to/cc/bcc/date matches both 'apple' AND 'banana'
+      -specify an individual field of subject/date/from/to/cc/bcc with a '~'
         from~mary
         => emails from 'mary'
       -negate a header field query with '!~' instead of '~'
@@ -93,10 +97,10 @@ my $usageFormat = "Usage:
         => emails that match 'a', PLUS emails that match 'b' AND match 'c' or 'd'
       -special characters can be escaped with backslash
         subject\\~fish\\ table
-        => emails where subject/from/to/date matches 'subject~fish table'
+        => emails where subject/from/to/cc/bcc/date matches 'subject~fish table'
       -doublequoted strings are treated as words
         \"this is a (single ++ w~ord)\"
-        => emails where subject/from/to/date matches 'this is a (single ++ w~ord)'
+        => emails where subject/from/to/cc/bcc/date matches 'this is a (single ++ w~ord)'
 
     GRAMMAR:
       QUERY = <LIST_AND>
@@ -122,7 +126,7 @@ my $usageFormat = "Usage:
         return emails where the body matches the pattern
       NEGATED_BODY_QUERY = body!~<PATTERN>
         return emails where the body does NOT match the pattern
-      HEADER_FIELD = subject | from | to | date | body
+      HEADER_FIELD = subject | from | to | cc | bcc | date | body
         restricts the fields that PATTERN can match
       PATTERN = <string> | <string>\"<string>\"<string>
         can be any string, supports doublequote quoting and backslash escaping
@@ -466,7 +470,7 @@ sub parseFlatQueryStr($){
       my @fields;
       my $negated;
       my $content;
-      if($and =~ /(to|from|subject)(!?)~(.*)/i){
+      if($and =~ /(to|cc|bcc|from|subject)(!?)~(.*)/i){
         $type = "header";
         @fields = (lc $1);
         $negated = $2 eq "!" ? 1 : 0;
@@ -478,7 +482,7 @@ sub parseFlatQueryStr($){
         $content = $3;
       }else{
         $type = "header";
-        @fields = qw(to from subject);
+        @fields = qw(to cc bcc from subject);
         $negated = 0;
         $content = $and;
       }
