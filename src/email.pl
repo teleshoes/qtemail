@@ -1197,9 +1197,9 @@ sub cacheBodies($$$$@){
 
 sub getBody($$$){
   my ($mimeParser, $bodyString, $preferHtml) = @_;
-  my $mimeBody = $mimeParser->parse_data($bodyString);
+  my $entity = $mimeParser->parse_data($bodyString);
 
-  my @parts = parseMimeEntity($mimeBody);
+  my @parts = parseMimeEntity($entity);
   my @text = map {$_->{handle}} grep {$_->{partType} eq "text"} @parts;
   my @html = map {$_->{handle}} grep {$_->{partType} eq "html"} @parts;
   my @atts = map {$_->{handle}} grep {$_->{partType} eq "attachment"} @parts;
@@ -1239,8 +1239,8 @@ sub getBody($$$){
 
 sub writeAttachments($$){
   my ($mimeParser, $bodyString) = @_;
-  my $mimeBody = $mimeParser->parse_data($bodyString);
-  my @parts = parseMimeEntity($mimeBody);
+  my $entity = $mimeParser->parse_data($bodyString);
+  my @parts = parseMimeEntity($entity);
   my @attachments;
   for my $part(@parts){
     my $partType = $$part{partType};
