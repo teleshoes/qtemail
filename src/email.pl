@@ -1071,7 +1071,7 @@ sub cacheAllHeaders($$$){
   my $nullFields = {};
   for my $uid(keys %$headers){
     $count++;
-    if($segment > 0 and $count % $segment == 0){
+    if(($segment > 0 and $count % $segment == 0) or $count == 1 or $count == $total){
       my $pct = int(0.5 + 100*$count/$total);
       #print "\n" if $pct > 50 and $pct <= 55 and $VERBOSE;
       print "\n";
