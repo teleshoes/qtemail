@@ -356,9 +356,11 @@ sub main(@){
   my $accounts = $$config{accounts};
   my %accNameFolderPairs = map {$_ => parseFolders $$accounts{$_}} keys %$accounts;
   my %accFolders;
+  my %accFolderOrder;
   for my $acc(keys %$accounts){
     my @nameFolderPairs = @{$accNameFolderPairs{$acc}};
     $accFolders{$acc} = {map {$$_[0] => $$_[1]} @nameFolderPairs};
+    $accFolderOrder{$acc} = [map {$$_[0]} @nameFolderPairs];
   }
 
   if($cmd =~ /^(--update)$/){
@@ -398,9 +400,10 @@ sub main(@){
       }
 
       my $folders = $accFolders{$accName};
+      my @folderOrder = @{$accFolderOrder{$accName}};
       my $unreadCount = 0;
       my $hasNewUnread = 0;
-      for my $folderName(sort keys %$folders){
+      for my $folderName(@folderOrder){
         if(defined $folderNameFilter and $folderName ne $folderNameFilter){
           print "skipping $folderName\n";
           next;
@@ -519,13 +522,14 @@ sub main(@){
     die $usage if @_ != 0;
     for my $accName(@accOrder){
       my $folders = $accFolders{$accName};
+      my @folderOrder = @{$accFolderOrder{$accName}};
       my $unreadCount = 0;
       my $totalCount = 0;
       my $lastUpdated = readLastUpdated $accName;
       my $lastUpdatedRel = relTime $lastUpdated;
       my $error = readError $accName;
       $error = "" if not defined $error;
-      for my $folderName(sort keys %$folders){
+      for my $folderName(@folderOrder){
         $unreadCount += readUidFileCounts $accName, $folderName, "unread";
         $totalCount += readUidFileCounts $accName, $folderName, "all";
       }
@@ -546,7 +550,8 @@ sub main(@){
     die $usage if @_ != 1;
     my $accName = shift;
     my $folders = $accFolders{$accName};
-    for my $folderName(sort keys %$folders){
+    my @folderOrder = @{$accFolderOrder{$accName}};
+    for my $folderName(@folderOrder){
       my $unreadCount = readUidFileCounts $accName, $folderName, "unread";
       my $totalCount = readUidFileCounts $accName, $folderName, "all";
       printf "$folderName:$unreadCount/$totalCount\n";
@@ -745,7 +750,8 @@ sub main(@){
     my @fmts;
     for my $accName(@accNames){
       my $folders = $accFolders{$accName};
-      for my $folderName(sort keys %$folders){
+      my @folderOrder = @{$accFolderOrder{$accName}};
+      for my $folderName(@folderOrder){
         my $unread = readUidFileCounts $accName, $folderName, "new-unread";
         if($unread > 0){
           print "yes\n";
@@ -760,7 +766,8 @@ sub main(@){
     my @fmts;
     for my $accName(@accNames){
       my $folders = $accFolders{$accName};
-      for my $folderName(sort keys %$folders){
+      my @folderOrder = @{$accFolderOrder{$accName}};
+      for my $folderName(@folderOrder){
         my $unread = readUidFileCounts $accName, $folderName, "unread";
         if($unread > 0){
           print "yes\n";
