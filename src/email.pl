@@ -1073,9 +1073,7 @@ sub cacheAllHeaders($$$){
     $count++;
     if(($segment > 0 and $count % $segment == 0) or $count == 1 or $count == $total){
       my $pct = int(0.5 + 100*$count/$total);
-      #print "\n" if $pct > 50 and $pct <= 55 and $VERBOSE;
-      print "\n";
-      print " $pct%" if $VERBOSE;
+      print "#$pct%\n" if $VERBOSE;
     }
     my $hdr = $$headers{$uid};
     my @fmtLines;
