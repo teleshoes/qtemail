@@ -1358,7 +1358,8 @@ sub getClient($){
       Socket => $socket,
     };
   }
-  print "$$acc{name}: logging in\n" if $VERBOSE;
+  my $sep = "="x50;
+  print "$sep\n$$acc{name}: logging in\n$sep\n" if $VERBOSE;
   my $c = Mail::IMAPClient->new(
     %$network,
     User     => $$acc{user},
