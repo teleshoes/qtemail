@@ -1101,7 +1101,9 @@ sub cacheAllHeaders($$$){
         $$nullFields{$field}{$uid} = 1;
         warn "  $uid NULs in $field\n";
       }
+
       my $fmtVal = formatHeaderField($field, $rawVal);
+      $fmtVal =~ s/\n+$//; #silently remove trailing newlines
       if($fmtVal =~ s/\n/\\n/g){
         $$newlineFields{$field} = {} if not defined $$newlineFields{$field};
         $$newlineFields{$field}{$uid} = 1;
