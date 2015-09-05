@@ -1081,16 +1081,16 @@ sub cacheAllHeaders($$$){
       my $vals = $$hdr{$field};
       my $val;
       if(not defined $vals or @$vals == 0){
-        warn "\nWARNING: $uid has no field $field\n" unless $field =~ /CC|BCC/;
+        warn "  $uid missing $field\n" unless $field =~ /^(CC|BCC)$/;
         $val = "";
       }else{
         $val = $$vals[0];
       }
-      if($val =~ s/\n/\\n/){
-        warn "\nWARNING: newlines in $uid $field {replaced with \\n}\n";
-      }
       my $rawVal = $val;
-      my $fmtVal = formatHeaderField($field, $val);
+      if($rawVal =~ s/\n/\\n/g){
+        warn "  $uid newlines in $field\n";
+      }
+      my $fmtVal = formatHeaderField($field, $rawVal);
       push @fmtLines, "$field: $fmtVal\n";
       push @rawLines, "raw_$field: $rawVal\n";
     }
