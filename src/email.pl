@@ -447,6 +447,7 @@ sub main(@){
 
         print "running updatedb\n";
         system $EMAIL_SEARCH_EXEC, "--updatedb", $accName, $folderName, $UPDATEDB_LIMIT;
+        print "\n";
       }
       $c->logout();
       $$counts{$accName} = $unreadCount;
