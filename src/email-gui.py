@@ -331,6 +331,8 @@ class EmailManager():
     hdrDate = ""
     hdrFrom = ""
     hdrTo = ""
+    hdrCC = ""
+    hdrBCC = ""
     hdrSubject = ""
     for line in header.splitlines():
       m = re.match('(\w+): (.*)', line)
@@ -349,9 +351,13 @@ class EmailManager():
         hdrFrom = val
       elif field == "To":
         hdrTo = val
+      elif field == "CC":
+        hdrCC = val
+      elif field == "BCC":
+        hdrBCC = val
       elif field == "Subject":
         hdrSubject = val
-    return Header(uid, hdrDate, hdrFrom, hdrTo, hdrSubject, False, False, False)
+    return Header(uid, hdrDate, hdrFrom, hdrTo, hdrCC, hdrBCC, hdrSubject, False, False, False)
   def getCachedBodies(self, accountName, folderName, uids, isHtml):
     if isHtml:
       bodyArg = "--body-html"
@@ -881,6 +887,8 @@ class Controller(QObject):
         + "From: " + self.header.From + "\n"
         + "Subject: " + self.header.Subject + "\n"
         + "To: " + self.header.To + "\n"
+        + "CC: " + self.header.CC + "\n"
+        + "BCC: " + self.header.BCC + "\n"
         + "Date: " + self.header.Date
         + "    (uid: " + str(self.header.Uid) + ")\n"
       );
@@ -1267,12 +1275,14 @@ class Folder(QObject):
   Total = Property(int, Total, notify=changed)
 
 class Header(QObject):
-  def __init__(self, uid_, date_, from_, to_, subject_, isSent_, read_, isLoading_):
+  def __init__(self, uid_, date_, from_, to_, cc_, bcc_, subject_, isSent_, read_, isLoading_):
     QObject.__init__(self)
     self.uid_ = uid_
     self.date_ = date_
     self.from_ = from_
     self.to_ = to_
+    self.cc_ = cc_
+    self.bcc_ = bcc_
     self.subject_ = subject_
     self.isSent_ = isSent_
     self.read_ = read_
@@ -1286,6 +1296,10 @@ class Header(QObject):
     return self.from_
   def To(self):
     return self.to_
+  def CC(self):
+    return self.cc_
+  def BCC(self):
+    return self.bcc_
   def Subject(self):
     return self.subject_
   def IsSent(self):
@@ -1310,6 +1324,8 @@ class Header(QObject):
   Date = Property(unicode, Date, notify=changed)
   From = Property(unicode, From, notify=changed)
   To = Property(unicode, To, notify=changed)
+  CC = Property(unicode, CC, notify=changed)
+  BCC = Property(unicode, BCC, notify=changed)
   Subject = Property(unicode, Subject, notify=changed)
   IsSent = Property(bool, IsSent, notify=changed)
   Read = Property(bool, Read, notify=changed)
