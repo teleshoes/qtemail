@@ -1326,7 +1326,7 @@ sub readCachedHeader($$$){
 
 sub openFolder($$$){
   my ($imapFolder, $c, $allowEditing) = @_;
-  print "Opening folder $imapFolder\n" if $VERBOSE;
+  print "Opening folder: $imapFolder\n" if $VERBOSE;
 
   my @folders = $c->folders($imapFolder);
   if(@folders != 1){
