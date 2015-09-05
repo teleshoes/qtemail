@@ -287,7 +287,7 @@ sub fetchHeaderRowMap($$$){
   my $rowMap = {};
   $$rowMap{"uid"} = $uid;
   for my $field(@headerFields){
-    my $val = $1 if $hdr =~ /^$field:\s*(.*)$/im;
+    my $val = $1 if $hdr =~ /^$field: *(.*)$/im;
     $val =~ s/'/''/g;
     $val =~ s/\x00//g;
     $val =~ s/[\r\n]/ /g;
