@@ -1065,7 +1065,7 @@ sub cacheAllHeaders($$$){
     my $hdr = $$headers{$uid};
     my @fmtLines;
     my @rawLines;
-    for my $field(sort @headerFields){
+    for my $field(@headerFields){
       my $vals = $$hdr{$field};
       my $val;
       if(not defined $vals or @$vals == 0){
