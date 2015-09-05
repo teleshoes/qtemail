@@ -330,6 +330,7 @@ class EmailManager():
     f.close()
     hdrDate = ""
     hdrFrom = ""
+    hdrTo = ""
     hdrSubject = ""
     for line in header.splitlines():
       m = re.match('(\w+): (.*)', line)
