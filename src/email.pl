@@ -354,7 +354,12 @@ sub main(@){
   validateSecrets $config;
   my @accOrder = @{$$config{accOrder}};
   my $accounts = $$config{accounts};
-  my %accFolders = map {$_ => parseFolders $$accounts{$_}} keys %$accounts;
+  my %accNameFolderPairs = map {$_ => parseFolders $$accounts{$_}} keys %$accounts;
+  my %accFolders;
+  for my $acc(keys %$accounts){
+    my @nameFolderPairs = @{$accNameFolderPairs{$acc}};
+    $accFolders{$acc} = {map {$$_[0] => $$_[1]} @nameFolderPairs};
+  }
 
   if($cmd =~ /^(--update)$/){
     $VERBOSE = 1;
@@ -1360,26 +1365,23 @@ sub getFolderName($){
 
 sub parseFolders($){
   my $acc = shift;
-  my $folders = {};
+  my $folders = [];
 
   my $folder = defined $$acc{inbox} ? $$acc{inbox} : "INBOX";
   my $name = "inbox";
-  die "DUPE FOLDER: $folder and $$folders{$name}\n" if defined $$folders{$name};
-  $$folders{$name} = $folder;
+  push @$folders, [$name, $folder];
 
   if(defined $$acc{sent}){
     my $folder = $$acc{sent};
     my $name = "sent";
-    die "DUPE FOLDER: $folder and $$folders{$name}\n" if defined $$folders{$name};
-    $$folders{$name} = $folder;
+    push @$folders, [$name, $folder];
   }
   if(defined $$acc{folders}){
     for my $folder(split /:/, $$acc{folders}){
       $folder =~ s/^\s*//;
       $folder =~ s/\s*$//;
       my $name = getFolderName $folder;
-      die "DUPE FOLDER: $folder and $$folders{$name}\n" if defined $$folders{$name};
-      $$folders{$name} = $folder;
+      push @$folders, [$name, $folder];
     }
   }
   return $folders;
