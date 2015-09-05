@@ -479,6 +479,8 @@ class Controller(QObject):
 
     toEmails = self.emailManager.parseEmails(header.To)
     fromEmails = self.emailManager.parseEmails(header.From)
+    ccEmails = self.emailManager.parseEmails(header.CC)
+    #do not retain bccEmails in reply/forward
 
     if sendType == "reply":
       if self.folderName == "sent":
@@ -505,8 +507,8 @@ class Controller(QObject):
     date = header.Date
 
     sendForm.setTo(recipEmails)
-    sendForm.setCC([])
-    sendForm.setBCC([])
+    sendForm.setCC(ccEmails)
+    sendForm.setBCC([]) #do not retain bccEmails in reply/forward
     sendForm.setSubject(subject)
 
     self.fetchCurrentBodyText(sendForm, None,
