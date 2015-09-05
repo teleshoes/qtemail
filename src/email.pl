@@ -73,7 +73,7 @@ my %enums = (
 );
 my @optionsConfigKeys = qw(update_cmd encrypt_cmd decrypt_cmd);
 
-my @headerFields = qw(Date Subject From To);
+my @headerFields = qw(Date Subject From To CC BCC);
 my $emailDir = "$ENV{HOME}/.cache/email";
 my $unreadCountsFile = "$emailDir/unread-counts";
 my $statusLineFile = "$emailDir/status-line";
@@ -685,6 +685,8 @@ sub main(@){
           . "DATE: $$hdr{Date}\n"
           . "FROM: $$hdr{From}\n"
           . "TO: $$hdr{To}\n"
+          . "CC: $$hdr{CC}\n"
+          . "BCC: $$hdr{BCC}\n"
           . "SUBJECT: $$hdr{Subject}\n"
           . "BODY:\n$bodySep\n$body\n$bodySep\n"
           . "\n"
@@ -707,6 +709,8 @@ sub main(@){
           . " $$hdr{Date}"
           . " $$hdr{From}"
           . " $$hdr{To}"
+          . " $$hdr{CC}"
+          . " $$hdr{BCC}"
           . "\n"
           . "  $$hdr{Subject}"
           . "\n"
