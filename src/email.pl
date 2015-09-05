@@ -1068,6 +1068,7 @@ sub cacheAllHeaders($$$){
 
   my $missingFields = {};
   my $newlineFields = {};
+  my $nullFields = {};
   for my $uid(keys %$headers){
     $count++;
     if($segment > 0 and $count % $segment == 0){
@@ -1096,6 +1097,11 @@ sub cacheAllHeaders($$$){
         $$newlineFields{$field}{$uid} = 1;
         warn "  $uid newlines in $field\n";
       }
+      if($rawVal =~ s/\x00//g){
+        $$nullFields{$field} = {} if not defined $$nullFields{$field};
+        $$nullFields{$field}{$uid} = 1;
+        warn "  $uid NULs in $field\n";
+      }
       my $fmtVal = formatHeaderField($field, $rawVal);
       push @fmtLines, "$field: $fmtVal\n";
       push @rawLines, "raw_$field: $rawVal\n";
@@ -1114,6 +1120,10 @@ sub cacheAllHeaders($$$){
   for my $field(keys %$newlineFields){
     my @uids = sort keys %{$$newlineFields{$field}};
     warn "\n=====\nWARNING: newlines in '$field':\n@uids\n=====\n";
+  }
+  for my $field(keys %$nullFields){
+    my @uids = sort keys %{$$nullFields{$field}};
+    warn "\n=====\nWARNING: NULs in '$field':\n@uids\n======\n";
   }
   print "\n" if $segment > 0 and $VERBOSE;
 
