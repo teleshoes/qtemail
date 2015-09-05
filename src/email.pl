@@ -120,7 +120,7 @@ my $usage = "
       sent     {Optional} IMAP folder name to use for sent mail
       folders  {Optional} colon-separated list of additional folders to fetch
         each folder has a FOLDER_NAME,
-        which is the directory on the filesystem will be lowercase
+        which is the directory on the filesystem
         FOLDER_NAME is the folder, with all non-alphanumeric characters
           replaced with _s, and all leading and trailing _s removed
         e.g.:  junk:[GMail]/Drafts:_12_/ponies
