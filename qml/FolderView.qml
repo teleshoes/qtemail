@@ -10,7 +10,7 @@ Rectangle {
     model: folderModel
     delegate: Component  {
       Rectangle {
-        height: 150
+        height: 100
         width: parent.width
         color: "gray"
         MouseArea{
