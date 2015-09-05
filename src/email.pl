@@ -1069,7 +1069,7 @@ sub cacheAllHeaders($$$){
       my $vals = $$hdr{$field};
       my $val;
       if(not defined $vals or @$vals == 0){
-        warn "\nWARNING: $uid has no field $field\n";
+        warn "\nWARNING: $uid has no field $field\n" unless $field =~ /CC|BCC/;
         $val = "";
       }else{
         $val = $$vals[0];
