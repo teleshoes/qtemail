@@ -584,7 +584,7 @@ sub main(@){
       $nulSep = 1;
       shift;
     }
-    if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
+    if(@_ > 0 and $_[0] =~ /^--folder=([a-zA-Z_]+)$/){
       $folderName = $1;
       shift;
     }
