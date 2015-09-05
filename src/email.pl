@@ -30,6 +30,7 @@ sub writeUidFile($$$@);
 sub cacheAllHeaders($$$);
 sub cacheHeader($$$$$$$);
 sub cacheBodies($$$$@);
+sub getHeaderFromBody($$);
 sub getBody($$$);
 sub writeAttachments($$);
 sub parseMimeEntity($);
@@ -1193,6 +1194,31 @@ sub cacheBodies($$$$@){
       close FH;
     }
   }
+}
+
+sub getHeaderFromBody($$){
+  my ($mimeParser, $bodyString) = @_;
+  my $entity = $mimeParser->parse_data($bodyString);
+
+  my $head = $entity->head();
+
+  #simulate Mail::IMAPClient::parse_headers using MIME::Parser
+  #like:
+  # my $c = Mail::IMAPClient->new();
+  # my $headers = $c->parse_headers($uid, @headerFields)
+  # my $hdr = $$headers{$uid};
+  # return $hdr;
+  my $hdr = {};
+  for my $field(@headerFields){
+    my $rawVal = $head->get($field);
+    if(defined $rawVal){
+      chomp $rawVal;
+      $$hdr{$field} = [$rawVal];
+    }
+  }
+
+  $mimeParser->filer->purge;
+  return $hdr;
 }
 
 sub getBody($$$){
