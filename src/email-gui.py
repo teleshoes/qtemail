@@ -512,7 +512,7 @@ class Controller(QObject):
     sendForm.setSubject(subject)
 
     self.fetchCurrentBodyText(sendForm, None,
-      lambda body: self.wrapBody(body, date, firstFrom))
+      lambda body: self.wrapBody(body, date, firstFrom), True)
 
   def wrapBody(self, body, date, author):
     bodyPrefix = "\n\nOn " + date + ", " + author + " wrote:\n"
@@ -878,7 +878,7 @@ class Controller(QObject):
     self.htmlMode = htmlMode
 
   @Slot(QObject, QObject, object)
-  def fetchCurrentBodyText(self, bodyBox, headerBox, transform):
+  def fetchCurrentBodyText(self, bodyBox, headerBox, transform, forcePlain=False):
     self.currentBodyText = None
     bodyBox.setBody("...loading body")
     if self.header == None:
@@ -895,7 +895,7 @@ class Controller(QObject):
         + "    (uid: " + str(self.header.Uid) + ")\n"
       );
 
-    if self.htmlMode:
+    if self.htmlMode and not forcePlain:
       arg = "--body-html"
     else:
       arg = "--body-plain"
