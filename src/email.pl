@@ -1066,6 +1066,8 @@ sub cacheAllHeaders($$$){
     select($old_fh);
   }
 
+  my $missingFields = {};
+  my $newlineFields = {};
   for my $uid(keys %$headers){
     $count++;
     if($segment > 0 and $count % $segment == 0){
@@ -1081,6 +1083,8 @@ sub cacheAllHeaders($$$){
       my $vals = $$hdr{$field};
       my $val;
       if(not defined $vals or @$vals == 0){
+        $$missingFields{$field} = {} if not defined $$missingFields{$field};
+        $$missingFields{$field}{$uid} = 1;
         warn "  $uid missing $field\n" unless $field =~ /^(CC|BCC)$/;
         $val = "";
       }else{
@@ -1088,6 +1092,8 @@ sub cacheAllHeaders($$$){
       }
       my $rawVal = $val;
       if($rawVal =~ s/\n/\\n/g){
+        $$newlineFields{$field} = {} if not defined $$newlineFields{$field};
+        $$newlineFields{$field}{$uid} = 1;
         warn "  $uid newlines in $field\n";
       }
       my $fmtVal = formatHeaderField($field, $rawVal);
@@ -1098,6 +1104,16 @@ sub cacheAllHeaders($$$){
     binmode FH, ':utf8';
     print FH (@fmtLines, @rawLines);
     close FH;
+  }
+
+  for my $field(keys %$missingFields){
+    next if $field =~ /^(CC|BCC)$/;
+    my @uids = sort keys %{$$missingFields{$field}};
+    warn "\n=====\nWARNING: missing '$field'\n@uids\n=====\n";
+  }
+  for my $field(keys %$newlineFields){
+    my @uids = sort keys %{$$newlineFields{$field}};
+    warn "\n=====\nWARNING: newlines in '$field':\n@uids\n=====\n";
   }
   print "\n" if $segment > 0 and $VERBOSE;
 
