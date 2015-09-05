@@ -1103,6 +1103,17 @@ sub cacheAllHeaders($$$){
         warn "  $uid NULs in $field\n";
       }
       my $fmtVal = formatHeaderField($field, $rawVal);
+      if($fmtVal =~ s/\n/\\n/g){
+        $$newlineFields{$field} = {} if not defined $$newlineFields{$field};
+        $$newlineFields{$field}{$uid} = 1;
+        warn "  $uid newlines in $field\n";
+      }
+      if($fmtVal =~ s/\x00//g){
+        $$nullFields{$field} = {} if not defined $$nullFields{$field};
+        $$nullFields{$field}{$uid} = 1;
+        warn "  $uid NULs in $field\n";
+      }
+
       push @fmtLines, "$field: $fmtVal\n";
       push @rawLines, "raw_$field: $rawVal\n";
     }
@@ -1373,8 +1384,6 @@ sub formatHeaderField($$){
   if($field =~ /^(Date)$/){
     $val = formatDate($val);
   }
-  chomp $val;
-  $val =~ s/\n/\\n/g;
   return $val;
 }
 
