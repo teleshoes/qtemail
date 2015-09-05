@@ -1356,29 +1356,29 @@ sub getFolderName($){
 
 sub parseFolders($){
   my $acc = shift;
-  my $fs = {};
+  my $folders = {};
 
-  my $f = defined $$acc{inbox} ? $$acc{inbox} : "INBOX";
+  my $folder = defined $$acc{inbox} ? $$acc{inbox} : "INBOX";
   my $name = "inbox";
-  die "DUPE FOLDER: $f and $$fs{$name}\n" if defined $$fs{$name};
-  $$fs{$name} = $f;
+  die "DUPE FOLDER: $folder and $$folders{$name}\n" if defined $$folders{$name};
+  $$folders{$name} = $folder;
 
   if(defined $$acc{sent}){
-    my $f = $$acc{sent};
+    my $folder = $$acc{sent};
     my $name = "sent";
-    die "DUPE FOLDER: $f and $$fs{$name}\n" if defined $$fs{$name};
-    $$fs{$name} = $f;
+    die "DUPE FOLDER: $folder and $$folders{$name}\n" if defined $$folders{$name};
+    $$folders{$name} = $folder;
   }
   if(defined $$acc{folders}){
-    for my $f(split /:/, $$acc{folders}){
-      $f =~ s/^\s*//;
-      $f =~ s/\s*$//;
-      my $name = getFolderName $f;
-      die "DUPE FOLDER: $f and $$fs{$name}\n" if defined $$fs{$name};
-      $$fs{$name} = $f;
+    for my $folder(split /:/, $$acc{folders}){
+      $folder =~ s/^\s*//;
+      $folder =~ s/\s*$//;
+      my $name = getFolderName $folder;
+      die "DUPE FOLDER: $folder and $$folders{$name}\n" if defined $$folders{$name};
+      $$folders{$name} = $folder;
     }
   }
-  return $fs;
+  return $folders;
 }
 
 sub hasWords($){
