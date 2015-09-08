@@ -123,6 +123,8 @@ my $usage = "
   Simple IMAP client. {--smtp command is a convenience wrapper around smtp-cli}
   Configuration is in $secretsFile
     Each config entry is one line of the format:
+      $secretsPrefix.GLOBAL_OPTION_KEY = <value>
+      or
       $secretsPrefix.ACCOUNT_NAME.ACCOUNT_CONFIG_KEY = <value>
 
     Account names can be any word characters (alphanumeric plus underscore)
@@ -132,6 +134,7 @@ my $usage = "
     FOLDER_NAME:     \"inbox\", \"sent\" or one of the names from \"folders\"
     UID:             an IMAP UID {UIDVALIDITY is assumed to never change}
 
+    GLOBAL_OPTION_KEY:\n" . formatSchemaDisplay($optionsConfigSchema, "      ") . "
 
     ACCOUNT_CONFIG_KEY:\n" . formatSchemaDisplay($accountConfigSchema, "      ") . "
 
