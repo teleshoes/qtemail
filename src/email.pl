@@ -121,28 +121,16 @@ my $okCmds = join "|", qw(
 my $usage = "
   Simple IMAP client. {--smtp command is a convenience wrapper around smtp-cli}
   Configuration is in $secretsFile
-    Each line is one key of the format: $secretsPrefix.ACCOUNT_NAME.FIELD = value
-    Account names can be any word characters (alphanumeric plus underscore)
-    Other keys are ignored.
-    required fields:
-      user     {Required} IMAP username, usually the full email address
-      password {Required} *password in plaintext*
-      server   {Required} IMAP server
-      port     {Required} IMAP server port
-      ssl      {Optional} false to forcibly disable security
-      inbox    {Optional} main IMAP folder name to use (default is \"INBOX\")
-      sent     {Optional} IMAP folder name to use for sent mail
-      folders  {Optional} colon-separated list of additional folders to fetch
-        each folder has a FOLDER_NAME,
-        which is the directory on the filesystem
-        FOLDER_NAME is the folder, with all non-alphanumeric characters
-          replaced with _s, and all leading and trailing _s removed
-        e.g.:  junk:[GMail]/Drafts:_12_/ponies
-               =>  [\"junk\", \"gmail_drafts\", \"12_ponies\"]
+    Each config entry is one line of the format:
+      $secretsPrefix.ACCOUNT_NAME.ACCOUNT_CONFIG_KEY = <value>
 
-  ACCOUNT_NAME    the word following \"$secretsPrefix.\" in $secretsFile
-  FOLDER_NAME     \"inbox\", \"sent\" or one of the names from \"folders\"
-  UID             an IMAP UID {UIDVALIDITY is assumed to never change}
+    Account names can be any word characters (alphanumeric plus underscore)
+    Lines that do not begin with \"$secretsPrefix.\" are ignored.
+
+    ACCOUNT_NAME:    the word following \"$secretsPrefix.\" in $secretsFile
+    FOLDER_NAME:     \"inbox\", \"sent\" or one of the names from \"folders\"
+    UID:             an IMAP UID {UIDVALIDITY is assumed to never change}
+
 
   $0 -h|--help
     show this message
