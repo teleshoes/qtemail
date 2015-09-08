@@ -150,7 +150,7 @@ class EmailManager():
   def compileEmailRegex(self):
     c = "[a-zA-Z0-9!#$%&'*+\\-/=?^_`{|}~]"
     start = c + "+"
-    middleDot = "(?:" + "\\." + c + ")*"
+    middleDot = "(?:" + "\\." + c + "+)*"
     end = c + "*"
     user = start + middleDot + end
 
