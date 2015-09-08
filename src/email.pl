@@ -54,26 +54,38 @@ my $TMP_DIR = "/var/tmp";
 
 my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
-my @accConfigKeys = qw(user password server port);
-my @accExtraConfigKeys = qw(
-  smtp_server
-  smtp_port
-  ssl
-  inbox
-  sent
-  folders
-  skip
-  body_cache_mode
-  prefer_html
-  new_unread_cmd
-  update_interval
-  refresh_interval
-  filters
-);
+my $accountConfigSchema = [
+  ["user",            "REQ", "IMAP username, usually the full email address"],
+  ["password",        "REQ", "password, stored with optional encrypt_cmd"],
+  ["server",          "REQ", "IMAP server, e.g.: \"imap.gmail.com\""],
+  ["port",            "REQ", "IMAP server port"],
+
+  ["smtp_server",     "OPT", "SMTP server, e.g.: \"smtp.gmail.com\""],
+  ["smtp_port",       "OPT", "SMTP server port"],
+  ["ssl",             "OPT", "set to false to forcibly disable security"],
+  ["inbox",           "OPT", "primary IMAP folder name (default is \"INBOX\")"],
+  ["sent",            "OPT", "IMAP folder name to use for sent mail, e.g.:\"Sent\""],
+  ["folders",         "OPT", "colon-separated list of additional folders to fetch"],
+  ["skip",            "OPT", "set to true to skip during --update"],
+  ["body_cache_mode", "OPT", "one of [unread|all|none],  default is unread"],
+  ["prefer_html",     "OPT", "prefer html over plaintext (default is false)"],
+  ["new_unread_cmd",  "OPT", "custom alert command"],
+  ["update_interval", "OPT", "GUI: seconds between account updates"],
+  ["refresh_interval","OPT", "GUI: seconds between account refresh"],
+  ["filters",         "OPT", "GUI: a CSV of filter-buttons to add"],
+];
+my $optionsConfigSchema = [
+  ["update_cmd",      "OPT", "command to run after all updates"],
+  ["encrypt_cmd",     "OPT", "command to encrypt passwords on disk"],
+  ["decrypt_cmd",     "OPT", "command to decrypt saved passwords"],
+];
+
+my @accConfigKeys = map {$$_[0]} grep {$$_[1] eq "REQ"} @$accountConfigSchema;
+my @accExtraConfigKeys = map {$$_[0]} grep {$$_[1] eq "OPT"} @$accountConfigSchema;
 my %enums = (
   body_cache_mode => [qw(all unread none)],
 );
-my @optionsConfigKeys = qw(update_cmd encrypt_cmd decrypt_cmd);
+my @optionsConfigKeys = map {$$_[0]} @$optionsConfigSchema;
 
 my @headerFields = qw(Date Subject From To CC BCC);
 my $emailDir = "$ENV{HOME}/.cache/email";
