@@ -220,21 +220,21 @@ class EmailManager():
       fields.append(Field(fieldName, isPass, value, fieldDescriptions[fieldName]))
     return fields
   def getAccountConfigFields(self, accName):
-    schema = [ "name",           "single-word account ID, e.g.: \"Work\""
-             , "user",           "IMAP user, usually the full email address"
-             , "password",       "password, stored with optional encrypt_cmd"
-             , "server",         "IMAP server, e.g.: \"imap.gmail.com\""
-             , "port",           "IMAP port"
-             , "sent",           "[OPT] sent folder, e.g: \"Sent\""
-             , "ssl",            "[OPT] set to false if necessary"
-             , "smtp_server",    "[OPT] SMTP server. e.g.: \"smtp.gmail.com\""
-             , "smtp_port",      "[OPT] SMTP port"
-             , "new_unread_cmd", "[OPT] custom alert command"
-             , "skip",           "[OPT] set to true to skip during --update"
-             , "preferHtml",     "[OPT] set to false to prefer plaintext"
-             , "filters",        "[OPT] a CSV of filter buttons"
-             , "updateInterval", "[OPT] seconds between account updates in GUI"
-             , "refreshInterval","[OPT] seconds between account refresh in GUI"
+    schema = [ "name",            "single-word account ID, e.g.: \"Work\""
+             , "user",            "IMAP user, usually the full email address"
+             , "password",        "password, stored with optional encrypt_cmd"
+             , "server",          "IMAP server, e.g.: \"imap.gmail.com\""
+             , "port",            "IMAP port"
+             , "sent",            "[OPT] sent folder, e.g: \"Sent\""
+             , "ssl",             "[OPT] set to false if necessary"
+             , "smtp_server",     "[OPT] SMTP server. e.g.: \"smtp.gmail.com\""
+             , "smtp_port",       "[OPT] SMTP port"
+             , "new_unread_cmd",  "[OPT] custom alert command"
+             , "skip",            "[OPT] set to true to skip during --update"
+             , "prefer_html",     "[OPT] set to false to prefer plaintext"
+             , "filters",         "[OPT] a CSV of filter buttons"
+             , "update_interval", "[OPT] seconds between account updates in GUI"
+             , "refresh_interval","[OPT] seconds between account refresh in GUI"
              ]
     if accName == None:
       configValues = []
@@ -674,8 +674,8 @@ class Controller(QObject):
     self.setFilterButtons(filterButtons)
 
     preferHtml = "false"
-    if self.accountConfig != None and "preferHtml" in self.accountConfig.keys():
-      preferHtml = self.accountConfig["preferHtml"]
+    if self.accountConfig != None and "prefer_html" in self.accountConfig.keys():
+      preferHtml = self.accountConfig["prefer_html"]
     self.setHtmlMode(preferHtml != "false")
   def reset(self):
     self.setAccountName(None)

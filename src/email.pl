@@ -63,15 +63,15 @@ my @accExtraConfigKeys = qw(
   sent
   folders
   skip
-  bodyCacheMode
-  preferHtml
+  body_cache_mode
+  prefer_html
   new_unread_cmd
-  updateInterval
-  refreshInterval
+  update_interval
+  refresh_interval
   filters
 );
 my %enums = (
-  bodyCacheMode => [qw(all unread none)],
+  body_cache_mode => [qw(all unread none)],
 );
 my @optionsConfigKeys = qw(update_cmd encrypt_cmd decrypt_cmd);
 
@@ -143,7 +143,7 @@ my $usage = "
           $emailDir/ACCOUNT_NAME/FOLDER_NAME/all
         -fetch and cache all message headers in
           $emailDir/ACCOUNT_NAME/FOLDER_NAME/headers/UID
-        -fetch and cache bodies according to bodyCacheMode config
+        -fetch and cache bodies according to body_cache_mode config
             all    => every header that was cached gets its body cached
             unread => every unread message gets its body cached
             none   => no bodies are cached
@@ -198,15 +198,15 @@ my $usage = "
     if body is not cached and --no-download is specified, use empty string for body
       instead of downloading the body
     if message has a plaintext and HTML component, only one is returned
-    if preferHtml is false, plaintext is returned, otherwise, HTML
+    if prefer_html is false, plaintext is returned, otherwise, HTML
 
   $0 --body-plain [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
-    same as --body, but override preferHtml=false,
+    same as --body, but override prefer_html=false,
       and attempt to convert the result to plaintext if it appears to be HTML
       (uses $html2textExec if available, or just strips out the tags)
 
   $0 --body-html [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
-    same as --body, but override preferHtml=true
+    same as --body, but override prefer_html=true
 
   $0 --attachments [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_DIR UID [UID UID ...]
     download the body of the indicated message(s) and save any attachments to DEST_DIR
@@ -427,7 +427,7 @@ sub main(@){
         $unreadCount += @unread;
 
         my @toCache;
-        my $bodyCacheMode = $$acc{bodyCacheMode};
+        my $bodyCacheMode = $$acc{body_cache_mode};
         $bodyCacheMode = 'unread' if not defined $bodyCacheMode;
         if($bodyCacheMode eq "all"){
           @toCache = @newMessages;
@@ -537,12 +537,12 @@ sub main(@){
         $totalCount += readUidFileCounts $accName, $folderName, "all";
       }
       $lastUpdated = 0 if not defined $lastUpdated;
-      my $updateInterval = $$accounts{$accName}{updateInterval};
+      my $updateInterval = $$accounts{$accName}{update_interval};
       if(not defined $updateInterval){
         $updateInterval = 0;
       }
       $updateInterval .= "s";
-      my $refreshInterval = $$accounts{$accName}{refreshInterval};
+      my $refreshInterval = $$accounts{$accName}{refresh_interval};
       if(not defined $refreshInterval){
         $refreshInterval = 0;
       }
@@ -605,7 +605,7 @@ sub main(@){
 
     my $acc = $$accounts{$accName};
     my $preferHtml = 1;
-    $preferHtml = 0 if defined $$acc{preferHtml} and $$acc{preferHtml} =~ /false/i;
+    $preferHtml = 0 if defined $$acc{prefer_html} and $$acc{prefer_html} =~ /false/i;
     $preferHtml = 0 if $cmd eq "--body-plain";
     $preferHtml = 1 if $cmd eq "--body-html";
     die "Unknown account $accName\n" if not defined $acc;
