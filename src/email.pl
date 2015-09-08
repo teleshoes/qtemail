@@ -133,6 +133,8 @@ my $usage = "
     UID:             an IMAP UID {UIDVALIDITY is assumed to never change}
 
 
+    ACCOUNT_CONFIG_KEY:\n" . formatSchemaDisplay($accountConfigSchema, "      ") . "
+
   $0 -h|--help
     show this message
 
