@@ -56,19 +56,19 @@ my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
 my @accConfigKeys = qw(user password server port);
 my @accExtraConfigKeys = qw(
+  smtp_server
+  smtp_port
+  ssl
   inbox
   sent
   folders
-  ssl
-  smtp_server
-  smtp_port
-  new_unread_cmd
   skip
-  preferHtml
   bodyCacheMode
-  filters
+  preferHtml
+  new_unread_cmd
   updateInterval
   refreshInterval
+  filters
 );
 my %enums = (
   bodyCacheMode => [qw(all unread none)],
