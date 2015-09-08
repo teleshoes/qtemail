@@ -630,10 +630,10 @@ class Controller(QObject):
     if self.addressBook == None:
       self.addressBook = self.emailManager.getAddressBook()
 
-    if self.addressBook == None:
-      accEmails = None
-    else:
+    if self.addressBook != None and self.accountName in self.addressBook:
       accEmails = self.addressBook[self.accountName]
+    else:
+      accEmails = None
 
     if accEmails == None or len(accEmails) == 0:
       self.addressBookModel.clear()
