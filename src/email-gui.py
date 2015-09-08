@@ -225,16 +225,16 @@ class EmailManager():
              , "password",        "password, stored with optional encrypt_cmd"
              , "server",          "IMAP server, e.g.: \"imap.gmail.com\""
              , "port",            "IMAP port"
-             , "sent",            "[OPT] sent folder, e.g: \"Sent\""
-             , "ssl",             "[OPT] set to false if necessary"
              , "smtp_server",     "[OPT] SMTP server. e.g.: \"smtp.gmail.com\""
              , "smtp_port",       "[OPT] SMTP port"
-             , "new_unread_cmd",  "[OPT] custom alert command"
+             , "ssl",             "[OPT] set to false if necessary"
+             , "sent",            "[OPT] sent folder, e.g: \"Sent\""
              , "skip",            "[OPT] set to true to skip during --update"
              , "prefer_html",     "[OPT] set to false to prefer plaintext"
-             , "filters",         "[OPT] a CSV of filter buttons"
+             , "new_unread_cmd",  "[OPT] custom alert command"
              , "update_interval", "[OPT] seconds between account updates in GUI"
              , "refresh_interval","[OPT] seconds between account refresh in GUI"
+             , "filters",         "[OPT] a CSV of filter buttons"
              ]
     if accName == None:
       configValues = []
