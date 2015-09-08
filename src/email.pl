@@ -130,12 +130,10 @@ my $usage = "
     Account names can be any word characters (alphanumeric plus underscore)
     Lines that do not begin with \"$secretsPrefix.\" are ignored.
 
-    ACCOUNT_NAME:    the word following \"$secretsPrefix.\" in $secretsFile
-    FOLDER_NAME:     \"inbox\", \"sent\" or one of the names from \"folders\"
-    UID:             an IMAP UID {UIDVALIDITY is assumed to never change}
-
+    ACCOUNT_NAME:    the word following \"$secretsPrefix.\" in $secretsFile\n
+    FOLDER_NAME:     \"inbox\", \"sent\" or one of the names from \"folders\"\n
+    UID:             an IMAP UID {UIDVALIDITY is assumed to never change}\n
     GLOBAL_OPTION_KEY:\n" . formatSchemaDisplay($optionsConfigSchema, "      ") . "
-
     ACCOUNT_CONFIG_KEY:\n" . formatSchemaDisplay($accountConfigSchema, "      ") . "
 
   $0 -h|--help
