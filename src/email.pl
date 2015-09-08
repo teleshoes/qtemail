@@ -198,7 +198,7 @@ my $usage = "
     if body is not cached and --no-download is specified, use empty string for body
       instead of downloading the body
     if message has a plaintext and HTML component, only one is returned
-    if prefer_html is false, plaintext is returned, otherwise, HTML
+    if prefer_html is true, HTML is returned, otherwise, plaintext
 
   $0 --body-plain [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but override prefer_html=false,
@@ -604,8 +604,8 @@ sub main(@){
     }
 
     my $acc = $$accounts{$accName};
-    my $preferHtml = 1;
-    $preferHtml = 0 if defined $$acc{prefer_html} and $$acc{prefer_html} =~ /false/i;
+    my $preferHtml = 0;
+    $preferHtml = 1 if defined $$acc{prefer_html} and $$acc{prefer_html} =~ /true/i;
     $preferHtml = 0 if $cmd eq "--body-plain";
     $preferHtml = 1 if $cmd eq "--body-html";
     die "Unknown account $accName\n" if not defined $acc;
