@@ -45,6 +45,7 @@ sub formatDate($);
 sub getFolderName($);
 sub parseFolders($);
 sub hasWords($);
+sub formatSchemaDisplay($$);
 sub readSecrets();
 sub validateSecrets($);
 sub modifySecrets($$);
@@ -1486,6 +1487,21 @@ sub hasWords($){
   my $msg = shift;
   $msg =~ s/\W+//g;
   return length($msg) > 0;
+}
+
+sub formatSchemaDisplay($$){
+  my ($schema, $indent) = @_;
+  my $maxNameLen = 0;
+  for my $nameLen(map {length $$_[0]} @$schema){
+    $maxNameLen = $nameLen if $nameLen > $maxNameLen;
+  }
+  my $fmt = '';
+  for my $row(@$schema){
+    my ($name, $reqOpt, $desc) = @$row;
+    my $sep = ' ' x (1 + $maxNameLen - length $name);
+    $fmt .= sprintf "%s%s%s[%s] %s\n", $indent, $name, $sep, $reqOpt, $desc;
+  }
+  return $fmt;
 }
 
 sub readSecrets(){
