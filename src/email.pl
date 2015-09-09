@@ -52,7 +52,7 @@ sub modifySecrets($$);
 
 my $VERBOSE = 0;
 my $DATE_FORMAT = "%Y-%m-%d %H:%M:%S";
-my $MAX_UNREAD_TO_CACHE = 100;
+my $MAX_BODIES_TO_CACHE = 100;
 
 my $EMAIL_SEARCH_EXEC = "/opt/qtemail/bin/email-search.pl";
 my $UPDATEDB_LIMIT = 100;
@@ -441,7 +441,7 @@ sub main(@){
           @toCache = ();
         }
 
-        cacheBodies($accName, $folderName, $c, $MAX_UNREAD_TO_CACHE, @toCache);
+        cacheBodies($accName, $folderName, $c, $MAX_BODIES_TO_CACHE, @toCache);
 
         $c->close();
 
