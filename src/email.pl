@@ -73,14 +73,14 @@ my $accountConfigSchema = [
   ["ssl",             "OPT", "set to false to forcibly disable security"],
   ["inbox",           "OPT", "primary IMAP folder name (default is \"INBOX\")"],
   ["sent",            "OPT", "IMAP folder name to use for sent mail, e.g.:\"Sent\""],
-  ["folders",         "OPT", "colon-separated list of additional folders to fetch"],
+  ["folders",         "OPT", "colon-separated list of extra IMAP folders to fetch"],
   ["skip",            "OPT", "set to true to skip during --update"],
   ["body_cache_mode", "OPT", "one of [unread|all|none],  default is unread"],
   ["prefer_html",     "OPT", "prefer html over plaintext (default is false)"],
   ["new_unread_cmd",  "OPT", "custom alert command"],
   ["update_interval", "OPT", "GUI: seconds between account updates"],
   ["refresh_interval","OPT", "GUI: seconds between account refresh"],
-  ["filters",         "OPT", "GUI: a CSV of filter-buttons to add"],
+  ["filters",         "OPT", "GUI: list of filter-buttons, e.g.:\"s1=%a% s2=%b%\""],
 ];
 my $optionsConfigSchema = [
   ["update_cmd",      "OPT", "command to run after all updates"],
