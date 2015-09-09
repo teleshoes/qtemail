@@ -88,6 +88,14 @@ my $optionsConfigSchema = [
   ["decrypt_cmd",     "OPT", "command to decrypt saved passwords"],
 ];
 my $longDescriptions = {
+  folders => ''
+    . "the FOLDER_NAME used as the dir on the filesystem\n"
+    . "has non-alphanumeric substrings replaced with _s\n"
+    . "and all leading and trailing _s removed\n"
+    . "e.g.:\n"
+    . "  email.Z.folders = junk:[GMail]/Drafts:_12_/ponies\n"
+    . "    =>  [\"junk\", \"gmail_drafts\", \"12_ponies\"]\n"
+  ,
 };
 
 my @accConfigKeys = map {$$_[0]} grep {$$_[1] eq "REQ"} @$accountConfigSchema;
