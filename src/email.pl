@@ -103,6 +103,15 @@ my $longDescriptions = {
     . "all:    cache all bodies (up to $MAX_BODIES_TO_CACHE)\n"
     . "none:   do not cache bodies during --update\n"
   ,
+  filters => ''
+    . "each filter is separated by a space, and takes the form:\n"
+    . "  <FILTER_NAME>=%<FILTER_STRING>%\n"
+    . "FILTER_NAME:   the text of the button in the GUI\n"
+    . "FILTER_STRING: query for $EMAIL_SEARCH_EXEC\n"
+    . "e.g.:\n"
+    . "  email.Z.filters = mary=%from~\"mary sue\"% ok=%body!~viagra%\n"
+    . "    => [\"mary\", \"ok\"]\n"
+  ,
 };
 
 my @accConfigKeys = map {$$_[0]} grep {$$_[1] eq "REQ"} @$accountConfigSchema;
