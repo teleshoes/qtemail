@@ -96,6 +96,13 @@ my $longDescriptions = {
     . "  email.Z.folders = junk:[GMail]/Drafts:_12_/ponies\n"
     . "    =>  [\"junk\", \"gmail_drafts\", \"12_ponies\"]\n"
   ,
+  body_cache_mode => ''
+    . "controls which bodies get cached during --update\n"
+    . "  (note: only caches the first MAX_BODIES_TO_CACHE=$MAX_BODIES_TO_CACHE)\n"
+    . "unread: cache unread bodies (up to $MAX_BODIES_TO_CACHE)\n"
+    . "all:    cache all bodies (up to $MAX_BODIES_TO_CACHE)\n"
+    . "none:   do not cache bodies during --update\n"
+  ,
 };
 
 my @accConfigKeys = map {$$_[0]} grep {$$_[1] eq "REQ"} @$accountConfigSchema;
