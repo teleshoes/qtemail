@@ -50,6 +50,13 @@ sub readSecrets();
 sub validateSecrets($);
 sub modifySecrets($$);
 
+my $VERBOSE = 0;
+my $DATE_FORMAT = "%Y-%m-%d %H:%M:%S";
+my $MAX_UNREAD_TO_CACHE = 100;
+
+my $EMAIL_SEARCH_EXEC = "/opt/qtemail/bin/email-search.pl";
+my $UPDATEDB_LIMIT = 100;
+
 my $SMTP_CLI_EXEC = "/opt/qtemail/bin/smtp-cli";
 my $TMP_DIR = "/var/tmp";
 
@@ -95,13 +102,6 @@ my $statusLineFile = "$emailDir/status-line";
 my $statusShortFile = "$emailDir/status-short";
 
 my $html2textExec = "/usr/bin/html2text";
-
-my $VERBOSE = 0;
-my $DATE_FORMAT = "%Y-%m-%d %H:%M:%S";
-my $MAX_UNREAD_TO_CACHE = 100;
-
-my $EMAIL_SEARCH_EXEC = "/opt/qtemail/bin/email-search.pl";
-my $UPDATEDB_LIMIT = 100;
 
 my $settings = {
   Peek => 1,
