@@ -87,6 +87,8 @@ my $optionsConfigSchema = [
   ["encrypt_cmd",     "OPT", "command to encrypt passwords on disk"],
   ["decrypt_cmd",     "OPT", "command to decrypt saved passwords"],
 ];
+my $longDescriptions = {
+};
 
 my @accConfigKeys = map {$$_[0]} grep {$$_[1] eq "REQ"} @$accountConfigSchema;
 my @accExtraConfigKeys = map {$$_[0]} grep {$$_[1] eq "OPT"} @$accountConfigSchema;
@@ -1502,7 +1504,15 @@ sub formatSchemaDisplay($$){
   for my $row(@$schema){
     my ($name, $reqOpt, $desc) = @$row;
     my $sep = ' ' x (1 + $maxNameLen - length $name);
-    $fmt .= sprintf "%s%s%s[%s] %s\n", $indent, $name, $sep, $reqOpt, $desc;
+    my $prefix = $indent . $name . $sep;
+    my $info = "[$reqOpt] $desc\n";
+    if(defined $$longDescriptions{$name}){
+      my $infoIndent = ' ' x (2 + length $prefix);
+      my @longLines = split /\n/, $$longDescriptions{$name};
+      @longLines = map {"$infoIndent$_\n"} @longLines;
+      $info .= join '', @longLines;
+    }
+    $fmt .= "$prefix$info";
   }
   return $fmt;
 }
