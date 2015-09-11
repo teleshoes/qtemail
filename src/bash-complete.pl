@@ -56,6 +56,7 @@ sub email(@){
     --accounts --folders --print --summary --status-line --status-short
     --has-error --has-new-unread --has-unread
     --read-config --write-config --read-options --write-options
+    --read-config-schema --read-options-schema
   );
   my @configOpts = map {"$_="} qw(
     user password server sent port ssl smtp_server smtp_port
