@@ -1401,6 +1401,8 @@ sub getCachedHeaderUids($$){
 sub getCachedBodyUids($$){
   my ($accName, $folderName) = @_;
   my $bodiesDir = "$emailDir/$accName/$folderName/bodies";
+  system "mkdir", "-p", $bodiesDir;
+
   opendir DIR, $bodiesDir or die "Could not list $bodiesDir\n";
   my @cachedBodies;
   while (my $file = readdir(DIR)) {
