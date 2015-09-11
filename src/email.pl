@@ -1541,6 +1541,27 @@ sub formatSchemaDisplay($$){
   return $fmt;
 }
 
+sub joinTrailingBackslashLines(@){
+  my @oldLines = @_;
+  my @lines;
+
+  my $curLine = undef;
+  for my $line(@oldLines){
+    my $isBackslashLine = $line =~ /\\\s*\n?/;
+
+    $curLine = '' if not defined $curLine;
+    $curLine .= $line;
+
+    if(not $isBackslashLine){
+      push @lines, $curLine;
+      $curLine = undef;
+    }
+  }
+  push @lines, $curLine if defined $curLine;
+
+  return @lines;
+}
+
 sub readSecrets(){
   my @lines = `cat $secretsFile 2>/dev/null`;
   my $accounts = {};
@@ -1555,10 +1576,13 @@ sub readSecrets(){
       last;
     }
   }
+
+  @lines = joinTrailingBackslashLines(@lines);
+
   for my $line(@lines){
-    if($line =~ /^$secretsPrefix\.($okOptionsConfigKeys)\s*=\s*(.+)$/){
+    if($line =~ /^$secretsPrefix\.($okOptionsConfigKeys)\s*=\s*(.+)$/s){
       $$optionsConfig{$1} = $2;
-    }elsif($line =~ /^$secretsPrefix\.(\w+)\.($okAccConfigKeys)\s*=\s*(.+)$/){
+    }elsif($line =~ /^$secretsPrefix\.(\w+)\.($okAccConfigKeys)\s*=\s*(.+)$/s){
       my ($accName, $key, $val)= ($1, $2, $3);
       if(not defined $$accounts{$accName}){
         $$accounts{$1} = {name => $accName};
@@ -1568,8 +1592,8 @@ sub readSecrets(){
         $val =~ s/'/'\\''/g;
         $val = `$decryptCmd '$val'`;
         die "error encrypting password\n" if $? != 0;
-        chomp $val;
       }
+      chomp $val;
       $$accounts{$accName}{$key} = $val;
     }elsif($line =~ /^$secretsPrefix\./){
       die "unknown config entry: $line";
@@ -1600,9 +1624,11 @@ sub modifySecrets($$){
   }
 
   my @lines = `cat $secretsFile 2>/dev/null`;
+  @lines = joinTrailingBackslashLines(@lines);
+
   my $encryptCmd;
   for my $line(@lines){
-    if(not defined $encryptCmd and $line =~ /^$secretsPrefix\.encrypt_cmd\s*=\s*(.*)$/){
+    if(not defined $encryptCmd and $line =~ /^$secretsPrefix\.encrypt_cmd\s*=\s*(.*)$/s){
       $encryptCmd = $1;
     }
   }
@@ -1633,7 +1659,7 @@ sub modifySecrets($$){
     my $newLine = $valEmpty ? '' : "$prefix.$key = $val\n";
     my $found = 0;
     for my $line(@lines){
-      if($line =~ s/^$prefix\.$key\s*=.*\n$/$newLine/){
+      if($line =~ s/^$prefix\.$key\s*=.*\n$/$newLine/s){
         $found = 1;
         last;
       }
