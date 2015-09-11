@@ -14,9 +14,8 @@ sub formatStatusLine($@);
 sub formatStatusShort($@);
 sub padtrim($$);
 sub html2text($);
-sub mergeUnreadCounts($@);
-sub readUnreadCounts();
-sub writeUnreadCounts($@);
+sub readGlobalUnreadCountsFile();
+sub updateGlobalUnreadCountsFile($);
 sub relTime($);
 sub clearError($);
 sub hasError($);
@@ -436,7 +435,6 @@ sub main(@){
       @accNames = @_;
     }
 
-    my $counts = {};
     my $isError = 0;
     my @newUnreadCommands;
     for my $accName(@accNames){
@@ -455,7 +453,6 @@ sub main(@){
 
       my $folders = $accFolders{$accName};
       my @folderOrder = @{$accFolderOrder{$accName}};
-      my $unreadCount = 0;
       my $hasNewUnread = 0;
       for my $folderName(@folderOrder){
         if(defined $folderNameFilter and $folderName ne $folderNameFilter){
@@ -476,7 +473,6 @@ sub main(@){
         my @newMessages = cacheAllHeaders($accName, $folderName, $c);
 
         my @unread = $c->unseen;
-        $unreadCount += @unread;
 
         my @toCache;
         my $bodyCacheMode = $$acc{body_cache_mode};
@@ -504,7 +500,6 @@ sub main(@){
         print "\n";
       }
       $c->logout();
-      $$counts{$accName} = $unreadCount;
       my $hasError = hasError $accName;
       if(not $hasError){
         writeLastUpdated $accName;
@@ -514,7 +509,7 @@ sub main(@){
         }
       }
     }
-    mergeUnreadCounts $counts, @accOrder;
+    updateGlobalUnreadCountsFile($config);
     writeStatusFiles(@accOrder);
     if(defined $$config{options}{update_cmd}){
       my $cmd = $$config{options}{update_cmd};
@@ -568,8 +563,7 @@ sub main(@){
       @unread = (@unread, sort keys %toUpdate);
     }
     writeUidFile $$acc{name}, $folderName, "unread", @unread;
-    my $count = @unread;
-    mergeUnreadCounts {$accName => $count}, @accOrder;
+    updateGlobalUnreadCountsFile($config);
     writeStatusFiles(@accOrder);
     $c->close();
     $c->logout();
@@ -784,7 +778,7 @@ sub main(@){
     }
   }elsif($cmd =~ /^(--status-line|--status-short)$/){
     my @accNames = @_ == 0 ? @accOrder : @_;
-    my $counts = readUnreadCounts();
+    my $counts = readGlobalUnreadCountsFile();
     if($cmd eq "--status-line"){
       print formatStatusLine($counts, @accNames);
     }elsif($cmd eq "--status-short"){
@@ -848,7 +842,7 @@ sub setFlagStatus($$$$){
 
 sub writeStatusFiles(@){
   my @accNames = @_;
-  my $counts = readUnreadCounts();
+  my $counts = readGlobalUnreadCountsFile();
 
   my $fmt;
   $fmt = formatStatusLine $counts, @accNames;
@@ -939,12 +933,7 @@ sub html2text($){
   }
 }
 
-sub mergeUnreadCounts($@){
-  my ($counts , @accOrder)= @_;
-  $counts = {%{readUnreadCounts()}, %$counts};
-  writeUnreadCounts($counts, @accOrder);
-}
-sub readUnreadCounts(){
+sub readGlobalUnreadCountsFile(){
   my $counts = {};
   if(not -e $unreadCountsFile){
     return $counts;
@@ -959,13 +948,23 @@ sub readUnreadCounts(){
   }
   return $counts;
 }
-sub writeUnreadCounts($@){
-  my ($counts , @accOrder)= @_;
+sub updateGlobalUnreadCountsFile($){
+  my ($config) = @_;
+  my @accOrder = @{$$config{accOrder}};
+
+  my %counts = map {$_ => 0} @accOrder;
+  for my $accName(@accOrder){
+    my $acc = $$config{accounts}{$accName};
+    my @folderNames = map {$$_[0]} @{parseFolders $$config{accounts}{$accName}};
+    for my $folderName(@folderNames){
+      my $count = readUidFileCounts $accName, $folderName, "unread";
+      $counts{$accName} += $count;
+    }
+  }
+
   open FH, "> $unreadCountsFile" or die "Could not write $unreadCountsFile\n";
   for my $accName(@accOrder){
-    my $count = $$counts{$accName};
-    $count = 0 if not defined $count;
-    print FH "$count:$accName\n";
+    print FH "$counts{$accName}:$accName\n";
   }
   close FH;
 }
