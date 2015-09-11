@@ -355,7 +355,7 @@ sub main(@){
     my $options = $$config{options};
     my $vals = defined $configGroup ? $$accounts{$configGroup} : $options;
     if(defined $vals){
-      for my $key(keys %$vals){
+      for my $key(sort keys %$vals){
         print "$key=$$vals{$key}\n";
       }
     }
