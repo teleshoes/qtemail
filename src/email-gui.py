@@ -179,11 +179,16 @@ class EmailManager():
 
     if cmd != None:
       configOut = self.readProc(cmd)
+      configOut = configOut.replace('%', '%boing%')
+      configOut = configOut.replace('\\\n', '%linebreak%')
+
       for line in configOut.splitlines():
         m = re.match("(\w+)=(.*)", line)
         if m:
           fieldName = m.group(1)
           value = m.group(2)
+          value = value.replace('%linebreak%', '\n')
+          value = value.replace('%boing%', '%')
           configValues[fieldName] = value
     return configValues
   def writeConfig(self, configValues, configMode, accName=None):
@@ -691,7 +696,7 @@ class Controller(QObject):
     filterButtonRegex = "(\\w+)=%(.+?)%\\s*"
     usedNames = set()
     filterButtons = []
-    for f in re.findall(filterButtonRegex, filterButtonStr):
+    for f in re.findall(filterButtonRegex, filterButtonStr, re.DOTALL):
       name = f[0]
       filterStr = f[1]
       if not name in usedNames:
