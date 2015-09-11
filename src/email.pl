@@ -1562,7 +1562,7 @@ sub formatSchemaPretty($$){
     my $prefix = $indent . $name . $sep;
     my $info = "[$reqOpt] $desc\n";
     if(defined $$longDescriptions{$name}){
-      my $infoIndent = ' ' x (2 + length $prefix);
+      my $infoIndent = ' ' x (length $prefix);
       my @longLines = split /\n/, $$longDescriptions{$name};
       @longLines = map {"$infoIndent$_\n"} @longLines;
       $info .= join '', @longLines;
