@@ -43,6 +43,7 @@ sub formatHeaderField($$);
 sub formatDate($);
 sub getFolderName($);
 sub parseFolders($);
+sub parseCountIncludeFolderNames($);
 sub hasWords($);
 sub formatSchemaSimple($);
 sub formatSchemaPretty($$);
@@ -74,6 +75,7 @@ my $accountConfigSchema = [
   ["inbox",           "OPT", "primary IMAP folder name (default=\"INBOX\")"],
   ["sent",            "OPT", "IMAP folder name to use for sent mail, e.g.:\"Sent\""],
   ["folders",         "OPT", "extra IMAP folders to fetch (sep=\":\")"],
+  ["count_include",   "OPT", "FOLDER_NAMEs for counts (default=\"inbox\", sep=\":\")"],
   ["skip",            "OPT", "set to true to skip during --update"],
   ["body_cache_mode", "OPT", "one of [unread|all|none] (default=\"unread\")"],
   ["prefer_html",     "OPT", "prefer html over plaintext (default=\"false\")"],
@@ -95,6 +97,18 @@ my $longDescriptions = {
     . "e.g.:\n"
     . "  email.Z.folders = junk:[GMail]/Drafts:_12_/ponies\n"
     . "    =>  [\"junk\", \"gmail_drafts\", \"12_ponies\"]\n"
+  ,
+  count_include => ''
+    . "list of FOLDER_NAMEs for account-wide unread/total counts\n"
+    . "this controls what gets written to the global unread file,\n"
+    . "  and what is returned by --accounts\n"
+    . "note this is the FOLDER_NAME, and not the IMAP folder\n"
+    . "e.g.:\n"
+    . "  email.Z.sent = [GMail]/Sent Mail\n"
+    . "  email.Z.folders = [GMail]/Spam:[GMail]/Drafts\n"
+    . "  email.Z.count_include = inbox:gmail_spam:sent\n"
+    . "    => included: INBOX, [GMail]/Spam, [GMail]/Sent Mail\n"
+    . "       excluded: [GMail]/Drafts\n"
   ,
   body_cache_mode => ''
     . "controls which bodies get cached during --update\n"
@@ -185,7 +199,8 @@ my $usage = "
           $emailDir/ACCOUNT_NAME/FOLDER_NAME/new-unread
         -run $EMAIL_SEARCH_EXEC --updatedb ACCOUNT_NAME FOLDER_NAME $UPDATEDB_LIMIT
     -update global unread counts file $unreadCountsFile
-      ignored or missing accounts are preserved in $unreadCountsFile
+      count the unread emails for each account in the folders in count_include
+      the default is just to include the counts for \"inbox\"
 
       write the unread counts, one line per account, to $unreadCountsFile
       e.g.: 3:AOL
@@ -570,15 +585,15 @@ sub main(@){
   }elsif($cmd =~ /^(--accounts)$/){
     die $usage if @_ != 0;
     for my $accName(@accOrder){
-      my $folders = $accFolders{$accName};
-      my @folderOrder = @{$accFolderOrder{$accName}};
+      my $acc = $$accounts{$accName};
+      my @countIncludeFolderNames = @{parseCountIncludeFolderNames $acc};
       my $unreadCount = 0;
       my $totalCount = 0;
       my $lastUpdated = readLastUpdated $accName;
       my $lastUpdatedRel = relTime $lastUpdated;
       my $error = readError $accName;
       $error = "" if not defined $error;
-      for my $folderName(@folderOrder){
+      for my $folderName(@countIncludeFolderNames){
         $unreadCount += readUidFileCounts $accName, $folderName, "unread";
         $totalCount += readUidFileCounts $accName, $folderName, "all";
       }
@@ -955,8 +970,8 @@ sub updateGlobalUnreadCountsFile($){
   my %counts = map {$_ => 0} @accOrder;
   for my $accName(@accOrder){
     my $acc = $$config{accounts}{$accName};
-    my @folderNames = map {$$_[0]} @{parseFolders $$config{accounts}{$accName}};
-    for my $folderName(@folderNames){
+    my @countIncludeFolderNames = @{parseCountIncludeFolderNames $acc};
+    for my $folderName(@countIncludeFolderNames){
       my $count = readUidFileCounts $accName, $folderName, "unread";
       $counts{$accName} += $count;
     }
@@ -1531,6 +1546,32 @@ sub parseFolders($){
     }
   }
   return $folders;
+}
+sub parseCountIncludeFolderNames($){
+  my $acc = shift;
+  my $countInclude = $$acc{count_include};
+  $countInclude = "inbox" if not defined $countInclude;
+
+  my $countIncludeFolderNames = [split /:/, $countInclude];
+  s/^\s*// foreach @$countIncludeFolderNames;
+  s/\s*$// foreach @$countIncludeFolderNames;
+
+  my $folders = parseFolders $acc;
+  my $okFolderNames = join "|", map {$$_[0]} @$folders;
+
+  my $seenFolderNames = {};
+  for my $folderName(@$countIncludeFolderNames){
+    if(defined $$seenFolderNames{$folderName}){
+      die "ERROR: duplicate folder name in count_include: $folderName\n";
+    }
+    $$seenFolderNames{$folderName} = 1;
+    if($folderName !~ /^($okFolderNames)$/){
+      die "ERROR: count_include folder name '$folderName' not found in:\n"
+        . "  [$okFolderNames]\n";
+    }
+  }
+
+  return $countIncludeFolderNames;
 }
 
 sub hasWords($){
