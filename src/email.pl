@@ -1112,7 +1112,6 @@ sub cacheAllHeaders($$$){
   print "fetched " . @messages . " ids\n" if $VERBOSE;
 
   my $dir = "$emailDir/$accName/$folderName";
-  writeUidFile $accName, $folderName, "all", @messages;
 
   my $headersDir = "$dir/headers";
   system "mkdir", "-p", $headersDir;
@@ -1177,8 +1176,11 @@ sub cacheAllHeaders($$$){
       my $hdr = getHeaderFromBody($mimeParser, $cachedBody);
       cacheHeader $hdr, $uid, $accName, $headersDir, {}, {}, {};
       warn "  cached $uid using MIME entity in body cache\n\n";
+      $okCachedHeaderUids{$uid} = 1;
     }
   }
+
+  writeUidFile $accName, $folderName, "all", keys %okCachedHeaderUids;
 
   return @messages;
 }
