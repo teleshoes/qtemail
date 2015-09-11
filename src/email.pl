@@ -1112,6 +1112,7 @@ sub cacheAllHeaders($$$){
   print "fetched " . @messages . " ids\n" if $VERBOSE;
 
   my $dir = "$emailDir/$accName/$folderName";
+  writeUidFile $accName, $folderName, "remote", @messages;
 
   my $headersDir = "$dir/headers";
   system "mkdir", "-p", $headersDir;
