@@ -45,6 +45,7 @@ sub formatDate($);
 sub getFolderName($);
 sub parseFolders($);
 sub hasWords($);
+sub formatSchemaSimple($);
 sub formatSchemaPretty($$);
 sub readSecrets();
 sub validateSecrets($);
@@ -143,6 +144,7 @@ my $okCmds = join "|", qw(
   --accounts --folders --print --summary --status-line --status-short
   --has-error --has-new-unread --has-unread
   --read-config --write-config --read-options --write-options
+  --read-config-schema --read-options-schema
 );
 
 my $usage = "
@@ -333,6 +335,20 @@ my $usage = "
     reads $secretsFile
     for each line of the form \"$secretsPrefix.KEY\\s*=\\s*VAL\"
       print KEY=VAL
+
+  $0 --read-config-schema
+    print the allowed keys and descriptions for account config entries
+    formatted, one per line, like this:
+    <KEY_NAME>=<DESC>
+      KEY_NAME: one of: @accConfigKeys @accExtraConfigKeys
+      DESC:     text description
+
+  $0 --read-config-schema
+    print the allowed keys and descriptions for account config entries
+    formatted, one per line, like this:
+    <KEY_NAME>=<DESC>
+      KEY_NAME: one of: @optionsConfigKeys
+      DESC:     text description
 ";
 
 sub main(@){
@@ -379,6 +395,12 @@ sub main(@){
       }
     }
     modifySecrets $configGroup, $config;
+    exit 0;
+  }elsif($cmd =~ /^(--read-config-schema|--read-options-schema)$/){
+    my $schema;
+    $schema = $accountConfigSchema if $cmd =~ /--read-config-schema/;
+    $schema = $optionsConfigSchema if $cmd =~ /--read-options-schema/;
+    print formatSchemaSimple $schema;
     exit 0;
   }
 
@@ -1518,6 +1540,15 @@ sub hasWords($){
   return length($msg) > 0;
 }
 
+sub formatSchemaSimple($){
+  my ($schema) = @_;
+  my $fmt = '';
+  for my $row(@$schema){
+    my ($name, $reqOpt, $desc) = @$row;
+    $fmt .= "$name=[$reqOpt] $desc\n";
+  }
+  return $fmt;
+}
 sub formatSchemaPretty($$){
   my ($schema, $indent) = @_;
   my $maxNameLen = 0;
