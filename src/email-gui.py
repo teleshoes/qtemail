@@ -232,8 +232,8 @@ class EmailManager():
     return schema
 
   def getConfigFields(self, schema, configValues):
-    fieldNames = schema[0::2]
-    fieldDescriptions = dict(zip(schema[0::2], schema[1::2]))
+    fieldNames = map(lambda (k,v): k, schema)
+    fieldDescriptions = dict(schema)
 
     fields = []
     for fieldName in fieldNames:
@@ -245,36 +245,19 @@ class EmailManager():
       isPass = pwRegex.search(fieldName) != None
       fields.append(Field(fieldName, isPass, value, fieldDescriptions[fieldName]))
     return fields
+
   def getAccountConfigFields(self, accName):
-    schema = [ "name",            "single-word account ID, e.g.: \"Work\""
-             , "user",            "IMAP user, usually the full email address"
-             , "password",        "password, stored with optional encrypt_cmd"
-             , "server",          "IMAP server, e.g.: \"imap.gmail.com\""
-             , "port",            "IMAP port"
-             , "smtp_server",     "[OPT] SMTP server. e.g.: \"smtp.gmail.com\""
-             , "smtp_port",       "[OPT] SMTP port"
-             , "ssl",             "[OPT] set to false if necessary"
-             , "inbox",           "[OPT] inbox folder, default is \"INBOX\""
-             , "sent",            "[OPT] sent folder, e.g: \"Sent\""
-             , "folders",         "[OPT] colon-separated list of extra folders"
-             , "skip",            "[OPT] set to true to skip during --update"
-             , "body_cache_mode", "[OPT] one of [unread|all|none],  default is unread"
-             , "prefer_html",     "[OPT] set to false to prefer plaintext"
-             , "new_unread_cmd",  "[OPT] custom alert command"
-             , "update_interval", "[OPT] seconds between account updates in GUI"
-             , "refresh_interval","[OPT] seconds between account refresh in GUI"
-             , "filters",         "[OPT] a CSV of filter buttons"
-             ]
+    schema = self.readSchema("account")
+    schema = [("name", "single-word account ID, e.g.: \"Work\"")] + schema
+
     if accName == None:
       configValues = []
     else:
       configValues = self.readConfig("account", accName)
     return self.getConfigFields(schema, configValues)
   def getOptionsConfigFields(self):
-    schema = [ "update_cmd",     "[OPT] command to run after all updates"
-             , "encrypt_cmd",    "[OPT] command to encrypt passwords on disk"
-             , "decrypt_cmd",    "[OPT] command to decrypt saved passwords"
-             ]
+    schema = self.readSchema("options")
+
     configValues = self.readConfig("options")
     return self.getConfigFields(schema, configValues)
 
