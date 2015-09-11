@@ -45,7 +45,7 @@ sub formatDate($);
 sub getFolderName($);
 sub parseFolders($);
 sub hasWords($);
-sub formatSchemaDisplay($$);
+sub formatSchemaPretty($$);
 sub readSecrets();
 sub validateSecrets($);
 sub modifySecrets($$);
@@ -159,8 +159,8 @@ my $usage = "
     ACCOUNT_NAME:    the word following \"$secretsPrefix.\" in $secretsFile\n
     FOLDER_NAME:     \"inbox\", \"sent\" or one of the names from \"folders\"\n
     UID:             an IMAP UID {UIDVALIDITY is assumed to never change}\n
-    GLOBAL_OPTION_KEY:\n" . formatSchemaDisplay($optionsConfigSchema, "      ") . "
-    ACCOUNT_CONFIG_KEY:\n" . formatSchemaDisplay($accountConfigSchema, "      ") . "
+    GLOBAL_OPTION_KEY:\n" . formatSchemaPretty($optionsConfigSchema, "      ") . "
+    ACCOUNT_CONFIG_KEY:\n" . formatSchemaPretty($accountConfigSchema, "      ") . "
 
   $0 -h|--help
     show this message
@@ -1518,7 +1518,7 @@ sub hasWords($){
   return length($msg) > 0;
 }
 
-sub formatSchemaDisplay($$){
+sub formatSchemaPretty($$){
   my ($schema, $indent) = @_;
   my $maxNameLen = 0;
   for my $nameLen(map {length $$_[0]} @$schema){
