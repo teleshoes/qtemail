@@ -18,6 +18,7 @@ sub cmdFolders($);
 sub cmdHeader($$@);
 sub cmdBodyAttachments($$$$$$$$@);
 sub cmdCacheAllBodies($$);
+sub cmdPrint($@);
 
 sub formatConfig($);
 sub writeConfig($@);
@@ -479,41 +480,9 @@ sub main(@){
     my ($accName, $folderName) = @_;
     cmdCacheAllBodies($accName, $folderName);
   }elsif($cmd =~ /^(--print)$/ and @_ >= 0){
-    my $config = getConfig();
-    my @accOrder = @{$$config{accOrder}};
     my $folderName = optFolder \@_, "inbox";
-    my @accNames = @_ == 0 ? @accOrder : @_;
-    my $mimeParser = MIME::Parser->new();
-    $mimeParser->output_dir($TMP_DIR);
-    binmode STDOUT, ':utf8';
-    for my $accName(@accNames){
-      my @unread = readUidFile $accName, $folderName, "unread";
-      for my $uid(@unread){
-        my $hdr = readCachedHeader($accName, $folderName, $uid);
-        my $cachedBody = readCachedBody($accName, $folderName, $uid);
-        my $body = getBody($mimeParser, $cachedBody, 0);
-        $body = "" if not defined $body;
-        $body = "[NO BODY]" if $body =~ /^[ \t\n]*$/;
-        $body = html2text($body);
-        $body =~ s/^\n(\s*\n)*//;
-        $body =~ s/\n(\s*\n)*$//;
-        $body =~ s/\n\s*\n(\s*\n)+/\n\n/g;
-        $body =~ s/^/  /mg;
-        my $bodySep = "="x30;
-        print "\n"
-          . "ACCOUNT: $accName\n"
-          . "UID: $uid\n"
-          . "DATE: $$hdr{Date}\n"
-          . "FROM: $$hdr{From}\n"
-          . "TO: $$hdr{To}\n"
-          . "CC: $$hdr{CC}\n"
-          . "BCC: $$hdr{BCC}\n"
-          . "SUBJECT: $$hdr{Subject}\n"
-          . "BODY:\n$bodySep\n$body\n$bodySep\n"
-          . "\n"
-          ;
-      }
-    }
+    my @accNames = @_;
+    cmdPrint($folderName, @accNames);
   }elsif($cmd =~ /^(--summary)$/ and @_ >= 0){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
@@ -880,6 +849,44 @@ sub cmdCacheAllBodies($$){
 
   my @messages = $c->messages;
   cacheBodies($accName, $folderName, $c, undef, @messages);
+}
+
+sub cmdPrint($@){
+  my ($folderName, @accNames) = @_;
+  my $config = getConfig();
+  my @accOrder = @{$$config{accOrder}};
+  @accNames = @accOrder if @accNames == 0;
+  my $mimeParser = MIME::Parser->new();
+  $mimeParser->output_dir($TMP_DIR);
+  binmode STDOUT, ':utf8';
+  for my $accName(@accNames){
+    my @unread = readUidFile $accName, $folderName, "unread";
+    for my $uid(@unread){
+      my $hdr = readCachedHeader($accName, $folderName, $uid);
+      my $cachedBody = readCachedBody($accName, $folderName, $uid);
+      my $body = getBody($mimeParser, $cachedBody, 0);
+      $body = "" if not defined $body;
+      $body = "[NO BODY]" if $body =~ /^[ \t\n]*$/;
+      $body = html2text($body);
+      $body =~ s/^\n(\s*\n)*//;
+      $body =~ s/\n(\s*\n)*$//;
+      $body =~ s/\n\s*\n(\s*\n)+/\n\n/g;
+      $body =~ s/^/  /mg;
+      my $bodySep = "="x30;
+      print "\n"
+        . "ACCOUNT: $accName\n"
+        . "UID: $uid\n"
+        . "DATE: $$hdr{Date}\n"
+        . "FROM: $$hdr{From}\n"
+        . "TO: $$hdr{To}\n"
+        . "CC: $$hdr{CC}\n"
+        . "BCC: $$hdr{BCC}\n"
+        . "SUBJECT: $$hdr{Subject}\n"
+        . "BODY:\n$bodySep\n$body\n$bodySep\n"
+        . "\n"
+        ;
+    }
+  }
 }
 
 sub formatConfig($){
