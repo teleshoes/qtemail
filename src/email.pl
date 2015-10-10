@@ -16,6 +16,7 @@ sub cmdMarkReadUnread($$$@);
 sub cmdAccounts();
 sub cmdFolders($);
 sub cmdHeader($$@);
+sub cmdBodyAttachments($$$$$$$$@);
 
 sub formatConfig($);
 sub writeConfig($@);
@@ -469,54 +470,9 @@ sub main(@){
         or not defined $destDir or not -d $destDir;
     }
 
-    my $acc = $$config{accounts}{$accName};
-    my $preferHtml = 0;
-    $preferHtml = 1 if defined $$acc{prefer_html} and $$acc{prefer_html} =~ /true/i;
-    $preferHtml = 0 if $wantPlain;
-    $preferHtml = 1 if $wantHtml;
-    die "Unknown account $accName\n" if not defined $acc;
-    my $imapFolder = accImapFolder($acc, $folderName);
-    die "Unknown folder $folderName\n" if not defined $imapFolder;
-    my $c;
-    my $f;
-    my $mimeParser = MIME::Parser->new();
-    $mimeParser->output_dir($destDir);
-    for my $uid(@uids){
-      my $body = readCachedBody($accName, $folderName, $uid);
-      if(not defined $body and $noDownload){
-        print $nulSep ? "\0" : "\n";
-        next;
-      }
-      if(not defined $body){
-        if(not defined $c){
-          $c = getClient($acc);
-          die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
-        }
-        if(not defined $f){
-          my $f = openFolder($imapFolder, $c, 0);
-          die "Error getting folder $folderName\n" if not defined $f;
-        }
-        cacheBodies($accName, $folderName, $c, undef, $uid);
-        $body = readCachedBody($accName, $folderName, $uid);
-      }
-      if(not defined $body){
-        die "No body found for $accName=>$folderName=>$uid\n";
-      }
-      if($modeBodyAttachments eq "body"){
-        my $fmt = getBody($mimeParser, $body, $preferHtml);
-        chomp $fmt;
-        $fmt = html2text $fmt if $wantPlain;
-        print $fmt;
-        print $nulSep ? "\0" : "\n";
-      }elsif($modeBodyAttachments eq "attachments"){
-        my @attachments = writeAttachments($mimeParser, $body);
-        for my $attachment(@attachments){
-          print " saved att: $attachment\n";
-        }
-      }
-    }
-    $c->close() if defined $c;
-    $c->logout() if defined $c;
+    cmdBodyAttachments($modeBodyAttachments, $wantPlain, $wantHtml,
+      $noDownload, $nulSep,
+      $accName, $folderName, $destDir, @uids);
   }elsif($cmd =~ /^(--cache-all-bodies)$/ and @_ == 2){
     $VERBOSE = 1;
     my $config = getConfig();
@@ -863,6 +819,61 @@ sub cmdHeader($$@){
       print "$uid.$field: $$hdr{$field}\n";
     }
   }
+}
+
+sub cmdBodyAttachments($$$$$$$$@){
+  my ($modeBodyAttachments, $wantPlain, $wantHtml,
+    $noDownload, $nulSep,
+    $accName, $folderName, $destDir, @uids) = @_;
+  my $config = getConfig();
+  my $acc = $$config{accounts}{$accName};
+  my $preferHtml = 0;
+  $preferHtml = 1 if defined $$acc{prefer_html} and $$acc{prefer_html} =~ /true/i;
+  $preferHtml = 0 if $wantPlain;
+  $preferHtml = 1 if $wantHtml;
+  die "Unknown account $accName\n" if not defined $acc;
+  my $imapFolder = accImapFolder($acc, $folderName);
+  die "Unknown folder $folderName\n" if not defined $imapFolder;
+  my $c;
+  my $f;
+  my $mimeParser = MIME::Parser->new();
+  $mimeParser->output_dir($destDir);
+  for my $uid(@uids){
+    my $body = readCachedBody($accName, $folderName, $uid);
+    if(not defined $body and $noDownload){
+      print $nulSep ? "\0" : "\n";
+      next;
+    }
+    if(not defined $body){
+      if(not defined $c){
+        $c = getClient($acc);
+        die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
+      }
+      if(not defined $f){
+        my $f = openFolder($imapFolder, $c, 0);
+        die "Error getting folder $folderName\n" if not defined $f;
+      }
+      cacheBodies($accName, $folderName, $c, undef, $uid);
+      $body = readCachedBody($accName, $folderName, $uid);
+    }
+    if(not defined $body){
+      die "No body found for $accName=>$folderName=>$uid\n";
+    }
+    if($modeBodyAttachments eq "body"){
+      my $fmt = getBody($mimeParser, $body, $preferHtml);
+      chomp $fmt;
+      $fmt = html2text $fmt if $wantPlain;
+      print $fmt;
+      print $nulSep ? "\0" : "\n";
+    }elsif($modeBodyAttachments eq "attachments"){
+      my @attachments = writeAttachments($mimeParser, $body);
+      for my $attachment(@attachments){
+        print " saved att: $attachment\n";
+      }
+    }
+  }
+  $c->close() if defined $c;
+  $c->logout() if defined $c;
 }
 
 sub formatConfig($){
