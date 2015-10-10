@@ -8,6 +8,8 @@ use MIME::Parser;
 use Date::Parse qw(str2time);
 use Date::Format qw(time2str);
 
+sub optFolder($$);
+
 sub formatConfig($);
 sub writeConfig($@);
 sub setFlagStatus($$$$);
@@ -402,11 +404,7 @@ sub main(@){
     $VERBOSE = 1;
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
-    my $folderNameFilter;
-    if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
-      $folderNameFilter = $1;
-      shift;
-    }
+    my $folderNameFilter = optFolder \@_, undef;
     my @accNames;
     if(@_ == 0){
       for my $accName(@accOrder){
@@ -518,11 +516,7 @@ sub main(@){
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
-    my $folderName = "inbox";
-    if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
-      $folderName = $1;
-      shift;
-    }
+    my $folderName = optFolder \@_, "inbox";
     $VERBOSE = 1;
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
@@ -594,11 +588,7 @@ sub main(@){
     }
   }elsif($cmd =~ /^(--header)$/){
     my $config = getConfig();
-    my $folderName = "inbox";
-    if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
-      $folderName = $1;
-      shift;
-    }
+    my $folderName = optFolder \@_, "inbox";
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
     binmode STDOUT, ':utf8';
@@ -621,11 +611,7 @@ sub main(@){
       $nulSep = 1;
       shift;
     }
-    my $folderName = "inbox";
-    if(@_ > 0 and $_[0] =~ /^--folder=([a-zA-Z_]+)$/){
-      $folderName = $1;
-      shift;
-    }
+    my $folderName = optFolder \@_, "inbox";
     die $usage if @_ < 2;
     my ($accName, $destDir, @uids);
     if($cmd =~ /^(--body|--body-plain|--body-html)/){
@@ -707,11 +693,7 @@ sub main(@){
   }elsif($cmd =~ /^(--print)$/){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
-    my $folderName = "inbox";
-    if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
-      $folderName = $1;
-      shift;
-    }
+    my $folderName = optFolder \@_, "inbox";
     my @accNames = @_ == 0 ? @accOrder : @_;
     my $mimeParser = MIME::Parser->new();
     $mimeParser->output_dir($TMP_DIR);
@@ -747,11 +729,7 @@ sub main(@){
   }elsif($cmd =~ /^(--summary)$/){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
-    my $folderName = "inbox";
-    if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
-      $folderName = $1;
-      shift;
-    }
+    my $folderName = optFolder \@_, "inbox";
     my @accNames = @_ == 0 ? @accOrder : @_;
     for my $accName(@accNames){
       my @unread = readUidFile $accName, $folderName, "unread";
@@ -826,6 +804,18 @@ sub main(@){
     }
     print "no\n";
     exit 1;
+  }
+}
+
+sub optFolder($$){
+  my ($opts, $default) = @_;
+  my $folder;
+  if(@$opts > 0 and $$opts[0] =~ /^--folder=([a-z]+)$/){
+    my $folder = $1;
+    shift @$opts;
+    return $folder;
+  }else{
+    return $default;
   }
 }
 
