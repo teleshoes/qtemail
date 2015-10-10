@@ -43,6 +43,9 @@ sub getClient($);
 sub getSocket($);
 sub formatHeaderField($$);
 sub formatDate($);
+sub accImapFolder($$);
+sub accFolderOrder($);
+sub accEnsureFoldersParsed($);
 sub getFolderName($);
 sub parseFolders($);
 sub parseCountIncludeFolderNames($);
@@ -396,14 +399,6 @@ sub main(@){
 
   my $config = readSecrets();
   validateSecrets $config;
-  my %accNameFolderPairs = map {$_ => parseFolders $$config{accounts}{$_}} keys %{$$config{accounts}};
-  my %accFolders;
-  my %accFolderOrder;
-  for my $acc(keys %{$$config{accounts}}){
-    my @nameFolderPairs = @{$accNameFolderPairs{$acc}};
-    $accFolders{$acc} = {map {$$_[0] => $$_[1]} @nameFolderPairs};
-    $accFolderOrder{$acc} = [map {$$_[0]} @nameFolderPairs];
-  }
 
   if($cmd =~ /^(--update)$/){
     $VERBOSE = 1;
@@ -441,15 +436,13 @@ sub main(@){
         next;
       }
 
-      my $folders = $accFolders{$accName};
-      my @folderOrder = @{$accFolderOrder{$accName}};
       my $hasNewUnread = 0;
-      for my $folderName(@folderOrder){
+      for my $folderName(accFolderOrder($acc)){
         if(defined $folderNameFilter and $folderName ne $folderNameFilter){
           print "skipping $folderName\n";
           next;
         }
-        my $imapFolder = $$folders{$folderName};
+        my $imapFolder = accImapFolder($acc, $folderName);
         my $f = openFolder($imapFolder, $c, 0);
         if(not defined $f){
           $isError = 1;
@@ -535,7 +528,7 @@ sub main(@){
     my $readStatus = $cmd =~ /^(--mark-read)$/ ? 1 : 0;
     my $acc = $$config{accounts}{$accName};
     die "Unknown account $accName\n" if not defined $acc;
-    my $imapFolder = $accFolders{$accName}{$folderName};
+    my $imapFolder = accImapFolder($acc, $folderName);
     die "Unknown folder $folderName\n" if not defined $imapFolder;
     my $c = getClient($acc);
     die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
@@ -590,9 +583,8 @@ sub main(@){
   }elsif($cmd =~ /^(--folders)$/){
     die $usage if @_ != 1;
     my $accName = shift;
-    my $folders = $accFolders{$accName};
-    my @folderOrder = @{$accFolderOrder{$accName}};
-    for my $folderName(@folderOrder){
+    my $acc = $$config{accounts}{$accName};
+    for my $folderName(accFolderOrder($acc)){
       my $unreadCount = readUidFileCounts $accName, $folderName, "unread";
       my $totalCount = readUidFileCounts $accName, $folderName, "all";
       printf "$folderName:$unreadCount/$totalCount\n";
@@ -647,7 +639,7 @@ sub main(@){
     $preferHtml = 0 if $cmd eq "--body-plain";
     $preferHtml = 1 if $cmd eq "--body-html";
     die "Unknown account $accName\n" if not defined $acc;
-    my $imapFolder = $accFolders{$accName}{$folderName};
+    my $imapFolder = accImapFolder($acc, $folderName);
     die "Unknown folder $folderName\n" if not defined $imapFolder;
     my $c;
     my $f;
@@ -699,7 +691,7 @@ sub main(@){
     my $c = getClient($acc);
     die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
 
-    my $imapFolder = $accFolders{$accName}{$folderName};
+    my $imapFolder = accImapFolder($acc, $folderName);
     die "Unknown folder $folderName\n" if not defined $imapFolder;
     my $f = openFolder($imapFolder, $c, 0);
     die "Error getting folder $folderName\n" if not defined $f;
@@ -795,9 +787,8 @@ sub main(@){
     my @accNames = @_ == 0 ? @accOrder : @_;
     my @fmts;
     for my $accName(@accNames){
-      my $folders = $accFolders{$accName};
-      my @folderOrder = @{$accFolderOrder{$accName}};
-      for my $folderName(@folderOrder){
+      my $acc = $$config{accounts}{$accName};
+      for my $folderName(accFolderOrder($acc)){
         my $unread = readUidFileCounts $accName, $folderName, "new-unread";
         if($unread > 0){
           print "yes\n";
@@ -812,9 +803,8 @@ sub main(@){
     my @accNames = @_ == 0 ? @accOrder : @_;
     my @fmts;
     for my $accName(@accNames){
-      my $folders = $accFolders{$accName};
-      my @folderOrder = @{$accFolderOrder{$accName}};
-      for my $folderName(@folderOrder){
+      my $acc = $$config{accounts}{$accName};
+      for my $folderName(accFolderOrder($acc)){
         my $unread = readUidFileCounts $accName, $folderName, "unread";
         if($unread > 0){
           print "yes\n";
@@ -1528,6 +1518,30 @@ sub formatDate($){
     return time2str($DATE_FORMAT, $d);
   }
   return $date;
+}
+
+sub accImapFolder($$){
+  my ($acc, $folderName) = @_;
+  accEnsureFoldersParsed $acc;
+  return $$acc{parsedFolders}{$folderName};
+}
+sub accFolderOrder($){
+  my ($acc) = @_;
+  accEnsureFoldersParsed $acc;
+  return @{$$acc{parsedFolderOrder}};
+}
+sub accEnsureFoldersParsed($){
+  my $acc = shift;
+  return if defined $$acc{parsedFolders};
+
+  my @nameFolderPairs = @{parseFolders $acc};
+  $$acc{parsedFolders} = {};
+  $$acc{parsedFolderOrder} = [];
+  for my $nameFolderPair(@{parseFolders $acc}){
+    my ($name, $folder) = @$nameFolderPair;
+    $$acc{parsedFolders}{$name} = $folder;
+    push @{$$acc{parsedFolderOrder}}, $name;
+  }
 }
 
 sub getFolderName($){
