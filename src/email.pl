@@ -15,6 +15,7 @@ sub cmdSmtp($$$$@);
 sub cmdMarkReadUnread($$$@);
 sub cmdAccounts();
 sub cmdFolders($);
+sub cmdHeader($$@);
 
 sub formatConfig($);
 sub writeConfig($@);
@@ -428,18 +429,10 @@ sub main(@){
     my $accName = shift;
     cmdFolders($accName);
   }elsif($cmd =~ /^(--header)$/ and @_ >= 2){
-    my $config = getConfig();
     my $folderName = optFolder \@_, "inbox";
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
-    binmode STDOUT, ':utf8';
-    for my $uid(@uids){
-      my $hdr = readCachedHeader($accName, $folderName, $uid);
-      die "Unknown message: $uid\n" if not defined $hdr;
-      for my $field(@headerFields){
-        print "$uid.$field: $$hdr{$field}\n";
-      }
-    }
+    cmdHeader($accName, $folderName, @uids);
   }elsif($cmd =~ /^(--body|--body-plain|--body-html|--attachments)$/ and @_ >= 2){
     my $modeBodyAttachments;
     if($cmd =~ /^(--body|--body-plain|--body-html)$/){
@@ -856,6 +849,19 @@ sub cmdFolders($){
     my $unreadCount = readUidFileCounts $accName, $folderName, "unread";
     my $totalCount = readUidFileCounts $accName, $folderName, "all";
     printf "$folderName:$unreadCount/$totalCount\n";
+  }
+}
+
+sub cmdHeader($$@){
+  my ($accName, $folderName, @uids) = @_;
+  my $config = getConfig();
+  binmode STDOUT, ':utf8';
+  for my $uid(@uids){
+    my $hdr = readCachedHeader($accName, $folderName, $uid);
+    die "Unknown message: $uid\n" if not defined $hdr;
+    for my $field(@headerFields){
+      print "$uid.$field: $$hdr{$field}\n";
+    }
   }
 }
 
