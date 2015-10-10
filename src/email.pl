@@ -396,7 +396,6 @@ sub main(@){
 
   my $config = readSecrets();
   validateSecrets $config;
-  my @accOrder = @{$$config{accOrder}};
   my $accounts = $$config{accounts};
   my %accNameFolderPairs = map {$_ => parseFolders $$accounts{$_}} keys %$accounts;
   my %accFolders;
@@ -409,6 +408,7 @@ sub main(@){
 
   if($cmd =~ /^(--update)$/){
     $VERBOSE = 1;
+    my @accOrder = @{$$config{accOrder}};
     my $folderNameFilter;
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
       $folderNameFilter = $1;
@@ -524,6 +524,7 @@ sub main(@){
       "--subject=$subject", "--body-plain=$body", "--to=$to",
       @args;
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/){
+    my @accOrder = @{$$config{accOrder}};
     my $folderName = "inbox";
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
       $folderName = $1;
@@ -560,6 +561,7 @@ sub main(@){
     $c->logout();
   }elsif($cmd =~ /^(--accounts)$/){
     die $usage if @_ != 0;
+    my @accOrder = @{$$config{accOrder}};
     for my $accName(@accOrder){
       my $acc = $$accounts{$accName};
       my @countIncludeFolderNames = @{parseCountIncludeFolderNames $acc};
@@ -706,6 +708,7 @@ sub main(@){
     my @messages = $c->messages;
     cacheBodies($accName, $folderName, $c, undef, @messages);
   }elsif($cmd =~ /^(--print)$/){
+    my @accOrder = @{$$config{accOrder}};
     my $folderName = "inbox";
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
       $folderName = $1;
@@ -744,6 +747,7 @@ sub main(@){
       }
     }
   }elsif($cmd =~ /^(--summary)$/){
+    my @accOrder = @{$$config{accOrder}};
     my $folderName = "inbox";
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
       $folderName = $1;
@@ -768,6 +772,7 @@ sub main(@){
       }
     }
   }elsif($cmd =~ /^(--status-line|--status-short)$/){
+    my @accOrder = @{$$config{accOrder}};
     my @accNames = @_ == 0 ? @accOrder : @_;
     my $counts = readGlobalUnreadCountsFile();
     if($cmd eq "--status-line"){
@@ -776,6 +781,7 @@ sub main(@){
       print formatStatusShort($counts, @accNames);
     }
   }elsif($cmd =~ /^(--has-error)$/){
+    my @accOrder = @{$$config{accOrder}};
     my @accNames = @_ == 0 ? @accOrder : @_;
     for my $accName(@accNames){
       if(hasError $accName){
@@ -786,6 +792,7 @@ sub main(@){
     print "no\n";
     exit 1;
   }elsif($cmd =~ /^(--has-new-unread)$/){
+    my @accOrder = @{$$config{accOrder}};
     my @accNames = @_ == 0 ? @accOrder : @_;
     my @fmts;
     for my $accName(@accNames){
@@ -802,6 +809,7 @@ sub main(@){
     print "no\n";
     exit 1;
   }elsif($cmd =~ /^(--has-unread)$/){
+    my @accOrder = @{$$config{accOrder}};
     my @accNames = @_ == 0 ? @accOrder : @_;
     my @fmts;
     for my $accName(@accNames){
