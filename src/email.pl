@@ -22,6 +22,7 @@ sub cmdPrint($@);
 sub cmdSummary($@);
 sub cmdStatus($@);
 sub cmdHasError(@);
+sub cmdHasNewUnread(@);
 
 sub formatConfig($);
 sub writeConfig($@);
@@ -511,22 +512,14 @@ sub main(@){
       exit 1;
     }
   }elsif($cmd =~ /^(--has-new-unread)$/ and @_ >= 0){
-    my $config = getConfig();
-    my @accOrder = @{$$config{accOrder}};
-    my @accNames = @_ == 0 ? @accOrder : @_;
-    my @fmts;
-    for my $accName(@accNames){
-      my $acc = $$config{accounts}{$accName};
-      for my $folderName(accFolderOrder($acc)){
-        my $unread = readUidFileCounts $accName, $folderName, "new-unread";
-        if($unread > 0){
-          print "yes\n";
-          exit 0;
-        }
-      }
+    my @accNames = @_;
+    if(cmdHasNewUnread(@accNames)){
+      print "yes\n";
+      exit 0;
+    }else{
+      print "no\n";
+      exit 1;
     }
-    print "no\n";
-    exit 1;
   }elsif($cmd =~ /^(--has-unread)$/ and @_ >= 0){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
@@ -917,6 +910,24 @@ sub cmdHasError(@){
   for my $accName(@accNames){
     if(hasError $accName){
       return 1;
+    }
+  }
+  return 0;
+}
+
+sub cmdHasNewUnread(@){
+  my @accNames = @_;
+  my $config = getConfig();
+  my @accOrder = @{$$config{accOrder}};
+  @accNames = @accOrder if @accNames == 0;
+  my @fmts;
+  for my $accName(@accNames){
+    my $acc = $$config{accounts}{$accName};
+    for my $folderName(accFolderOrder($acc)){
+      my $unread = readUidFileCounts $accName, $folderName, "new-unread";
+      if($unread > 0){
+        return 1;
+      }
     }
   }
   return 0;
