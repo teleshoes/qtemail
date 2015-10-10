@@ -1,12 +1,12 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use Encode;
-use Mail::IMAPClient;
-use IO::Socket::SSL;
-use MIME::Parser;
-use Date::Parse qw(str2time);
-use Date::Format qw(time2str);
+# Encode
+# Mail::IMAPClient;
+# IO::Socket::SSL;
+# MIME::Parser
+# Date::Parse
+# Date::Format
 
 sub optFolder($$);
 
@@ -762,6 +762,7 @@ sub cmdBodyAttachments($$$$$$$$@){
   die "Unknown folder $folderName\n" if not defined $imapFolder;
   my $c;
   my $f;
+  require MIME::Parser;
   my $mimeParser = MIME::Parser->new();
   $mimeParser->output_dir($destDir);
   for my $uid(@uids){
@@ -825,6 +826,7 @@ sub cmdPrint($@){
   my $config = getConfig();
   my @accOrder = @{$$config{accOrder}};
   @accNames = @accOrder if @accNames == 0;
+  require MIME::Parser;
   my $mimeParser = MIME::Parser->new();
   $mimeParser->output_dir($GVAR{TMP_DIR});
   binmode STDOUT, ':utf8';
@@ -1296,6 +1298,7 @@ sub cacheAllHeaders($$$){
   for my $uid(@cachedBodyUids){
     if(not defined $okCachedHeaderUids{$uid}){
       warn "\n!!!!!\nDELETED MESSAGE: $uid is cached in bodies, but not on server\n";
+      require MIME::Parser;
       my $mimeParser = MIME::Parser->new();
       $mimeParser->output_dir($GVAR{TMP_DIR});
 
@@ -1611,6 +1614,7 @@ sub getClient($){
   }
   my $sep = "="x50;
   print "$sep\n$$acc{name}: logging in\n$sep\n" if $GVAR{VERBOSE};
+  require Mail::IMAPClient;
   my $c = Mail::IMAPClient->new(
     %$network,
     User     => $$acc{user},
@@ -1623,6 +1627,7 @@ sub getClient($){
 
 sub getSocket($){
   my $acc = shift;
+  require IO::Socket::SSL;
   return IO::Socket::SSL->new(
     PeerAddr => $$acc{server},
     PeerPort => $$acc{port},
@@ -1631,7 +1636,8 @@ sub getSocket($){
 
 sub formatHeaderField($$){
   my ($field, $val) = @_;
-  $val = decode('MIME-Header', $val);
+  require Encode;
+  $val = Encode::decode('MIME-Header', $val);
   if($field =~ /^(Date)$/){
     $val = formatDate($val);
   }
@@ -1640,9 +1646,11 @@ sub formatHeaderField($$){
 
 sub formatDate($){
   my $date = shift;
-  my $d = str2time($date);
+  require Date::Parse;
+  my $d = Date::Parse::str2time($date);
   if(defined $d){
-    return time2str($GVAR{DATE_FORMAT}, $d);
+    require Date::Format;
+    return Date::Format::time2str($GVAR{DATE_FORMAT}, $d);
   }
   return $date;
 }
