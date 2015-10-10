@@ -19,6 +19,7 @@ sub cmdHeader($$@);
 sub cmdBodyAttachments($$$$$$$$@);
 sub cmdCacheAllBodies($$);
 sub cmdPrint($@);
+sub cmdSummary($@);
 
 sub formatConfig($);
 sub writeConfig($@);
@@ -484,27 +485,9 @@ sub main(@){
     my @accNames = @_;
     cmdPrint($folderName, @accNames);
   }elsif($cmd =~ /^(--summary)$/ and @_ >= 0){
-    my $config = getConfig();
-    my @accOrder = @{$$config{accOrder}};
     my $folderName = optFolder \@_, "inbox";
-    my @accNames = @_ == 0 ? @accOrder : @_;
-    for my $accName(@accNames){
-      my @unread = readUidFile $accName, $folderName, "unread";
-      for my $uid(@unread){
-        my $hdr = readCachedHeader($accName, $folderName, $uid);
-        print ""
-          . "$accName"
-          . " $$hdr{Date}"
-          . " $$hdr{From}"
-          . " $$hdr{To}"
-          . " $$hdr{CC}"
-          . " $$hdr{BCC}"
-          . "\n"
-          . "  $$hdr{Subject}"
-          . "\n"
-          ;
-      }
-    }
+    my @accNames = @_;
+    cmdSummary($folderName, @accNames);
   }elsif($cmd =~ /^(--status-line|--status-short)$/ and @_ >= 0){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
@@ -883,6 +866,30 @@ sub cmdPrint($@){
         . "BCC: $$hdr{BCC}\n"
         . "SUBJECT: $$hdr{Subject}\n"
         . "BODY:\n$bodySep\n$body\n$bodySep\n"
+        . "\n"
+        ;
+    }
+  }
+}
+
+sub cmdSummary($@){
+  my ($folderName, @accNames) = @_;
+  my $config = getConfig();
+  my @accOrder = @{$$config{accOrder}};
+  @accNames = @accOrder if @accNames == 0;
+  for my $accName(@accNames){
+    my @unread = readUidFile $accName, $folderName, "unread";
+    for my $uid(@unread){
+      my $hdr = readCachedHeader($accName, $folderName, $uid);
+      print ""
+        . "$accName"
+        . " $$hdr{Date}"
+        . " $$hdr{From}"
+        . " $$hdr{To}"
+        . " $$hdr{CC}"
+        . " $$hdr{BCC}"
+        . "\n"
+        . "  $$hdr{Subject}"
         . "\n"
         ;
     }
