@@ -396,11 +396,10 @@ sub main(@){
 
   my $config = readSecrets();
   validateSecrets $config;
-  my $accounts = $$config{accounts};
-  my %accNameFolderPairs = map {$_ => parseFolders $$accounts{$_}} keys %$accounts;
+  my %accNameFolderPairs = map {$_ => parseFolders $$config{accounts}{$_}} keys %{$$config{accounts}};
   my %accFolders;
   my %accFolderOrder;
-  for my $acc(keys %$accounts){
+  for my $acc(keys %{$$config{accounts}}){
     my @nameFolderPairs = @{$accNameFolderPairs{$acc}};
     $accFolders{$acc} = {map {$$_[0] => $$_[1]} @nameFolderPairs};
     $accFolderOrder{$acc} = [map {$$_[0]} @nameFolderPairs];
@@ -417,7 +416,7 @@ sub main(@){
     my @accNames;
     if(@_ == 0){
       for my $accName(@accOrder){
-        my $skip = $$accounts{$accName}{skip};
+        my $skip = $$config{accounts}{$accName}{skip};
         if(not defined $skip or $skip !~ /^true$/i){
           push @accNames, $accName;
         }
@@ -429,7 +428,7 @@ sub main(@){
     my $isError = 0;
     my @newUnreadCommands;
     for my $accName(@accNames){
-      my $acc = $$accounts{$accName};
+      my $acc = $$config{accounts}{$accName};
       die "Unknown account $accName\n" if not defined $acc;
       clearError $accName;
       my $c = getClient($acc);
@@ -515,7 +514,7 @@ sub main(@){
   }elsif($cmd =~ /^(--smtp)$/){
     die $usage if @_ < 4;
     my ($accName, $subject, $body, $to, @args) = @_;
-    my $acc = $$accounts{$accName};
+    my $acc = $$config{accounts}{$accName};
     die "Unknown account $accName\n" if not defined $acc;
     exec $SMTP_CLI_EXEC,
       "--server=$$acc{smtp_server}", "--port=$$acc{smtp_port}",
@@ -534,7 +533,7 @@ sub main(@){
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
     my $readStatus = $cmd =~ /^(--mark-read)$/ ? 1 : 0;
-    my $acc = $$accounts{$accName};
+    my $acc = $$config{accounts}{$accName};
     die "Unknown account $accName\n" if not defined $acc;
     my $imapFolder = $accFolders{$accName}{$folderName};
     die "Unknown folder $folderName\n" if not defined $imapFolder;
@@ -563,7 +562,7 @@ sub main(@){
     die $usage if @_ != 0;
     my @accOrder = @{$$config{accOrder}};
     for my $accName(@accOrder){
-      my $acc = $$accounts{$accName};
+      my $acc = $$config{accounts}{$accName};
       my @countIncludeFolderNames = @{parseCountIncludeFolderNames $acc};
       my $unreadCount = 0;
       my $totalCount = 0;
@@ -576,12 +575,12 @@ sub main(@){
         $totalCount += readUidFileCounts $accName, $folderName, "all";
       }
       $lastUpdated = 0 if not defined $lastUpdated;
-      my $updateInterval = $$accounts{$accName}{update_interval};
+      my $updateInterval = $$config{accounts}{$accName}{update_interval};
       if(not defined $updateInterval){
         $updateInterval = 0;
       }
       $updateInterval .= "s";
-      my $refreshInterval = $$accounts{$accName}{refresh_interval};
+      my $refreshInterval = $$config{accounts}{$accName}{refresh_interval};
       if(not defined $refreshInterval){
         $refreshInterval = 0;
       }
@@ -642,7 +641,7 @@ sub main(@){
         or not defined $destDir or not -d $destDir;
     }
 
-    my $acc = $$accounts{$accName};
+    my $acc = $$config{accounts}{$accName};
     my $preferHtml = 0;
     $preferHtml = 1 if defined $$acc{prefer_html} and $$acc{prefer_html} =~ /true/i;
     $preferHtml = 0 if $cmd eq "--body-plain";
@@ -695,7 +694,7 @@ sub main(@){
     die $usage if @_ != 2;
     my ($accName, $folderName) = @_;
 
-    my $acc = $$accounts{$accName};
+    my $acc = $$config{accounts}{$accName};
     die "Unknown account $accName\n" if not defined $acc;
     my $c = getClient($acc);
     die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
