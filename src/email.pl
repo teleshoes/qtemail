@@ -421,8 +421,9 @@ sub main(@){
     $GVAR{VERBOSE} = 1;
     my $folderNameFilter = optFolder \@_, undef;
     my @accNames = @_;
-    my $ok = cmdUpdate($folderNameFilter, @accNames);
-    exit $ok ? 0 : 1;
+    my $success = cmdUpdate($folderNameFilter, @accNames);
+    my $exitCode = $success ? 0 : 1;
+    exit $exitCode;
   }elsif($cmd =~ /^(--smtp)$/ and @_ >= 4){
     my ($accName, $subject, $body, $to, @args) = @_;
     cmdSmtp($accName, $subject, $body, $to, @args);
@@ -560,7 +561,7 @@ sub cmdUpdate($@){
     }
   }
 
-  my $isError = 0;
+  my $success = 1;
   my @newUnreadCommands;
   for my $accName(@accNames){
     my $acc = $$config{accounts}{$accName};
@@ -568,7 +569,7 @@ sub cmdUpdate($@){
     clearError $accName;
     my $c = getClient($acc);
     if(not defined $c){
-      $isError = 1;
+      $success = 0;
       my $msg = "ERROR: Could not authenticate $$acc{name} ($$acc{user})\n";
       warn $msg;
       writeError $accName, $msg;
@@ -585,7 +586,7 @@ sub cmdUpdate($@){
       my $imapFolder = accImapFolder($acc, $folderName);
       my $f = openFolder($imapFolder, $c, 0);
       if(not defined $f){
-        $isError = 1;
+        $success = 0;
         my $msg = "ERROR: Could not open folder $folderName\n";
         warn $msg;
         writeError $accName, $msg;
@@ -644,7 +645,7 @@ sub cmdUpdate($@){
     system "$cmd";
   }
 
-  return $isError ? 0 : 1;
+  return $success;
 }
 
 sub cmdSmtp($$$$@){
