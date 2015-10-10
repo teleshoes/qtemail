@@ -21,6 +21,7 @@ sub cmdCacheAllBodies($$);
 sub cmdPrint($@);
 sub cmdSummary($@);
 sub cmdStatus($@);
+sub cmdHasError(@);
 
 sub formatConfig($);
 sub writeConfig($@);
@@ -501,17 +502,14 @@ sub main(@){
     my @accNames = @_;
     cmdStatus($modeLineStatus, @accNames);
   }elsif($cmd =~ /^(--has-error)$/ and @_ >= 0){
-    my $config = getConfig();
-    my @accOrder = @{$$config{accOrder}};
-    my @accNames = @_ == 0 ? @accOrder : @_;
-    for my $accName(@accNames){
-      if(hasError $accName){
-        print "yes\n";
-        exit 0;
-      }
+    my @accNames = @_;
+    if(cmdHasError(@accNames)){
+      print "yes\n";
+      exit 0;
+    }else{
+      print "no\n";
+      exit 1;
     }
-    print "no\n";
-    exit 1;
   }elsif($cmd =~ /^(--has-new-unread)$/ and @_ >= 0){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
@@ -909,6 +907,19 @@ sub cmdStatus($@){
   }elsif($modeLineShort eq "status"){
     print formatStatusShort($counts, @accNames);
   }
+}
+
+sub cmdHasError(@){
+  my @accNames = @_;
+  my $config = getConfig();
+  my @accOrder = @{$$config{accOrder}};
+  @accNames = @accOrder if @accNames == 0;
+  for my $accName(@accNames){
+    if(hasError $accName){
+      return 1;
+    }
+  }
+  return 0;
 }
 
 sub formatConfig($){
