@@ -8,6 +8,7 @@ use MIME::Parser;
 use Date::Parse qw(str2time);
 use Date::Format qw(time2str);
 
+sub formatConfig($);
 sub setFlagStatus($$$$);
 sub writeStatusFiles(@);
 sub formatStatusLine($@);
@@ -371,24 +372,12 @@ sub main(@){
 
   die $usage if @_ > 0 and $_[0] =~ /^(-h|--help)$/;
 
-  if($cmd =~ /^(--read-config|--read-options)$/){
-    my $configGroup;
-    if($cmd eq "--read-config"){
-      die $usage if @_ != 1;
-      $configGroup = shift;
-    }elsif($cmd eq "--read-options"){
-      die $usage if @_ != 0;
-      $configGroup = undef;
-    }
-    my $config = readSecrets;
-    my $accounts = $$config{accounts};
-    my $options = $$config{options};
-    my $vals = defined $configGroup ? $$accounts{$configGroup} : $options;
-    if(defined $vals){
-      for my $key(sort keys %$vals){
-        print "$key=$$vals{$key}\n";
-      }
-    }
+  if($cmd =~ /^(--read-config)$/ and @_ == 1){
+    my $account = shift;
+    print formatConfig $account;
+    exit 0;
+  }elsif($cmd =~ /^(--read-options)$/ and @_ ==0){
+    print formatConfig undef;
     exit 0;
   }elsif($cmd =~ /^(--write-config|--write-options)$/){
     my $configGroup;
@@ -842,6 +831,21 @@ sub main(@){
     print "no\n";
     exit 1;
   }
+}
+
+sub formatConfig($){
+  my $configGroup = shift;
+  my $config = readSecrets;
+  my $accounts = $$config{accounts};
+  my $options = $$config{options};
+  my $vals = defined $configGroup ? $$accounts{$configGroup} : $options;
+  my $fmt = '';
+  if(defined $vals){
+    for my $key(sort keys %$vals){
+      $fmt .= "$key=$$vals{$key}\n";
+    }
+  }
+  return $fmt;
 }
 
 sub setFlagStatus($$$$){
