@@ -1671,7 +1671,7 @@ sub readSecrets(){
       if(defined $decryptCmd and $key =~ /password/){
         $val =~ s/'/'\\''/g;
         $val = `$decryptCmd '$val'`;
-        die "error encrypting password\n" if $? != 0;
+        die "error decrypting password\n" if $? != 0;
       }
       chomp $val;
       $$accounts{$accName}{$key} = $val;
