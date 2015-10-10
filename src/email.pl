@@ -20,6 +20,7 @@ sub cmdBodyAttachments($$$$$$$$@);
 sub cmdCacheAllBodies($$);
 sub cmdPrint($@);
 sub cmdSummary($@);
+sub cmdStatus($@);
 
 sub formatConfig($);
 sub writeConfig($@);
@@ -489,15 +490,16 @@ sub main(@){
     my @accNames = @_;
     cmdSummary($folderName, @accNames);
   }elsif($cmd =~ /^(--status-line|--status-short)$/ and @_ >= 0){
-    my $config = getConfig();
-    my @accOrder = @{$$config{accOrder}};
-    my @accNames = @_ == 0 ? @accOrder : @_;
-    my $counts = readGlobalUnreadCountsFile();
-    if($cmd eq "--status-line"){
-      print formatStatusLine($counts, @accNames);
-    }elsif($cmd eq "--status-short"){
-      print formatStatusShort($counts, @accNames);
+    my $modeLineStatus;
+    if($cmd =~ /^(--status-line)$/){
+      $modeLineStatus = "line";
+    }elsif($cmd =~ /^(--status-short)$/){
+      $modeLineStatus = "short";
+    }else{
+      die "failed to parsed cmd: $cmd\n";
     }
+    my @accNames = @_;
+    cmdStatus($modeLineStatus, @accNames);
   }elsif($cmd =~ /^(--has-error)$/ and @_ >= 0){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
@@ -893,6 +895,19 @@ sub cmdSummary($@){
         . "\n"
         ;
     }
+  }
+}
+
+sub cmdStatus($@){
+  my ($modeLineShort, @accNames) = @_;
+  my $config = getConfig();
+  my @accOrder = @{$$config{accOrder}};
+  @accNames = @accOrder if @accNames == 0;
+  my $counts = readGlobalUnreadCountsFile();
+  if($modeLineShort eq "line"){
+    print formatStatusLine($counts, @accNames);
+  }elsif($modeLineShort eq "status"){
+    print formatStatusShort($counts, @accNames);
   }
 }
 
