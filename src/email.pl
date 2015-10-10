@@ -12,6 +12,7 @@ sub optFolder($$);
 
 sub cmdUpdate($@);
 sub cmdSmtp($$$$@);
+sub cmdMarkReadUnread($$$@);
 
 sub formatConfig($);
 sub writeConfig($@);
@@ -413,38 +414,12 @@ sub main(@){
     my ($accName, $subject, $body, $to, @args) = @_;
     cmdSmtp($accName, $subject, $body, $to, @args);
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/ and @_ >= 2){
-    my $config = getConfig();
-    my @accOrder = @{$$config{accOrder}};
-    my $folderName = optFolder \@_, "inbox";
     $VERBOSE = 1;
+    my $folderName = optFolder \@_, "inbox";
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
     my $readStatus = $cmd =~ /^(--mark-read)$/ ? 1 : 0;
-    my $acc = $$config{accounts}{$accName};
-    die "Unknown account $accName\n" if not defined $acc;
-    my $imapFolder = accImapFolder($acc, $folderName);
-    die "Unknown folder $folderName\n" if not defined $imapFolder;
-    my $c = getClient($acc);
-    die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
-    my $f = openFolder($imapFolder, $c, 1);
-    die "Error getting folder $folderName\n" if not defined $f;
-    for my $uid(@uids){
-      setFlagStatus($c, $uid, "Seen", $readStatus);
-    }
-    my @unread = readUidFile $$acc{name}, $folderName, "unread";
-    my %all = map {$_ => 1} readUidFile $$acc{name}, $folderName, "all";
-    my %marked = map {$_ => 1} @uids;
-
-    my %toUpdate = map {$_ => 1} grep {defined $all{$_}} keys %marked;
-    @unread = grep {not defined $toUpdate{$_}} @unread;
-    if(not $readStatus){
-      @unread = (@unread, sort keys %toUpdate);
-    }
-    writeUidFile $$acc{name}, $folderName, "unread", @unread;
-    updateGlobalUnreadCountsFile($config);
-    writeStatusFiles(@accOrder);
-    $c->close();
-    $c->logout();
+    cmdMarkReadUnread($readStatus, $accName, $folderName, @uids);
   }elsif($cmd =~ /^(--accounts)$/ and @_ == 0){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
@@ -839,6 +814,38 @@ sub cmdSmtp($$$$@){
     "--from=$$acc{user}",
     "--subject=$subject", "--body-plain=$body", "--to=$to",
     @args;
+}
+
+sub cmdMarkReadUnread($$$@){
+  my ($readStatus, $accName, $folderName, @uids) = @_;
+  my $config = getConfig();
+  my @accOrder = @{$$config{accOrder}};
+  $folderName = "inbox" if not defined $folderName;
+  my $acc = $$config{accounts}{$accName};
+  die "Unknown account $accName\n" if not defined $acc;
+  my $imapFolder = accImapFolder($acc, $folderName);
+  die "Unknown folder $folderName\n" if not defined $imapFolder;
+  my $c = getClient($acc);
+  die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
+  my $f = openFolder($imapFolder, $c, 1);
+  die "Error getting folder $folderName\n" if not defined $f;
+  for my $uid(@uids){
+    setFlagStatus($c, $uid, "Seen", $readStatus);
+  }
+  my @unread = readUidFile $$acc{name}, $folderName, "unread";
+  my %all = map {$_ => 1} readUidFile $$acc{name}, $folderName, "all";
+  my %marked = map {$_ => 1} @uids;
+
+  my %toUpdate = map {$_ => 1} grep {defined $all{$_}} keys %marked;
+  @unread = grep {not defined $toUpdate{$_}} @unread;
+  if(not $readStatus){
+    @unread = (@unread, sort keys %toUpdate);
+  }
+  writeUidFile $$acc{name}, $folderName, "unread", @unread;
+  updateGlobalUnreadCountsFile($config);
+  writeStatusFiles(@accOrder);
+  $c->close();
+  $c->logout();
 }
 
 sub formatConfig($){
