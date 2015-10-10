@@ -17,6 +17,7 @@ sub cmdAccounts();
 sub cmdFolders($);
 sub cmdHeader($$@);
 sub cmdBodyAttachments($$$$$$$$@);
+sub cmdCacheAllBodies($$);
 
 sub formatConfig($);
 sub writeConfig($@);
@@ -475,21 +476,8 @@ sub main(@){
       $accName, $folderName, $destDir, @uids);
   }elsif($cmd =~ /^(--cache-all-bodies)$/ and @_ == 2){
     $VERBOSE = 1;
-    my $config = getConfig();
     my ($accName, $folderName) = @_;
-
-    my $acc = $$config{accounts}{$accName};
-    die "Unknown account $accName\n" if not defined $acc;
-    my $c = getClient($acc);
-    die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
-
-    my $imapFolder = accImapFolder($acc, $folderName);
-    die "Unknown folder $folderName\n" if not defined $imapFolder;
-    my $f = openFolder($imapFolder, $c, 0);
-    die "Error getting folder $folderName\n" if not defined $f;
-
-    my @messages = $c->messages;
-    cacheBodies($accName, $folderName, $c, undef, @messages);
+    cmdCacheAllBodies($accName, $folderName);
   }elsif($cmd =~ /^(--print)$/ and @_ >= 0){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
@@ -874,6 +862,24 @@ sub cmdBodyAttachments($$$$$$$$@){
   }
   $c->close() if defined $c;
   $c->logout() if defined $c;
+}
+
+sub cmdCacheAllBodies($$){
+  my ($accName, $folderName) = @_;
+  my $config = getConfig();
+
+  my $acc = $$config{accounts}{$accName};
+  die "Unknown account $accName\n" if not defined $acc;
+  my $c = getClient($acc);
+  die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
+
+  my $imapFolder = accImapFolder($acc, $folderName);
+  die "Unknown folder $folderName\n" if not defined $imapFolder;
+  my $f = openFolder($imapFolder, $c, 0);
+  die "Error getting folder $folderName\n" if not defined $f;
+
+  my @messages = $c->messages;
+  cacheBodies($accName, $folderName, $c, undef, @messages);
 }
 
 sub formatConfig($){
