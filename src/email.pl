@@ -600,25 +600,36 @@ sub main(@){
       }
     }
   }elsif($cmd =~ /^(--body|--body-plain|--body-html|--attachments)$/){
+    my $modeBodyAttachments;
+    if($cmd =~ /^(--body|--body-plain|--body-html)$/){
+      $modeBodyAttachments = "body";
+    }elsif($cmd =~ /^(--attachments)$/){
+      $modeBodyAttachments = "attachments";
+    }else{
+      die "failed to parsed cmd: $cmd\n";
+    }
+    my $wantPlain = $cmd eq "--body-plain" ? 1 : 0;
+    my $wantHtml = $cmd eq "--body-html" ? 1 : 0;
+
     my $config = getConfig();
     my $noDownload = 0;
-    if($cmd =~ /^--body/ and @_ > 0 and $_[0] =~ /^--no-download$/){
+    if($modeBodyAttachments eq "body" and @_ > 0 and $_[0] =~ /^--no-download$/){
       $noDownload = 1;
       shift;
     }
     my $nulSep = 0;
-    if($cmd =~ /^--body/ and @_ > 0 and $_[0] =~ /^-0$/){
+    if($modeBodyAttachments eq "body" and @_ > 0 and $_[0] =~ /^-0$/){
       $nulSep = 1;
       shift;
     }
     my $folderName = optFolder \@_, "inbox";
     die $usage if @_ < 2;
     my ($accName, $destDir, @uids);
-    if($cmd =~ /^(--body|--body-plain|--body-html)/){
+    if($modeBodyAttachments eq "body"){
       ($accName, @uids) = @_;
       $destDir = $TMP_DIR;
       die $usage if not defined $accName or @uids == 0;
-    }elsif($cmd =~ /^(--attachments)$/){
+    }elsif($modeBodyAttachments eq "attachments"){
       ($accName, $destDir, @uids) = @_;
       die $usage if not defined $accName or @uids == 0
         or not defined $destDir or not -d $destDir;
@@ -627,8 +638,8 @@ sub main(@){
     my $acc = $$config{accounts}{$accName};
     my $preferHtml = 0;
     $preferHtml = 1 if defined $$acc{prefer_html} and $$acc{prefer_html} =~ /true/i;
-    $preferHtml = 0 if $cmd eq "--body-plain";
-    $preferHtml = 1 if $cmd eq "--body-html";
+    $preferHtml = 0 if $wantPlain;
+    $preferHtml = 1 if $wantHtml;
     die "Unknown account $accName\n" if not defined $acc;
     my $imapFolder = accImapFolder($acc, $folderName);
     die "Unknown folder $folderName\n" if not defined $imapFolder;
@@ -657,13 +668,13 @@ sub main(@){
       if(not defined $body){
         die "No body found for $accName=>$folderName=>$uid\n";
       }
-      if($cmd =~ /^(--body|--body-plain|--body-html)$/){
+      if($modeBodyAttachments eq "body"){
         my $fmt = getBody($mimeParser, $body, $preferHtml);
         chomp $fmt;
-        $fmt = html2text $fmt if $cmd =~ /^(--body-plain)$/;
+        $fmt = html2text $fmt if $wantPlain;
         print $fmt;
         print $nulSep ? "\0" : "\n";
-      }elsif($cmd =~ /^(--attachments)$/){
+      }elsif($modeBodyAttachments eq "attachments"){
         my @attachments = writeAttachments($mimeParser, $body);
         for my $attachment(@attachments){
           print " saved att: $attachment\n";
