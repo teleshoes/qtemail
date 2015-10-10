@@ -365,8 +365,8 @@ my $usage = "
       KEY_NAME: one of: @accConfigKeys @accExtraConfigKeys
       DESC:     text description
 
-  $0 --read-config-schema
-    print the allowed keys and descriptions for account config entries
+  $0 --read-options-schema
+    print the allowed keys and descriptions for global option entries
     formatted, one per line, like this:
     <KEY_NAME>=<DESC>
       KEY_NAME: one of: @optionsConfigKeys
