@@ -1710,6 +1710,7 @@ sub modifySecrets($$){
   for my $line(@lines){
     if(not defined $encryptCmd and $line =~ /^$secretsPrefix\.encrypt_cmd\s*=\s*(.*)$/s){
       $encryptCmd = $1;
+      chomp $encryptCmd;
     }
   }
 
