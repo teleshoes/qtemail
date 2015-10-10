@@ -400,7 +400,7 @@ sub main(@){
     exit 0;
   }
 
-  if($cmd =~ /^(--update)$/){
+  if($cmd =~ /^(--update)$/ and @_ >= 0){
     $VERBOSE = 1;
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
@@ -501,8 +501,7 @@ sub main(@){
       system "$cmd";
     }
     exit $isError ? 1 : 0;
-  }elsif($cmd =~ /^(--smtp)$/){
-    die $usage if @_ < 4;
+  }elsif($cmd =~ /^(--smtp)$/ and @_ >= 4){
     my $config = getConfig();
     my ($accName, $subject, $body, $to, @args) = @_;
     my $acc = $$config{accounts}{$accName};
@@ -513,7 +512,7 @@ sub main(@){
       "--from=$$acc{user}",
       "--subject=$subject", "--body-plain=$body", "--to=$to",
       @args;
-  }elsif($cmd =~ /^(--mark-read|--mark-unread)$/){
+  }elsif($cmd =~ /^(--mark-read|--mark-unread)$/ and @_ >= 2){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my $folderName = optFolder \@_, "inbox";
@@ -546,8 +545,7 @@ sub main(@){
     writeStatusFiles(@accOrder);
     $c->close();
     $c->logout();
-  }elsif($cmd =~ /^(--accounts)$/){
-    die $usage if @_ != 0;
+  }elsif($cmd =~ /^(--accounts)$/ and @_ == 0){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     for my $accName(@accOrder){
@@ -576,8 +574,7 @@ sub main(@){
       $refreshInterval .= "s";
       print "$accName:$lastUpdated:$lastUpdatedRel:$updateInterval:$refreshInterval:$unreadCount/$totalCount:$error\n";
     }
-  }elsif($cmd =~ /^(--folders)$/){
-    die $usage if @_ != 1;
+  }elsif($cmd =~ /^(--folders)$/ and @_ == 1){
     my $config = getConfig();
     my $accName = shift;
     my $acc = $$config{accounts}{$accName};
@@ -586,7 +583,7 @@ sub main(@){
       my $totalCount = readUidFileCounts $accName, $folderName, "all";
       printf "$folderName:$unreadCount/$totalCount\n";
     }
-  }elsif($cmd =~ /^(--header)$/){
+  }elsif($cmd =~ /^(--header)$/ and @_ >= 2){
     my $config = getConfig();
     my $folderName = optFolder \@_, "inbox";
     die $usage if @_ < 2;
@@ -599,7 +596,7 @@ sub main(@){
         print "$uid.$field: $$hdr{$field}\n";
       }
     }
-  }elsif($cmd =~ /^(--body|--body-plain|--body-html|--attachments)$/){
+  }elsif($cmd =~ /^(--body|--body-plain|--body-html|--attachments)$/ and @_ >= 2){
     my $modeBodyAttachments;
     if($cmd =~ /^(--body|--body-plain|--body-html)$/){
       $modeBodyAttachments = "body";
@@ -683,10 +680,9 @@ sub main(@){
     }
     $c->close() if defined $c;
     $c->logout() if defined $c;
-  }elsif($cmd =~ /^(--cache-all-bodies)$/){
+  }elsif($cmd =~ /^(--cache-all-bodies)$/ and @_ == 2){
     $VERBOSE = 1;
     my $config = getConfig();
-    die $usage if @_ != 2;
     my ($accName, $folderName) = @_;
 
     my $acc = $$config{accounts}{$accName};
@@ -701,7 +697,7 @@ sub main(@){
 
     my @messages = $c->messages;
     cacheBodies($accName, $folderName, $c, undef, @messages);
-  }elsif($cmd =~ /^(--print)$/){
+  }elsif($cmd =~ /^(--print)$/ and @_ >= 0){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my $folderName = optFolder \@_, "inbox";
@@ -737,7 +733,7 @@ sub main(@){
           ;
       }
     }
-  }elsif($cmd =~ /^(--summary)$/){
+  }elsif($cmd =~ /^(--summary)$/ and @_ >= 0){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my $folderName = optFolder \@_, "inbox";
@@ -759,7 +755,7 @@ sub main(@){
           ;
       }
     }
-  }elsif($cmd =~ /^(--status-line|--status-short)$/){
+  }elsif($cmd =~ /^(--status-line|--status-short)$/ and @_ >= 0){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my @accNames = @_ == 0 ? @accOrder : @_;
@@ -769,7 +765,7 @@ sub main(@){
     }elsif($cmd eq "--status-short"){
       print formatStatusShort($counts, @accNames);
     }
-  }elsif($cmd =~ /^(--has-error)$/){
+  }elsif($cmd =~ /^(--has-error)$/ and @_ >= 0){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my @accNames = @_ == 0 ? @accOrder : @_;
@@ -781,7 +777,7 @@ sub main(@){
     }
     print "no\n";
     exit 1;
-  }elsif($cmd =~ /^(--has-new-unread)$/){
+  }elsif($cmd =~ /^(--has-new-unread)$/ and @_ >= 0){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my @accNames = @_ == 0 ? @accOrder : @_;
@@ -798,7 +794,7 @@ sub main(@){
     }
     print "no\n";
     exit 1;
-  }elsif($cmd =~ /^(--has-unread)$/){
+  }elsif($cmd =~ /^(--has-unread)$/ and @_ >= 0){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my @accNames = @_ == 0 ? @accOrder : @_;
@@ -815,6 +811,8 @@ sub main(@){
     }
     print "no\n";
     exit 1;
+  }else{
+    die $usage;
   }
 }
 
