@@ -10,6 +10,8 @@ use Date::Format qw(time2str);
 
 sub optFolder($$);
 
+sub cmdUpdate($@);
+
 sub formatConfig($);
 sub writeConfig($@);
 sub setFlagStatus($$$$);
@@ -402,105 +404,10 @@ sub main(@){
 
   if($cmd =~ /^(--update)$/ and @_ >= 0){
     $VERBOSE = 1;
-    my $config = getConfig();
-    my @accOrder = @{$$config{accOrder}};
     my $folderNameFilter = optFolder \@_, undef;
-    my @accNames;
-    if(@_ == 0){
-      for my $accName(@accOrder){
-        my $skip = $$config{accounts}{$accName}{skip};
-        if(not defined $skip or $skip !~ /^true$/i){
-          push @accNames, $accName;
-        }
-      }
-    }else{
-      @accNames = @_;
-    }
-
-    my $isError = 0;
-    my @newUnreadCommands;
-    for my $accName(@accNames){
-      my $acc = $$config{accounts}{$accName};
-      die "Unknown account $accName\n" if not defined $acc;
-      clearError $accName;
-      my $c = getClient($acc);
-      if(not defined $c){
-        $isError = 1;
-        my $msg = "ERROR: Could not authenticate $$acc{name} ($$acc{user})\n";
-        warn $msg;
-        writeError $accName, $msg;
-        writeStatusFiles(@accOrder);
-        next;
-      }
-
-      my $hasNewUnread = 0;
-      for my $folderName(accFolderOrder($acc)){
-        if(defined $folderNameFilter and $folderName ne $folderNameFilter){
-          print "skipping $folderName\n";
-          next;
-        }
-        my $imapFolder = accImapFolder($acc, $folderName);
-        my $f = openFolder($imapFolder, $c, 0);
-        if(not defined $f){
-          $isError = 1;
-          my $msg = "ERROR: Could not open folder $folderName\n";
-          warn $msg;
-          writeError $accName, $msg;
-          writeStatusFiles(@accOrder);
-          next;
-        }
-
-        my @newMessages = cacheAllHeaders($accName, $folderName, $c);
-
-        my @unread = $c->unseen;
-
-        my @toCache;
-        my $bodyCacheMode = $$acc{body_cache_mode};
-        $bodyCacheMode = 'unread' if not defined $bodyCacheMode;
-        if($bodyCacheMode eq "all"){
-          @toCache = @newMessages;
-        }elsif($bodyCacheMode eq "unread"){
-          @toCache = @unread;
-        }elsif($bodyCacheMode eq "none"){
-          @toCache = ();
-        }
-
-        cacheBodies($accName, $folderName, $c, $MAX_BODIES_TO_CACHE, @toCache);
-
-        $c->close();
-
-        my %oldUnread = map {$_ => 1} readUidFile $accName, $folderName, "unread";
-        writeUidFile $accName, $folderName, "unread", @unread;
-        my @newUnread = grep {not defined $oldUnread{$_}} @unread;
-        writeUidFile $accName, $folderName, "new-unread", @newUnread;
-        $hasNewUnread = 1 if @newUnread > 0;
-
-        print "running updatedb\n";
-        system $EMAIL_SEARCH_EXEC, "--updatedb", $accName, $folderName, $UPDATEDB_LIMIT;
-        print "\n";
-      }
-      $c->logout();
-      my $hasError = hasError $accName;
-      if(not $hasError){
-        writeLastUpdated $accName;
-        if($hasNewUnread){
-          my $cmd = $$acc{new_unread_cmd};
-          push @newUnreadCommands, $cmd if defined $cmd and $cmd !~ /^\s*$/;
-        }
-      }
-    }
-    updateGlobalUnreadCountsFile($config);
-    writeStatusFiles(@accOrder);
-    if(defined $$config{options}{update_cmd}){
-      my $cmd = $$config{options}{update_cmd};
-      print "running update_cmd: $cmd\n";
-      system "$cmd";
-    }
-    for my $cmd(@newUnreadCommands){
-      print "running new_unread_cmd: $cmd\n";
-      system "$cmd";
-    }
-    exit $isError ? 1 : 0;
+    my @accNames = @_;
+    my $ok = cmdUpdate($folderNameFilter, @accNames);
+    exit $ok ? 0 : 1;
   }elsif($cmd =~ /^(--smtp)$/ and @_ >= 4){
     my $config = getConfig();
     my ($accName, $subject, $body, $to, @args) = @_;
@@ -826,6 +733,106 @@ sub optFolder($$){
   }else{
     return $default;
   }
+}
+
+sub cmdUpdate($@){
+  my ($folderNameFilter, @accNames) = @_;
+  my $config = getConfig();
+  my @accOrder = @{$$config{accOrder}};
+  if(@accNames == 0){
+    for my $accName(@accOrder){
+      my $skip = $$config{accounts}{$accName}{skip};
+      if(not defined $skip or $skip !~ /^true$/i){
+        push @accNames, $accName;
+      }
+    }
+  }
+
+  my $isError = 0;
+  my @newUnreadCommands;
+  for my $accName(@accNames){
+    my $acc = $$config{accounts}{$accName};
+    die "Unknown account $accName\n" if not defined $acc;
+    clearError $accName;
+    my $c = getClient($acc);
+    if(not defined $c){
+      $isError = 1;
+      my $msg = "ERROR: Could not authenticate $$acc{name} ($$acc{user})\n";
+      warn $msg;
+      writeError $accName, $msg;
+      writeStatusFiles(@accOrder);
+      next;
+    }
+
+    my $hasNewUnread = 0;
+    for my $folderName(accFolderOrder($acc)){
+      if(defined $folderNameFilter and $folderName ne $folderNameFilter){
+        print "skipping $folderName\n";
+        next;
+      }
+      my $imapFolder = accImapFolder($acc, $folderName);
+      my $f = openFolder($imapFolder, $c, 0);
+      if(not defined $f){
+        $isError = 1;
+        my $msg = "ERROR: Could not open folder $folderName\n";
+        warn $msg;
+        writeError $accName, $msg;
+        writeStatusFiles(@accOrder);
+        next;
+      }
+
+      my @newMessages = cacheAllHeaders($accName, $folderName, $c);
+
+      my @unread = $c->unseen;
+
+      my @toCache;
+      my $bodyCacheMode = $$acc{body_cache_mode};
+      $bodyCacheMode = 'unread' if not defined $bodyCacheMode;
+      if($bodyCacheMode eq "all"){
+        @toCache = @newMessages;
+      }elsif($bodyCacheMode eq "unread"){
+        @toCache = @unread;
+      }elsif($bodyCacheMode eq "none"){
+        @toCache = ();
+      }
+
+      cacheBodies($accName, $folderName, $c, $MAX_BODIES_TO_CACHE, @toCache);
+
+      $c->close();
+
+      my %oldUnread = map {$_ => 1} readUidFile $accName, $folderName, "unread";
+      writeUidFile $accName, $folderName, "unread", @unread;
+      my @newUnread = grep {not defined $oldUnread{$_}} @unread;
+      writeUidFile $accName, $folderName, "new-unread", @newUnread;
+      $hasNewUnread = 1 if @newUnread > 0;
+
+      print "running updatedb\n";
+      system $EMAIL_SEARCH_EXEC, "--updatedb", $accName, $folderName, $UPDATEDB_LIMIT;
+      print "\n";
+    }
+    $c->logout();
+    my $hasError = hasError $accName;
+    if(not $hasError){
+      writeLastUpdated $accName;
+      if($hasNewUnread){
+        my $cmd = $$acc{new_unread_cmd};
+        push @newUnreadCommands, $cmd if defined $cmd and $cmd !~ /^\s*$/;
+      }
+    }
+  }
+  updateGlobalUnreadCountsFile($config);
+  writeStatusFiles(@accOrder);
+  if(defined $$config{options}{update_cmd}){
+    my $cmd = $$config{options}{update_cmd};
+    print "running update_cmd: $cmd\n";
+    system "$cmd";
+  }
+  for my $cmd(@newUnreadCommands){
+    print "running new_unread_cmd: $cmd\n";
+    system "$cmd";
+  }
+
+  return $isError ? 0 : 1;
 }
 
 sub formatConfig($){
