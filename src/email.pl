@@ -11,6 +11,7 @@ use Date::Format qw(time2str);
 sub optFolder($$);
 
 sub cmdUpdate($@);
+sub cmdSmtp($$$$@);
 
 sub formatConfig($);
 sub writeConfig($@);
@@ -409,16 +410,8 @@ sub main(@){
     my $ok = cmdUpdate($folderNameFilter, @accNames);
     exit $ok ? 0 : 1;
   }elsif($cmd =~ /^(--smtp)$/ and @_ >= 4){
-    my $config = getConfig();
     my ($accName, $subject, $body, $to, @args) = @_;
-    my $acc = $$config{accounts}{$accName};
-    die "Unknown account $accName\n" if not defined $acc;
-    exec $SMTP_CLI_EXEC,
-      "--server=$$acc{smtp_server}", "--port=$$acc{smtp_port}",
-      "--user=$$acc{user}", "--pass=$$acc{password}",
-      "--from=$$acc{user}",
-      "--subject=$subject", "--body-plain=$body", "--to=$to",
-      @args;
+    cmdSmtp($accName, $subject, $body, $to, @args);
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/ and @_ >= 2){
     my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
@@ -833,6 +826,19 @@ sub cmdUpdate($@){
   }
 
   return $isError ? 0 : 1;
+}
+
+sub cmdSmtp($$$$@){
+  my ($accName, $subject, $body, $to, @args) = @_;
+  my $config = getConfig();
+  my $acc = $$config{accounts}{$accName};
+  die "Unknown account $accName\n" if not defined $acc;
+  exec $SMTP_CLI_EXEC,
+    "--server=$$acc{smtp_server}", "--port=$$acc{smtp_port}",
+    "--user=$$acc{user}", "--pass=$$acc{password}",
+    "--from=$$acc{user}",
+    "--subject=$subject", "--body-plain=$body", "--to=$to",
+    @args;
 }
 
 sub formatConfig($){
