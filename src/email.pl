@@ -14,6 +14,7 @@ sub cmdUpdate($@);
 sub cmdSmtp($$$$@);
 sub cmdMarkReadUnread($$$@);
 sub cmdAccounts();
+sub cmdFolders($);
 
 sub formatConfig($);
 sub writeConfig($@);
@@ -424,14 +425,8 @@ sub main(@){
   }elsif($cmd =~ /^(--accounts)$/ and @_ == 0){
     cmdAccounts();
   }elsif($cmd =~ /^(--folders)$/ and @_ == 1){
-    my $config = getConfig();
     my $accName = shift;
-    my $acc = $$config{accounts}{$accName};
-    for my $folderName(accFolderOrder($acc)){
-      my $unreadCount = readUidFileCounts $accName, $folderName, "unread";
-      my $totalCount = readUidFileCounts $accName, $folderName, "all";
-      printf "$folderName:$unreadCount/$totalCount\n";
-    }
+    cmdFolders($accName);
   }elsif($cmd =~ /^(--header)$/ and @_ >= 2){
     my $config = getConfig();
     my $folderName = optFolder \@_, "inbox";
@@ -850,6 +845,17 @@ sub cmdAccounts(){
     }
     $refreshInterval .= "s";
     print "$accName:$lastUpdated:$lastUpdatedRel:$updateInterval:$refreshInterval:$unreadCount/$totalCount:$error\n";
+  }
+}
+
+sub cmdFolders($){
+  my $accName = shift;
+  my $config = getConfig();
+  my $acc = $$config{accounts}{$accName};
+  for my $folderName(accFolderOrder($acc)){
+    my $unreadCount = readUidFileCounts $accName, $folderName, "unread";
+    my $totalCount = readUidFileCounts $accName, $folderName, "all";
+    printf "$folderName:$unreadCount/$totalCount\n";
   }
 }
 
