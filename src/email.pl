@@ -1651,8 +1651,9 @@ sub readSecrets(){
   my $optionsConfig = {};
   my $decryptCmd;
   for my $line(@lines){
-    if($line =~ /^$secretsPrefix\.decrypt_cmd\s*=\s*(.*)$/){
+    if($line =~ /^$secretsPrefix\.decrypt_cmd\s*=\s*(.*)$/s){
       $decryptCmd = $1;
+      chomp $decryptCmd;
       last;
     }
   }
@@ -1708,9 +1709,10 @@ sub modifySecrets($$){
 
   my $encryptCmd;
   for my $line(@lines){
-    if(not defined $encryptCmd and $line =~ /^$secretsPrefix\.encrypt_cmd\s*=\s*(.*)$/s){
+    if($line =~ /^$secretsPrefix\.encrypt_cmd\s*=\s*(.*)$/s){
       $encryptCmd = $1;
       chomp $encryptCmd;
+      last;
     }
   }
 
