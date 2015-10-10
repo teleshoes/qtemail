@@ -13,6 +13,7 @@ sub optFolder($$);
 sub cmdUpdate($@);
 sub cmdSmtp($$$$@);
 sub cmdMarkReadUnread($$$@);
+sub cmdAccounts();
 
 sub formatConfig($);
 sub writeConfig($@);
@@ -421,34 +422,7 @@ sub main(@){
     my $readStatus = $cmd =~ /^(--mark-read)$/ ? 1 : 0;
     cmdMarkReadUnread($readStatus, $accName, $folderName, @uids);
   }elsif($cmd =~ /^(--accounts)$/ and @_ == 0){
-    my $config = getConfig();
-    my @accOrder = @{$$config{accOrder}};
-    for my $accName(@accOrder){
-      my $acc = $$config{accounts}{$accName};
-      my @countIncludeFolderNames = @{parseCountIncludeFolderNames $acc};
-      my $unreadCount = 0;
-      my $totalCount = 0;
-      my $lastUpdated = readLastUpdated $accName;
-      my $lastUpdatedRel = relTime $lastUpdated;
-      my $error = readError $accName;
-      $error = "" if not defined $error;
-      for my $folderName(@countIncludeFolderNames){
-        $unreadCount += readUidFileCounts $accName, $folderName, "unread";
-        $totalCount += readUidFileCounts $accName, $folderName, "all";
-      }
-      $lastUpdated = 0 if not defined $lastUpdated;
-      my $updateInterval = $$config{accounts}{$accName}{update_interval};
-      if(not defined $updateInterval){
-        $updateInterval = 0;
-      }
-      $updateInterval .= "s";
-      my $refreshInterval = $$config{accounts}{$accName}{refresh_interval};
-      if(not defined $refreshInterval){
-        $refreshInterval = 0;
-      }
-      $refreshInterval .= "s";
-      print "$accName:$lastUpdated:$lastUpdatedRel:$updateInterval:$refreshInterval:$unreadCount/$totalCount:$error\n";
-    }
+    cmdAccounts();
   }elsif($cmd =~ /^(--folders)$/ and @_ == 1){
     my $config = getConfig();
     my $accName = shift;
@@ -846,6 +820,37 @@ sub cmdMarkReadUnread($$$@){
   writeStatusFiles(@accOrder);
   $c->close();
   $c->logout();
+}
+
+sub cmdAccounts(){
+  my $config = getConfig();
+  my @accOrder = @{$$config{accOrder}};
+  for my $accName(@accOrder){
+    my $acc = $$config{accounts}{$accName};
+    my @countIncludeFolderNames = @{parseCountIncludeFolderNames $acc};
+    my $unreadCount = 0;
+    my $totalCount = 0;
+    my $lastUpdated = readLastUpdated $accName;
+    my $lastUpdatedRel = relTime $lastUpdated;
+    my $error = readError $accName;
+    $error = "" if not defined $error;
+    for my $folderName(@countIncludeFolderNames){
+      $unreadCount += readUidFileCounts $accName, $folderName, "unread";
+      $totalCount += readUidFileCounts $accName, $folderName, "all";
+    }
+    $lastUpdated = 0 if not defined $lastUpdated;
+    my $updateInterval = $$config{accounts}{$accName}{update_interval};
+    if(not defined $updateInterval){
+      $updateInterval = 0;
+    }
+    $updateInterval .= "s";
+    my $refreshInterval = $$config{accounts}{$accName}{refresh_interval};
+    if(not defined $refreshInterval){
+      $refreshInterval = 0;
+    }
+    $refreshInterval .= "s";
+    print "$accName:$lastUpdated:$lastUpdatedRel:$updateInterval:$refreshInterval:$unreadCount/$totalCount:$error\n";
+  }
 }
 
 sub formatConfig($){
