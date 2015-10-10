@@ -386,11 +386,11 @@ sub main(@){
   }elsif($cmd =~ /^(--write-options)$/ and @_ >= 1){
     writeConfig undef, @_;
     exit 0;
-  }elsif($cmd =~ /^(--read-config-schema|--read-options-schema)$/){
-    my $schema;
-    $schema = $accountConfigSchema if $cmd =~ /--read-config-schema/;
-    $schema = $optionsConfigSchema if $cmd =~ /--read-options-schema/;
-    print formatSchemaSimple $schema;
+  }elsif($cmd =~ /^(--read-config-schema)$/ and @_ == 0){
+    print formatSchemaSimple $accountConfigSchema;
+    exit 0;
+  }elsif($cmd =~ /^(--read-options-schema)$/ and @_ == 0){
+    print formatSchemaSimple $optionsConfigSchema;
     exit 0;
   }
 
