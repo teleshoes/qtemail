@@ -611,17 +611,17 @@ sub main(@){
     }
   }elsif($cmd =~ /^(--body|--body-plain|--body-html|--attachments)$/){
     my $config = getConfig();
-    my $folderName = "inbox";
     my $noDownload = 0;
-    my $nulSep = 0;
     if($cmd =~ /^--body/ and @_ > 0 and $_[0] =~ /^--no-download$/){
       $noDownload = 1;
       shift;
     }
+    my $nulSep = 0;
     if($cmd =~ /^--body/ and @_ > 0 and $_[0] =~ /^-0$/){
       $nulSep = 1;
       shift;
     }
+    my $folderName = "inbox";
     if(@_ > 0 and $_[0] =~ /^--folder=([a-zA-Z_]+)$/){
       $folderName = $1;
       shift;
