@@ -9,6 +9,7 @@ use Date::Parse qw(str2time);
 use Date::Format qw(time2str);
 
 sub formatConfig($);
+sub writeConfig($@);
 sub setFlagStatus($$$$);
 sub writeStatusFiles(@);
 sub formatStatusLine($@);
@@ -379,25 +380,11 @@ sub main(@){
   }elsif($cmd =~ /^(--read-options)$/ and @_ ==0){
     print formatConfig undef;
     exit 0;
-  }elsif($cmd =~ /^(--write-config|--write-options)$/){
-    my $configGroup;
-    if($cmd eq "--write-config"){
-      die $usage if @_ < 2;
-      $configGroup = shift;
-    }elsif($cmd eq "--write-options"){
-      die $usage if @_ < 1;
-      $configGroup = undef;
-    }
-    my @keyValPairs = @_;
-    my $config = {};
-    for my $keyValPair(@keyValPairs){
-      if($keyValPair =~ /^(\w+)=(.*)$/){
-        $$config{$1} = $2;
-      }else{
-        die "Malformed KEY=VAL pair: $keyValPair\n";
-      }
-    }
-    modifySecrets $configGroup, $config;
+  }elsif($cmd =~ /^(--write-config)$/ and @_ >= 2){
+    my $accName = shift;
+    writeConfig $accName, @_;
+  }elsif($cmd =~ /^(--write-options)$/ and @_ >= 1){
+    writeConfig undef, @_;
     exit 0;
   }elsif($cmd =~ /^(--read-config-schema|--read-options-schema)$/){
     my $schema;
@@ -846,6 +833,18 @@ sub formatConfig($){
     }
   }
   return $fmt;
+}
+sub writeConfig($@){
+  my ($configGroup, @keyVals) = @_;
+  my $config = {};
+  for my $keyVal(@keyVals){
+    if($keyVal =~ /^(\w+)=(.*)$/){
+      $$config{$1} = $2;
+    }else{
+      die "Malformed KEY=VAL entry: $keyVal\n";
+    }
+  }
+  modifySecrets $configGroup, $config;
 }
 
 sub setFlagStatus($$$$){
