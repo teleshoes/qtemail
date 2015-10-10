@@ -52,6 +52,7 @@ sub parseCountIncludeFolderNames($);
 sub hasWords($);
 sub formatSchemaSimple($);
 sub formatSchemaPretty($$);
+sub getConfig();
 sub readSecrets();
 sub validateSecrets($);
 sub modifySecrets($$);
@@ -397,11 +398,9 @@ sub main(@){
     exit 0;
   }
 
-  my $config = readSecrets();
-  validateSecrets $config;
-
   if($cmd =~ /^(--update)$/){
     $VERBOSE = 1;
+    my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my $folderNameFilter;
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
@@ -506,6 +505,7 @@ sub main(@){
     exit $isError ? 1 : 0;
   }elsif($cmd =~ /^(--smtp)$/){
     die $usage if @_ < 4;
+    my $config = getConfig();
     my ($accName, $subject, $body, $to, @args) = @_;
     my $acc = $$config{accounts}{$accName};
     die "Unknown account $accName\n" if not defined $acc;
@@ -516,6 +516,7 @@ sub main(@){
       "--subject=$subject", "--body-plain=$body", "--to=$to",
       @args;
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/){
+    my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my $folderName = "inbox";
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
@@ -553,6 +554,7 @@ sub main(@){
     $c->logout();
   }elsif($cmd =~ /^(--accounts)$/){
     die $usage if @_ != 0;
+    my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     for my $accName(@accOrder){
       my $acc = $$config{accounts}{$accName};
@@ -582,6 +584,7 @@ sub main(@){
     }
   }elsif($cmd =~ /^(--folders)$/){
     die $usage if @_ != 1;
+    my $config = getConfig();
     my $accName = shift;
     my $acc = $$config{accounts}{$accName};
     for my $folderName(accFolderOrder($acc)){
@@ -590,6 +593,7 @@ sub main(@){
       printf "$folderName:$unreadCount/$totalCount\n";
     }
   }elsif($cmd =~ /^(--header)$/){
+    my $config = getConfig();
     my $folderName = "inbox";
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
       $folderName = $1;
@@ -606,6 +610,7 @@ sub main(@){
       }
     }
   }elsif($cmd =~ /^(--body|--body-plain|--body-html|--attachments)$/){
+    my $config = getConfig();
     my $folderName = "inbox";
     my $noDownload = 0;
     my $nulSep = 0;
@@ -683,6 +688,7 @@ sub main(@){
     $c->logout() if defined $c;
   }elsif($cmd =~ /^(--cache-all-bodies)$/){
     $VERBOSE = 1;
+    my $config = getConfig();
     die $usage if @_ != 2;
     my ($accName, $folderName) = @_;
 
@@ -699,6 +705,7 @@ sub main(@){
     my @messages = $c->messages;
     cacheBodies($accName, $folderName, $c, undef, @messages);
   }elsif($cmd =~ /^(--print)$/){
+    my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my $folderName = "inbox";
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
@@ -738,6 +745,7 @@ sub main(@){
       }
     }
   }elsif($cmd =~ /^(--summary)$/){
+    my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my $folderName = "inbox";
     if(@_ > 0 and $_[0] =~ /^--folder=([a-z]+)$/){
@@ -763,6 +771,7 @@ sub main(@){
       }
     }
   }elsif($cmd =~ /^(--status-line|--status-short)$/){
+    my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my @accNames = @_ == 0 ? @accOrder : @_;
     my $counts = readGlobalUnreadCountsFile();
@@ -772,6 +781,7 @@ sub main(@){
       print formatStatusShort($counts, @accNames);
     }
   }elsif($cmd =~ /^(--has-error)$/){
+    my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my @accNames = @_ == 0 ? @accOrder : @_;
     for my $accName(@accNames){
@@ -783,6 +793,7 @@ sub main(@){
     print "no\n";
     exit 1;
   }elsif($cmd =~ /^(--has-new-unread)$/){
+    my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my @accNames = @_ == 0 ? @accOrder : @_;
     my @fmts;
@@ -799,6 +810,7 @@ sub main(@){
     print "no\n";
     exit 1;
   }elsif($cmd =~ /^(--has-unread)$/){
+    my $config = getConfig();
     my @accOrder = @{$$config{accOrder}};
     my @accNames = @_ == 0 ? @accOrder : @_;
     my @fmts;
@@ -1660,6 +1672,12 @@ sub joinTrailingBackslashLines(@){
   push @lines, $curLine if defined $curLine;
 
   return @lines;
+}
+
+sub getConfig(){
+  my $config = readSecrets();
+  validateSecrets $config;
+  return $config;
 }
 
 sub readSecrets(){
