@@ -2,7 +2,13 @@ project(qtemail)
 
 cmake_minimum_required(VERSION 2.6.2)
 
-FILE(GLOB programs src/*)
+FILE(GLOB programs
+  src/email.pl
+  src/email-search.pl
+  src/email-gui.py
+  src/smtp-cli
+  src/bash-complete.pl
+)
 INSTALL(PROGRAMS ${programs}
   DESTINATION /opt/qtemail/bin)
 
