@@ -539,7 +539,7 @@ sub main(@){
 sub optFolder($$){
   my ($opts, $default) = @_;
   my $folder;
-  if(@$opts > 0 and $$opts[0] =~ /^--folder=([a-z]+)$/){
+  if(@$opts > 0 and $$opts[0] =~ /^--folder=(\w+)$/){
     my $folder = $1;
     shift @$opts;
     return $folder;
