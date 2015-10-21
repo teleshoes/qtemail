@@ -8,7 +8,10 @@ use lib "/opt/qtemail/lib";
 
 BEGIN {
   require QtEmail::Shared;
+  my $baseDir = "$ENV{HOME}/.cache/email";
   QtEmail::Shared::INIT_GVAR({
+    EMAIL_DIR => $baseDir,
+
     VERBOSE => 0,
     DATE_FORMAT => "%Y-%m-%d %H:%M:%S",
     MAX_BODIES_TO_CACHE => 100,
@@ -91,10 +94,9 @@ sub hasWords($);
 my $GVAR = QtEmail::Shared::GET_GVAR;
 
 my @headerFields = qw(Date Subject From To CC BCC);
-my $emailDir = "$ENV{HOME}/.cache/email";
-my $unreadCountsFile = "$emailDir/unread-counts";
-my $statusLineFile = "$emailDir/status-line";
-my $statusShortFile = "$emailDir/status-short";
+my $unreadCountsFile = "$$GVAR{EMAIL_DIR}/unread-counts";
+my $statusLineFile = "$$GVAR{EMAIL_DIR}/status-line";
+my $statusShortFile = "$$GVAR{EMAIL_DIR}/status-short";
 
 my $html2textExec = "/usr/bin/html2text";
 
@@ -137,21 +139,21 @@ my $usage = "
 
   $0 [--update] [--folder=FOLDER_NAME_FILTER] [ACCOUNT_NAME ACCOUNT_NAME ...]
     -for each account specified {or all non-skipped accounts if none are specified}:
-      -login to IMAP server, or create file $emailDir/ACCOUNT_NAME/error
+      -login to IMAP server, or create file $$GVAR{EMAIL_DIR}/ACCOUNT_NAME/error
       -for each FOLDER_NAME {or just FOLDER_NAME_FILTER if specified}:
         -fetch and write all message UIDs to
-          $emailDir/ACCOUNT_NAME/FOLDER_NAME/all
+          $$GVAR{EMAIL_DIR}/ACCOUNT_NAME/FOLDER_NAME/all
         -fetch and cache all message headers in
-          $emailDir/ACCOUNT_NAME/FOLDER_NAME/headers/UID
+          $$GVAR{EMAIL_DIR}/ACCOUNT_NAME/FOLDER_NAME/headers/UID
         -fetch and cache bodies according to body_cache_mode config
             all    => every header that was cached gets its body cached
             unread => every unread message gets its body cached
             none   => no bodies are cached
-          $emailDir/ACCOUNT_NAME/FOLDER_NAME/bodies/UID
+          $$GVAR{EMAIL_DIR}/ACCOUNT_NAME/FOLDER_NAME/bodies/UID
         -fetch all unread messages and write their UIDs to
-          $emailDir/ACCOUNT_NAME/FOLDER_NAME/unread
+          $$GVAR{EMAIL_DIR}/ACCOUNT_NAME/FOLDER_NAME/unread
         -write all message UIDs that are now in unread and were not before
-          $emailDir/ACCOUNT_NAME/FOLDER_NAME/new-unread
+          $$GVAR{EMAIL_DIR}/ACCOUNT_NAME/FOLDER_NAME/new-unread
         -run $$GVAR{EMAIL_SEARCH_EXEC} --updatedb ACCOUNT_NAME FOLDER_NAME $$GVAR{UPDATEDB_LIMIT}
     -update global unread counts file $unreadCountsFile
       count the unread emails for each account in the folders in count_include
@@ -266,20 +268,20 @@ my $usage = "
     <count> = unread count for the indicated account
 
   $0 --has-error [ACCOUNT_NAME ACCOUNT_NAME ...]
-    checks if $emailDir/ACCOUNT_NAME/error exists
+    checks if $$GVAR{EMAIL_DIR}/ACCOUNT_NAME/error exists
     print \"yes\" and exit with zero exit code if it does
     otherwise, print \"no\" and exit with non-zero exit code
 
   $0 --has-new-unread [ACCOUNT_NAME ACCOUNT_NAME ...]
     checks for any NEW unread emails, in any account
-      {UIDs in $emailDir/ACCOUNT_NAME/new-unread}
+      {UIDs in $$GVAR{EMAIL_DIR}/ACCOUNT_NAME/new-unread}
     if accounts are specified, all but those are ignored
     print \"yes\" and exit with zero exit code if there are new unread emails
     otherwise, print \"no\" and exit with non-zero exit code
 
   $0 --has-unread [ACCOUNT_NAME ACCOUNT_NAME ...]
     checks for any unread emails, in any account
-      {UIDs in $emailDir/ACCOUNT_NAME/unread}
+      {UIDs in $$GVAR{EMAIL_DIR}/ACCOUNT_NAME/unread}
     if accounts are specified, all but those are ignored
     print \"yes\" and exit with zero exit code if there are unread emails
     otherwise, print \"no\" and exit with non-zero exit code
@@ -910,7 +912,7 @@ sub formatStatusLine($@){
   for my $accName(@accNames){
     die "Unknown account $accName\n" if not defined $$counts{$accName};
     my $count = $$counts{$accName};
-    my $errorFile = "$emailDir/$accName/error";
+    my $errorFile = "$$GVAR{EMAIL_DIR}/$accName/error";
     my $nameDisplay = substr($accName, 0, 1);
     my $fmt = $nameDisplay . $count;
     if(-f $errorFile){
@@ -931,7 +933,7 @@ sub formatStatusShort($@){
   for my $accName(@accNames){
     die "Unknown account $accName\n" if not defined $$counts{$accName};
     my $count = $$counts{$accName};
-    my $errorFile = "$emailDir/$accName/error";
+    my $errorFile = "$$GVAR{EMAIL_DIR}/$accName/error";
     my $nameDisplay = substr($accName, 0, 1);
     my $fmt = $nameDisplay . $count;
     $isTooLarge = 1 if $count > 99;
@@ -1055,17 +1057,17 @@ sub relTime($){
 
 sub hasError($){
   my ($accName) = @_;
-  my $errorFile = "$emailDir/$accName/error";
+  my $errorFile = "$$GVAR{EMAIL_DIR}/$accName/error";
   return -f $errorFile;
 }
 sub clearError($){
   my ($accName) = @_;
-  my $errorFile = "$emailDir/$accName/error";
+  my $errorFile = "$$GVAR{EMAIL_DIR}/$accName/error";
   system "rm", "-f", $errorFile;
 }
 sub readError($){
   my ($accName) = @_;
-  my $errorFile = "$emailDir/$accName/error";
+  my $errorFile = "$$GVAR{EMAIL_DIR}/$accName/error";
   if(not -f $errorFile){
     return undef;
   }
@@ -1076,7 +1078,7 @@ sub readError($){
 }
 sub writeError($$){
   my ($accName, $msg) = @_;
-  my $errorFile = "$emailDir/$accName/error";
+  my $errorFile = "$$GVAR{EMAIL_DIR}/$accName/error";
   open FH, "> $errorFile" or die "Could not write to $errorFile\n";
   print FH $msg;
   close FH;
@@ -1084,7 +1086,7 @@ sub writeError($$){
 
 sub readLastUpdated($){
   my ($accName) = @_;
-  my $f = "$emailDir/$accName/last_updated";
+  my $f = "$$GVAR{EMAIL_DIR}/$accName/last_updated";
   if(not -f $f){
     return undef;
   }
@@ -1096,7 +1098,7 @@ sub readLastUpdated($){
 }
 sub writeLastUpdated($){
   my ($accName) = @_;
-  my $f = "$emailDir/$accName/last_updated";
+  my $f = "$$GVAR{EMAIL_DIR}/$accName/last_updated";
   open FH, "> $f" or die "Could not write to $f\n";
   print FH time . "\n";
   close FH;
@@ -1104,7 +1106,7 @@ sub writeLastUpdated($){
 
 sub readUidFileCounts($$$){
   my ($accName, $folderName, $fileName) = @_;
-  my $dir = "$emailDir/$accName/$folderName";
+  my $dir = "$$GVAR{EMAIL_DIR}/$accName/$folderName";
 
   if(not -f "$dir/$fileName"){
     return 0;
@@ -1119,7 +1121,7 @@ sub readUidFileCounts($$$){
 
 sub readUidFile($$$){
   my ($accName, $folderName, $fileName) = @_;
-  my $dir = "$emailDir/$accName/$folderName";
+  my $dir = "$$GVAR{EMAIL_DIR}/$accName/$folderName";
 
   if(not -f "$dir/$fileName"){
     return ();
@@ -1131,7 +1133,7 @@ sub readUidFile($$$){
 }
 sub writeUidFile($$$@){
   my ($accName, $folderName, $fileName, @uids) = @_;
-  my $dir = "$emailDir/$accName/$folderName";
+  my $dir = "$$GVAR{EMAIL_DIR}/$accName/$folderName";
   system "mkdir", "-p", $dir;
 
   open FH, "> $dir/$fileName" or die "Could not write $dir/$fileName\n";
@@ -1145,7 +1147,7 @@ sub cacheAllHeaders($$$){
   my @messages = $c->messages;
   print "fetched " . @messages . " ids\n" if $$GVAR{VERBOSE};
 
-  my $dir = "$emailDir/$accName/$folderName";
+  my $dir = "$$GVAR{EMAIL_DIR}/$accName/$folderName";
   writeUidFile $accName, $folderName, "remote", @messages;
 
   my $headersDir = "$dir/headers";
@@ -1274,7 +1276,7 @@ sub cacheHeader($$$$$$$){
 
 sub cacheBodies($$$$@){
   my ($accName, $folderName, $c, $maxCap, @messages) = @_;
-  my $bodiesDir = "$emailDir/$accName/$folderName/bodies";
+  my $bodiesDir = "$$GVAR{EMAIL_DIR}/$accName/$folderName/bodies";
   system "mkdir", "-p", $bodiesDir;
 
   local $| = 1;
@@ -1431,14 +1433,14 @@ sub parseMimeEntity($){
 
 sub getCachedHeaderUids($$){
   my ($accName, $folderName) = @_;
-  my $headersDir = "$emailDir/$accName/$folderName/headers";
+  my $headersDir = "$$GVAR{EMAIL_DIR}/$accName/$folderName/headers";
   my @cachedHeaders = `cd "$headersDir"; ls`;
   chomp foreach @cachedHeaders;
   return @cachedHeaders;
 }
 sub getCachedBodyUids($$){
   my ($accName, $folderName) = @_;
-  my $bodiesDir = "$emailDir/$accName/$folderName/bodies";
+  my $bodiesDir = "$$GVAR{EMAIL_DIR}/$accName/$folderName/bodies";
   system "mkdir", "-p", $bodiesDir;
 
   opendir DIR, $bodiesDir or die "Could not list $bodiesDir\n";
@@ -1455,7 +1457,7 @@ sub getCachedBodyUids($$){
 
 sub readCachedBody($$$){
   my ($accName, $folderName, $uid) = @_;
-  my $bodyFile = "$emailDir/$accName/$folderName/bodies/$uid";
+  my $bodyFile = "$$GVAR{EMAIL_DIR}/$accName/$folderName/bodies/$uid";
   if(not -f $bodyFile){
     return undef;
   }
@@ -1464,7 +1466,7 @@ sub readCachedBody($$$){
 
 sub readCachedHeader($$$){
   my ($accName, $folderName, $uid) = @_;
-  my $hdrFile = "$emailDir/$accName/$folderName/headers/$uid";
+  my $hdrFile = "$$GVAR{EMAIL_DIR}/$accName/$folderName/headers/$uid";
   if(not -f $hdrFile){
     return undef;
   }
