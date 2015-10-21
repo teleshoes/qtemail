@@ -61,6 +61,9 @@ sub cmdStatus($@);
 sub cmdHasError(@);
 sub cmdHasNewUnread(@);
 sub cmdHasUnread(@);
+sub cmdReadConfigOptions($$);
+sub cmdWriteConfigOptions($$@);
+sub cmdReadConfigOptionsSchema($);
 
 sub setFlagStatus($$$$);
 sub writeStatusFiles(@);
@@ -330,22 +333,22 @@ sub main(@){
 
   if($cmd =~ /^(--read-config)$/ and @_ == 1){
     my $account = shift;
-    print formatConfig $account;
+    cmdReadConfigOptions "account", $account;
     exit 0;
   }elsif($cmd =~ /^(--read-options)$/ and @_ ==0){
-    print formatConfig undef;
+    cmdReadConfigOptions "options", undef;
     exit 0;
   }elsif($cmd =~ /^(--write-config)$/ and @_ >= 2){
     my $accName = shift;
-    writeConfig $accName, @_;
+    cmdWriteConfigOptions "account", $accName, @_;
   }elsif($cmd =~ /^(--write-options)$/ and @_ >= 1){
-    writeConfig undef, @_;
+    cmdWriteConfigOptions "options", undef, @_;
     exit 0;
   }elsif($cmd =~ /^(--read-config-schema)$/ and @_ == 0){
-    print formatSchemaSimple getAccountConfigSchema();
+    cmdReadConfigOptionsSchema "account";
     exit 0;
   }elsif($cmd =~ /^(--read-options-schema)$/ and @_ == 0){
-    print formatSchemaSimple getOptionsConfigSchema();
+    cmdReadConfigOptionsSchema "options";
     exit 0;
   }
 
@@ -877,6 +880,39 @@ sub cmdHasUnread(@){
     }
   }
   return 0;
+}
+
+sub cmdReadConfigOptions($$){
+  my ($modeAccountOptions, $account) = @_;
+  if($modeAccountOptions eq "account" and defined $account){
+    print formatConfig $account;
+  }elsif($modeAccountOptions eq "options" and not defined $account){
+    print formatConfig undef;
+  }else{
+    die "invalid read config/options mode: $modeAccountOptions\n";
+  }
+}
+
+sub cmdWriteConfigOptions($$@){
+  my ($modeAccountOptions, $account, @keyVals) = @_;
+  if($modeAccountOptions eq "account" and defined $account){
+    writeConfig $account, @keyVals;
+  }elsif($modeAccountOptions eq "options" and not defined $account){
+    writeConfig undef, @keyVals;
+  }else{
+    die "invalid write config/options mode: $modeAccountOptions\n";
+  }
+}
+
+sub cmdReadConfigOptionsSchema($){
+  my ($modeAccountOptions) = @_;
+  if($modeAccountOptions eq "account"){
+    print formatSchemaSimple getAccountConfigSchema();
+  }elsif($modeAccountOptions eq "options"){
+    print formatSchemaSimple getOptionsConfigSchema();
+  }else{
+    die "invalid read config/options schema mode: $modeAccountOptions\n";
+  }
 }
 
 sub setFlagStatus($$$$){
