@@ -107,17 +107,6 @@ sub hasWords($);
 
 my $GVAR = QtEmail::Shared::GET_GVAR;
 
-my $okCmds = join "|", qw(
-  --update --header --body --body-plain --body-html --attachments
-  --cache-all-bodies
-  --smtp
-  --mark-read --mark-unread
-  --accounts --folders --print --summary --status-line --status-short
-  --has-error --has-new-unread --has-unread
-  --read-config --write-config --read-options --write-options
-  --read-config-schema --read-options-schema
-);
-
 my $usage = "
   Simple IMAP client. {--smtp command is a convenience wrapper around smtp-cli}
   Configuration is in ".getSecretsFile()."
