@@ -8,6 +8,18 @@ use warnings;
 # Date::Parse
 # Date::Format
 
+our $GVAR = {
+    VERBOSE => 0,
+    DATE_FORMAT => "%Y-%m-%d %H:%M:%S",
+    MAX_BODIES_TO_CACHE => 100,
+
+    EMAIL_SEARCH_EXEC => "/opt/qtemail/bin/email-search.pl",
+    UPDATEDB_LIMIT => 100,
+
+    SMTP_CLI_EXEC => "/opt/qtemail/bin/smtp-cli",
+    TMP_DIR => "/var/tmp",
+};
+
 sub optFolder($$);
 
 sub cmdUpdate($@);
@@ -74,18 +86,6 @@ sub readSecrets();
 sub validateSecrets($);
 sub modifySecrets($$);
 
-our %GVAR = (
-  VERBOSE => 0,
-  DATE_FORMAT => "%Y-%m-%d %H:%M:%S",
-  MAX_BODIES_TO_CACHE => 100,
-
-  EMAIL_SEARCH_EXEC => "/opt/qtemail/bin/email-search.pl",
-  UPDATEDB_LIMIT => 100,
-
-  SMTP_CLI_EXEC => "/opt/qtemail/bin/smtp-cli",
-  TMP_DIR => "/var/tmp",
-);
-
 my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
 my $accountConfigSchema = [
@@ -137,16 +137,16 @@ my $longDescriptions = {
   ,
   body_cache_mode => ''
     . "controls which bodies get cached during --update\n"
-    . "  (note: only caches the first MAX_BODIES_TO_CACHE=$GVAR{MAX_BODIES_TO_CACHE})\n"
-    . "unread: cache unread bodies (up to $GVAR{MAX_BODIES_TO_CACHE})\n"
-    . "all:    cache all bodies (up to $GVAR{MAX_BODIES_TO_CACHE})\n"
+    . "  (note: only caches the first MAX_BODIES_TO_CACHE=$$GVAR{MAX_BODIES_TO_CACHE})\n"
+    . "unread: cache unread bodies (up to $$GVAR{MAX_BODIES_TO_CACHE})\n"
+    . "all:    cache all bodies (up to $$GVAR{MAX_BODIES_TO_CACHE})\n"
     . "none:   do not cache bodies during --update\n"
   ,
   filters => ''
     . "each filter is separated by a space, and takes the form:\n"
     . "  <FILTER_NAME>=%<FILTER_STRING>%\n"
     . "FILTER_NAME:   the text of the button in the GUI\n"
-    . "FILTER_STRING: query for $GVAR{EMAIL_SEARCH_EXEC}\n"
+    . "FILTER_STRING: query for $$GVAR{EMAIL_SEARCH_EXEC}\n"
     . "e.g.:\n"
     . "  email.Z.filters = mary=%from~\"mary sue\"% ok=%body!~viagra%\n"
     . "    => [\"mary\", \"ok\"]\n"
@@ -222,7 +222,7 @@ my $usage = "
           $emailDir/ACCOUNT_NAME/FOLDER_NAME/unread
         -write all message UIDs that are now in unread and were not before
           $emailDir/ACCOUNT_NAME/FOLDER_NAME/new-unread
-        -run $GVAR{EMAIL_SEARCH_EXEC} --updatedb ACCOUNT_NAME FOLDER_NAME $GVAR{UPDATEDB_LIMIT}
+        -run $$GVAR{EMAIL_SEARCH_EXEC} --updatedb ACCOUNT_NAME FOLDER_NAME $$GVAR{UPDATEDB_LIMIT}
     -update global unread counts file $unreadCountsFile
       count the unread emails for each account in the folders in count_include
       the default is just to include the counts for \"inbox\"
@@ -235,7 +235,7 @@ my $usage = "
   $0 --smtp ACCOUNT_NAME SUBJECT BODY TO [ARG ARG ..]
     simple wrapper around smtp-cli. {you can add extra recipients with --to}
     calls:
-      $GVAR{SMTP_CLI_EXEC} \\
+      $$GVAR{SMTP_CLI_EXEC} \\
         --server=<smtp_server> --port=<smtp_port> \\
         --user=<user> --pass=<password> \\
         --from=<user> \\
@@ -418,7 +418,7 @@ sub main(@){
   }
 
   if($cmd =~ /^(--update)$/ and @_ >= 0){
-    $GVAR{VERBOSE} = 1;
+    $$GVAR{VERBOSE} = 1;
     my $folderNameFilter = optFolder \@_, undef;
     my @accNames = @_;
     my $success = cmdUpdate($folderNameFilter, @accNames);
@@ -428,7 +428,7 @@ sub main(@){
     my ($accName, $subject, $body, $to, @args) = @_;
     cmdSmtp($accName, $subject, $body, $to, @args);
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/ and @_ >= 2){
-    $GVAR{VERBOSE} = 1;
+    $$GVAR{VERBOSE} = 1;
     my $folderName = optFolder \@_, "inbox";
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
@@ -472,7 +472,7 @@ sub main(@){
     my ($accName, $destDir, @uids);
     if($modeBodyAttachments eq "body"){
       ($accName, @uids) = @_;
-      $destDir = $GVAR{TMP_DIR};
+      $destDir = $$GVAR{TMP_DIR};
       die $usage if not defined $accName or @uids == 0;
     }elsif($modeBodyAttachments eq "attachments"){
       ($accName, $destDir, @uids) = @_;
@@ -484,7 +484,7 @@ sub main(@){
       $noDownload, $nulSep,
       $accName, $folderName, $destDir, @uids);
   }elsif($cmd =~ /^(--cache-all-bodies)$/ and @_ == 2){
-    $GVAR{VERBOSE} = 1;
+    $$GVAR{VERBOSE} = 1;
     my ($accName, $folderName) = @_;
     cmdCacheAllBodies($accName, $folderName);
   }elsif($cmd =~ /^(--print)$/ and @_ >= 0){
@@ -609,7 +609,7 @@ sub cmdUpdate($@){
         @toCache = ();
       }
 
-      cacheBodies($accName, $folderName, $c, $GVAR{MAX_BODIES_TO_CACHE}, @toCache);
+      cacheBodies($accName, $folderName, $c, $$GVAR{MAX_BODIES_TO_CACHE}, @toCache);
 
       $c->close();
 
@@ -620,7 +620,7 @@ sub cmdUpdate($@){
       $hasNewUnread = 1 if @newUnread > 0;
 
       print "running updatedb\n";
-      system $GVAR{EMAIL_SEARCH_EXEC}, "--updatedb", $accName, $folderName, $GVAR{UPDATEDB_LIMIT};
+      system $$GVAR{EMAIL_SEARCH_EXEC}, "--updatedb", $accName, $folderName, $$GVAR{UPDATEDB_LIMIT};
       print "\n";
     }
     $c->logout();
@@ -653,7 +653,7 @@ sub cmdSmtp($$$$@){
   my $config = getConfig();
   my $acc = $$config{accounts}{$accName};
   die "Unknown account $accName\n" if not defined $acc;
-  exec $GVAR{SMTP_CLI_EXEC},
+  exec $$GVAR{SMTP_CLI_EXEC},
     "--server=$$acc{smtp_server}", "--port=$$acc{smtp_port}",
     "--user=$$acc{user}", "--pass=$$acc{password}",
     "--from=$$acc{user}",
@@ -829,7 +829,7 @@ sub cmdPrint($@){
   @accNames = @accOrder if @accNames == 0;
   require MIME::Parser;
   my $mimeParser = MIME::Parser->new();
-  $mimeParser->output_dir($GVAR{TMP_DIR});
+  $mimeParser->output_dir($$GVAR{TMP_DIR});
   binmode STDOUT, ':utf8';
   for my $accName(@accNames){
     my @unread = readUidFile $accName, $folderName, "unread";
@@ -977,10 +977,10 @@ sub writeConfig($@){
 sub setFlagStatus($$$$){
   my ($c, $uid, $flag, $status) = @_;
   if($status){
-    print "$uid $flag => true\n" if $GVAR{VERBOSE};
+    print "$uid $flag => true\n" if $$GVAR{VERBOSE};
     $c->set_flag($flag, $uid) or die "FAILED: set $flag on $uid\n";
   }else{
-    print "$uid $flag => false\n" if $GVAR{VERBOSE};
+    print "$uid $flag => false\n" if $$GVAR{VERBOSE};
     $c->unset_flag($flag, $uid) or die "FAILED: unset flag on $uid\n";
   }
 }
@@ -1237,9 +1237,9 @@ sub writeUidFile($$$@){
 
 sub cacheAllHeaders($$$){
   my ($accName, $folderName, $c) = @_;
-  print "fetching all message ids\n" if $GVAR{VERBOSE};
+  print "fetching all message ids\n" if $$GVAR{VERBOSE};
   my @messages = $c->messages;
-  print "fetched " . @messages . " ids\n" if $GVAR{VERBOSE};
+  print "fetched " . @messages . " ids\n" if $$GVAR{VERBOSE};
 
   my $dir = "$emailDir/$accName/$folderName";
   writeUidFile $accName, $folderName, "remote", @messages;
@@ -1252,14 +1252,14 @@ sub cacheAllHeaders($$$){
   @messages = grep {not defined $toSkip{$_}} @messages;
   my $total = @messages;
 
-  print "downloading headers for $total messages\n" if $GVAR{VERBOSE};
+  print "downloading headers for $total messages\n" if $$GVAR{VERBOSE};
   my $headers = $c->parse_headers(\@messages, @headerFields);
 
-  print "encoding and formatting $total headers\n" if $GVAR{VERBOSE};
+  print "encoding and formatting $total headers\n" if $$GVAR{VERBOSE};
   my $count = 0;
   my $segment = int($total/20);
 
-  if($GVAR{VERBOSE}){
+  if($$GVAR{VERBOSE}){
     my $old_fh = select(STDOUT);
     $| = 1;
     select($old_fh);
@@ -1272,7 +1272,7 @@ sub cacheAllHeaders($$$){
     $count++;
     if(($segment > 0 and $count % $segment == 0) or $count == 1 or $count == $total){
       my $pct = int(0.5 + 100*$count/$total);
-      print "#$pct%\n" if $GVAR{VERBOSE};
+      print "#$pct%\n" if $$GVAR{VERBOSE};
     }
     my $hdr = $$headers{$uid};
     cacheHeader $hdr, $uid, $accName, $headersDir,
@@ -1292,7 +1292,7 @@ sub cacheAllHeaders($$$){
     my @uids = sort keys %{$$nullFields{$field}};
     warn "\n=====\nWARNING: NULs in '$field':\n@uids\n======\n";
   }
-  print "\n" if $segment > 0 and $GVAR{VERBOSE};
+  print "\n" if $segment > 0 and $$GVAR{VERBOSE};
 
   my @cachedBodyUids = getCachedBodyUids($accName, $folderName);
   my %okCachedHeaderUids = map {$_ => 1} getCachedHeaderUids($accName, $folderName);
@@ -1301,7 +1301,7 @@ sub cacheAllHeaders($$$){
       warn "\n!!!!!\nDELETED MESSAGE: $uid is cached in bodies, but not on server\n";
       require MIME::Parser;
       my $mimeParser = MIME::Parser->new();
-      $mimeParser->output_dir($GVAR{TMP_DIR});
+      $mimeParser->output_dir($$GVAR{TMP_DIR});
 
       my $cachedBody = readCachedBody($accName, $folderName, $uid);
 
@@ -1379,12 +1379,12 @@ sub cacheBodies($$$$@){
   @messages = grep {not defined $toSkip{$_}} @messages;
   if(defined $maxCap and $maxCap > 0 and @messages > $maxCap){
     my $count = @messages;
-    print "only caching $maxCap out of $count\n" if $GVAR{VERBOSE};
+    print "only caching $maxCap out of $count\n" if $$GVAR{VERBOSE};
     @messages = reverse @messages;
     @messages = splice @messages, 0, $maxCap;
     @messages = reverse @messages;
   }
-  print "caching bodies for " . @messages . " messages\n" if $GVAR{VERBOSE};
+  print "caching bodies for " . @messages . " messages\n" if $$GVAR{VERBOSE};
   my $total = @messages;
   my $count = 0;
   my $segment = int($total/20);
@@ -1396,7 +1396,7 @@ sub cacheBodies($$$$@){
       my $pct = int(0.5 + 100*$count/$total);
       my $date = `date`;
       chomp $date;
-      print "  {cached $count/$total bodies} $pct%  $date\n" if $GVAR{VERBOSE};
+      print "  {cached $count/$total bodies} $pct%  $date\n" if $$GVAR{VERBOSE};
     }
     my $body = $c->message_string($uid);
     $body = "" if not defined $body;
@@ -1581,7 +1581,7 @@ sub readCachedHeader($$$){
 
 sub openFolder($$$){
   my ($imapFolder, $c, $allowEditing) = @_;
-  print "Opening folder: $imapFolder\n" if $GVAR{VERBOSE};
+  print "Opening folder: $imapFolder\n" if $$GVAR{VERBOSE};
 
   my @folders = $c->folders($imapFolder);
   if(@folders != 1){
@@ -1614,7 +1614,7 @@ sub getClient($){
     };
   }
   my $sep = "="x50;
-  print "$sep\n$$acc{name}: logging in\n$sep\n" if $GVAR{VERBOSE};
+  print "$sep\n$$acc{name}: logging in\n$sep\n" if $$GVAR{VERBOSE};
   require Mail::IMAPClient;
   my $c = Mail::IMAPClient->new(
     %$network,
@@ -1651,7 +1651,7 @@ sub formatDate($){
   my $d = Date::Parse::str2time($date);
   if(defined $d){
     require Date::Format;
-    return Date::Format::time2str($GVAR{DATE_FORMAT}, $d);
+    return Date::Format::time2str($$GVAR{DATE_FORMAT}, $d);
   }
   return $date;
 }
