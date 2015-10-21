@@ -1,11 +1,14 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+use lib "/opt/qtemail/lib";
 #Module deps required below:
 # Encode Mail::IMAPClient IO::Socket::SSL MIME::Parser
 # Date::Parse Date::Format
 
-our $GVAR = {
+BEGIN {
+  require QtEmail::Shared;
+  QtEmail::Shared::INIT_GVAR({
     VERBOSE => 0,
     DATE_FORMAT => "%Y-%m-%d %H:%M:%S",
     MAX_BODIES_TO_CACHE => 100,
@@ -15,7 +18,10 @@ our $GVAR = {
 
     SMTP_CLI_EXEC => "/opt/qtemail/bin/smtp-cli",
     TMP_DIR => "/var/tmp",
-};
+  });
+}
+
+use QtEmail::Shared qw(GET_GVAR MODIFY_GVAR);
 
 sub optFolder($$);
 
@@ -91,6 +97,8 @@ sub readSecrets();
 sub validateSecrets($);
 sub modifySecrets($$);
 sub joinTrailingBackslashLines(@);
+
+my $GVAR = QtEmail::Shared::GET_GVAR;
 
 my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
@@ -425,7 +433,7 @@ sub main(@){
   }
 
   if($cmd =~ /^(--update)$/ and @_ >= 0){
-    $$GVAR{VERBOSE} = 1;
+    QtEmail::Shared::MODIFY_GVAR('VERBOSE', 1);
     my $folderNameFilter = optFolder \@_, undef;
     my @accNames = @_;
     my $success = cmdUpdate($folderNameFilter, @accNames);
@@ -435,7 +443,7 @@ sub main(@){
     my ($accName, $subject, $body, $to, @args) = @_;
     cmdSmtp($accName, $subject, $body, $to, @args);
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/ and @_ >= 2){
-    $$GVAR{VERBOSE} = 1;
+    QtEmail::Shared::MODIFY_GVAR('VERBOSE', 1);
     my $folderName = optFolder \@_, "inbox";
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
@@ -491,7 +499,7 @@ sub main(@){
       $noDownload, $nulSep,
       $accName, $folderName, $destDir, @uids);
   }elsif($cmd =~ /^(--cache-all-bodies)$/ and @_ == 2){
-    $$GVAR{VERBOSE} = 1;
+    QtEmail::Shared::MODIFY_GVAR('VERBOSE', 1);
     my ($accName, $folderName) = @_;
     cmdCacheAllBodies($accName, $folderName);
   }elsif($cmd =~ /^(--print)$/ and @_ >= 0){
