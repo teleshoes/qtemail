@@ -81,6 +81,13 @@ sub parseCountIncludeFolderNames($);
 sub hasWords($);
 sub formatSchemaSimple($);
 sub formatSchemaPretty($$);
+sub getSecretsFile();
+sub getSecretsPrefix();
+sub getAccountConfigSchema();
+sub getOptionsConfigSchema();
+sub getAccReqConfigKeys();
+sub getAccOptConfigKeys();
+sub getOptionsConfigKeys();
 sub getConfig();
 sub readSecrets();
 sub validateSecrets($);
@@ -187,20 +194,20 @@ my $okCmds = join "|", qw(
 
 my $usage = "
   Simple IMAP client. {--smtp command is a convenience wrapper around smtp-cli}
-  Configuration is in $secretsFile
+  Configuration is in ".getSecretsFile()."
     Each config entry is one line of the format:
-      $secretsPrefix.GLOBAL_OPTION_KEY = <value>
+      ".getSecretsPrefix().".GLOBAL_OPTION_KEY = <value>
       or
-      $secretsPrefix.ACCOUNT_NAME.ACCOUNT_CONFIG_KEY = <value>
+      ".getSecretsPrefix().".ACCOUNT_NAME.ACCOUNT_CONFIG_KEY = <value>
 
     Account names can be any word characters (alphanumeric plus underscore)
-    Lines that do not begin with \"$secretsPrefix.\" are ignored.
+    Lines that do not begin with \"".getSecretsPrefix().".\" are ignored.
 
-    ACCOUNT_NAME:    the word following \"$secretsPrefix.\" in $secretsFile\n
+    ACCOUNT_NAME:    the word following \"".getSecretsPrefix().".\" in ".getSecretsFile()."\n
     FOLDER_NAME:     \"inbox\", \"sent\" or one of the names from \"folders\"\n
     UID:             an IMAP UID {UIDVALIDITY is assumed to never change}\n
-    GLOBAL_OPTION_KEY:\n" . formatSchemaPretty($optionsConfigSchema, "      ") . "
-    ACCOUNT_CONFIG_KEY:\n" . formatSchemaPretty($accountConfigSchema, "      ") . "
+    GLOBAL_OPTION_KEY:\n" . formatSchemaPretty(getOptionsConfigSchema(), "      ") . "
+    ACCOUNT_CONFIG_KEY:\n" . formatSchemaPretty(getAccountConfigSchema(), "      ") . "
 
   $0 -h|--help
     show this message
@@ -355,38 +362,39 @@ my $usage = "
     otherwise, print \"no\" and exit with non-zero exit code
 
   $0 --read-config ACCOUNT_NAME
-    reads $secretsFile
-    for each line of the form \"$secretsPrefix.ACCOUNT_NAME.KEY\\s*=\\s*VAL\"
+    reads ".getSecretsFile()."
+    for each line of the form \"".getSecretsPrefix().".ACCOUNT_NAME.KEY\\s*=\\s*VAL\"
       print KEY=VAL
 
   $0 --write-config ACCOUNT_NAME KEY=VAL [KEY=VAL KEY=VAL]
-    modifies $secretsFile
+    modifies ".getSecretsFile()."
     for each KEY/VAL pair:
-      removes any line that matches \"$secretsPrefix.ACCOUNT_NAME.KEY\\s*=\"
-      adds a line at the end \"$secretsPrefix.ACCOUNT_NAME.KEY = VAL\"
+      removes any line that matches \"".getSecretsPrefix().".ACCOUNT_NAME.KEY\\s*=\"
+      adds a line at the end \"".getSecretsPrefix().".ACCOUNT_NAME.KEY = VAL\"
 
   $0 --read-options
-    reads $secretsFile
-    for each line of the form \"$secretsPrefix.KEY\\s*=\\s*VAL\"
+    reads ".getSecretsFile()."
+    for each line of the form \"".getSecretsPrefix().".KEY\\s*=\\s*VAL\"
       print KEY=VAL
 
   $0 --write-options KEY=VAL [KEY=VAL KEY=VAL]
-    reads $secretsFile
-    for each line of the form \"$secretsPrefix.KEY\\s*=\\s*VAL\"
+    reads ".getSecretsFile()."
+    for each line of the form \"".getSecretsPrefix().".KEY\\s*=\\s*VAL\"
       print KEY=VAL
 
   $0 --read-config-schema
     print the allowed keys and descriptions for account config entries
     formatted, one per line, like this:
     <KEY_NAME>=<DESC>
-      KEY_NAME: one of: @accReqConfigKeys @accOptConfigKeys
+      KEY_NAME: one of: " .
+        join(" ", (getAccReqConfigKeys(), getAccOptConfigKeys())) . "
       DESC:     text description
 
   $0 --read-options-schema
     print the allowed keys and descriptions for global option entries
     formatted, one per line, like this:
     <KEY_NAME>=<DESC>
-      KEY_NAME: one of: @optionsConfigKeys
+      KEY_NAME: one of: " . join(" ", getOptionsConfigKeys()) . "
       DESC:     text description
 ";
 
@@ -410,10 +418,10 @@ sub main(@){
     writeConfig undef, @_;
     exit 0;
   }elsif($cmd =~ /^(--read-config-schema)$/ and @_ == 0){
-    print formatSchemaSimple $accountConfigSchema;
+    print formatSchemaSimple getAccountConfigSchema();
     exit 0;
   }elsif($cmd =~ /^(--read-options-schema)$/ and @_ == 0){
-    print formatSchemaSimple $optionsConfigSchema;
+    print formatSchemaSimple getOptionsConfigSchema();
     exit 0;
   }
 
@@ -1775,6 +1783,28 @@ sub formatSchemaPretty($$){
     $fmt .= "$prefix$info";
   }
   return $fmt;
+}
+
+sub getSecretsFile(){
+  return $secretsFile;
+}
+sub getSecretsPrefix(){
+  return $secretsPrefix;
+}
+sub getAccountConfigSchema(){
+  return $accountConfigSchema;
+}
+sub getOptionsConfigSchema(){
+  return $optionsConfigSchema;
+}
+sub getAccReqConfigKeys(){
+  return @accReqConfigKeys;
+}
+sub getAccOptConfigKeys(){
+  return @accOptConfigKeys;
+}
+sub getOptionsConfigKeys(){
+  return @optionsConfigKeys;
 }
 
 sub joinTrailingBackslashLines(@){
