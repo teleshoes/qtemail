@@ -326,8 +326,7 @@ my $usage = "
 ";
 
 sub main(@){
-  my $cmd = shift if @_ > 0 and $_[0] =~ /^($okCmds)$/;
-  $cmd = "--update" if not defined $cmd;
+  my $cmd = @_ > 0 ? shift : "--update";
 
   if($cmd =~ /^(-h|--help)$/){
     print $usage;
@@ -466,6 +465,8 @@ sub main(@){
   }elsif($cmd =~ /^(--read-options-schema)$/ and @_ == 0){
     cmdReadConfigOptionsSchema "options";
     exit 0;
+  }else{
+    die $usage;
   }
 }
 
