@@ -330,7 +330,7 @@ sub main(@){
   $cmd = "--update" if not defined $cmd;
 
   if($cmd =~ /^(-h|--help)$/){
-    die $usage;
+    print $usage;
   }elsif($cmd =~ /^(--update)$/ and @_ >= 0){
     QtEmail::Shared::MODIFY_GVAR('VERBOSE', 1);
     my $folderNameFilter = optFolder \@_, undef;
