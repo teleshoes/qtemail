@@ -92,6 +92,7 @@ sub getConfig();
 sub readSecrets();
 sub validateSecrets($);
 sub modifySecrets($$);
+sub joinTrailingBackslashLines(@);
 
 my $secretsFile = "$ENV{HOME}/.secrets";
 my $secretsPrefix = "email";
@@ -1807,27 +1808,6 @@ sub getOptionsConfigKeys(){
   return @optionsConfigKeys;
 }
 
-sub joinTrailingBackslashLines(@){
-  my @oldLines = @_;
-  my @lines;
-
-  my $curLine = undef;
-  for my $line(@oldLines){
-    my $isBackslashLine = $line =~ /\\\s*\n?/;
-
-    $curLine = '' if not defined $curLine;
-    $curLine .= $line;
-
-    if(not $isBackslashLine){
-      push @lines, $curLine;
-      $curLine = undef;
-    }
-  }
-  push @lines, $curLine if defined $curLine;
-
-  return @lines;
-}
-
 sub getConfig(){
   my $config = readSecrets();
   validateSecrets $config;
@@ -1949,6 +1929,27 @@ sub modifySecrets($$){
   open FH, "> $secretsFile" or die "Could not write $secretsFile\n";
   print FH @lines;
   close FH;
+}
+
+sub joinTrailingBackslashLines(@){
+  my @oldLines = @_;
+  my @lines;
+
+  my $curLine = undef;
+  for my $line(@oldLines){
+    my $isBackslashLine = $line =~ /\\\s*\n?/;
+
+    $curLine = '' if not defined $curLine;
+    $curLine .= $line;
+
+    if(not $isBackslashLine){
+      push @lines, $curLine;
+      $curLine = undef;
+    }
+  }
+  push @lines, $curLine if defined $curLine;
+
+  return @lines;
 }
 
 &main(@ARGV);
