@@ -37,6 +37,7 @@ sub cmdHasError(@);
 sub cmdHasNewUnread(@);
 sub cmdHasUnread(@);
 
+sub getConfig();
 sub formatConfig($);
 sub writeConfig($@);
 sub setFlagStatus($$$$);
@@ -88,7 +89,7 @@ sub getOptionsConfigSchema();
 sub getAccReqConfigKeys();
 sub getAccOptConfigKeys();
 sub getOptionsConfigKeys();
-sub getConfig();
+########
 sub readSecrets();
 sub validateSecrets($);
 sub modifySecrets($$);
@@ -956,6 +957,12 @@ sub cmdHasUnread(@){
   return 0;
 }
 
+sub getConfig(){
+  my $config = readSecrets();
+  validateSecrets $config;
+  return $config;
+}
+
 sub formatConfig($){
   my $configGroup = shift;
   my $config = readSecrets;
@@ -970,6 +977,7 @@ sub formatConfig($){
   }
   return $fmt;
 }
+
 sub writeConfig($@){
   my ($configGroup, @keyVals) = @_;
   my $config = {};
@@ -1763,6 +1771,7 @@ sub formatSchemaSimple($){
   }
   return $fmt;
 }
+
 sub formatSchemaPretty($$){
   my ($schema, $indent) = @_;
   my $maxNameLen = 0;
@@ -1808,11 +1817,7 @@ sub getOptionsConfigKeys(){
   return @optionsConfigKeys;
 }
 
-sub getConfig(){
-  my $config = readSecrets();
-  validateSecrets $config;
-  return $config;
-}
+#######################
 
 sub readSecrets(){
   my @lines = `cat $secretsFile 2>/dev/null`;
