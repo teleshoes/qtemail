@@ -449,22 +449,17 @@ sub main(@){
   }elsif($cmd =~ /^(--read-config)$/ and @_ == 1){
     my $account = shift;
     cmdReadConfigOptions "account", $account;
-    exit 0;
   }elsif($cmd =~ /^(--read-options)$/ and @_ ==0){
     cmdReadConfigOptions "options", undef;
-    exit 0;
   }elsif($cmd =~ /^(--write-config)$/ and @_ >= 2){
     my $accName = shift;
     cmdWriteConfigOptions "account", $accName, @_;
   }elsif($cmd =~ /^(--write-options)$/ and @_ >= 1){
     cmdWriteConfigOptions "options", undef, @_;
-    exit 0;
   }elsif($cmd =~ /^(--read-config-schema)$/ and @_ == 0){
     cmdReadConfigOptionsSchema "account";
-    exit 0;
   }elsif($cmd =~ /^(--read-options-schema)$/ and @_ == 0){
     cmdReadConfigOptionsSchema "options";
-    exit 0;
   }else{
     die $usage;
   }
