@@ -10,29 +10,28 @@ BEGIN {
   require QtEmail::Shared;
   my $baseDir = "$ENV{HOME}/.cache/email";
   QtEmail::Shared::INIT_GVAR({
-    EMAIL_DIR => $baseDir,
-    HEADER_FIELDS => [qw(Date Subject From To CC BCC)],
     VERBOSE => 0,
     DATE_FORMAT => "%Y-%m-%d %H:%M:%S",
     MAX_BODIES_TO_CACHE => 100,
-
-    EMAIL_SEARCH_EXEC => "/opt/qtemail/bin/email-search.pl",
     UPDATEDB_LIMIT => 100,
 
+    EMAIL_SEARCH_EXEC => "/opt/qtemail/bin/email-search.pl",
     SMTP_CLI_EXEC => "/opt/qtemail/bin/smtp-cli",
+    HTML2TEXT_EXEC => "/usr/bin/html2text",
+
     TMP_DIR => "/var/tmp",
 
+    EMAIL_DIR => $baseDir,
     UNREAD_COUNTS_FILE => "$baseDir/unread-counts",
     STATUS_LINE_FILE => "$baseDir/status-line",
     STATUS_SHORT_FILE => "$baseDir/status-short",
-
-    HTML2TEXT_EXEC => "/usr/bin/html2text",
 
     IMAP_CLIENT_SETTINGS => {
       Peek => 1,
       Uid => 1,
       Ignoresizeerrors => 1,
     },
+    HEADER_FIELDS => [qw(Date Subject From To CC BCC)],
   });
 }
 
