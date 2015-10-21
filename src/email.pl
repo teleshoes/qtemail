@@ -153,8 +153,8 @@ my $longDescriptions = {
   ,
 };
 
-my @accConfigKeys = map {$$_[0]} grep {$$_[1] eq "REQ"} @$accountConfigSchema;
-my @accExtraConfigKeys = map {$$_[0]} grep {$$_[1] eq "OPT"} @$accountConfigSchema;
+my @accReqConfigKeys = map {$$_[0]} grep {$$_[1] eq "REQ"} @$accountConfigSchema;
+my @accOptConfigKeys = map {$$_[0]} grep {$$_[1] eq "OPT"} @$accountConfigSchema;
 my %enums = (
   body_cache_mode => [qw(all unread none)],
 );
@@ -379,7 +379,7 @@ my $usage = "
     print the allowed keys and descriptions for account config entries
     formatted, one per line, like this:
     <KEY_NAME>=<DESC>
-      KEY_NAME: one of: @accConfigKeys @accExtraConfigKeys
+      KEY_NAME: one of: @accReqConfigKeys @accOptConfigKeys
       DESC:     text description
 
   $0 --read-options-schema
@@ -1808,7 +1808,7 @@ sub readSecrets(){
   my @lines = `cat $secretsFile 2>/dev/null`;
   my $accounts = {};
   my $accOrder = [];
-  my $okAccConfigKeys = join "|", (@accConfigKeys, @accExtraConfigKeys);
+  my $okAccReqConfigKeys = join "|", (@accReqConfigKeys, @accOptConfigKeys);
   my $okOptionsConfigKeys = join "|", (@optionsConfigKeys);
   my $optionsConfig = {};
   my $decryptCmd;
@@ -1825,7 +1825,7 @@ sub readSecrets(){
   for my $line(@lines){
     if($line =~ /^$secretsPrefix\.($okOptionsConfigKeys)\s*=\s*(.+)$/s){
       $$optionsConfig{$1} = $2;
-    }elsif($line =~ /^$secretsPrefix\.(\w+)\.($okAccConfigKeys)\s*=\s*(.+)$/s){
+    }elsif($line =~ /^$secretsPrefix\.(\w+)\.($okAccReqConfigKeys)\s*=\s*(.+)$/s){
       my ($accName, $key, $val)= ($1, $2, $3);
       if(not defined $$accounts{$accName}){
         $$accounts{$1} = {name => $accName};
@@ -1850,7 +1850,7 @@ sub validateSecrets($){
   my $accounts = $$config{accounts};
   for my $accName(keys %$accounts){
     my $acc = $$accounts{$accName};
-    for my $key(sort @accConfigKeys){
+    for my $key(sort @accReqConfigKeys){
       die "Missing '$key' for '$accName' in $secretsFile\n" if not defined $$acc{$key};
     }
   }
@@ -1878,9 +1878,9 @@ sub modifySecrets($$){
     }
   }
 
-  my %requiredConfigKeys = map {$_ => 1} @accConfigKeys;
+  my %requiredConfigKeys = map {$_ => 1} @accReqConfigKeys;
 
-  my $okConfigKeys = join "|", (@accConfigKeys, @accExtraConfigKeys);
+  my $okConfigKeys = join "|", (@accReqConfigKeys, @accOptConfigKeys);
   my $okOptionsKeys = join "|", (@optionsConfigKeys);
   for my $key(sort keys %$config){
     if(defined $configGroup){
