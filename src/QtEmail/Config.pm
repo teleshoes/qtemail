@@ -7,8 +7,10 @@ use QtEmail::Shared qw(GET_GVAR);
 our @ISA = qw(Exporter);
 use Exporter;
 our @EXPORT = qw(
-  getConfig formatConfig writeConfig
-  formatSchemaSimple formatSchemaPretty
+  getConfig
+  formatConfig writeConfig
+  formatSchemaSimple
+  formatSchemaPretty
   getSecretsFile getSecretsPrefix
   getAccountConfigSchema getOptionsConfigSchema
   getAccReqConfigKeys getAccOptConfigKeys getOptionsConfigKeys
