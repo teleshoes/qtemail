@@ -21,6 +21,10 @@ BEGIN {
 
     SMTP_CLI_EXEC => "/opt/qtemail/bin/smtp-cli",
     TMP_DIR => "/var/tmp",
+
+    UNREAD_COUNTS_FILE => "$baseDir/unread-counts",
+    STATUS_LINE_FILE => "$baseDir/status-line",
+    STATUS_SHORT_FILE => "$baseDir/status-short",
   });
 }
 
@@ -93,10 +97,6 @@ sub hasWords($);
 
 my $GVAR = QtEmail::Shared::GET_GVAR;
 
-my $unreadCountsFile = "$$GVAR{EMAIL_DIR}/unread-counts";
-my $statusLineFile = "$$GVAR{EMAIL_DIR}/status-line";
-my $statusShortFile = "$$GVAR{EMAIL_DIR}/status-short";
-
 my $html2textExec = "/usr/bin/html2text";
 
 my $settings = {
@@ -154,11 +154,11 @@ my $usage = "
         -write all message UIDs that are now in unread and were not before
           $$GVAR{EMAIL_DIR}/ACCOUNT_NAME/FOLDER_NAME/new-unread
         -run $$GVAR{EMAIL_SEARCH_EXEC} --updatedb ACCOUNT_NAME FOLDER_NAME $$GVAR{UPDATEDB_LIMIT}
-    -update global unread counts file $unreadCountsFile
+    -update global unread counts file $$GVAR{UNREAD_COUNTS_FILE}
       count the unread emails for each account in the folders in count_include
       the default is just to include the counts for \"inbox\"
 
-      write the unread counts, one line per account, to $unreadCountsFile
+      write the unread counts, one line per account, to $$GVAR{UNREAD_COUNTS_FILE}
       e.g.: 3:AOL
             6:GMAIL
             0:WORK_GMAIL
@@ -228,9 +228,9 @@ my $usage = "
     format and print cached unread message headers
 
   $0 --status-line [ACCOUNT_NAME ACCOUNT_NAME ...]
-    {cached in $statusLineFile when $unreadCountsFile or error files change}
-    does not fetch anything, merely reads $unreadCountsFile
-    format and print $unreadCountsFile
+    {cached in $$GVAR{STATUS_LINE_FILE} when $$GVAR{UNREAD_COUNTS_FILE} or error files change}
+    does not fetch anything, merely reads $$GVAR{UNREAD_COUNTS_FILE}
+    format and print $$GVAR{UNREAD_COUNTS_FILE}
     the string is a space-separated list of the first character of
       each account name followed by the integer count
     no newline character is printed
@@ -239,9 +239,9 @@ my $usage = "
     e.g.: A3 G6
 
   $0 --status-short [ACCOUNT_NAME ACCOUNT_NAME ...]
-    {cached in $statusShortFile when $unreadCountsFile or error files change}
-    does not fetch anything, merely reads $unreadCountsFile
-    format and print $unreadCountsFile
+    {cached in $$GVAR{STATUS_SHORT_FILE} when $$GVAR{UNREAD_COUNTS_FILE} or error files change}
+    does not fetch anything, merely reads $$GVAR{UNREAD_COUNTS_FILE}
+    format and print $$GVAR{UNREAD_COUNTS_FILE}
     if accounts are specified, all but those are omitted
     omits accounts with unread-count of 0
 
@@ -896,12 +896,12 @@ sub writeStatusFiles(@){
 
   my $fmt;
   $fmt = formatStatusLine $counts, @accNames;
-  open FH, "> $statusLineFile" or die "Could not write $statusLineFile\n";
+  open FH, "> $$GVAR{STATUS_LINE_FILE}" or die "Could not write $$GVAR{STATUS_LINE_FILE}\n";
   print FH $fmt;
   close FH;
 
   $fmt = formatStatusShort $counts, @accNames;
-  open FH, "> $statusShortFile" or die "Could not write $statusShortFile\n";
+  open FH, "> $$GVAR{STATUS_SHORT_FILE}" or die "Could not write $$GVAR{STATUS_SHORT_FILE}\n";
   print FH $fmt;
   close FH;
 }
@@ -985,15 +985,15 @@ sub html2text($){
 
 sub readGlobalUnreadCountsFile(){
   my $counts = {};
-  if(not -e $unreadCountsFile){
+  if(not -e $$GVAR{UNREAD_COUNTS_FILE}){
     return $counts;
   }
-  open FH, "< $unreadCountsFile" or die "Could not read $unreadCountsFile\n";
+  open FH, "< $$GVAR{UNREAD_COUNTS_FILE}" or die "Could not read $$GVAR{UNREAD_COUNTS_FILE}\n";
   for my $line(<FH>){
     if($line =~ /^(\d+):(.*)/){
       $$counts{$2} = $1;
     }else{
-      die "malformed $unreadCountsFile line: $line";
+      die "malformed $$GVAR{UNREAD_COUNTS_FILE} line: $line";
     }
   }
   return $counts;
@@ -1012,7 +1012,7 @@ sub updateGlobalUnreadCountsFile($){
     }
   }
 
-  open FH, "> $unreadCountsFile" or die "Could not write $unreadCountsFile\n";
+  open FH, "> $$GVAR{UNREAD_COUNTS_FILE}" or die "Could not write $$GVAR{UNREAD_COUNTS_FILE}\n";
   for my $accName(@accOrder){
     print FH "$counts{$accName}:$accName\n";
   }
