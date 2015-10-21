@@ -27,6 +27,12 @@ BEGIN {
     STATUS_SHORT_FILE => "$baseDir/status-short",
 
     HTML2TEXT_EXEC => "/usr/bin/html2text",
+
+    IMAP_CLIENT_SETTINGS => {
+      Peek => 1,
+      Uid => 1,
+      Ignoresizeerrors => 1,
+    },
   });
 }
 
@@ -98,12 +104,6 @@ sub parseCountIncludeFolderNames($);
 sub hasWords($);
 
 my $GVAR = QtEmail::Shared::GET_GVAR;
-
-my $settings = {
-  Peek => 1,
-  Uid => 1,
-  Ignoresizeerrors => 1,
-};
 
 my $okCmds = join "|", qw(
   --update --header --body --body-plain --body-html --attachments
@@ -1525,7 +1525,7 @@ sub getClient($){
     %$network,
     User     => $$acc{user},
     Password => $$acc{password},
-    %$settings,
+    %{$$GVAR{IMAP_CLIENT_SETTINGS}},
   );
   return undef if not defined $c or not $c->IsAuthenticated();
   return $c;
