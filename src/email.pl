@@ -1,12 +1,9 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-# Encode
-# Mail::IMAPClient;
-# IO::Socket::SSL;
-# MIME::Parser
-# Date::Parse
-# Date::Format
+#Module deps required below:
+# Encode Mail::IMAPClient IO::Socket::SSL MIME::Parser
+# Date::Parse Date::Format
 
 our $GVAR = {
     VERBOSE => 0,
