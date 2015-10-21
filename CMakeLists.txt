@@ -12,6 +12,10 @@ FILE(GLOB programs
 INSTALL(PROGRAMS ${programs}
   DESTINATION /opt/qtemail/bin)
 
+FILE(GLOB lib src/QtEmail/*)
+INSTALL(FILES ${lib}
+  DESTINATION /opt/qtemail/lib/QtEmail)
+
 FILE(GLOB qml qml/*.qml)
 INSTALL(FILES ${qml}
   DESTINATION /opt/qtemail/qml)
