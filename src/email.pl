@@ -25,6 +25,8 @@ BEGIN {
     UNREAD_COUNTS_FILE => "$baseDir/unread-counts",
     STATUS_LINE_FILE => "$baseDir/status-line",
     STATUS_SHORT_FILE => "$baseDir/status-short",
+
+    HTML2TEXT_EXEC => "/usr/bin/html2text",
   });
 }
 
@@ -96,8 +98,6 @@ sub parseCountIncludeFolderNames($);
 sub hasWords($);
 
 my $GVAR = QtEmail::Shared::GET_GVAR;
-
-my $html2textExec = "/usr/bin/html2text";
 
 my $settings = {
   Peek => 1,
@@ -205,7 +205,7 @@ my $usage = "
   $0 --body-plain [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but override prefer_html=false,
       and attempt to convert the result to plaintext if it appears to be HTML
-      (uses $html2textExec if available, or just strips out the tags)
+      (uses $$GVAR{HTML2TEXT_EXEC} if available, or just strips out the tags)
 
   $0 --body-html [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     same as --body, but override prefer_html=true
@@ -967,12 +967,12 @@ sub html2text($){
   if($html !~ /<(html|body|head|table)(\s+[^>]*)?>/){
     return $html;
   }
-  if(-x $html2textExec){
+  if(-x $$GVAR{HTML2TEXT_EXEC}){
     my $tmpFile = "/tmp/email_tmp_" . int(time*1000) . ".html";
     open FH, "> $tmpFile" or die "Could not write to $tmpFile\n";
     print FH $html;
     close FH;
-    my $text = `$html2textExec $tmpFile`;
+    my $text = `$$GVAR{HTML2TEXT_EXEC} $tmpFile`;
     system "rm", $tmpFile;
     return $text;
   }else{
