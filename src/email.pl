@@ -11,7 +11,7 @@ BEGIN {
   my $baseDir = "$ENV{HOME}/.cache/email";
   QtEmail::Shared::INIT_GVAR({
     EMAIL_DIR => $baseDir,
-
+    HEADER_FIELDS => [qw(Date Subject From To CC BCC)],
     VERBOSE => 0,
     DATE_FORMAT => "%Y-%m-%d %H:%M:%S",
     MAX_BODIES_TO_CACHE => 100,
@@ -93,7 +93,6 @@ sub hasWords($);
 
 my $GVAR = QtEmail::Shared::GET_GVAR;
 
-my @headerFields = qw(Date Subject From To CC BCC);
 my $unreadCountsFile = "$$GVAR{EMAIL_DIR}/unread-counts";
 my $statusLineFile = "$$GVAR{EMAIL_DIR}/status-line";
 my $statusShortFile = "$$GVAR{EMAIL_DIR}/status-short";
@@ -191,7 +190,7 @@ my $usage = "
 
   $0 --header [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     format and print the header of the indicated message(s)
-    prints each of [@headerFields]
+    prints each of [@{$$GVAR{HEADER_FIELDS}}]
       one per line, formatted \"UID.FIELD: VALUE\"
 
   $0 --body [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
@@ -675,7 +674,7 @@ sub cmdHeader($$@){
   for my $uid(@uids){
     my $hdr = readCachedHeader($accName, $folderName, $uid);
     die "Unknown message: $uid\n" if not defined $hdr;
-    for my $field(@headerFields){
+    for my $field(@{$$GVAR{HEADER_FIELDS}}){
       print "$uid.$field: $$hdr{$field}\n";
     }
   }
@@ -1159,7 +1158,7 @@ sub cacheAllHeaders($$$){
   my $total = @messages;
 
   print "downloading headers for $total messages\n" if $$GVAR{VERBOSE};
-  my $headers = $c->parse_headers(\@messages, @headerFields);
+  my $headers = $c->parse_headers(\@messages, @{$$GVAR{HEADER_FIELDS}});
 
   print "encoding and formatting $total headers\n" if $$GVAR{VERBOSE};
   my $count = 0;
@@ -1228,7 +1227,7 @@ sub cacheHeader($$$$$$$){
     $missingFields, $newlineFields, $nullFields) = @_;
   my @fmtLines;
   my @rawLines;
-  for my $field(@headerFields){
+  for my $field(@{$$GVAR{HEADER_FIELDS}}){
     my $vals = $$hdr{$field};
     my $val;
     if(not defined $vals or @$vals == 0){
@@ -1327,11 +1326,11 @@ sub getHeaderFromBody($$){
   #simulate Mail::IMAPClient::parse_headers using MIME::Parser
   #like:
   # my $c = Mail::IMAPClient->new();
-  # my $headers = $c->parse_headers($uid, @headerFields)
+  # my $headers = $c->parse_headers($uid, @{$$GVAR{HEADER_FIELDS}})
   # my $hdr = $$headers{$uid};
   # return $hdr;
   my $hdr = {};
-  for my $field(@headerFields){
+  for my $field(@{$$GVAR{HEADER_FIELDS}}){
     my $rawVal = $head->get($field);
     if(defined $rawVal){
       chomp $rawVal;
