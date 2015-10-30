@@ -20,7 +20,6 @@ our @ISA = qw(Exporter);
 use Exporter;
 our @EXPORT = qw(
   cmdUpdate
-  cmdSmtp
   cmdMarkReadUnread
   cmdAccounts
   cmdFolders
@@ -39,7 +38,6 @@ our @EXPORT = qw(
 );
 
 sub cmdUpdate($@);
-sub cmdSmtp($$$$@);
 sub cmdMarkReadUnread($$$@);
 sub cmdAccounts();
 sub cmdFolders($);
@@ -191,19 +189,6 @@ sub cmdUpdate($@){
   }
 
   return $success;
-}
-
-sub cmdSmtp($$$$@){
-  my ($accName, $subject, $body, $to, @args) = @_;
-  my $config = getConfig();
-  my $acc = $$config{accounts}{$accName};
-  die "Unknown account $accName\n" if not defined $acc;
-  exec $$GVAR{SMTP_CLI_EXEC},
-    "--server=$$acc{smtp_server}", "--port=$$acc{smtp_port}",
-    "--user=$$acc{user}", "--pass=$$acc{password}",
-    "--from=$$acc{user}",
-    "--subject=$subject", "--body-plain=$body", "--to=$to",
-    @args;
 }
 
 sub cmdMarkReadUnread($$$@){

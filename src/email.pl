@@ -45,7 +45,6 @@ use QtEmail::Config qw(
 );
 use QtEmail::Email qw(
   cmdUpdate
-  cmdSmtp
   cmdMarkReadUnread
   cmdAccounts
   cmdFolders
@@ -61,6 +60,9 @@ use QtEmail::Email qw(
   cmdReadConfigOptions
   cmdWriteConfigOptions
   cmdReadConfigOptionsSchema
+);
+use QtEmail::Smtp qw(
+  cmdSmtp
 );
 
 sub optFolder($$);
