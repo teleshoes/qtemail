@@ -10,10 +10,6 @@ use QtEmail::Config qw(
   formatSchemaSimple
   getAccountConfigSchema getOptionsConfigSchema
 );
-use QtEmail::Body qw(
-  cacheBodies
-  getBody
-);
 use QtEmail::Folders qw(
   accImapFolder accFolderOrder accEnsureFoldersParsed
   getFolderName
