@@ -15,6 +15,11 @@ use QtEmail::Folders qw(
   getFolderName
   parseFolders parseCountIncludeFolderNames
 );
+use QtEmail::Client qw(
+  openFolder
+  getClient
+  setFlagStatus
+);
 use QtEmail::Cache qw(
   getCachedHeaderUids
   getCachedBodyUids
@@ -64,7 +69,6 @@ sub cmdReadConfigOptions($$);
 sub cmdWriteConfigOptions($$@);
 sub cmdReadConfigOptionsSchema($);
 
-sub setFlagStatus($$$$);
 sub writeStatusFiles(@);
 sub formatStatusLine($@);
 sub formatStatusShort($@);
@@ -90,9 +94,6 @@ sub getBody($$$);
 sub writeAttachments($$);
 sub parseMimeEntity($);
 sub parseAttachments($);
-sub openFolder($$$);
-sub getClient($);
-sub getSocket($);
 sub formatHeaderField($$);
 sub formatDate($);
 
@@ -514,17 +515,6 @@ sub cmdReadConfigOptionsSchema($){
     print formatSchemaSimple getOptionsConfigSchema();
   }else{
     die "invalid read config/options schema mode: $modeAccountOptions\n";
-  }
-}
-
-sub setFlagStatus($$$$){
-  my ($c, $uid, $flag, $status) = @_;
-  if($status){
-    print "$uid $flag => true\n" if $$GVAR{VERBOSE};
-    $c->set_flag($flag, $uid) or die "FAILED: set $flag on $uid\n";
-  }else{
-    print "$uid $flag => false\n" if $$GVAR{VERBOSE};
-    $c->unset_flag($flag, $uid) or die "FAILED: unset flag on $uid\n";
   }
 }
 
@@ -1067,62 +1057,6 @@ sub parseMimeEntity($){
   }
 }
 
-
-sub openFolder($$$){
-  my ($imapFolder, $c, $allowEditing) = @_;
-  print "Opening folder: $imapFolder\n" if $$GVAR{VERBOSE};
-
-  my @folders = $c->folders($imapFolder);
-  if(@folders != 1){
-    return undef;
-  }
-
-  my $f = $folders[0];
-  if($allowEditing){
-    $c->select($f) or $f = undef;
-  }else{
-    $c->examine($f) or $f = undef;
-  }
-  return $f;
-}
-
-sub getClient($){
-  my ($acc) = @_;
-  my $network;
-  if(defined $$acc{ssl} and $$acc{ssl} =~ /^false$/){
-    $network = {
-      Server => $$acc{server},
-      Port => $$acc{port},
-    };
-  }else{
-    my $socket = getSocket($acc);
-    return undef if not defined $socket;
-
-    $network = {
-      Socket => $socket,
-    };
-  }
-  my $sep = "="x50;
-  print "$sep\n$$acc{name}: logging in\n$sep\n" if $$GVAR{VERBOSE};
-  require Mail::IMAPClient;
-  my $c = Mail::IMAPClient->new(
-    %$network,
-    User     => $$acc{user},
-    Password => $$acc{password},
-    %{$$GVAR{IMAP_CLIENT_SETTINGS}},
-  );
-  return undef if not defined $c or not $c->IsAuthenticated();
-  return $c;
-}
-
-sub getSocket($){
-  my $acc = shift;
-  require IO::Socket::SSL;
-  return IO::Socket::SSL->new(
-    PeerAddr => $$acc{server},
-    PeerPort => $$acc{port},
-  );
-}
 
 sub formatHeaderField($$){
   my ($field, $val) = @_;
