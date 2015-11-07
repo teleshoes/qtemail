@@ -15,6 +15,9 @@ use QtEmail::Folders qw(
   getFolderName
   parseFolders parseCountIncludeFolderNames
 );
+use QtEmail::Util qw(
+  hasWords
+);
 
 our @ISA = qw(Exporter);
 use Exporter;
@@ -87,7 +90,6 @@ sub getClient($);
 sub getSocket($);
 sub formatHeaderField($$);
 sub formatDate($);
-sub hasWords($);
 
 my $GVAR = QtEmail::Shared::GET_GVAR;
 
@@ -1190,12 +1192,6 @@ sub formatDate($){
     return Date::Format::time2str($$GVAR{DATE_FORMAT}, $d);
   }
   return $date;
-}
-
-sub hasWords($){
-  my $msg = shift;
-  $msg =~ s/\W+//g;
-  return length($msg) > 0;
 }
 
 1;
