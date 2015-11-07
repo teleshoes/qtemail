@@ -52,6 +52,27 @@ our @EXPORT = qw(
   cmdReadConfigOptions
   cmdWriteConfigOptions
   cmdReadConfigOptionsSchema
+
+  writeStatusFiles
+  formatStatusLine
+  formatStatusShort
+  padtrim
+  html2text
+  readGlobalUnreadCountsFile
+  updateGlobalUnreadCountsFile
+  relTime
+  clearError
+  hasError
+  readError
+  writeError
+  readLastUpdated
+  writeLastUpdated
+  readUidFileCounts
+  readUidFile
+  writeUidFile
+  cacheHeader
+  formatHeaderField
+  formatDate
 );
 
 sub cmdUpdate($@);
