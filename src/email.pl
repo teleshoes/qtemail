@@ -57,17 +57,6 @@ use QtEmail::Email qw(
   cmdWriteConfigOptions
   cmdReadConfigOptionsSchema
 );
-use QtEmail::Smtp qw(
-  cmdSmtp
-);
-use QtEmail::UpdatePrint qw(
-  cmdUpdate
-  cmdPrint
-);
-use QtEmail::Body qw(
-  cmdBodyAttachments
-  cmdCacheAllBodies
-);
 
 sub optFolder($$);
 
@@ -285,15 +274,17 @@ sub main(@){
   if($cmd =~ /^(-h|--help)$/){
     print $usage;
   }elsif($cmd =~ /^(--update)$/ and @_ >= 0){
+    require QtEmail::UpdatePrint;
     QtEmail::Shared::MODIFY_GVAR('VERBOSE', 1);
     my $folderNameFilter = optFolder \@_, undef;
     my @accNames = @_;
-    my $success = cmdUpdate($folderNameFilter, @accNames);
+    my $success = QtEmail::UpdatePrint::cmdUpdate($folderNameFilter, @accNames);
     my $exitCode = $success ? 0 : 1;
     exit $exitCode;
   }elsif($cmd =~ /^(--smtp)$/ and @_ >= 4){
+    require QtEmail::Smtp;
     my ($accName, $subject, $body, $to, @args) = @_;
-    cmdSmtp($accName, $subject, $body, $to, @args);
+    QtEmail::Smtp::cmdSmtp($accName, $subject, $body, $to, @args);
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/ and @_ >= 2){
     QtEmail::Shared::MODIFY_GVAR('VERBOSE', 1);
     my $folderName = optFolder \@_, "inbox";
@@ -312,6 +303,7 @@ sub main(@){
     my ($accName, @uids) = @_;
     cmdHeader($accName, $folderName, @uids);
   }elsif($cmd =~ /^(--body|--body-plain|--body-html|--attachments)$/ and @_ >= 2){
+    require QtEmail::Body;
     my $modeBodyAttachments;
     if($cmd =~ /^(--body|--body-plain|--body-html)$/){
       $modeBodyAttachments = "body";
@@ -347,17 +339,19 @@ sub main(@){
         or not defined $destDir or not -d $destDir;
     }
 
-    cmdBodyAttachments($modeBodyAttachments, $wantPlain, $wantHtml,
+    QtEmail::Body::cmdBodyAttachments($modeBodyAttachments, $wantPlain, $wantHtml,
       $noDownload, $nulSep,
       $accName, $folderName, $destDir, @uids);
   }elsif($cmd =~ /^(--cache-all-bodies)$/ and @_ == 2){
+    require QtEmail::Body;
     QtEmail::Shared::MODIFY_GVAR('VERBOSE', 1);
     my ($accName, $folderName) = @_;
-    cmdCacheAllBodies($accName, $folderName);
+    QtEmail::Body::cmdCacheAllBodies($accName, $folderName);
   }elsif($cmd =~ /^(--print)$/ and @_ >= 0){
+    require QtEmail::UpdatePrint;
     my $folderName = optFolder \@_, "inbox";
     my @accNames = @_;
-    cmdPrint($folderName, @accNames);
+    QtEmail::UpdatePrint::cmdPrint($folderName, @accNames);
   }elsif($cmd =~ /^(--summary)$/ and @_ >= 0){
     my $folderName = optFolder \@_, "inbox";
     my @accNames = @_;
