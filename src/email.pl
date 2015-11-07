@@ -44,12 +44,10 @@ use QtEmail::Config qw(
   getAccReqConfigKeys getAccOptConfigKeys getOptionsConfigKeys
 );
 use QtEmail::Email qw(
-  cmdUpdate
   cmdMarkReadUnread
   cmdAccounts
   cmdFolders
   cmdHeader
-  cmdPrint
   cmdSummary
   cmdStatus
   cmdHasError
@@ -61,6 +59,10 @@ use QtEmail::Email qw(
 );
 use QtEmail::Smtp qw(
   cmdSmtp
+);
+use QtEmail::UpdatePrint qw(
+  cmdUpdate
+  cmdPrint
 );
 use QtEmail::Body qw(
   cmdBodyAttachments
