@@ -49,8 +49,6 @@ use QtEmail::Email qw(
   cmdAccounts
   cmdFolders
   cmdHeader
-  cmdBodyAttachments
-  cmdCacheAllBodies
   cmdPrint
   cmdSummary
   cmdStatus
@@ -63,6 +61,10 @@ use QtEmail::Email qw(
 );
 use QtEmail::Smtp qw(
   cmdSmtp
+);
+use QtEmail::Body qw(
+  cmdBodyAttachments
+  cmdCacheAllBodies
 );
 
 sub optFolder($$);
