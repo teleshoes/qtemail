@@ -24,7 +24,6 @@ use QtEmail::Email qw(
   readUidFile
   writeUidFile
   cacheHeader
-  readCachedHeader
   formatHeaderField
   formatDate
 );
