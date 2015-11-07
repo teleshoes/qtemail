@@ -51,7 +51,6 @@ our @EXPORT = qw(
   formatStatusLine
   formatStatusShort
   padtrim
-  html2text
   readGlobalUnreadCountsFile
   updateGlobalUnreadCountsFile
   relTime
@@ -86,7 +85,6 @@ sub writeStatusFiles(@);
 sub formatStatusLine($@);
 sub formatStatusShort($@);
 sub padtrim($$);
-sub html2text($);
 sub readGlobalUnreadCountsFile();
 sub updateGlobalUnreadCountsFile($);
 sub relTime($);
@@ -382,26 +380,6 @@ sub padtrim($$){
   $s = substr($s, 0, $len);
   $s = ' ' x ($len - length $s) . $s;
   return $s;
-}
-sub html2text($){
-  my ($html) = @_;
-  if($html !~ /<(html|body|head|table)(\s+[^>]*)?>/){
-    return $html;
-  }
-  if(-x $$GVAR{HTML2TEXT_EXEC}){
-    my $tmpFile = "/tmp/email_tmp_" . int(time*1000) . ".html";
-    open FH, "> $tmpFile" or die "Could not write to $tmpFile\n";
-    print FH $html;
-    close FH;
-    my $text = `$$GVAR{HTML2TEXT_EXEC} $tmpFile`;
-    system "rm", $tmpFile;
-    return $text;
-  }else{
-    $html =~ s/<[^>]*>//g;
-    $html =~ s/\n(\s*\n)+/\n/g;
-    $html =~ s/^\s+//mg;
-    return $html;
-  }
 }
 
 sub readGlobalUnreadCountsFile(){

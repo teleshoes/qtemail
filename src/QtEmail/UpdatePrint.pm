@@ -10,7 +10,6 @@ use QtEmail::Email qw(
   formatStatusLine
   formatStatusShort
   padtrim
-  html2text
   readGlobalUnreadCountsFile
   updateGlobalUnreadCountsFile
   relTime
@@ -40,6 +39,7 @@ use QtEmail::Client qw(
 use QtEmail::Body qw(
   cacheBodies
   getBody
+  html2text
 );
 use QtEmail::Cache qw(
   getCachedHeaderUids
