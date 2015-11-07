@@ -43,20 +43,6 @@ use QtEmail::Config qw(
   getAccountConfigSchema getOptionsConfigSchema
   getAccReqConfigKeys getAccOptConfigKeys getOptionsConfigKeys
 );
-use QtEmail::Email qw(
-  cmdMarkReadUnread
-  cmdAccounts
-  cmdFolders
-  cmdHeader
-  cmdSummary
-  cmdStatus
-  cmdHasError
-  cmdHasNewUnread
-  cmdHasUnread
-  cmdReadConfigOptions
-  cmdWriteConfigOptions
-  cmdReadConfigOptionsSchema
-);
 
 sub optFolder($$);
 
@@ -286,22 +272,26 @@ sub main(@){
     my ($accName, $subject, $body, $to, @args) = @_;
     QtEmail::Smtp::cmdSmtp($accName, $subject, $body, $to, @args);
   }elsif($cmd =~ /^(--mark-read|--mark-unread)$/ and @_ >= 2){
+    require QtEmail::Email;
     QtEmail::Shared::MODIFY_GVAR('VERBOSE', 1);
     my $folderName = optFolder \@_, "inbox";
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
     my $readStatus = $cmd =~ /^(--mark-read)$/ ? 1 : 0;
-    cmdMarkReadUnread($readStatus, $accName, $folderName, @uids);
+    QtEmail::Email::cmdMarkReadUnread($readStatus, $accName, $folderName, @uids);
   }elsif($cmd =~ /^(--accounts)$/ and @_ == 0){
-    cmdAccounts();
+    require QtEmail::Email;
+    QtEmail::Email::cmdAccounts();
   }elsif($cmd =~ /^(--folders)$/ and @_ == 1){
+    require QtEmail::Email;
     my $accName = shift;
-    cmdFolders($accName);
+    QtEmail::Email::cmdFolders($accName);
   }elsif($cmd =~ /^(--header)$/ and @_ >= 2){
+    require QtEmail::Email;
     my $folderName = optFolder \@_, "inbox";
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
-    cmdHeader($accName, $folderName, @uids);
+    QtEmail::Email::cmdHeader($accName, $folderName, @uids);
   }elsif($cmd =~ /^(--body|--body-plain|--body-html|--attachments)$/ and @_ >= 2){
     require QtEmail::Body;
     my $modeBodyAttachments;
@@ -353,10 +343,12 @@ sub main(@){
     my @accNames = @_;
     QtEmail::UpdatePrint::cmdPrint($folderName, @accNames);
   }elsif($cmd =~ /^(--summary)$/ and @_ >= 0){
+    require QtEmail::Email;
     my $folderName = optFolder \@_, "inbox";
     my @accNames = @_;
-    cmdSummary($folderName, @accNames);
+    QtEmail::Email::cmdSummary($folderName, @accNames);
   }elsif($cmd =~ /^(--status-line|--status-short)$/ and @_ >= 0){
+    require QtEmail::Email;
     my $modeLineStatus;
     if($cmd =~ /^(--status-line)$/){
       $modeLineStatus = "line";
@@ -366,10 +358,11 @@ sub main(@){
       die "failed to parsed cmd: $cmd\n";
     }
     my @accNames = @_;
-    cmdStatus($modeLineStatus, @accNames);
+    QtEmail::Email::cmdStatus($modeLineStatus, @accNames);
   }elsif($cmd =~ /^(--has-error)$/ and @_ >= 0){
+    require QtEmail::Email;
     my @accNames = @_;
-    if(cmdHasError(@accNames)){
+    if(QtEmail::Email::cmdHasError(@accNames)){
       print "yes\n";
       exit 0;
     }else{
@@ -377,8 +370,9 @@ sub main(@){
       exit 1;
     }
   }elsif($cmd =~ /^(--has-new-unread)$/ and @_ >= 0){
+    require QtEmail::Email;
     my @accNames = @_;
-    if(cmdHasNewUnread(@accNames)){
+    if(QtEmail::Email::cmdHasNewUnread(@accNames)){
       print "yes\n";
       exit 0;
     }else{
@@ -386,8 +380,9 @@ sub main(@){
       exit 1;
     }
   }elsif($cmd =~ /^(--has-unread)$/ and @_ >= 0){
+    require QtEmail::Email;
     my @accNames = @_;
-    if(cmdHasUnread(@accNames)){
+    if(QtEmail::Email::cmdHasUnread(@accNames)){
       print "yes\n";
       exit 0;
     }else{
@@ -395,19 +390,25 @@ sub main(@){
       exit 1;
     }
   }elsif($cmd =~ /^(--read-config)$/ and @_ == 1){
+    require QtEmail::Email;
     my $account = shift;
-    cmdReadConfigOptions "account", $account;
+    QtEmail::Email::cmdReadConfigOptions("account", $account);
   }elsif($cmd =~ /^(--read-options)$/ and @_ ==0){
-    cmdReadConfigOptions "options", undef;
+    require QtEmail::Email;
+    QtEmail::Email::cmdReadConfigOptions("options", undef);
   }elsif($cmd =~ /^(--write-config)$/ and @_ >= 2){
+    require QtEmail::Email;
     my $accName = shift;
-    cmdWriteConfigOptions "account", $accName, @_;
+    QtEmail::Email::cmdWriteConfigOptions("account", $accName, @_);
   }elsif($cmd =~ /^(--write-options)$/ and @_ >= 1){
-    cmdWriteConfigOptions "options", undef, @_;
+    require QtEmail::Email;
+    QtEmail::Email::cmdWriteConfigOptions("options", undef, @_);
   }elsif($cmd =~ /^(--read-config-schema)$/ and @_ == 0){
-    cmdReadConfigOptionsSchema "account";
+    require QtEmail::Email;
+    QtEmail::Email::cmdReadConfigOptionsSchema("account");
   }elsif($cmd =~ /^(--read-options-schema)$/ and @_ == 0){
-    cmdReadConfigOptionsSchema "options";
+    require QtEmail::Email;
+    QtEmail::Email::cmdReadConfigOptionsSchema("options");
   }else{
     die $usage;
   }
