@@ -288,10 +288,15 @@ sub fetchHeaderRowMap($$$){
   $$rowMap{"uid"} = $uid;
   for my $field(@headerFields){
     my $val = $1 if $hdr =~ /^$field: *(.*)$/im;
-    $val =~ s/'/''/g;
-    $val =~ s/\x00//g;
-    $val =~ s/[\r\n]/ /g;
-    $val = "'$val'";
+    if(defined $val){
+      $val =~ s/'/''/g;
+      $val =~ s/\x00//g;
+      $val =~ s/[\r\n]/ /g;
+      $val = "'$val'";
+    }else{
+      print STDERR "missing field $field\n" if not defined $val;
+      $val = "''";
+    }
 
     my $col = "header_$field";
     $$rowMap{$col} = $val;
