@@ -58,6 +58,7 @@ our @EXPORT = qw(
   hasError
   readError
   writeError
+  writeWarning
   warnMsg
   readLastUpdated
   writeLastUpdated
@@ -482,9 +483,18 @@ sub writeError($$){
   print FH $msg;
   close FH;
 }
+sub writeWarning($){
+  my ($msg) = @_;
+  my $warningFile = "$$GVAR{EMAIL_DIR}/warnings";
+  open FH, ">> $warningFile" or die "Could not write to $warningFile\n";
+  print FH `date`;
+  print FH $msg;
+  close FH;
+}
 sub warnMsg($){
   my ($msg) = @_;
   warn $msg;
+  writeWarning $msg;
 }
 
 sub readLastUpdated($){
