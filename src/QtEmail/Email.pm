@@ -550,7 +550,7 @@ sub cacheHeader($$$$$$$){
     if(not defined $vals or @$vals == 0){
       $$missingFields{$field} = {} if not defined $$missingFields{$field};
       $$missingFields{$field}{$uid} = 1;
-      warn "  $uid missing $field\n" unless $field =~ /^(CC|BCC)$/;
+      warn "  $accName $uid missing '$field'\n" unless $field =~ /^(CC|BCC)$/;
       $val = "";
     }else{
       if(@$vals > 1){
