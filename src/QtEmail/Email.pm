@@ -58,6 +58,7 @@ our @EXPORT = qw(
   hasError
   readError
   writeError
+  warnMsg
   readLastUpdated
   writeLastUpdated
   readUidFileCounts
@@ -481,6 +482,10 @@ sub writeError($$){
   print FH $msg;
   close FH;
 }
+sub warnMsg($){
+  my ($msg) = @_;
+  warn $msg;
+}
 
 sub readLastUpdated($){
   my ($accName) = @_;
@@ -550,7 +555,7 @@ sub cacheHeader($$$$$$$){
     if(not defined $vals or @$vals == 0){
       $$missingFields{$field} = {} if not defined $$missingFields{$field};
       $$missingFields{$field}{$uid} = 1;
-      warn "  $accName $uid missing '$field'\n" unless $field =~ /^(CC|BCC)$/;
+      warnMsg "  $accName $uid missing '$field'\n" unless $field =~ /^(CC|BCC)$/;
       $val = "";
     }else{
       if(@$vals > 1){
@@ -563,12 +568,12 @@ sub cacheHeader($$$$$$$){
     if($rawVal =~ s/\n/\\n/g){
       $$newlineFields{$field} = {} if not defined $$newlineFields{$field};
       $$newlineFields{$field}{$uid} = 1;
-      warn "  $uid newlines in $field\n";
+      warnMsg "  $uid newlines in $field\n";
     }
     if($rawVal =~ s/\x00//g){
       $$nullFields{$field} = {} if not defined $$nullFields{$field};
       $$nullFields{$field}{$uid} = 1;
-      warn "  $uid NULs in $field\n";
+      warnMsg "  $uid NULs in $field\n";
     }
 
     my $fmtVal = formatHeaderField($field, $rawVal);
@@ -576,12 +581,12 @@ sub cacheHeader($$$$$$$){
     if($fmtVal =~ s/\n/\\n/g){
       $$newlineFields{$field} = {} if not defined $$newlineFields{$field};
       $$newlineFields{$field}{$uid} = 1;
-      warn "  $uid newlines in $field\n";
+      warnMsg "  $uid newlines in $field\n";
     }
     if($fmtVal =~ s/\x00//g){
       $$nullFields{$field} = {} if not defined $$nullFields{$field};
       $$nullFields{$field}{$uid} = 1;
-      warn "  $uid NULs in $field\n";
+      warnMsg "  $uid NULs in $field\n";
     }
 
     push @fmtLines, "$field: $fmtVal\n";
