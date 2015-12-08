@@ -140,7 +140,7 @@ sub main(@){
   die usage() if not defined $cmd;
   if($cmd =~ /^(--updatedb)$/ and @_ == 3){
     my ($accName, $folderName, $limit) = @_;
-    die usage() if $limit !~ /^(all|[1-9]\d+)$/;
+    die usage() if $limit !~ /^(all|[1-9]\d*)$/;
     updateDb($accName, $folderName, $limit);
   }elsif($cmd =~ /^(--format)$/ and @_ >= 1){
     my $query = "@_";
