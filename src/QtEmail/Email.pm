@@ -553,7 +553,10 @@ sub cacheHeader($$$$$$$){
       warn "  $uid missing $field\n" unless $field =~ /^(CC|BCC)$/;
       $val = "";
     }else{
-      die "FATAL: too many '$field' values for $uid in $accName\n" if @$vals != 1;
+      if(@$vals > 1){
+        warn "  $accName $uid too many '$field' values (using first):\n" .
+          (join '', map {"    \"$_\"\n"} @$vals);
+      }
       $val = $$vals[0];
     }
     my $rawVal = $val;
