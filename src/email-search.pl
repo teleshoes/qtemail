@@ -82,6 +82,7 @@ my $usageFormat = "Usage:
         => emails from everyone EXCEPT 'mary'
       -specify that the body must match with a '~'
         body~bus
+        (can be abbreviated with just 'b', e.g.: \"b~bus\")
         => emails where the cached body matches 'bus'
       -negate a body query with '!~' instead of '~'
         body!~bus
@@ -480,7 +481,7 @@ sub parseFlatQueryStr($){
         @fields = (lc $1);
         $negated = $2 eq "!" ? 1 : 0;
         $content = $3;
-      }elsif($and =~ /(body)(!?)~(.*)/i){
+      }elsif($and =~ /(b|body)(!?)~(.*)/i){
         $type = "body";
         @fields = ();
         $negated = $2 eq "!" ? 1 : 0;
