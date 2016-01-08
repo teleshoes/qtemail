@@ -113,7 +113,7 @@ Rectangle {
           id: accountPage
           objectName: "accountPage"
           border.width: 1
-          height: parent.height * 0.5
+          height: parent.height * 0.55
           width: parent.width - 30*2
 
           AccountView{ id: accountView }
@@ -124,7 +124,7 @@ Rectangle {
           id: folderPage
           objectName: "folderPage"
           border.width: 1
-          height: parent.height * 0.5
+          height: parent.height * 0.45
           width: parent.width - 30*2
 
           FolderView{ id: folderView }
