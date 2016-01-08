@@ -5,12 +5,12 @@ Rectangle {
 
   ListView {
     id: folderFlickable
-    spacing: 50
+    spacing: 40
     anchors.fill: parent
     model: folderModel
     delegate: Component  {
       Rectangle {
-        height: 100
+        height: 80
         width: parent.width
         color: "gray"
         MouseArea{
