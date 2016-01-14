@@ -190,8 +190,8 @@ Rectangle {
     Repeater {
       model: toolButtons.getButtonDefs()
       Btn {
-        width: 80
-        height: 80
+        width: 70
+        height: 70
         textSize: main.fontTiny
         function setText(text){
           this.text = text
