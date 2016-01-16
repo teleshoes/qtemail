@@ -71,7 +71,7 @@ sub getClient($){
   my $c = Mail::IMAPClient->new(
     %$network,
     User     => $$acc{user},
-    Password => $$acc{password},
+    Password => Mail::IMAPClient->Quote($$acc{password}),
     %{$$GVAR{IMAP_CLIENT_SETTINGS}},
   );
   return undef if not defined $c or not $c->IsAuthenticated();
