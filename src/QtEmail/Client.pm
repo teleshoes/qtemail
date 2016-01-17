@@ -72,10 +72,19 @@ sub getClient($){
   my $sep = "="x50;
   print "$sep\n$$acc{name}: logging in\n$sep\n" if $$GVAR{VERBOSE};
   require Mail::IMAPClient;
+
+  my $user = $$acc{user};
+  my $pass = $$acc{password};
+
+  # quote password if Mail::IMAPClient version > 3.31
+  if(not isOldIMAPClientVersion()){
+    $pass = Mail::IMAPClient->Quote($pass);
+  }
+
   my $c = Mail::IMAPClient->new(
     %$network,
-    User     => $$acc{user},
-    Password => Mail::IMAPClient->Quote($$acc{password}),
+    User     => $user,
+    Password => $pass,
     %{$$GVAR{IMAP_CLIENT_SETTINGS}},
   );
   return undef if not defined $c or not $c->IsAuthenticated();
