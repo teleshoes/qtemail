@@ -17,6 +17,10 @@ sub setFlagStatus($$$$);
 sub openFolder($$$);
 sub getClient($);
 sub getSocket($);
+sub isOldIMAPClientVersion();
+
+my $IMAPCLIENT_OLD_MAJOR_VERSION = 3;
+my $IMAPCLIENT_OLD_MINOR_VERSION = 31;
 
 my $GVAR = QtEmail::Shared::GET_GVAR;
 
@@ -85,6 +89,22 @@ sub getSocket($){
     PeerAddr => $$acc{server},
     PeerPort => $$acc{port},
   );
+}
+
+sub isOldIMAPClientVersion(){
+  my $version = $Mail::IMAPClient::VERSION;
+  my ($maj, $min) = split /\./, $version;
+
+  my $oldMaj = $IMAPCLIENT_OLD_MAJOR_VERSION;
+  my $oldMin = $IMAPCLIENT_OLD_MINOR_VERSION;
+
+  if(not defined $maj or not defined $min or $maj !~ /^\d+$/ or $min !~ /^\d+$/){
+    return 0;
+  }elsif($maj < $oldMaj or ($maj == $oldMaj and $min <= $oldMin)){
+    return 1;
+  }else{
+    return 0;
+  }
 }
 
 1;
