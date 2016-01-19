@@ -112,6 +112,9 @@ my $usage = "
   $0 --mark-unread [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     login mark the indicated message(s) as unread
 
+  $0 --delete [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+    delete the indicated messages
+
   $0 --accounts
     format and print information about each account
     \"ACCOUNT_NAME:<timestamp>:<relative_time>:<update_interval>s:<unread_count>/<total_count>:<error>\"
@@ -279,6 +282,13 @@ sub main(@){
     my ($accName, @uids) = @_;
     my $readStatus = $cmd =~ /^(--mark-read)$/ ? 1 : 0;
     QtEmail::Email::cmdMarkReadUnread($readStatus, $accName, $folderName, @uids);
+  }elsif($cmd =~ /^(--delete)$/ and @_ >= 2){
+    require QtEmail::Email;
+    QtEmail::Shared::MODIFY_GVAR('VERBOSE', 1);
+    my $folderName = optFolder \@_, "inbox";
+    die $usage if @_ < 2;
+    my ($accName, @uids) = @_;
+    QtEmail::Email::cmdDelete($accName, $folderName, @uids);
   }elsif($cmd =~ /^(--accounts)$/ and @_ == 0){
     require QtEmail::Email;
     QtEmail::Email::cmdAccounts();
