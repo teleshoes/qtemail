@@ -19,6 +19,7 @@ use QtEmail::Client qw(
   openFolder
   getClient
   setFlagStatus
+  deleteMessages
 );
 use QtEmail::Cache qw(
   getCachedHeaderUids
@@ -158,6 +159,8 @@ sub cmdDelete($$@){
   die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
   my $f = openFolder($imapFolder, $c, 1);
   die "Error getting folder $folderName\n" if not defined $f;
+
+  deleteMessages $c, @uids;
 
   for my $uid(@uids){
     deleteCachedHeader $accName, $folderName, $uid;
