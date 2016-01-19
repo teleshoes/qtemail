@@ -200,6 +200,7 @@ sub updateDb($$$){
 
   my @allUids = getAllUids $accName, $folderName;
   my $allUidsCount = @allUids;
+  my %isValidUid = map {$_ => 1} @allUids;
 
   my %isCachedUid = map {$_ => 1} @cachedUids;
   my @uncachedUids = reverse grep {not defined $isCachedUid{$_}} @allUids;
@@ -211,6 +212,9 @@ sub updateDb($$$){
   @uidsToAdd = @uidsToAdd[0 .. $limit-1] if @uidsToAdd > $limit;
   my $uidsToAddCount = @uidsToAdd;
 
+  my @uidsToRemove = grep {not defined $isValidUid{$_}} @cachedUids;
+  my $uidsToRemoveCount = @uidsToRemove;
+
   my $limitUidsToAddCount = @uidsToAdd;
   print "updatedb:"
     . " all:$allUidsCount"
@@ -218,6 +222,18 @@ sub updateDb($$$){
     . " uncached:$uncachedUidsCount"
     . " adding:$uidsToAddCount"
     . "\n";
+
+  if($uidsToRemoveCount > 0){
+    print "updatedb: removing $uidsToRemoveCount UIDs: @uidsToRemove\n";
+    for my $uid(@uidsToRemove){
+      print " --deleting $uid\n";
+      my $deleteSql = ''
+        . " delete from $emailTable"
+        . " where uid = $uid"
+        ;
+      runSql $accName, $folderName, "$deleteSql\n";
+    }
+  }
 
   if($uidsToAddCount == 0){
     print "no UIDs to add\n";
