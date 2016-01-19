@@ -11,9 +11,11 @@ our @EXPORT = qw(
   openFolder
   getClient
   setFlagStatus
+  deleteMessages
 );
 
 sub setFlagStatus($$$@);
+sub deleteMessages($@);
 sub openFolder($$$);
 sub getClient($);
 sub getSocket($);
@@ -33,6 +35,12 @@ sub setFlagStatus($$$@){
     print "$flag => false [@uids]\n" if $$GVAR{VERBOSE};
     $c->unset_flag($flag, @uids) or die "FAILED: unset $flag on [@uids]\n";
   }
+}
+
+sub deleteMessages($@){
+  my ($c, @uids) = @_;
+  my $success = $c->delete_message(\@uids);
+  die "Error deleting messages: @uids\n" if not defined $success;
 }
 
 sub openFolder($$$){
