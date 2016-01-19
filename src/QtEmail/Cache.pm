@@ -18,6 +18,9 @@ our @EXPORT = qw(
 sub getCachedHeaderUids($$);
 sub getCachedBodyUids($$);
 
+sub readCachedBody($$$);
+sub readCachedHeader($$$);
+
 my $GVAR = QtEmail::Shared::GET_GVAR;
 
 sub getCachedHeaderUids($$){
