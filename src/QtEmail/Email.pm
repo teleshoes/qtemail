@@ -169,6 +169,12 @@ sub cmdDelete($$@){
   removeFromUidFile $accName, $folderName, "new-unread", @uids;
   removeFromUidFile $accName, $folderName, "remote", @uids;
 
+  system $$GVAR{EMAIL_SEARCH_EXEC}, "--updatedb",
+    $accName, $folderName, $$GVAR{UPDATEDB_LIMIT};
+
+  updateGlobalUnreadCountsFile($config);
+  writeStatusFiles(@accOrder);
+
   $c->close();
   $c->logout();
 }
