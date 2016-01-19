@@ -118,9 +118,9 @@ sub cmdMarkReadUnread($$$@){
   die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
   my $f = openFolder($imapFolder, $c, 1);
   die "Error getting folder $folderName\n" if not defined $f;
-  for my $uid(@uids){
-    setFlagStatus($c, $uid, "Seen", $readStatus);
-  }
+
+  setFlagStatus($c, "Seen", $readStatus, @uids);
+
   my @unread = readUidFile $$acc{name}, $folderName, "unread";
   my %all = map {$_ => 1} readUidFile $$acc{name}, $folderName, "all";
   my %marked = map {$_ => 1} @uids;

@@ -13,7 +13,7 @@ our @EXPORT = qw(
   setFlagStatus
 );
 
-sub setFlagStatus($$$$);
+sub setFlagStatus($$$@);
 sub openFolder($$$);
 sub getClient($);
 sub getSocket($);
@@ -24,14 +24,14 @@ my $IMAPCLIENT_OLD_MINOR_VERSION = 31;
 
 my $GVAR = QtEmail::Shared::GET_GVAR;
 
-sub setFlagStatus($$$$){
-  my ($c, $uid, $flag, $status) = @_;
+sub setFlagStatus($$$@){
+  my ($c, $flag, $status, @uids) = @_;
   if($status){
-    print "$uid $flag => true\n" if $$GVAR{VERBOSE};
-    $c->set_flag($flag, $uid) or die "FAILED: set $flag on $uid\n";
+    print "$flag => true [@uids]\n" if $$GVAR{VERBOSE};
+    $c->set_flag($flag, @uids) or die "FAILED: set $flag on [@uids]\n";
   }else{
-    print "$uid $flag => false\n" if $$GVAR{VERBOSE};
-    $c->unset_flag($flag, $uid) or die "FAILED: unset flag on $uid\n";
+    print "$flag => false [@uids]\n" if $$GVAR{VERBOSE};
+    $c->unset_flag($flag, @uids) or die "FAILED: unset $flag on [@uids]\n";
   }
 }
 
