@@ -65,7 +65,10 @@ our @EXPORT = qw(
   readUidFileCounts
   readUidFile
   writeUidFile
+  removeFromUidFile
   cacheHeader
+  deleteCachedHeader
+  deleteCachedBody
   formatHeaderField
   formatDate
 );
@@ -99,7 +102,10 @@ sub writeLastUpdated($);
 sub readUidFileCounts($$$);
 sub readUidFile($$$);
 sub writeUidFile($$$@);
+sub removeFromUidFile($$$@);
 sub cacheHeader($$$$$$$);
+sub deleteCachedHeader($$$);
+sub deleteCachedBody($$$);
 sub formatHeaderField($$);
 sub formatDate($);
 
@@ -553,6 +559,15 @@ sub writeUidFile($$$@){
   print FH "$_\n" foreach @uids;
   close FH;
 }
+sub removeFromUidFile($$$@){
+  my ($accName, $folderName, $fileName, @uidsToDelete) = @_;
+
+  my %toDelete = map {$_=>1} @uidsToDelete;
+
+  my @uids = readUidFile $accName, $folderName, $fileName;
+  @uids = grep {not defined $toDelete{$_}} @uids;
+  writeUidFile $accName, $folderName, $fileName, @uids;
+}
 
 sub cacheHeader($$$$$$$){
   my ($hdr, $uid, $accName, $headersDir,
@@ -606,6 +621,17 @@ sub cacheHeader($$$$$$$){
   binmode FH, ':utf8';
   print FH (@fmtLines, @rawLines);
   close FH;
+}
+
+sub deleteCachedHeader($$$){
+  my ($accName, $folderName, $uid) = @_;
+  my $uidFile = "$$GVAR{EMAIL_DIR}/$accName/$folderName/headers/$uid";
+  system "rm", $uidFile;
+}
+sub deleteCachedBody($$$){
+  my ($accName, $folderName, $uid) = @_;
+  my $uidFile = "$$GVAR{EMAIL_DIR}/$accName/$folderName/bodies/$uid";
+  system "rm", $uidFile;
 }
 
 sub formatHeaderField($$){
