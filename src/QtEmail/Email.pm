@@ -159,6 +159,16 @@ sub cmdDelete($$@){
   my $f = openFolder($imapFolder, $c, 1);
   die "Error getting folder $folderName\n" if not defined $f;
 
+  for my $uid(@uids){
+    deleteCachedHeader $accName, $folderName, $uid;
+    deleteCachedBody $accName, $folderName, $uid;
+  }
+
+  removeFromUidFile $accName, $folderName, "all", @uids;
+  removeFromUidFile $accName, $folderName, "unread", @uids;
+  removeFromUidFile $accName, $folderName, "new-unread", @uids;
+  removeFromUidFile $accName, $folderName, "remote", @uids;
+
   $c->close();
   $c->logout();
 }
