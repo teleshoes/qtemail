@@ -115,6 +115,10 @@ my $usage = "
   $0 --delete [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     delete the indicated messages (from IMAP server AND local cache)
 
+  $0 --delete-local [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+    delete the indicated messages from the local cache ONLY
+    (does not delete from IMAP server)
+
   $0 --move [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_FOLDER_NAME UID [UID UID ...]
     move the indicated messages on the IMAP server from FOLDER_NAME to DEST_FOLDER_NAME
     this deletes the indicated messages from the local cache.
@@ -288,13 +292,13 @@ sub main(@){
     my ($accName, @uids) = @_;
     my $readStatus = $cmd =~ /^(--mark-read)$/ ? 1 : 0;
     QtEmail::Email::cmdMarkReadUnread($readStatus, $accName, $folderName, @uids);
-  }elsif($cmd =~ /^(--delete)$/ and @_ >= 2){
+  }elsif($cmd =~ /^(--delete|--delete-local)$/ and @_ >= 2){
     require QtEmail::Email;
     QtEmail::Shared::MODIFY_GVAR('VERBOSE', 1);
     my $folderName = optFolder \@_, "inbox";
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
-    my $localOnly = 0;
+    my $localOnly = ($cmd eq "--delete-local") ? 1 : 0;
     QtEmail::Email::cmdDelete($accName, $folderName, $localOnly, @uids);
   }elsif($cmd =~ /^(--move)$/ and @_ >= 3){
     require QtEmail::Email;
