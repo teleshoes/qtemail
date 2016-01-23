@@ -301,6 +301,7 @@ sub main(@){
     my $folderName = optFolder \@_, "inbox";
     die $usage if @_ < 3;
     my ($accName, $destFolderName, @uids) = @_;
+    QtEmail::Email::cmdMove($accName, $folderName, $destFolderName,  @uids);
   }elsif($cmd =~ /^(--accounts)$/ and @_ == 0){
     require QtEmail::Email;
     QtEmail::Email::cmdAccounts();

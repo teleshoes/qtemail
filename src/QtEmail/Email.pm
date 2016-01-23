@@ -37,6 +37,7 @@ use Exporter;
 our @EXPORT = qw(
   cmdMarkReadUnread
   cmdDelete
+  cmdMove
   cmdAccounts
   cmdFolders
   cmdHeader
@@ -77,6 +78,7 @@ our @EXPORT = qw(
 
 sub cmdMarkReadUnread($$$@);
 sub cmdDelete($$@);
+sub cmdMove($$$@);
 sub cmdAccounts();
 sub cmdFolders($);
 sub cmdHeader($$@);
@@ -177,6 +179,26 @@ sub cmdDelete($$@){
 
   updateGlobalUnreadCountsFile($config);
   writeStatusFiles(@accOrder);
+
+  $c->close();
+  $c->logout();
+}
+
+sub cmdMove($$$@){
+  my ($accName, $folderName, $destFolderName, @uids) = @_;
+  my $config = getConfig();
+  my @accOrder = @{$$config{accOrder}};
+  $folderName = "inbox" if not defined $folderName;
+  my $acc = $$config{accounts}{$accName};
+  die "Unknown account $accName\n" if not defined $acc;
+  my $imapFolder = accImapFolder($acc, $folderName);
+  die "Unknown folder $folderName\n" if not defined $imapFolder;
+  my $destImapFolder = accImapFolder($acc, $destFolderName);
+  die "Unknown folder $destFolderName\n" if not defined $destImapFolder;
+  my $c = getClient($acc);
+  die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
+  my $f = openFolder($imapFolder, $c, 1);
+  die "Error getting folder $folderName\n" if not defined $f;
 
   $c->close();
   $c->logout();
