@@ -113,7 +113,7 @@ my $usage = "
     login mark the indicated message(s) as unread
 
   $0 --delete [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
-    delete the indicated messages
+    delete the indicated messages (from IMAP server AND local cache)
 
   $0 --accounts
     format and print information about each account
