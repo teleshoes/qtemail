@@ -12,10 +12,12 @@ our @EXPORT = qw(
   getClient
   setFlagStatus
   deleteMessages
+  moveMessages
 );
 
 sub setFlagStatus($$$@);
 sub deleteMessages($@);
+sub moveMessages($$@);
 sub openFolder($$$);
 sub getClient($);
 sub getSocket($);
@@ -41,6 +43,12 @@ sub deleteMessages($@){
   my ($c, @uids) = @_;
   my $success = $c->delete_message(\@uids);
   die "Error deleting messages: @uids\n" if not defined $success;
+}
+
+sub moveMessages($$@){
+  my ($c, $destImapFolder, @uids) = @_;
+  my $success = $c->move($destImapFolder, \@uids);
+  die "Error moving messages to $destImapFolder: @uids\n" if not defined $success;
 }
 
 sub openFolder($$$){
