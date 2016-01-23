@@ -79,7 +79,7 @@ our @EXPORT = qw(
 );
 
 sub cmdMarkReadUnread($$$@);
-sub cmdDelete($$@);
+sub cmdDelete($$$@);
 sub cmdMove($$$@);
 sub cmdAccounts();
 sub cmdFolders($);
@@ -151,25 +151,31 @@ sub cmdMarkReadUnread($$$@){
   $c->logout();
 }
 
-sub cmdDelete($$@){
-  my ($accName, $folderName, @uids) = @_;
+sub cmdDelete($$$@){
+  my ($accName, $folderName, $localOnly, @uids) = @_;
   my $config = getConfig();
   $folderName = "inbox" if not defined $folderName;
   my $acc = $$config{accounts}{$accName};
   die "Unknown account $accName\n" if not defined $acc;
   my $imapFolder = accImapFolder($acc, $folderName);
   die "Unknown folder $folderName\n" if not defined $imapFolder;
-  my $c = getClient($acc);
-  die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
-  my $f = openFolder($imapFolder, $c, 1);
-  die "Error getting folder $folderName\n" if not defined $f;
 
-  deleteMessages $c, @uids;
+  my $c;
+  if(not $localOnly){
+    $c = getClient($acc);
+    die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
+    my $f = openFolder($imapFolder, $c, 1);
+    die "Error getting folder $folderName\n" if not defined $f;
+
+    deleteMessages $c, @uids;
+  }
 
   deleteFromLocalCache $config, $accName, $folderName, @uids;
 
-  $c->close();
-  $c->logout();
+  if(not $localOnly){
+    $c->close();
+    $c->logout();
+  }
 }
 
 sub cmdMove($$$@){

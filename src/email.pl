@@ -294,7 +294,8 @@ sub main(@){
     my $folderName = optFolder \@_, "inbox";
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
-    QtEmail::Email::cmdDelete($accName, $folderName, @uids);
+    my $localOnly = 0;
+    QtEmail::Email::cmdDelete($accName, $folderName, $localOnly, @uids);
   }elsif($cmd =~ /^(--move)$/ and @_ >= 3){
     require QtEmail::Email;
     QtEmail::Shared::MODIFY_GVAR('VERBOSE', 1);
