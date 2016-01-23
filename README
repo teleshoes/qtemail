@@ -121,28 +121,73 @@ Usage:
 
   Simple IMAP client. {--smtp command is a convenience wrapper around smtp-cli}
   Configuration is in ~/.secrets
-    Each line is one key of the format: email.ACCOUNT_NAME.FIELD = value
-    Account names can be any word characters (alphanumeric plus underscore)
-    Other keys are ignored.
-    required fields:
-      user     {Required} IMAP username, usually the full email address
-      password {Required} *password in plaintext*
-      server   {Required} IMAP server
-      port     {Required} IMAP server port
-      ssl      {Optional} false to forcibly disable security
-      inbox    {Optional} main IMAP folder name to use (default is "INBOX")
-      sent     {Optional} IMAP folder name to use for sent mail
-      folders  {Optional} colon-separated list of additional folders to fetch
-        each folder has a FOLDER_NAME,
-        which is the directory on the filesystem will be lowercase
-        FOLDER_NAME is the folder, with all non-alphanumeric characters
-          replaced with _s, and all leading and trailing _s removed
-        e.g.:  junk:[GMail]/Drafts:_12_/ponies
-               =>  ["junk", "gmail_drafts", "12_ponies"]
+    Each config entry is one line of the format:
+      email.GLOBAL_OPTION_KEY = <value>
+      or
+      email.ACCOUNT_NAME.ACCOUNT_CONFIG_KEY = <value>
 
-  ACCOUNT_NAME    the word following "email." in ~/.secrets
-  FOLDER_NAME     "inbox", "sent" or one of the names from "folders"
-  UID             an IMAP UID {UIDVALIDITY is assumed to never change}
+    Account names can be any word characters (alphanumeric plus underscore)
+    Lines that do not begin with "email." are ignored.
+
+    ACCOUNT_NAME:    the word following "email." in ~/.secrets
+
+    FOLDER_NAME:     "inbox", "sent" or one of the names from "folders"
+
+    UID:             an IMAP UID {UIDVALIDITY is assumed to never change}
+
+    GLOBAL_OPTION_KEY:
+      update_cmd  [OPT] command to run after all updates
+      encrypt_cmd [OPT] command to encrypt passwords on disk
+      decrypt_cmd [OPT] command to decrypt saved passwords
+
+    ACCOUNT_CONFIG_KEY:
+      user             [REQ] IMAP username, usually the full email address
+      password         [REQ] password, stored with optional encrypt_cmd
+      server           [REQ] IMAP server, e.g.: "imap.gmail.com"
+      port             [REQ] IMAP server port
+      smtp_server      [OPT] SMTP server, e.g.: "smtp.gmail.com"
+      smtp_port        [OPT] SMTP server port
+      ssl              [OPT] set to false to forcibly disable security
+      inbox            [OPT] primary IMAP folder name (default="INBOX")
+      sent             [OPT] IMAP folder name to use for sent mail, e.g.:"Sent"
+      folders          [OPT] extra IMAP folders to fetch (sep=":")
+                       the FOLDER_NAME used as the dir on the filesystem
+                       has non-alphanumeric substrings replaced with _s
+                       and all leading and trailing _s removed
+                       e.g.:
+                         email.Z.folders = junk:[GMail]/Drafts:_12_/ponies
+                           =>  ["junk", "gmail_drafts", "12_ponies"]
+      count_include    [OPT] FOLDER_NAMEs for counts (default="inbox", sep=":")
+                       list of FOLDER_NAMEs for account-wide unread/total counts
+                       this controls what gets written to the global unread file,
+                         and what is returned by --accounts
+                       note this is the FOLDER_NAME, and not the IMAP folder
+                       e.g.:
+                         email.Z.sent = [GMail]/Sent Mail
+                         email.Z.folders = [GMail]/Spam:[GMail]/Drafts
+                         email.Z.count_include = inbox:gmail_spam:sent
+                           => included: INBOX, [GMail]/Spam, [GMail]/Sent Mail
+                              excluded: [GMail]/Drafts
+      skip             [OPT] set to true to skip during --update
+      body_cache_mode  [OPT] one of [unread|all|none] (default="unread")
+                       controls which bodies get cached during --update
+                         (note: only caches the first MAX_BODIES_TO_CACHE=100)
+                       unread: cache unread bodies (up to 100)
+                       all:    cache all bodies (up to 100)
+                       none:   do not cache bodies during --update
+      prefer_html      [OPT] prefer html over plaintext (default="false")
+      new_unread_cmd   [OPT] custom alert command
+      update_interval  [OPT] GUI: seconds between account updates
+      refresh_interval [OPT] GUI: seconds between account refresh
+      filters          [OPT] GUI: list of filter-buttons, e.g.:"s1=%a% s2=%b%"
+                       each filter is separated by a space, and takes the form:
+                         <FILTER_NAME>=%<FILTER_STRING>%
+                       FILTER_NAME:   the text of the button in the GUI
+                       FILTER_STRING: query for /opt/qtemail/bin/email-search.pl
+                       e.g.:
+                         email.Z.filters = mary=%from~"mary sue"% ok=%body!~viagra%
+                           => ["mary", "ok"]
+
 
   /opt/qtemail/bin/email.pl -h|--help
     show this message
@@ -155,7 +200,7 @@ Usage:
           ~/.cache/email/ACCOUNT_NAME/FOLDER_NAME/all
         -fetch and cache all message headers in
           ~/.cache/email/ACCOUNT_NAME/FOLDER_NAME/headers/UID
-        -fetch and cache bodies according to bodyCacheMode config
+        -fetch and cache bodies according to body_cache_mode config
             all    => every header that was cached gets its body cached
             unread => every unread message gets its body cached
             none   => no bodies are cached
@@ -166,7 +211,8 @@ Usage:
           ~/.cache/email/ACCOUNT_NAME/FOLDER_NAME/new-unread
         -run /opt/qtemail/bin/email-search.pl --updatedb ACCOUNT_NAME FOLDER_NAME 100
     -update global unread counts file ~/.cache/email/unread-counts
-      ignored or missing accounts are preserved in ~/.cache/email/unread-counts
+      count the unread emails for each account in the folders in count_include
+      the default is just to include the counts for "inbox"
 
       write the unread counts, one line per account, to ~/.cache/email/unread-counts
       e.g.: 3:AOL
@@ -190,6 +236,19 @@ Usage:
   /opt/qtemail/bin/email.pl --mark-unread [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     login mark the indicated message(s) as unread
 
+  /opt/qtemail/bin/email.pl --delete [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+    delete the indicated messages (from IMAP server AND local cache)
+
+  /opt/qtemail/bin/email.pl --delete-local [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+    delete the indicated messages from the local cache ONLY
+    (does not delete from IMAP server)
+
+  /opt/qtemail/bin/email.pl --move [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_FOLDER_NAME UID [UID UID ...]
+    move the indicated messages on the IMAP server from FOLDER_NAME to DEST_FOLDER_NAME
+    this deletes the indicated messages from the local cache.
+    this does NOT, however, download the newly moved messages in DEST_FOLDER_NAME;
+      you need to update DEST_FOLDER_NAME to fetch them from the IMAP server
+
   /opt/qtemail/bin/email.pl --accounts
     format and print information about each account
     "ACCOUNT_NAME:<timestamp>:<relative_time>:<update_interval>s:<unread_count>/<total_count>:<error>"
@@ -200,7 +259,7 @@ Usage:
 
   /opt/qtemail/bin/email.pl --header [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     format and print the header of the indicated message(s)
-    prints each of [Date Subject From To]
+    prints each of [Date Subject From To CC BCC]
       one per line, formatted "UID.FIELD: VALUE"
 
   /opt/qtemail/bin/email.pl --body [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
@@ -210,15 +269,15 @@ Usage:
     if body is not cached and --no-download is specified, use empty string for body
       instead of downloading the body
     if message has a plaintext and HTML component, only one is returned
-    if preferHtml is false, plaintext is returned, otherwise, HTML
+    if prefer_html is true, HTML is returned, otherwise, plaintext
 
   /opt/qtemail/bin/email.pl --body-plain [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
-    same as --body, but override preferHtml=false,
+    same as --body, but override prefer_html=false,
       and attempt to convert the result to plaintext if it appears to be HTML
       (uses /usr/bin/html2text if available, or just strips out the tags)
 
   /opt/qtemail/bin/email.pl --body-html [--no-download] [-0] [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
-    same as --body, but override preferHtml=true
+    same as --body, but override prefer_html=true
 
   /opt/qtemail/bin/email.pl --attachments [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_DIR UID [UID UID ...]
     download the body of the indicated message(s) and save any attachments to DEST_DIR
@@ -316,6 +375,20 @@ Usage:
     for each line of the form "email.KEY\s*=\s*VAL"
       print KEY=VAL
 
+  /opt/qtemail/bin/email.pl --read-config-schema
+    print the allowed keys and descriptions for account config entries
+    formatted, one per line, like this:
+    <KEY_NAME>=<DESC>
+      KEY_NAME: one of: user password server port smtp_server smtp_port ssl inbox sent folders count_include skip body_cache_mode prefer_html new_unread_cmd update_interval refresh_interval filters
+      DESC:     text description
+
+  /opt/qtemail/bin/email.pl --read-options-schema
+    print the allowed keys and descriptions for global option entries
+    formatted, one per line, like this:
+    <KEY_NAME>=<DESC>
+      KEY_NAME: one of: update_cmd encrypt_cmd decrypt_cmd
+      DESC:     text description
+
 ===== email-search.pl =====
 
   /opt/qtemail/bin/email-search.pl --updatedb ACCOUNT_NAME FOLDER_NAME LIMIT
@@ -343,10 +416,10 @@ Usage:
         ignore all except the last UID_LIMIT UIDs
 
     SEARCH FORMAT:
-      -all words separated by spaces must match one of subject/date/from/to
+      -all words separated by spaces must match one of subject/date/from/to/cc/bcc
         apple banana
-        => emails where subject/from/to/date matches both 'apple' AND 'banana'
-      -specify an individual field of subject/date/from/to with a '~'
+        => emails where subject/from/to/cc/bcc/date matches both 'apple' AND 'banana'
+      -specify an individual field of subject/date/from/to/cc/bcc with a '~'
         from~mary
         => emails from 'mary'
       -negate a header field query with '!~' instead of '~'
@@ -354,6 +427,7 @@ Usage:
         => emails from everyone EXCEPT 'mary'
       -specify that the body must match with a '~'
         body~bus
+        (can be abbreviated with just 'b', e.g.: "b~bus")
         => emails where the cached body matches 'bus'
       -negate a body query with '!~' instead of '~'
         body!~bus
@@ -369,10 +443,10 @@ Usage:
         => emails that match 'a', PLUS emails that match 'b' AND match 'c' or 'd'
       -special characters can be escaped with backslash
         subject\~fish\ table
-        => emails where subject/from/to/date matches 'subject~fish table'
+        => emails where subject/from/to/cc/bcc/date matches 'subject~fish table'
       -doublequoted strings are treated as words
         "this is a (single ++ w~ord)"
-        => emails where subject/from/to/date matches 'this is a (single ++ w~ord)'
+        => emails where subject/from/to/cc/bcc/date matches 'this is a (single ++ w~ord)'
 
     GRAMMAR:
       QUERY = <LIST_AND>
@@ -398,7 +472,7 @@ Usage:
         return emails where the body matches the pattern
       NEGATED_BODY_QUERY = body!~<PATTERN>
         return emails where the body does NOT match the pattern
-      HEADER_FIELD = subject | from | to | date | body
+      HEADER_FIELD = subject | from | to | cc | bcc | date | body
         restricts the fields that PATTERN can match
       PATTERN = <string> | <string>"<string>"<string>
         can be any string, supports doublequote quoting and backslash escaping
@@ -410,30 +484,30 @@ Usage:
       =====
       mary smith
         ALL(
-           |--[to from subject] LIKE mary
-           |--[to from subject] LIKE smith
+           |--[to cc bcc from subject] LIKE mary
+           |--[to cc bcc from subject] LIKE smith
            )
       =====
       ((a b) ++ (c d) ++ (e f))
         ANY(
            |--ALL(
-           |     |--[to from subject] LIKE a
-           |     |--[to from subject] LIKE b
+           |     |--[to cc bcc from subject] LIKE a
+           |     |--[to cc bcc from subject] LIKE b
            |     )
            |--ALL(
-           |     |--[to from subject] LIKE c
-           |     |--[to from subject] LIKE d
+           |     |--[to cc bcc from subject] LIKE c
+           |     |--[to cc bcc from subject] LIKE d
            |     )
            |--ALL(
-           |     |--[to from subject] LIKE e
-           |     |--[to from subject] LIKE f
+           |     |--[to cc bcc from subject] LIKE e
+           |     |--[to cc bcc from subject] LIKE f
            |     )
            )
       =====
       subject~b ++ "subject~b"
         ANY(
            |--[subject] LIKE b
-           |--[to from subject] LIKE subject~b
+           |--[to cc bcc from subject] LIKE subject~b
            )
       =====
       from!~bob ++ subject!~math
@@ -443,7 +517,7 @@ Usage:
            )
       =====
       "a ++ b"
-        [to from subject] LIKE a ++ b
+        [to cc bcc from subject] LIKE a ++ b
       =====
 
 ===== email-gui.py =====
