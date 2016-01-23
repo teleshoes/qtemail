@@ -115,6 +115,12 @@ my $usage = "
   $0 --delete [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
     delete the indicated messages (from IMAP server AND local cache)
 
+  $0 --move [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_FOLDER_NAME UID [UID UID ...]
+    move the indicated messages on the IMAP server from FOLDER_NAME to DEST_FOLDER_NAME
+    this deletes the indicated messages from the local cache.
+    this does NOT, however, download the newly moved messages in DEST_FOLDER_NAME;
+      you need to update DEST_FOLDER_NAME to fetch them from the IMAP server
+
   $0 --accounts
     format and print information about each account
     \"ACCOUNT_NAME:<timestamp>:<relative_time>:<update_interval>s:<unread_count>/<total_count>:<error>\"
@@ -289,6 +295,12 @@ sub main(@){
     die $usage if @_ < 2;
     my ($accName, @uids) = @_;
     QtEmail::Email::cmdDelete($accName, $folderName, @uids);
+  }elsif($cmd =~ /^(--move)$/ and @_ >= 2){
+    require QtEmail::Email;
+    QtEmail::Shared::MODIFY_GVAR('VERBOSE', 1);
+    my $folderName = optFolder \@_, "inbox";
+    die $usage if @_ < 3;
+    my ($accName, $destFolderName, @uids) = @_;
   }elsif($cmd =~ /^(--accounts)$/ and @_ == 0){
     require QtEmail::Email;
     QtEmail::Email::cmdAccounts();
