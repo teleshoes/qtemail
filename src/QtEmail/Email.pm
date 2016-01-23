@@ -71,6 +71,7 @@ our @EXPORT = qw(
   writeUidFile
   removeFromUidFile
   cacheHeader
+  deleteFromLocalCache
   deleteCachedHeader
   deleteCachedBody
   formatHeaderField
@@ -110,6 +111,7 @@ sub readUidFile($$$);
 sub writeUidFile($$$@);
 sub removeFromUidFile($$$@);
 sub cacheHeader($$$$$$$);
+sub deleteFromLocalCache($$$@);
 sub deleteCachedHeader($$$);
 sub deleteCachedBody($$$);
 sub formatHeaderField($$);
@@ -152,7 +154,6 @@ sub cmdMarkReadUnread($$$@){
 sub cmdDelete($$@){
   my ($accName, $folderName, @uids) = @_;
   my $config = getConfig();
-  my @accOrder = @{$$config{accOrder}};
   $folderName = "inbox" if not defined $folderName;
   my $acc = $$config{accounts}{$accName};
   die "Unknown account $accName\n" if not defined $acc;
@@ -165,21 +166,7 @@ sub cmdDelete($$@){
 
   deleteMessages $c, @uids;
 
-  for my $uid(@uids){
-    deleteCachedHeader $accName, $folderName, $uid;
-    deleteCachedBody $accName, $folderName, $uid;
-  }
-
-  removeFromUidFile $accName, $folderName, "all", @uids;
-  removeFromUidFile $accName, $folderName, "unread", @uids;
-  removeFromUidFile $accName, $folderName, "new-unread", @uids;
-  removeFromUidFile $accName, $folderName, "remote", @uids;
-
-  system $$GVAR{EMAIL_SEARCH_EXEC}, "--updatedb",
-    $accName, $folderName, $$GVAR{UPDATEDB_LIMIT};
-
-  updateGlobalUnreadCountsFile($config);
-  writeStatusFiles(@accOrder);
+  deleteFromLocalCache $config, $accName, $folderName, @uids;
 
   $c->close();
   $c->logout();
@@ -685,6 +672,27 @@ sub cacheHeader($$$$$$$){
   binmode FH, ':utf8';
   print FH (@fmtLines, @rawLines);
   close FH;
+}
+
+sub deleteFromLocalCache($$$@){
+  my ($config, $accName, $folderName, @uids) = @_;
+  my @accOrder = @{$$config{accOrder}};
+
+  for my $uid(@uids){
+    deleteCachedHeader $accName, $folderName, $uid;
+    deleteCachedBody $accName, $folderName, $uid;
+  }
+
+  removeFromUidFile $accName, $folderName, "all", @uids;
+  removeFromUidFile $accName, $folderName, "unread", @uids;
+  removeFromUidFile $accName, $folderName, "new-unread", @uids;
+  removeFromUidFile $accName, $folderName, "remote", @uids;
+
+  system $$GVAR{EMAIL_SEARCH_EXEC}, "--updatedb",
+    $accName, $folderName, $$GVAR{UPDATEDB_LIMIT};
+
+  updateGlobalUnreadCountsFile($config);
+  writeStatusFiles(@accOrder);
 }
 
 sub deleteCachedHeader($$$){
