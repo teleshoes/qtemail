@@ -52,7 +52,7 @@ sub email(@){
     --update --header --body --body-plain --body-html --attachments
     --cache-all-bodies
     --smtp
-    --mark-read --mark-unread --delete --move
+    --mark-read --mark-unread --delete --delete-local --move
     --accounts --folders --print --summary --status-line --status-short
     --has-error --has-new-unread --has-unread
     --read-config --write-config --read-options --write-options
@@ -82,7 +82,7 @@ sub email(@){
   }
 
   my $okFolderCmdArgs = join "|", qw(
-    --update --mark-read --mark-unread --delete --move --header --attachments --print --summary
+    --update --mark-read --mark-unread --delete --delete-local --move --header --attachments --print --summary
   );
   if(@opts == 0 and @args == 0 and $cmdArg =~ /^($okFolderCmdArgs)$/){
     @complete = (@complete, @folderOptExamples);
@@ -119,7 +119,7 @@ sub email(@){
   }
 
   my $okAccUidList = join "|", qw(
-    --mark-read --mark-unread --delete --header --body --body-plain --body-html --attachments
+    --mark-read --mark-unread --delete --delete-local --header --body --body-plain --body-html --attachments
   );
   if($cmdArg =~ /^($okAccUidList)/){
     if(@args == 0){
@@ -191,6 +191,7 @@ sub getAccounts(@){
 # --mark-read [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
 # --mark-unread [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
 # --delete [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
+# --delete-local [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ...]
 # --move [--folder=FOLDER_NAME] ACCOUNT_NAME DEST_FOLDER_NAME UID [UID UID ...]
 # --accounts
 # --folders ACCOUNT_NAME
