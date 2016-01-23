@@ -175,7 +175,6 @@ sub cmdDelete($$@){
 sub cmdMove($$$@){
   my ($accName, $folderName, $destFolderName, @uids) = @_;
   my $config = getConfig();
-  my @accOrder = @{$$config{accOrder}};
   $folderName = "inbox" if not defined $folderName;
   my $acc = $$config{accounts}{$accName};
   die "Unknown account $accName\n" if not defined $acc;
@@ -189,6 +188,8 @@ sub cmdMove($$$@){
   die "Error getting folder $folderName\n" if not defined $f;
 
   moveMessages $c, $destImapFolder, @uids;
+
+  deleteFromLocalCache $config, $accName, $folderName, @uids;
 
   $c->close();
   $c->logout();
