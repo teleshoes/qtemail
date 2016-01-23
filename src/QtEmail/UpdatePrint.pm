@@ -117,7 +117,7 @@ sub cmdUpdate($@){
       my $bodyCacheMode = $$acc{body_cache_mode};
       $bodyCacheMode = 'unread' if not defined $bodyCacheMode;
       if($bodyCacheMode eq "all"){
-        @toCache = @newMessages;
+        @toCache = readUidFile $accName, $folderName, "all";
       }elsif($bodyCacheMode eq "unread"){
         @toCache = @unread;
       }elsif($bodyCacheMode eq "none"){
