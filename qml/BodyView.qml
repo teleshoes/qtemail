@@ -107,8 +107,10 @@ Rectangle {
       width: parent.width
       height: parent.height
       color: "#FFFFFF"
-      Text {
+      TextEdit {
         id: headerText
+        readOnly: true
+        selectByMouse: true
         color: "#0000FF"
         width: parent.width
         wrapMode: Text.Wrap
