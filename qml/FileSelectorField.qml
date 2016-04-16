@@ -63,10 +63,14 @@ Rectangle {
     anchors.top: labelContainer.bottom
     anchors.left: parent.left
 
-    FileBrowser {
-      id: fileBrowser
+    FileListField {
+      id: fileListField
       height: parent.height
       width: parent.width
+      onEnterPressed: {
+        addFile(value)
+        setValue("")
+      }
     }
   }
   Column {
@@ -77,23 +81,6 @@ Rectangle {
     anchors.left: leftColumn.right
     anchors.top: labelContainer.bottom
 
-    Rectangle {
-      id: addContainer
-      width: parent.width
-      height: 50
-      Btn {
-        width: parent.width - 20
-        height: parent.height
-        anchors.centerIn: parent
-        text: "attach selected file"
-        onClicked: {
-          if(fileBrowser.value){
-            addFile(fileBrowser.value)
-            fileBrowser.clear()
-          }
-        }
-      }
-    }
     Rectangle {
       width: parent.width
       height: 30
@@ -106,7 +93,7 @@ Rectangle {
     Rectangle {
       id: fileListContainer
       width: parent.width
-      height: parent.height - countDisplay.height - addContainer.height
+      height: parent.height - countDisplay.height
 
       clip: true
       anchors.margins: 2
