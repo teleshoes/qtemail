@@ -19,6 +19,10 @@ Rectangle {
     suggBox.updateFileList()
   }
 
+  function setValueHome() {
+    fileListField.setValue(fileSystemController.getHome())
+  }
+
   Row {
     id: buttonPanel
     width: parent.width
