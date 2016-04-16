@@ -457,6 +457,7 @@ class Controller(QObject):
     self.addressBook = None
     self.sendWindow = None
     self.counterBox = None
+    self.fileListDir = None
 
   @Slot(QObject)
   def setCounterBox(self, counterBox):
@@ -533,6 +534,27 @@ class Controller(QObject):
     lines = [""] + body.splitlines()
     indentedBody = "\n".join(map(lambda line: "> " + line, lines)) + "\n"
     return bodyPrefix + indentedBody
+
+  @Slot(str, result=bool)
+  def updateFileList(self, text):
+    oldDir = self.fileListDir
+    self.fileListDir = text
+    if oldDir == self.fileListDir:
+      print "filelist: skipping, same dir '" + self.fileListDir + "'"
+      return False
+    else:
+      items = []
+      if len(items) == 0:
+        if len(self.fileListModel.getItems()) == 0:
+          print "filelist: skipping, suggestions empty now and were empty"
+          return False
+        else:
+          print "filelist: clearing"
+          self.fileListModel.clear()
+      else:
+        print "filelist: adding " + str(len(items)) + " items"
+        self.fileListModel.setItems(items)
+        return True
 
   @Slot(QObject)
   def sendEmail(self, sendForm):
