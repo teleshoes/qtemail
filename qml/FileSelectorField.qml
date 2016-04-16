@@ -51,6 +51,9 @@ Rectangle {
       text: isExpanded ? "hide" : "show"
       onClicked: {
         isExpanded = !isExpanded
+        if (isExpanded){
+          fileListField.setValueHome()
+        }
       }
     }
   }
