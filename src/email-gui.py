@@ -105,9 +105,10 @@ def main():
   notifierModel = NotifierModel()
   filterButtonModel = FilterButtonModel()
   addressBookModel = AddressBookModel()
+  fileListModel = FileListModel()
   controller = Controller(emailManager,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
-    addressBookModel)
+    addressBookModel, fileListModel)
 
   controller.setupAccounts()
 
@@ -124,12 +125,12 @@ def main():
   app = QApplication([])
   mainWindow = MainWindow(qmlFile, controller,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
-    addressBookModel)
+    addressBookModel, fileListModel)
 
   if platform[0] == PLATFORM_OTHER:
     sendWindow = SendWindow(QML_DIR + "/SendView.qml", controller, mainWindow.rootObject(),
       accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
-      addressBookModel)
+      addressBookModel, fileListModel)
     sendView = sendWindow.rootObject()
     mainWindow.rootContext().setContextProperty('sendView', sendView)
     sendView.setNotifierEnabled(True)
@@ -428,7 +429,7 @@ class EmailManager():
 class Controller(QObject):
   def __init__(self, emailManager,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
-    addressBookModel):
+    addressBookModel, fileListModel):
     QObject.__init__(self)
     self.emailManager = emailManager
     self.accountModel = accountModel
@@ -438,6 +439,7 @@ class Controller(QObject):
     self.filterButtonModel = filterButtonModel
     self.notifierModel = notifierModel
     self.addressBookModel = addressBookModel
+    self.fileListModel = fileListModel
     self.initialPageName = "account"
     self.htmlMode = False
     self.configMode = None
@@ -1220,6 +1222,12 @@ class AddressBookModel(BaseListModel):
     BaseListModel.__init__(self)
     self.setRoleNames(dict(enumerate(AddressBookModel.COLUMNS)))
 
+class FileListModel(BaseListModel):
+  COLUMNS = ('path',)
+  def __init__(self):
+    BaseListModel.__init__(self)
+    self.setRoleNames(dict(enumerate(FileListModel.COLUMNS)))
+
 class Account(QObject):
   def __init__(self, name_, lastUpdated_, lastUpdatedRel_, updateInterval_, refreshInterval_, unread_, total_, error_, isLoading_):
     QObject.__init__(self)
@@ -1432,7 +1440,7 @@ class Suggestion(QObject):
 class MainWindow(QDeclarativeView):
   def __init__(self, qmlFile, controller,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
-    addressBookModel):
+    addressBookModel, fileListModel):
     super(MainWindow, self).__init__(None)
     context = self.rootContext()
     context.setContextProperty('accountModel', accountModel)
@@ -1442,6 +1450,7 @@ class MainWindow(QDeclarativeView):
     context.setContextProperty('filterButtonModel', filterButtonModel)
     context.setContextProperty('notifierModel', notifierModel)
     context.setContextProperty('addressBookModel', addressBookModel)
+    context.setContextProperty('fileListModel', fileListModel)
     context.setContextProperty('controller', controller)
     context.setContextProperty('fileSystemController', controller.fileSystemController)
 
@@ -1451,7 +1460,7 @@ class MainWindow(QDeclarativeView):
 class SendWindow(QDeclarativeView):
   def __init__(self, qmlFile, controller, main,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
-    addressBookModel):
+    addressBookModel, fileListModel):
     super(SendWindow, self).__init__(None)
     context = self.rootContext()
     context.setContextProperty('main', main)
@@ -1462,6 +1471,7 @@ class SendWindow(QDeclarativeView):
     context.setContextProperty('filterButtonModel', filterButtonModel)
     context.setContextProperty('notifierModel', notifierModel)
     context.setContextProperty('addressBookModel', addressBookModel)
+    context.setContextProperty('fileListModel', fileListModel)
     context.setContextProperty('controller', controller)
     context.setContextProperty('fileSystemController', controller.fileSystemController)
 
