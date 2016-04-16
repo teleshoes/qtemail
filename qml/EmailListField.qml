@@ -29,6 +29,7 @@ Rectangle {
   SuggField {
     id: textField
     fontSize: main.fontMedium
+    popupHeight: parent.height - 30
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
