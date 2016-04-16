@@ -26,7 +26,7 @@ Rectangle {
 
         id: completionsHint
         delegate: PreviewDelegate {
-            text: model.name
+            text: model.name ? model.name : ""
         }
     }
 }
