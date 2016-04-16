@@ -38,9 +38,13 @@ Rectangle {
       id: updateFileListTimer
       interval: 750;
       onTriggered: {
-        if(controller.updateFileList(suggBox.text)){
-          suggBox.resetFilter()
-        }
+        suggBox.updateFileList()
+      }
+    }
+
+    function updateFileList() {
+      if(controller.updateFileList(suggBox.text)){
+        suggBox.resetFilter()
       }
     }
 
