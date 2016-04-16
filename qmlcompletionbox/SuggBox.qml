@@ -8,6 +8,7 @@ Rectangle {
     property bool showPreview: false
 
     signal keyPressed
+    signal complete
 
     Item {
         id: contents
@@ -70,6 +71,7 @@ Rectangle {
                 suggestionsBox.currentIndex = -1
                 if (item !== undefined)
                     inputField.textInput.text = item.name
+                suggBox.complete()
             }
         }
 
