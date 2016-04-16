@@ -192,7 +192,7 @@ Rectangle {
       Btn {
         width: 70
         height: 70
-        textSize: main.fontTiny
+        Component.onCompleted: {textSize = main.fontTiny}
         function setText(text){
           this.text = text
         }
