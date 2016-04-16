@@ -35,10 +35,7 @@ Rectangle {
     // --- behaviours
     z: parent.z + 100
     visible: filter.length > 0 && suggestionsModel.count > 0 && !filterMatchesLastSuggestion()
-    height: visible ? childrenRect.height : 0
-    Behavior on height {
-        NumberAnimation{}
-    }
+    height: popup.height
     function filterMatchesLastSuggestion() {
         return suggestionsModel.count == 1 && suggestionsModel.get(0).name === filter
     }
