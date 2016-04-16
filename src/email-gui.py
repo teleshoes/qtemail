@@ -544,6 +544,10 @@ class Controller(QObject):
       return False
     else:
       items = []
+      if self.fileListDir != None:
+        for f in self.listDir(self.fileListDir):
+          items.append(Suggestion(f))
+
       if len(items) == 0:
         if len(self.fileListModel.getItems()) == 0:
           print "filelist: skipping, suggestions empty now and were empty"
@@ -566,6 +570,18 @@ class Controller(QObject):
         return None
     except:
       print "FAILED TO EXTRACT DIR: " + path
+      return None
+  def listDir(self, dirPath):
+    try:
+      files = []
+      ls = os.listdir(dirPath)
+      ls.sort()
+      for f in ls:
+        path = os.path.join(dirPath, f)
+        files.append(path)
+      return files
+    except:
+      print "FAILED TO LIST DIR: " + path
       return None
 
   @Slot(QObject)
