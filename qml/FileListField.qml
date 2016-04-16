@@ -28,6 +28,30 @@ Rectangle {
     property double btnWidth: (width - (spacing*(children.length-1))) * 1/children.length
     property double btnHeight: height
 
+    Btn {
+      width: buttonPanel.btnWidth
+      height: buttonPanel.btnHeight
+      text: "home"
+      onClicked: {
+        fileListField.setValue(fileSystemController.getHome())
+      }
+    }
+    Btn {
+      width: buttonPanel.btnWidth
+      height: buttonPanel.btnHeight
+      text: "root"
+      onClicked: {
+        fileListField.setValue("/")
+      }
+    }
+    Btn {
+      width: buttonPanel.btnWidth
+      height: buttonPanel.btnHeight
+      text: "clear"
+      onClicked: {
+        fileListField.setValue("")
+      }
+    }
   }
 
   SuggBox {
