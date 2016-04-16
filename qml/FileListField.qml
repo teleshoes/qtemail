@@ -19,10 +19,23 @@ Rectangle {
     suggBox.updateFileList()
   }
 
+  Row {
+    id: buttonPanel
+    width: parent.width
+    height: 30
+    spacing: 20
+
+    property double btnWidth: (width - (spacing*(children.length-1))) * 1/children.length
+    property double btnHeight: height
+
+  }
+
   SuggBox {
     id: suggBox
     width: parent.width
-    height: parent.height
+    height: parent.height - buttonPanel.height
+    anchors.top: buttonPanel.bottom
+
     onEnterPressed: {
       fileListField.enterPressed()
     }
