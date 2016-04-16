@@ -18,6 +18,7 @@ FocusScope {
     signal enterPressed
     signal upPressed
     signal downPressed
+    signal keyPressed
 
 
     id: focusScope
@@ -57,6 +58,7 @@ FocusScope {
         Keys.onUpPressed: focusScope.upPressed()
         Keys.onDownPressed: focusScope.downPressed()
         Keys.onEnterPressed: focusScope.enterPressed()
+        Keys.onPressed: focusScope.keyPressed()
     }
 
     Button {

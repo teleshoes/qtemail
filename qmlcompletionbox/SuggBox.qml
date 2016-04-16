@@ -7,6 +7,8 @@ Rectangle {
     property variant suggModel
     property bool showPreview: false
 
+    signal keyPressed
+
     Item {
         id: contents
         anchors.fill: parent
@@ -33,6 +35,7 @@ Rectangle {
             onDownPressed: activateSuggestionAt(+1)
             onEnterPressed: processEnter()
             onAccepted: processEnter()
+            onKeyPressed: suggBox.keyPressed()
 
             Component.onCompleted: {
                 inputField.forceActiveFocus()
