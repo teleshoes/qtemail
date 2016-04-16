@@ -116,7 +116,10 @@ def main():
   showSendWindowAtStart = False
 
   if 'page' in opts:
-    controller.setInitialPageName(opts['page'])
+    if useSendWindow and opts['page'] == 'send':
+      showSendWindowAtStart = True
+    else:
+      controller.setInitialPageName(opts['page'])
   if 'account' in opts:
     controller.accountSelected(opts['account'])
   if 'folder' in opts:
