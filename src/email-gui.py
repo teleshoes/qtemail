@@ -538,7 +538,7 @@ class Controller(QObject):
   @Slot(str, result=bool)
   def updateFileList(self, text):
     oldDir = self.fileListDir
-    self.fileListDir = text
+    self.fileListDir = self.extractDir(text)
     if oldDir == self.fileListDir:
       print "filelist: skipping, same dir '" + self.fileListDir + "'"
       return False
@@ -555,6 +555,18 @@ class Controller(QObject):
         print "filelist: adding " + str(len(items)) + " items"
         self.fileListModel.setItems(items)
         return True
+  def extractDir(self, filePath):
+    try:
+      dirPath = os.path.dirname(filePath)
+      if os.path.isdir(filePath):
+        return filePath
+      elif os.path.isdir(dirPath):
+        return dirPath
+      else:
+        return None
+    except:
+      print "FAILED TO EXTRACT DIR: " + path
+      return None
 
   @Slot(QObject)
   def sendEmail(self, sendForm):
