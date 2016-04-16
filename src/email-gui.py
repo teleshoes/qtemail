@@ -113,6 +113,7 @@ def main():
   controller.setupAccounts()
 
   useSendWindow = platform[0] == PLATFORM_OTHER
+  showSendWindowAtStart = False
 
   if 'page' in opts:
     controller.setInitialPageName(opts['page'])
@@ -138,6 +139,8 @@ def main():
     sendView.setNotifierEnabled(True)
 
     controller.setSendWindow(sendWindow)
+    if showSendWindowAtStart:
+      sendWindow.show()
 
   if platform[0] == PLATFORM_HARMATTAN:
     mainWindow.window().showFullScreen()
