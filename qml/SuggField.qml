@@ -1,7 +1,10 @@
 import QtQuick 1.1
 
 Rectangle {
+  id: suggField
   signal enterPressed
+  signal keyPressed
+  signal complete
   z: parent.z + 100
 
   property alias suggModel: edit.suggModel
@@ -25,6 +28,9 @@ Rectangle {
   function setValue(value){
     this.value = value
     edit.cursorPosition = 0
+  }
+  function refreshSuggestions(){
+    edit.resetFilter()
   }
 
   Rectangle {
@@ -63,6 +69,12 @@ Rectangle {
         anchors.fill: parent
         Keys.onReturnPressed: {
           enterPressed()
+        }
+        onKeyPressed: {
+          suggField.keyPressed()
+        }
+        onComplete: {
+          suggField.complete()
         }
       }
     }
