@@ -6,6 +6,7 @@ Rectangle {
 
     property variant suggModel
     property bool showPreview: false
+    property int popupHeight: contents.height - inputField.height
 
     signal enterPressed
     signal keyPressed
@@ -68,6 +69,7 @@ Rectangle {
             id: suggestionsBox
             model: suggModel
             width: parent.width
+            height: popupHeight
             anchors.top: inputField.bottom
             anchors.left: inputField.left
             filter: inputField.textInput.text

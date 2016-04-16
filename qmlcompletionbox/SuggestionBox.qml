@@ -35,7 +35,6 @@ Rectangle {
     // --- behaviours
     z: parent.z + 100
     visible: filter.length > 0 && suggestionsModel.count > 0 && !filterMatchesLastSuggestion()
-    height: popup.height
     function filterMatchesLastSuggestion() {
         return suggestionsModel.count == 1 && suggestionsModel.get(0).name === filter
     }
@@ -62,10 +61,8 @@ Rectangle {
     // --- UI
     Column {
         id: popup
-        clip: true
-        height: childrenRect.height
-        width: parent.width - 6
-        anchors.centerIn: parent
+        height: parent.height
+        width: parent.width
 
 
         property int selectedIndex: -1
@@ -78,9 +75,13 @@ Rectangle {
         }
 
 
-        Repeater {
-            id: repeater
+        ListView {
+            id: suggestionsPanel
             model: container.suggestionsModel
+            height: parent.height
+            width: parent.width
+            clip: true
+
             delegate: Item {
                 id: delegateItem
                 property bool keyboardSelected: popup.selectedIndex === suggestion.index
