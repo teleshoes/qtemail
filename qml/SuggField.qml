@@ -67,8 +67,8 @@ Rectangle {
         anchors.margins: 3
         id: edit
         anchors.fill: parent
-        Keys.onReturnPressed: {
-          enterPressed()
+        onEnterPressed: {
+          suggField.enterPressed()
         }
         onKeyPressed: {
           suggField.keyPressed()
