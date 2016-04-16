@@ -57,7 +57,13 @@ Rectangle {
     }else if(curPage == sendPage){
     }
 
-    initToolBar()
+    initToolBarTimer.restart()
+  }
+
+  Timer {
+    id: initToolBarTimer
+    interval: 1; //0.001s
+    onTriggered: initToolBar()
   }
 
   function initToolBar() {
