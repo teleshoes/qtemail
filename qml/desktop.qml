@@ -45,7 +45,13 @@ Rectangle {
       controller.showSendWindow()
     }
 
-    initToolBar()
+    initToolBarTimer.restart()
+  }
+
+  Timer {
+    id: initToolBarTimer
+    interval: 1; //0.001s
+    onTriggered: initToolBar()
   }
 
   function setIsMain(newIsMain){
