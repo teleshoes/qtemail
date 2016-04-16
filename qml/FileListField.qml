@@ -1,29 +1,48 @@
 import QtQuick 1.1
 
-SuggField {
-  id: textField
-  fontSize: main.fontMedium
-  anchors.top: parent.top
-  anchors.left: parent.left
-  anchors.right: parent.right
-  onEnterPressed: {
-    add.clicked()
+Rectangle {
+  id: fileListField
+  signal enterPressed
+  signal keyPressed
+  signal complete
+
+  property alias value: suggField.value
+
+  width: parent.width
+  height: parent.height
+
+  function getValue() {
+    return suggField.getValue();
   }
-  onKeyPressed: {
-    updateFileListTimer.restart()
+  function setValue(value) {
+    suggField.setValue(value)
   }
-  onComplete: {
-    updateFileListTimer.restart()
-  }
-  Timer {
-    id: updateFileListTimer
-    interval: 750;
-    onTriggered: {
-      if(controller.updateFileList(textField.value)){
-        textField.refreshSuggestions()
+
+  SuggField {
+    id: suggField
+    width: parent.width
+    height: parent.height
+    fontSize: main.fontMedium
+    onEnterPressed: {
+      fileListField.enterPressed()
+    }
+    onKeyPressed: {
+      updateFileListTimer.restart()
+      fileListField.keyPressed()
+    }
+    onComplete: {
+      updateFileListTimer.restart()
+      fileListField.complete()
+    }
+    Timer {
+      id: updateFileListTimer
+      interval: 750;
+      onTriggered: {
+        if(controller.updateFileList(suggField.value)){
+          suggField.refreshSuggestions()
+        }
       }
     }
+    suggModel: fileListModel
   }
-  suggModel: fileListModel
 }
-

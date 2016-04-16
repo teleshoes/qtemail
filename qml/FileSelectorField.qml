@@ -68,8 +68,10 @@ Rectangle {
       height: parent.height
       width: parent.width
       onEnterPressed: {
-        addFile(value)
-        setValue("")
+        if(value){
+          addFile(value)
+          setValue("")
+        }
       }
     }
   }
