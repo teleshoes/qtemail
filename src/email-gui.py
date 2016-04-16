@@ -112,6 +112,8 @@ def main():
 
   controller.setupAccounts()
 
+  useSendWindow = platform[0] == PLATFORM_OTHER
+
   if 'page' in opts:
     controller.setInitialPageName(opts['page'])
   if 'account' in opts:
@@ -127,7 +129,7 @@ def main():
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
     addressBookModel, fileListModel)
 
-  if platform[0] == PLATFORM_OTHER:
+  if useSendWindow:
     sendWindow = SendWindow(QML_DIR + "/SendView.qml", controller, mainWindow.rootObject(),
       accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
       addressBookModel, fileListModel)
