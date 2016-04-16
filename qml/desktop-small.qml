@@ -43,17 +43,6 @@ Rectangle {
     }
   }
   function initPage(){
-    for (var i = 0; i < toolBar.children.length; ++i){
-      toolBar.children[i].visible = false
-    }
-    var pageName = curPage.objectName
-    var buttonNames = toolButtons.pages[pageName]
-    for (var i = 0; i < buttonNames.length; ++i){
-      var objectName = "toolbarButton-" + buttonNames[i]
-      var btn = controller.findChild(main, objectName)
-      btn.visible = true
-    }
-
     if(curPage == accountPage){
       controller.setupAccounts()
     }else if(curPage == headerPage){
@@ -66,6 +55,21 @@ Rectangle {
     }else if(curPage == configPage){
       controller.setupConfig()
     }else if(curPage == sendPage){
+    }
+
+    initToolBar()
+  }
+
+  function initToolBar() {
+    for (var i = 0; i < toolBar.children.length; ++i){
+      toolBar.children[i].visible = false
+    }
+    var pageName = curPage.objectName
+    var buttonNames = toolButtons.pages[pageName]
+    for (var i = 0; i < buttonNames.length; ++i){
+      var objectName = "toolbarButton-" + buttonNames[i]
+      var btn = controller.findChild(main, objectName)
+      btn.visible = true
     }
   }
 
