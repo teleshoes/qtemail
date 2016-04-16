@@ -10,6 +10,10 @@ Rectangle {
     signal keyPressed
     signal complete
 
+    function resetFilter() {
+      suggestionsBox.resetFilter()
+    }
+
     Item {
         id: contents
         anchors.fill: parent

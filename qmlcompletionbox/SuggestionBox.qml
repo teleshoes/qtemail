@@ -42,6 +42,9 @@ Rectangle {
     function filterMatchesLastSuggestion() {
         return suggestionsModel.count == 1 && suggestionsModel.get(0).name === filter
     }
+    function resetFilter() {
+      filterItem.invalidateFilter()
+    }
 
 
     // --- defaults
