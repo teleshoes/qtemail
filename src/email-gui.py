@@ -578,6 +578,8 @@ class Controller(QObject):
       ls.sort()
       for f in ls:
         path = os.path.join(dirPath, f)
+        if os.path.isdir(path):
+          path = path + os.sep
         files.append(path)
       return files
     except:
