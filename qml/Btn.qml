@@ -34,10 +34,10 @@ Rectangle {
       interval: 50;
       onTriggered: mouseArea.setColor()
     }
-    onEntered: colorTimer.start()
-    onExited: colorTimer.start()
-    onPressed: colorTimer.start()
-    onReleased: colorTimer.start()
+    onEntered: colorTimer.restart()
+    onExited: colorTimer.restart()
+    onPressed: colorTimer.restart()
+    onReleased: colorTimer.restart()
   }
   gradient: Gradient {
     GradientStop { position: 0.0; color: buttonColor }
