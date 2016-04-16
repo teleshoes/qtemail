@@ -6,23 +6,22 @@ Rectangle {
   signal keyPressed
   signal complete
 
-  property alias value: suggField.value
+  property alias value: suggBox.text
 
   width: parent.width
   height: parent.height
 
   function getValue() {
-    return suggField.getValue();
+    return suggBox.text;
   }
   function setValue(value) {
-    suggField.setValue(value)
+    suggBox.text = value
   }
 
-  SuggField {
-    id: suggField
+  SuggBox {
+    id: suggBox
     width: parent.width
     height: parent.height
-    fontSize: main.fontMedium
     onEnterPressed: {
       fileListField.enterPressed()
     }
@@ -34,15 +33,17 @@ Rectangle {
       updateFileListTimer.restart()
       fileListField.complete()
     }
+
     Timer {
       id: updateFileListTimer
       interval: 750;
       onTriggered: {
-        if(controller.updateFileList(suggField.value)){
-          suggField.refreshSuggestions()
+        if(controller.updateFileList(suggBox.text)){
+          suggBox.resetFilter()
         }
       }
     }
+
     suggModel: fileListModel
   }
 }
