@@ -573,15 +573,17 @@ class Controller(QObject):
       return None
   def listDir(self, dirPath):
     try:
+      dirs = []
       files = []
       ls = os.listdir(dirPath)
       ls.sort()
       for f in ls:
         path = os.path.join(dirPath, f)
         if os.path.isdir(path):
-          path = path + os.sep
-        files.append(path)
-      return files
+          dirs.append(path + os.sep)
+        else:
+          files.append(path)
+      return dirs + files
     except:
       print "FAILED TO LIST DIR: " + path
       return None
