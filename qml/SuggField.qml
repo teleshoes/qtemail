@@ -8,6 +8,7 @@ Rectangle {
   z: parent.z + 100
 
   property alias suggModel: edit.suggModel
+  property alias popupHeight: edit.popupHeight
 
   property alias labelText: label.text
   property alias value: edit.text
