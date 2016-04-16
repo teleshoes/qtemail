@@ -551,7 +551,7 @@ class Controller(QObject):
     oldDir = self.fileListDir
     self.fileListDir = self.extractDir(text)
     if oldDir == self.fileListDir:
-      print "filelist: skipping, same dir '" + self.fileListDir + "'"
+      print "filelist: skipping, same dir '" + str(self.fileListDir) + "'"
       return False
     else:
       items = []
