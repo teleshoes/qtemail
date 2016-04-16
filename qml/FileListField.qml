@@ -16,6 +16,7 @@ Rectangle {
   }
   function setValue(value) {
     suggBox.text = value
+    suggBox.updateFileList()
   }
 
   SuggBox {
