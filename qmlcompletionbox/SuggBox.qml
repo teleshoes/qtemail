@@ -7,6 +7,7 @@ Rectangle {
     property variant suggModel
     property bool showPreview: false
 
+    signal enterPressed
     signal keyPressed
     signal complete
 
@@ -48,8 +49,10 @@ Rectangle {
 
             function processEnter() {
                 if (suggestionsBox.currentIndex === -1) {
-                    console.log("Enter pressed in input field")
+                    console.log("suggbox: enter pressed on texbox (NOT on a suggestion)")
+                    suggBox.enterPressed()
                 } else {
+                    console.log("suggbox: enter pressed on a suggestion")
                     suggestionsBox.complete(suggestionsBox.currentItem)
                 }
             }
