@@ -128,6 +128,9 @@ def main():
     hdr = emailManager.getHeader(opts['account'], opts['folder'], opts['uid'])
     controller.setHeader(hdr)
 
+  if 'account' in opts or 'folder' in opts:
+    controller.setupHeaders()
+
   app = QApplication([])
   mainWindow = MainWindow(qmlFile, controller,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
