@@ -192,15 +192,19 @@ PageStackWindow {
 
   Rectangle {
     id: toolBarContainer
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+
+    anchors.leftMargin: 10
+    anchors.rightMargin: 10
+
+    height: toolBar.btnHeight
 
     Row {
       id: toolBar
       objectName: "toolBar"
-
-      height: toolBar.btnHeight
-      anchors.left: parent.left
-      anchors.right: parent.right
-      anchors.bottom: parent.bottom
+      anchors.fill: parent
 
       property int btnHeight: 48
       property int btnWidth: 48
