@@ -12,16 +12,17 @@ Rectangle {
   color: isDark ? "#444444" : "#666666"
 
   function getFiles(){
-    var files = []
+    var filePaths = []
     for(var i=0; i<fileListView.model.count; i++){
-      files.push(fileListView.model.get(i).fileInfo.FilePath)
+      var filePath = fileListView.model.get(i).FilePath
+      filePaths.push(filePath)
     }
-    return files
+    return filePaths
   }
-  function setFiles(files){
+  function setFiles(filePaths){
     clearFiles()
-    for(var i=0; i<files.length; i++){
-      addFile(files[i])
+    for(var i=0; i<filePaths.length; i++){
+      addFile(filePaths[i])
     }
   }
 
