@@ -174,7 +174,8 @@ Rectangle {
             anchors {left: fileInfoCol.right}
             height: fileInfoCol.height
             width: parent.width * 0.10
-            text: "x"
+            text: "X"
+            textSize: main.fontLarge
             onClicked: {
               controller.removeFileInfo(model.fileInfo.FilePath)
             }
