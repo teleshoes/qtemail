@@ -43,6 +43,7 @@ PageStackWindow {
       var btn = controller.findChild(main, objectName)
       btn.visible = true
     }
+    toolBar.resetSpacing()
 
     if(curPage == accountPage){
       controller.clearAccount()
@@ -209,7 +210,30 @@ PageStackWindow {
       property int btnHeight: 48
       property int btnWidth: 48
 
-      spacing: 15
+      onWidthChanged: resetSpacing()
+
+      function resetSpacing() {
+        var btnCount = 0
+        for (var i = 0; i < toolBar.children.length; ++i){
+          if(toolBar.children[i].visible) {
+            btnCount++;
+          }
+        }
+        var totalSpace = toolBar.width
+        var usedSpace = toolBar.btnWidth*btnCount
+        var emptySpace = totalSpace - usedSpace
+
+        var spaceCount = btnCount - 1
+
+        var spacing = 0
+        if(spaceCount > 0){
+          spacing = Math.floor(emptySpace/spaceCount + 0.5)
+        }
+        if(spacing < 2){
+          spacing = 2
+        }
+        toolBar.spacing = spacing
+      }
 
       Repeater {
         id: buttonRepeater
