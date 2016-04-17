@@ -44,6 +44,7 @@ PageStackWindow {
       btn.visible = true
     }
     toolBar.resetSpacing()
+    hideKbBtn.visible = false
 
     if(curPage == accountPage){
       controller.clearAccount()
@@ -51,13 +52,16 @@ PageStackWindow {
     }else if(curPage == headerPage){
       controller.setCounterBox(headerView.getCounterBox())
       controller.setupHeaders()
+      hideKbBtn.visible = true
     }else if(curPage == folderPage){
       controller.setupFolders()
     }else if(curPage == bodyPage){
       controller.fetchCurrentBodyText(bodyView, bodyView, null)
     }else if(curPage == configPage){
       controller.setupConfig()
+      hideKbBtn.visible = true
     }else if(curPage == sendPage){
+      hideKbBtn.visible = true
     }
   }
 
@@ -107,15 +111,6 @@ PageStackWindow {
     anchors.rightMargin: 30
 
     HeaderView{ id: headerView }
-    // HACK TO HIDE KEYBOARD
-    Btn {
-      text: "push to hide keyboard"
-      anchors.top: parent.bottom
-      height: parent.anchors.bottomMargin
-      width: parent.width
-      onClicked: hideKb()
-    }
-    // HACK TO HIDE KEYBOARD
   }
 
   // BODY PAGE
@@ -140,15 +135,6 @@ PageStackWindow {
     anchors.rightMargin: 30
 
     ConfigView{ id: configView }
-    // HACK TO HIDE KEYBOARD
-    Btn {
-      text: "push to hide keyboard"
-      anchors.top: parent.bottom
-      height: parent.anchors.bottomMargin
-      width: parent.width
-      onClicked: hideKb()
-    }
-    // HACK TO HIDE KEYBOARD
   }
 
   // CONFIG PAGE
@@ -161,15 +147,6 @@ PageStackWindow {
     anchors.rightMargin: 30
 
     SendView{ id: sendView }
-    // HACK TO HIDE KEYBOARD
-    Btn {
-      text: "push to hide keyboard"
-      anchors.top: parent.bottom
-      height: parent.anchors.bottomMargin
-      width: parent.width
-      onClicked: hideKb()
-    }
-    // HACK TO HIDE KEYBOARD
   }
 
   // HACK TO HIDE KEYBOARD
@@ -183,6 +160,14 @@ PageStackWindow {
     activeFocusOnPress: false
     width: 0
     height: 0
+  }
+  Btn {
+    id: hideKbBtn
+    text: "push to hide keyboard"
+    anchors.bottom: toolBarContainer.top
+    height: 30
+    width: parent.width
+    onClicked: hideKb()
   }
   // HACK TO HIDE KEYBOARD
 
