@@ -130,7 +130,7 @@ Rectangle {
             width: parent.width * 0.10
             text: "x"
             onClicked: {
-              fileListView.model.remove(index)
+              controller.removeFileInfo(model.fileInfo.FilePath)
             }
           }
         }
