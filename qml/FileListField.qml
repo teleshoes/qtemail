@@ -20,7 +20,7 @@ Rectangle {
   }
 
   function setValueHome() {
-    fileListField.setValue(fileSystemController.getHome())
+    fileListField.setValue(controller.getHomeDir())
   }
 
   Row {
@@ -37,7 +37,7 @@ Rectangle {
       height: buttonPanel.btnHeight
       text: "home"
       onClicked: {
-        fileListField.setValue(fileSystemController.getHome())
+        fileListField.setValue(controller.getHomeDir())
       }
     }
     Btn {
