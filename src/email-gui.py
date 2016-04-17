@@ -1124,58 +1124,6 @@ class HeaderFilterAtt(HeaderFilter):
       return header.read_ == self.value
     return True
 
-class FileSystemController(QObject):
-  def __init__(self):
-    QObject.__init__(self)
-    self.dirModel = None
-
-  def ensureDirModel(self):
-    if self.dirModel == None:
-      self.dirModel = QDirModel()
-      self.dirModel.setSorting(QDir.DirsFirst)
-      self.dirModel.setFilter(QDir.AllEntries | QDir.NoDot | QDir.NoDotDot)
-
-  @Slot(result=str)
-  def getHome(self):
-    return os.getenv("HOME")
-
-  @Slot(result=QObject)
-  def getDirModel(self):
-    self.ensureDirModel()
-    return self.dirModel
-  @Slot(str, result=QModelIndex)
-  def getModelIndex(self, path):
-    self.ensureDirModel()
-    return self.dirModel.index(path)
-  @Slot(QModelIndex, result=str)
-  def getFilePath(self, index):
-    self.ensureDirModel()
-    return self.dirModel.filePath(index)
-  @Slot(QModelIndex, result=bool)
-  def isDir(self, index):
-    self.ensureDirModel()
-    p = self.getFilePath(index)
-    if p:
-      return self.dirModel.isDir(index)
-    else:
-      return False
-  @Slot(str, result=QObject)
-  def setDirModelPath(self, path):
-    index = self.dirModel.index(path)
-    self.dirModel.refresh(parent=index)
-
-  @Slot(result=bool)
-  def checkDirModelFucked(self):
-    try:
-      if self.dirModel:
-        self.dirModel.isReadOnly()
-    except:
-      print "\n\n\n\n\n\nQDirModel is FUUUUUUCKED\n\n"
-      self.dirModel = None
-      self.ensureDirModel()
-      return True
-    return False
-
 
 class EmailCommandThread(QThread):
   commandFinished = Signal(bool, str, object, list)
@@ -1520,7 +1468,6 @@ class MainWindow(QDeclarativeView):
     context.setContextProperty('addressBookModel', addressBookModel)
     context.setContextProperty('fileListModel', fileListModel)
     context.setContextProperty('controller', controller)
-    context.setContextProperty('fileSystemController', controller.fileSystemController)
 
     self.setResizeMode(QDeclarativeView.SizeRootObjectToView)
     self.setSource(qmlFile)
@@ -1541,7 +1488,6 @@ class SendWindow(QDeclarativeView):
     context.setContextProperty('addressBookModel', addressBookModel)
     context.setContextProperty('fileListModel', fileListModel)
     context.setContextProperty('controller', controller)
-    context.setContextProperty('fileSystemController', controller.fileSystemController)
 
     self.setResizeMode(QDeclarativeView.SizeRootObjectToView)
     self.setSource(qmlFile)
