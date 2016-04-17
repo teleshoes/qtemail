@@ -504,6 +504,16 @@ class Controller(QObject):
       self.fileInfoModel.appendItems([FileInfo(filePath, sizeFmt, mtimeFmt, error)])
 
   @Slot(str)
+  def removeFileInfo(self, filePath):
+    files = []
+    for fileInfo in self.fileInfoModel.getItems():
+      if fileInfo.FilePath == filePath:
+        print "removing " + str(filePath)
+      else:
+        files.append(fileInfo)
+    self.fileInfoModel.setItems(files)
+
+  @Slot(str)
   def clearFileInfo(self):
     self.fileInfoModel.clear()
 
