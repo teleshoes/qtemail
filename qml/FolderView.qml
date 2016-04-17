@@ -18,7 +18,6 @@ Rectangle {
           onClicked: {
             controller.folderSelected(model.folder)
             controller.setupHeaders()
-            controller.updateCounterBox(headerView.getCounterBox())
             navToPage(headerPage)
           }
         }
