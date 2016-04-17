@@ -463,12 +463,15 @@ class Controller(QObject):
     self.currentHeaders = []
     self.headerFilters = []
     self.filterButtons = []
-    self.fileSystemController = FileSystemController()
     self.setFilterButtons([])
     self.addressBook = None
     self.sendWindow = None
     self.counterBox = None
     self.fileListDir = None
+
+  @Slot(result=str)
+  def getHomeDir(self):
+    return os.getenv("HOME")
 
   @Slot(QObject)
   def setCounterBox(self, counterBox):
