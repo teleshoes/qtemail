@@ -16,6 +16,7 @@ import re
 import signal
 import sys
 import subprocess
+import time
 
 EMAIL_BIN = "/opt/qtemail/bin/email.pl"
 EMAIL_SEARCH_BIN = "/opt/qtemail/bin/email-search.pl"
@@ -485,6 +486,13 @@ class Controller(QObject):
         error = 'ERROR: could not find file'
       elif os.path.isdir(filePath):
         error = 'ERROR: file is directory'
+      else:
+        stat = os.stat(filePath)
+        sizeKiB = int(stat.st_size / 1024.0 + 0.5)
+        mtime = stat.st_mtime
+
+        sizeFmt = str(sizeKiB) + "KiB"
+        mtimeFmt = time.ctime(mtime)
     except:
       error = 'ERROR: unknown failure, could not stat file'
     self.fileInfoModel.appendItems([FileInfo(filePath, sizeFmt, mtimeFmt, error)])
