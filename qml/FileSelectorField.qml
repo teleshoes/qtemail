@@ -14,7 +14,7 @@ Rectangle {
   function getFiles(){
     var files = []
     for(var i=0; i<fileListView.model.count; i++){
-      files.push(fileListView.model.get(i)['file'])
+      files.push(fileListView.model.get(i).fileInfo.FilePath)
     }
     return files
   }
@@ -25,11 +25,11 @@ Rectangle {
     }
   }
 
-  function addFile(file){
-    fileListView.model.append({'file': file})
+  function addFile(filePath){
+    controller.addFileInfo(filePath)
   }
   function clearFiles(){
-    fileListView.model.clear()
+    controller.clearFileInfo()
   }
 
 
@@ -109,7 +109,7 @@ Rectangle {
         id: fileListView
         anchors.fill: parent
         anchors.margins: 5
-        model: ListModel {}
+        model: fileInfoModel
         clip: true
 
         spacing: 8
@@ -121,7 +121,7 @@ Rectangle {
           Text {
             id: fileListLabel
             width: parent.width * 0.90
-            text: model['file']
+            text: model.fileInfo.FilePath
             font.pointSize: main.fontSmall
           }
           Btn {
