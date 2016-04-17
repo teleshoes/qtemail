@@ -120,7 +120,7 @@ Rectangle {
           border.width: 2
           Column {
             id: fileInfoCol
-            height: filePathPanel.height + errorMsgPanel.height
+            height: filePathPanel.height + errorMsgPanel.height + detailsPanel.height
             width: parent.width * 0.90
             Rectangle {
               id: filePathPanel
@@ -142,6 +142,29 @@ Rectangle {
               Text {
                 id: errorLabel
                 text: model.fileInfo.ErrorMsg
+                font.pointSize: main.fontSmall
+                wrapMode: Text.Wrap
+              }
+            }
+            Rectangle {
+              id: detailsPanel
+              color: "#CCCCCC"
+              height: detailsLabel.text.length > 0 ? detailsLabel.height : 0
+              width: parent.width
+              function formatDetails() {
+                var msg = ""
+                if(model.fileInfo.SizeFmt){
+                  msg += model.fileInfo.SizeFmt
+                }
+                if(model.fileInfo.MtimeFmt){
+                  msg += " | " + model.fileInfo.MtimeFmt
+                }
+                return msg
+              }
+
+              Text {
+                id: detailsLabel
+                text: detailsPanel.formatDetails()
                 font.pointSize: main.fontSmall
                 wrapMode: Text.Wrap
               }
