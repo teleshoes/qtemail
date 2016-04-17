@@ -137,7 +137,7 @@ PageStackWindow {
     ConfigView{ id: configView }
   }
 
-  // CONFIG PAGE
+  // SEND PAGE
   Page {
     id: sendPage
     objectName: "sendPage"
