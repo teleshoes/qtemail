@@ -129,6 +129,7 @@ Rectangle {
               width: parent.width
               Text {
                 id: filePathLabel
+                width: parent.width
                 text: model.fileInfo.FilePath
                 font.pointSize: main.fontSmall
                 wrapMode: Text.Wrap
@@ -141,6 +142,7 @@ Rectangle {
               width: parent.width
               Text {
                 id: errorLabel
+                width: parent.width
                 text: model.fileInfo.ErrorMsg
                 font.pointSize: main.fontSmall
                 wrapMode: Text.Wrap
@@ -164,6 +166,7 @@ Rectangle {
 
               Text {
                 id: detailsLabel
+                width: parent.width
                 text: detailsPanel.formatDetails()
                 font.pointSize: main.fontSmall
                 wrapMode: Text.Wrap
