@@ -76,8 +76,10 @@ PageStackWindow {
   Page {
     id: accountPage
     objectName: "accountPage"
-    tools: toolBar
-    anchors.margins: 30
+    anchors.topMargin: 30
+    anchors.bottomMargin: 30 + toolBar.height
+    anchors.leftMargin: 30
+    anchors.rightMargin: 30
 
     AccountView{ id: accountView }
   }
@@ -86,8 +88,10 @@ PageStackWindow {
   Page {
     id: folderPage
     objectName: "folderPage"
-    tools: toolBar
-    anchors.margins: 30
+    anchors.topMargin: 30
+    anchors.bottomMargin: 30 + toolBar.height
+    anchors.leftMargin: 30
+    anchors.rightMargin: 30
 
     FolderView{ id: folderView }
   }
@@ -96,8 +100,10 @@ PageStackWindow {
   Page {
     id: headerPage
     objectName: "headerPage"
-    tools: toolBar
-    anchors.margins: 30
+    anchors.topMargin: 30
+    anchors.bottomMargin: 30 + toolBar.height
+    anchors.leftMargin: 30
+    anchors.rightMargin: 30
 
     HeaderView{ id: headerView }
     // HACK TO HIDE KEYBOARD
@@ -115,8 +121,10 @@ PageStackWindow {
   Page {
     id: bodyPage
     objectName: "bodyPage"
-    tools: toolBar
-    anchors.margins: 30
+    anchors.topMargin: 30
+    anchors.bottomMargin: 30 + toolBar.height
+    anchors.leftMargin: 30
+    anchors.rightMargin: 30
 
     BodyView{ id: bodyView }
   }
@@ -125,8 +133,10 @@ PageStackWindow {
   Page {
     id: configPage
     objectName: "configPage"
-    tools: toolBar
-    anchors.margins: 30
+    anchors.topMargin: 30
+    anchors.bottomMargin: 30 + toolBar.height
+    anchors.leftMargin: 30
+    anchors.rightMargin: 30
 
     ConfigView{ id: configView }
     // HACK TO HIDE KEYBOARD
@@ -144,8 +154,10 @@ PageStackWindow {
   Page {
     id: sendPage
     objectName: "sendPage"
-    tools: toolBar
-    anchors.margins: 30
+    anchors.topMargin: 30
+    anchors.bottomMargin: 30 + toolBar.height
+    anchors.leftMargin: 30
+    anchors.rightMargin: 30
 
     SendView{ id: sendView }
     // HACK TO HIDE KEYBOARD
@@ -178,27 +190,33 @@ PageStackWindow {
     id: toolButtons
   }
 
-  ToolBarLayout {
+  Row {
     id: toolBar
+    objectName: "toolBar"
+
+    height: toolBar.btnHeight
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+
+    property int btnHeight: 48
+    property int btnWidth: 48
+
+    spacing: 15
 
     Repeater {
+      id: buttonRepeater
       model: toolButtons.getButtonDefs()
-      ToolIcon {
+      Btn {
+        width: toolBar.btnWidth
+        height: toolBar.btnHeight
+        textSize: main.fontTiny
         function setText(text){
-          buttonTextArea.text = text
+          this.text = text
         }
         objectName: "toolbarButton-" + modelData.name
-        Text{
-          id: buttonTextArea
-          text: modelData.text
-          anchors.horizontalCenter: parent.horizontalCenter
-        }
-        Image {
-          source: "/opt/qtemail/icons/buttons/" + modelData.name + ".png"
-          anchors.centerIn: parent
-          height: 48
-          width: 48
-        }
+        text: modelData.text
+        imgSource: "/opt/qtemail/icons/buttons/" + modelData.name + ".png"
         onClicked: modelData.clicked()
         visible: false
       }
