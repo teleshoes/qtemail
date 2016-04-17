@@ -117,17 +117,22 @@ Rectangle {
         delegate: Rectangle {
           height: fileInfoCol.height
           width: parent.width
-          color: "#E1D6A1"
           border.width: 2
           Column {
             id: fileInfoCol
-            height: filePathLabel.height
+            height: filePathPanel.height
             width: parent.width * 0.90
-            Text {
-              id: filePathLabel
-              text: model.fileInfo.FilePath
-              font.pointSize: main.fontSmall
-              wrapMode: Text.Wrap
+            Rectangle {
+              id: filePathPanel
+              color: "#E1D6A1"
+              height: filePathLabel.text.length > 0 ? filePathLabel.height : 0
+              width: parent.width
+              Text {
+                id: filePathLabel
+                text: model.fileInfo.FilePath
+                font.pointSize: main.fontSmall
+                wrapMode: Text.Wrap
+              }
             }
           }
           Btn {
