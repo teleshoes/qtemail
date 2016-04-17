@@ -190,35 +190,39 @@ PageStackWindow {
     id: toolButtons
   }
 
-  Row {
-    id: toolBar
-    objectName: "toolBar"
+  Rectangle {
+    id: toolBarContainer
 
-    height: toolBar.btnHeight
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.bottom: parent.bottom
+    Row {
+      id: toolBar
+      objectName: "toolBar"
 
-    property int btnHeight: 48
-    property int btnWidth: 48
+      height: toolBar.btnHeight
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.bottom: parent.bottom
 
-    spacing: 15
+      property int btnHeight: 48
+      property int btnWidth: 48
 
-    Repeater {
-      id: buttonRepeater
-      model: toolButtons.getButtonDefs()
-      Btn {
-        width: toolBar.btnWidth
-        height: toolBar.btnHeight
-        textSize: main.fontTiny
-        function setText(text){
-          this.text = text
+      spacing: 15
+
+      Repeater {
+        id: buttonRepeater
+        model: toolButtons.getButtonDefs()
+        Btn {
+          width: toolBar.btnWidth
+          height: toolBar.btnHeight
+          textSize: main.fontTiny
+          function setText(text){
+            this.text = text
+          }
+          objectName: "toolbarButton-" + modelData.name
+          text: modelData.text
+          imgSource: "/opt/qtemail/icons/buttons/" + modelData.name + ".png"
+          onClicked: modelData.clicked()
+          visible: false
         }
-        objectName: "toolbarButton-" + modelData.name
-        text: modelData.text
-        imgSource: "/opt/qtemail/icons/buttons/" + modelData.name + ".png"
-        onClicked: modelData.clicked()
-        visible: false
       }
     }
   }
