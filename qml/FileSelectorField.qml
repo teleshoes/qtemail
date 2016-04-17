@@ -123,6 +123,7 @@ Rectangle {
             width: parent.width * 0.90
             text: model.fileInfo.FilePath
             font.pointSize: main.fontSmall
+            wrapMode: Text.Wrap
           }
           Btn {
             anchors {left: fileListLabel.right}
