@@ -106,9 +106,10 @@ def main():
   filterButtonModel = FilterButtonModel()
   addressBookModel = AddressBookModel()
   fileListModel = FileListModel()
+  fileInfoModel = FileInfoModel()
   controller = Controller(emailManager,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
-    addressBookModel, fileListModel)
+    addressBookModel, fileListModel, fileInfoModel)
 
   controller.setupAccounts()
 
@@ -134,12 +135,12 @@ def main():
   app = QApplication([])
   mainWindow = MainWindow(qmlFile, controller,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
-    addressBookModel, fileListModel)
+    addressBookModel, fileListModel, fileInfoModel)
 
   if useSendWindow:
     sendWindow = SendWindow(QML_DIR + "/SendView.qml", controller, mainWindow.rootObject(),
       accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
-      addressBookModel, fileListModel)
+      addressBookModel, fileListModel, fileInfoModel)
     sendView = sendWindow.rootObject()
     mainWindow.rootContext().setContextProperty('sendView', sendView)
     sendView.setNotifierEnabled(True)
@@ -440,7 +441,7 @@ class EmailManager():
 class Controller(QObject):
   def __init__(self, emailManager,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
-    addressBookModel, fileListModel):
+    addressBookModel, fileListModel, fileInfoModel):
     QObject.__init__(self)
     self.emailManager = emailManager
     self.accountModel = accountModel
@@ -451,6 +452,7 @@ class Controller(QObject):
     self.notifierModel = notifierModel
     self.addressBookModel = addressBookModel
     self.fileListModel = fileListModel
+    self.fileInfoModel = fileInfoModel
     self.initialPageName = "account"
     self.htmlMode = False
     self.configMode = None
@@ -472,6 +474,24 @@ class Controller(QObject):
   @Slot(result=str)
   def getHomeDir(self):
     return os.getenv("HOME")
+
+  @Slot(str)
+  def addFileInfo(self, filePath):
+    sizeFmt = ""
+    mtimeFmt = ""
+    error = ""
+    try:
+      if not os.path.exists(filePath):
+        error = 'ERROR: could not find file'
+      elif os.path.isdir(filePath):
+        error = 'ERROR: file is directory'
+    except:
+      error = 'ERROR: unknown failure, could not stat file'
+    self.fileInfoModel.appendItems([FileInfo(filePath, sizeFmt, mtimeFmt, error)])
+
+  @Slot(str)
+  def clearFileInfo(self):
+    self.fileInfoModel.clear()
 
   @Slot(QObject)
   def setCounterBox(self, counterBox):
@@ -1244,6 +1264,13 @@ class FileListModel(BaseListModel):
     BaseListModel.__init__(self)
     self.setRoleNames(dict(enumerate(FileListModel.COLUMNS)))
 
+class FileInfoModel(BaseListModel):
+  COLUMNS = ('fileInfo',)
+  def __init__(self):
+    BaseListModel.__init__(self)
+    self.setRoleNames(dict(enumerate(FileInfoModel.COLUMNS)))
+
+
 class Account(QObject):
   def __init__(self, name_, lastUpdated_, lastUpdatedRel_, updateInterval_, refreshInterval_, unread_, total_, error_, isLoading_):
     QObject.__init__(self)
@@ -1453,10 +1480,31 @@ class Suggestion(QObject):
   changed = Signal()
   name = Property(unicode, name, notify=changed)
 
+class FileInfo(QObject):
+  def __init__(self, filePath_, sizeFmt_, mtimeFmt_, errorMsg_):
+    QObject.__init__(self)
+    self.filePath_ = filePath_
+    self.sizeFmt_ = sizeFmt_
+    self.mtimeFmt_ = mtimeFmt_
+    self.errorMsg_ = errorMsg_
+  def FilePath(self):
+    return self.filePath_
+  def SizeFmt(self):
+    return self.sizeFmt_
+  def MtimeFmt(self):
+    return self.mtimeFmt_
+  def ErrorMsg(self):
+    return self.errorMsg_
+  changed = Signal()
+  FilePath = Property(unicode, FilePath, notify=changed)
+  SizeFmt = Property(unicode, SizeFmt, notify=changed)
+  MtimeFmt = Property(unicode, MtimeFmt, notify=changed)
+  ErrorMsg = Property(unicode, ErrorMsg, notify=changed)
+
 class MainWindow(QDeclarativeView):
   def __init__(self, qmlFile, controller,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
-    addressBookModel, fileListModel):
+    addressBookModel, fileListModel, fileInfoModel):
     super(MainWindow, self).__init__(None)
     context = self.rootContext()
     context.setContextProperty('accountModel', accountModel)
@@ -1467,6 +1515,7 @@ class MainWindow(QDeclarativeView):
     context.setContextProperty('notifierModel', notifierModel)
     context.setContextProperty('addressBookModel', addressBookModel)
     context.setContextProperty('fileListModel', fileListModel)
+    context.setContextProperty('fileInfoModel', fileInfoModel)
     context.setContextProperty('controller', controller)
 
     self.setResizeMode(QDeclarativeView.SizeRootObjectToView)
@@ -1475,7 +1524,7 @@ class MainWindow(QDeclarativeView):
 class SendWindow(QDeclarativeView):
   def __init__(self, qmlFile, controller, main,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
-    addressBookModel, fileListModel):
+    addressBookModel, fileListModel, fileInfoModel):
     super(SendWindow, self).__init__(None)
     context = self.rootContext()
     context.setContextProperty('main', main)
@@ -1487,6 +1536,7 @@ class SendWindow(QDeclarativeView):
     context.setContextProperty('notifierModel', notifierModel)
     context.setContextProperty('addressBookModel', addressBookModel)
     context.setContextProperty('fileListModel', fileListModel)
+    context.setContextProperty('fileInfoModel', fileInfoModel)
     context.setContextProperty('controller', controller)
 
     self.setResizeMode(QDeclarativeView.SizeRootObjectToView)
