@@ -120,7 +120,7 @@ Rectangle {
           border.width: 2
           Column {
             id: fileInfoCol
-            height: filePathPanel.height
+            height: filePathPanel.height + errorMsgPanel.height
             width: parent.width * 0.90
             Rectangle {
               id: filePathPanel
@@ -130,6 +130,18 @@ Rectangle {
               Text {
                 id: filePathLabel
                 text: model.fileInfo.FilePath
+                font.pointSize: main.fontSmall
+                wrapMode: Text.Wrap
+              }
+            }
+            Rectangle {
+              id: errorMsgPanel
+              color: "#FF0000"
+              height: errorLabel.text.length > 0 ? errorLabel.height : 0
+              width: parent.width
+              Text {
+                id: errorLabel
+                text: model.fileInfo.ErrorMsg
                 font.pointSize: main.fontSmall
                 wrapMode: Text.Wrap
               }
