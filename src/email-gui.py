@@ -495,7 +495,13 @@ class Controller(QObject):
         mtimeFmt = time.ctime(mtime)
     except:
       error = 'ERROR: unknown failure, could not stat file'
-    self.fileInfoModel.appendItems([FileInfo(filePath, sizeFmt, mtimeFmt, error)])
+    isDupe = False
+    for fileInfo in self.fileInfoModel.getItems():
+      if fileInfo.FilePath == filePath:
+        print "skipping duplicate file: " + str(filePath)
+        isDupe = True
+    if not isDupe:
+      self.fileInfoModel.appendItems([FileInfo(filePath, sizeFmt, mtimeFmt, error)])
 
   @Slot(str)
   def clearFileInfo(self):
