@@ -114,20 +114,24 @@ Rectangle {
 
         spacing: 8
         delegate: Rectangle {
-          height: fileListLabel.height
+          height: fileInfoCol.height
           width: parent.width
           color: "#E1D6A1"
           border.width: 2
-          Text {
-            id: fileListLabel
+          Column {
+            id: fileInfoCol
+            height: filePathLabel.height
             width: parent.width * 0.90
-            text: model.fileInfo.FilePath
-            font.pointSize: main.fontSmall
-            wrapMode: Text.Wrap
+            Text {
+              id: filePathLabel
+              text: model.fileInfo.FilePath
+              font.pointSize: main.fontSmall
+              wrapMode: Text.Wrap
+            }
           }
           Btn {
-            anchors {left: fileListLabel.right}
-            height: fileListLabel.height
+            anchors {left: fileInfoCol.right}
+            height: fileInfoCol.height
             width: parent.width * 0.10
             text: "x"
             onClicked: {
