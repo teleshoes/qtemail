@@ -67,16 +67,7 @@ Rectangle {
   }
 
   function initToolBar() {
-    for (var i = 0; i < toolBar.children.length; ++i){
-      toolBar.children[i].visible = false
-    }
-    var pageName = curPage.objectName
-    var buttonNames = toolButtons.pages[pageName]
-    for (var i = 0; i < buttonNames.length; ++i){
-      var objectName = "toolbarButton-" + buttonNames[i]
-      var btn = controller.findChild(main, objectName)
-      btn.visible = true
-    }
+    toolBar.resetButtons([curPage.objectName])
   }
 
   function onLinkActivated(link){
@@ -159,32 +150,14 @@ Rectangle {
     }
   }
 
-  // TOOLBAR
   ToolButtons {
     id: toolButtons
   }
 
-  Row {
+  ToolBarPanel {
     id: toolBar
-    objectName: "toolBar"
-    anchors.bottom: parent.bottom
-    width: parent.width
-
-    spacing: 10
-    Repeater {
-      model: toolButtons.getButtonDefs()
-      Btn {
-        width: 80
-        height: 80
-        function setText(text){
-          this.text = text
-        }
-        objectName: "toolbarButton-" + modelData.name
-        text: modelData.text
-        imgSource: "/opt/qtemail/icons/buttons/" + modelData.name + ".png"
-        onClicked: modelData.clicked()
-        visible: false
-      }
-    }
+    toolButtons: toolButtons
+    btnHeight: 80
+    btnWidth: 80
   }
 }
