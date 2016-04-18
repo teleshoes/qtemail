@@ -69,22 +69,15 @@ Rectangle {
     initToolBar()
   }
   function initToolBar(){
-    for (var i = 0; i < toolBar.children.length; ++i){
-      toolBar.children[i].visible = false
-    }
-    var pages = [accountPage, headerPage, folderPage, bodyPage, configPage, sendPage]
-    for (var pageIndex = 0; pageIndex < pages.length; ++pageIndex){
-      var p = pages[pageIndex]
+    var activePageNames = []
+    var allPages = [accountPage, headerPage, folderPage, bodyPage, configPage, sendPage]
+    for (var pageIndex = 0; pageIndex < allPages.length; ++pageIndex){
+      var p = allPages[pageIndex]
       if(p.visible){
-        var pageName = p.objectName
-        var buttonNames = toolButtons.pages[pageName]
-        for (var i = 0; i < buttonNames.length; ++i){
-          var objectName = "toolbarButton-" + buttonNames[i]
-          var btn = controller.findChild(main, objectName)
-          btn.visible = true
-        }
+        activePageNames.push(p.objectName)
       }
     }
+    toolBar.resetButtons(activePageNames)
   }
 
   function onLinkActivated(link){
@@ -181,33 +174,14 @@ Rectangle {
     }
   }
 
-  // TOOLBAR
   ToolButtons {
     id: toolButtons
   }
 
-  Row {
+  ToolBarPanel {
     id: toolBar
-    objectName: "toolBar"
-    anchors.bottom: parent.bottom
-    width: parent.width
-
-    spacing: 10
-    Repeater {
-      model: toolButtons.getButtonDefs()
-      Btn {
-        width: 70
-        height: 70
-        Component.onCompleted: {textSize = main.fontTiny}
-        function setText(text){
-          this.text = text
-        }
-        objectName: "toolbarButton-" + modelData.name
-        text: modelData.text
-        imgSource: "/opt/qtemail/icons/buttons/" + modelData.name + ".png"
-        onClicked: modelData.clicked()
-        visible: false
-      }
-    }
+    toolButtons: toolButtons
+    btnHeight: 70
+    btnWidth: 70
   }
 }
