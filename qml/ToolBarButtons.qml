@@ -5,21 +5,27 @@ QtObject {
   property variant pages: {
     "accountPage": {
       "buttons": ["newAccount", "options", "update"],
+      "buttonsExtra": [],
     },
     "folderPage": {
       "buttons": ["back"],
+      "buttonsExtra": [],
     },
     "headerPage": {
-      "buttons": ["back", "config", "send", "more", "wayMore", "all", "markAllRead", "folder"],
+      "buttons": ["back", "more", "markAllRead"],
+      "buttonsExtra": ["config", "send", "wayMore", "all", "folder"],
     },
     "bodyPage": {
-      "buttons": ["back", "reply", "forward", "toggleHtml", "toggleSelectable", "copy", "zoomIn", "zoomOut", "attachments"],
+      "buttons": ["back", "toggleHtml", "toggleSelectable", "copy"],
+      "buttonsExtra": ["reply", "forward", "attachments", "zoomIn", "zoomOut"],
     },
     "configPage": {
       "buttons": ["back", "submit"],
+      "buttonsExtra": [],
     },
     "sendPage": {
       "buttons": ["back", "sendEmail"],
+      "buttonsExtra": [],
     },
   }
 
