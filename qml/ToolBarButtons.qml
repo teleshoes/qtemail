@@ -1,18 +1,19 @@
 import QtQuick 1.1
 
 QtObject {
+  // order is determined by 'buttonDefs', not 'pages'
   property variant pages: {
     "accountPage": {
-      "buttons": ["newAccount", "update", "options"],
+      "buttons": ["newAccount", "options", "update"],
     },
     "folderPage": {
       "buttons": ["back"],
     },
     "headerPage": {
-      "buttons": ["back", "more", "wayMore", "all", "markAllRead", "config", "send", "folder"],
+      "buttons": ["back", "config", "send", "more", "wayMore", "all", "markAllRead", "folder"],
     },
     "bodyPage": {
-      "buttons": ["back", "attachments", "toggleHtml", "toggleSelectable", "reply", "forward", "copy", "zoomIn", "zoomOut"],
+      "buttons": ["back", "reply", "forward", "toggleHtml", "toggleSelectable", "copy", "zoomIn", "zoomOut", "attachments"],
     },
     "configPage": {
       "buttons": ["back", "submit"],
