@@ -2,12 +2,24 @@ import QtQuick 1.1
 
 QtObject {
   property variant pages: {
-    "accountPage": ["newAccount", "update", "options"],
-    "folderPage": ["back"],
-    "headerPage": ["back", "more", "wayMore", "all", "markAllRead", "config", "send", "folder"],
-    "bodyPage": ["back", "attachments", "toggleHtml", "toggleSelectable", "reply", "forward", "copy", "zoomIn", "zoomOut"],
-    "configPage": ["back", "submit"],
-    "sendPage": ["back", "sendEmail"],
+    "accountPage": {
+      "buttons": ["newAccount", "update", "options"],
+    },
+    "folderPage": {
+      "buttons": ["back"],
+    },
+    "headerPage": {
+      "buttons": ["back", "more", "wayMore", "all", "markAllRead", "config", "send", "folder"],
+    },
+    "bodyPage": {
+      "buttons": ["back", "attachments", "toggleHtml", "toggleSelectable", "reply", "forward", "copy", "zoomIn", "zoomOut"],
+    },
+    "configPage": {
+      "buttons": ["back", "submit"],
+    },
+    "sendPage": {
+      "buttons": ["back", "sendEmail"],
+    },
   }
 
   function getButtonDefs(){

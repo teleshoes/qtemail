@@ -20,7 +20,7 @@ Rectangle {
     var okButtonNames = []
     for (var p = 0; p < activePageNames.length; ++p){
       var pageName = activePageNames[p]
-      var buttonNames = toolBarButtons.pages[pageName]
+      var buttonNames = toolBarButtons.pages[pageName]["buttons"]
       for (var b = 0; b < buttonNames.length; ++b){
         var objectName = "toolbarButton-" + buttonNames[b]
         okButtonNames.push(objectName)
