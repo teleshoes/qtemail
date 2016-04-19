@@ -11,7 +11,7 @@ Rectangle {
 
   height: toolBar.btnHeight
 
-  property variant toolButtons
+  property variant toolBarButtons
 
   property int btnHeight: 48
   property int btnWidth: 48
@@ -20,32 +20,32 @@ Rectangle {
     var okButtonNames = []
     for (var p = 0; p < activePageNames.length; ++p){
       var pageName = activePageNames[p]
-      var buttonNames = toolButtons.pages[pageName]
+      var buttonNames = toolBarButtons.pages[pageName]
       for (var b = 0; b < buttonNames.length; ++b){
         var objectName = "toolbarButton-" + buttonNames[b]
         okButtonNames.push(objectName)
       }
     }
 
-    for (var i = 0; i < toolButtonsPanel.children.length; ++i){
-      var btn = toolButtonsPanel.children[i]
+    for (var i = 0; i < toolBarButtonsPanel.children.length; ++i){
+      var btn = toolBarButtonsPanel.children[i]
       var isVisible = okButtonNames.indexOf(btn.objectName) >= 0
       btn.visible = isVisible
     }
 
-    toolButtonsPanel.resetSpacing()
+    toolBarButtonsPanel.resetSpacing()
   }
 
   Row {
-    id: toolButtonsPanel
+    id: toolBarButtonsPanel
     anchors.fill: parent
 
     onWidthChanged: resetSpacing()
 
     function resetSpacing() {
       var btnCount = 0
-      for (var i = 0; i < toolButtonsPanel.children.length; ++i){
-        if(toolButtonsPanel.children[i].visible) {
+      for (var i = 0; i < toolBarButtonsPanel.children.length; ++i){
+        if(toolBarButtonsPanel.children[i].visible) {
           btnCount++;
         }
       }
@@ -62,12 +62,12 @@ Rectangle {
       if(spacing < 2){
         spacing = 2
       }
-      toolButtonsPanel.spacing = spacing
+      toolBarButtonsPanel.spacing = spacing
     }
 
     Repeater {
       id: buttonRepeater
-      model: toolButtons.getButtonDefs()
+      model: toolBarButtons.getButtonDefs()
       Btn {
         width: toolBar.btnWidth
         height: toolBar.btnHeight

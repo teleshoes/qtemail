@@ -10,7 +10,7 @@ Rectangle {
 
   function initAccountConfig(){
     var isHtml = controller.getHtmlMode()
-    toolButtons.getButtonDefByName("toggleHtml").setIsHtml(isHtml)
+    toolBarButtons.getButtonDefByName("toggleHtml").setIsHtml(isHtml)
     controller.resetFilterButtons()
   }
 

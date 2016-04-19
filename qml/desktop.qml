@@ -174,13 +174,13 @@ Rectangle {
     }
   }
 
-  ToolButtons {
-    id: toolButtons
+  ToolBarButtons {
+    id: toolBarButtons
   }
 
   ToolBarPanel {
     id: toolBar
-    toolButtons: toolButtons
+    toolBarButtons: toolBarButtons
     btnHeight: 70
     btnWidth: 70
   }
