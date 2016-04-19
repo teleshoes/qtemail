@@ -27,146 +27,132 @@ QtObject {
     return controller.findChild(toolBar, "toolbarButton-" + name)
   }
 
-  property list<QtObject> buttonDefs: [
-    QtObject {
-      signal clicked
-      property variant name: "back"
-      property variant text: "back"
+  property list<ToolBarButtonDef> buttonDefs: [
+    ToolBarButtonDef {
+      name: "back"
+      text: "back"
       onClicked: main.backPage()
     },
-    QtObject {
-      signal clicked
-      property variant name: "config"
-      property variant text: "config"
+    ToolBarButtonDef {
+      name: "config"
+      text: "config"
       onClicked: {
         controller.setConfigMode("account")
         navToPage(configPage)
       }
     },
-    QtObject {
-      signal clicked
-      property variant name: "newAccount"
-      property variant text: "new acc"
+    ToolBarButtonDef {
+      name: "newAccount"
+      text: "new acc"
       onClicked: {
         controller.setConfigMode("account")
         navToPage(configPage)
       }
     },
-    QtObject {
-      signal clicked
-      property variant name: "options"
-      property variant text: "options"
+    ToolBarButtonDef {
+      name: "options"
+      text: "options"
       onClicked: {
         controller.setConfigMode("options")
         navToPage(configPage)
       }
     },
-    QtObject {
-      signal clicked
-      property variant name: "send"
-      property variant text: "write"
+    ToolBarButtonDef {
+      name: "send"
+      text: "write"
       onClicked: navToPage(sendPage)
     },
-    QtObject {
-      signal clicked
-      property variant name: "reply"
-      property variant text: "reply"
+    ToolBarButtonDef {
+      name: "reply"
+      text: "reply"
       onClicked: {
         controller.initSend("reply", sendView.getForm())
         navToPage(sendPage)
       }
     },
-    QtObject {
-      signal clicked
-      property variant name: "forward"
-      property variant text: "forward"
+    ToolBarButtonDef {
+      name: "forward"
+      text: "forward"
       onClicked: {
         controller.initSend("forward", sendView.getForm())
         navToPage(sendPage)
       }
     },
-    QtObject {
-      signal clicked
-      property variant name: "sendEmail"
-      property variant text: "send"
+    ToolBarButtonDef {
+      name: "sendEmail"
+      text: "send"
       onClicked: controller.sendEmail(sendView.getForm())
     },
-    QtObject {
-      signal clicked
-      property variant name: "update"
-      property variant text: "update"
+    ToolBarButtonDef {
+      name: "update"
+      text: "update"
       onClicked: accountView.updateAllAccounts()
     },
-    QtObject {
-      signal clicked
-      property variant name: "submit"
-      property variant text: "submit"
+    ToolBarButtonDef {
+      name: "submit"
+      text: "submit"
       onClicked: {
         if(controller.saveConfig()){
           main.backPage()
         }
       }
     },
-    QtObject {
-      signal clicked
-      property variant name: "more"
-      property variant text: "more"
+    ToolBarButtonDef {
+      name: "more"
+      text: "more"
       onClicked: {
         controller.moreHeaders(0)
         controller.updateCounterBox(headerView.getCounterBox())
       }
     },
-    QtObject {
-      signal clicked
-      property variant name: "wayMore"
-      property variant text: "+30%"
+    ToolBarButtonDef {
+      name: "wayMore"
+      text: "+30%"
       onClicked: {
         controller.moreHeaders(30)
         controller.updateCounterBox(headerView.getCounterBox())
       }
     },
-    QtObject {
-      signal clicked
-      property variant name: "all"
-      property variant text: "all"
+    ToolBarButtonDef {
+      name: "all"
+      text: "all"
       onClicked: {
         controller.moreHeaders(100)
         controller.updateCounterBox(headerView.getCounterBox())
       }
     },
-    QtObject {
-      signal clicked
-      property variant name: "markAllRead"
-      property variant text: "all=>read"
+    ToolBarButtonDef {
+      name: "markAllRead"
+      text: "all=>read"
       onClicked: {
         controller.markAllRead()
       }
     },
-    QtObject {
-      signal clicked
-      property variant name: "folder"
-      property variant text: "folders"
+    ToolBarButtonDef {
+      name: "folder"
+      text: "folders"
       onClicked: navToPage(folderPage)
     },
-    QtObject {
-      signal clicked
-      property variant name: "toggleHtml"
-      property variant text: "html"
-      function setIsHtml(isHtml){
-        var btnElem = getButtonElemByName(name)
-        btnElem.setText(isHtml ? "text" : "html")
-      }
+    ToolBarButtonDef {
+      name: "toggleHtml"
+      text: "html"
       onClicked: {
         var wasHtml = controller.getHtmlMode()
         controller.setHtmlMode(!wasHtml)
         setIsHtml(!wasHtml)
         controller.fetchCurrentBodyText(bodyView, bodyView, null)
       }
+      function setIsHtml(isHtml){
+        var btnElem = getButtonElemByName(name)
+        btnElem.setText(isHtml ? "text" : "html")
+      }
     },
-    QtObject {
-      signal clicked
-      property variant name: "toggleSelectable"
-      property variant text: "select on"
+    ToolBarButtonDef {
+      name: "toggleSelectable"
+      text: "select on"
+      onClicked: {
+        setIsSelectable(!getIsSelectable())
+      }
       function getIsSelectable(){
         return bodyView.selectable
       }
@@ -175,32 +161,25 @@ QtObject {
         btnElem.setText(isSelectable ? "select off" : "select on")
         bodyView.selectable = isSelectable
       }
-      onClicked: {
-        setIsSelectable(!getIsSelectable())
-      }
     },
-    QtObject {
-      signal clicked
-      property variant name: "copy"
-      property variant text: "copy"
+    ToolBarButtonDef {
+      name: "copy"
+      text: "copy"
       onClicked: controller.copyBodyToClipboard(bodyView)
     },
-    QtObject {
-      signal clicked
-      property variant name: "zoomIn"
-      property variant text: "zoom in"
+    ToolBarButtonDef {
+      name: "zoomIn"
+      text: "zoom in"
       onClicked: bodyView.zoomIn()
     },
-    QtObject {
-      signal clicked
-      property variant name: "zoomOut"
-      property variant text: "zoom out"
+    ToolBarButtonDef {
+      name: "zoomOut"
+      text: "zoom out"
       onClicked: bodyView.zoomOut()
     },
-    QtObject {
-      signal clicked
-      property variant name: "attachments"
-      property variant text: "attach"
+    ToolBarButtonDef {
+      name: "attachments"
+      text: "attach"
       onClicked: controller.saveCurrentAttachments()
     }
   ]
