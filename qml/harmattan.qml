@@ -172,13 +172,13 @@ PageStackWindow {
   }
   // HACK TO HIDE KEYBOARD
 
-  ToolBarButtons {
-    id: toolBarButtons
+  ToolBarButtonDefList {
+    id: toolBarButtonDefList
   }
 
   ToolBarPanel {
     id: toolBar
-    toolBarButtons: toolBarButtons
+    toolBarButtonDefList: toolBarButtonDefList
     btnHeight: 48
     btnWidth: 48
   }

@@ -11,7 +11,7 @@ Rectangle {
 
   height: toolBar.btnHeight
 
-  property variant toolBarButtons
+  property variant toolBarButtonDefList
 
   property int btnHeight: 48
   property int btnWidth: 48
@@ -21,8 +21,8 @@ Rectangle {
     for (var p = 0; p < activePageNames.length; ++p){
       var pageName = activePageNames[p]
       var buttonNames = []
-      buttonNames = buttonNames.concat(toolBarButtons.pages[pageName]["buttons"])
-      buttonNames = buttonNames.concat(toolBarButtons.pages[pageName]["buttonsExtra"])
+      buttonNames = buttonNames.concat(toolBarButtonDefList.pages[pageName]["buttons"])
+      buttonNames = buttonNames.concat(toolBarButtonDefList.pages[pageName]["buttonsExtra"])
       for (var b = 0; b < buttonNames.length; ++b){
         var objectName = "toolbarButton-" + buttonNames[b]
         okButtonNames.push(objectName)
@@ -69,7 +69,7 @@ Rectangle {
 
     Repeater {
       id: buttonRepeater
-      model: toolBarButtons.getButtonDefs()
+      model: toolBarButtonDefList.getButtonDefs()
       Btn {
         width: toolBar.btnWidth
         height: toolBar.btnHeight
