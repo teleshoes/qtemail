@@ -40,6 +40,14 @@ Rectangle {
         fileListField.setValue(controller.getHomeDir())
       }
     }
+    Btn {
+      width: buttonPanel.btnWidth
+      height: buttonPanel.btnHeight
+      text: "accept"
+      onClicked: {
+        suggBox.enterPressed()
+      }
+    }
   }
 
   SuggBox {
