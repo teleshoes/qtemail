@@ -27,7 +27,7 @@ ToolBarPanelAbstract {
         function setText(text){
           this.text = text
         }
-        objectName: "toolbarButton-" + modelData.name
+        objectName: toolBarName + "-" + modelData.name
         text: modelData.text
         imgSource: "/opt/qtemail/icons/buttons/" + modelData.name + ".png"
         onClicked: modelData.clicked()

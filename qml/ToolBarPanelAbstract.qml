@@ -7,12 +7,19 @@ Rectangle {
   property variant buttonContainer
   property int btnHeight
   property int btnWidth
+  property string toolBarName
   property string direction
 
+  function prefixStrList(prefix, listStr){
+    return listStr.map(function(s){ return prefix + s })
+  }
+
   function setVisibleButtonNames(visibleButtonNames){
+    var visibleButtonObjectNames = prefixStrList(toolBarName + "-", visibleButtonNames)
+
     for (var i = 0; i < buttonContainer.children.length; ++i){
       var btn = buttonContainer.children[i]
-      var isVisible = visibleButtonNames.indexOf(btn.objectName) >= 0
+      var isVisible = visibleButtonObjectNames.indexOf(btn.objectName) >= 0
       btn.visible = isVisible
     }
 

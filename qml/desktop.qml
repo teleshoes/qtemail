@@ -186,6 +186,7 @@ Rectangle {
 
   ToolBarPanelRow {
     id: mainToolBar
+    toolBarName: "toolbar-main"
     toolBarButtonDefList: toolBarButtonDefList
     btnHeight: 70
     btnWidth: 70

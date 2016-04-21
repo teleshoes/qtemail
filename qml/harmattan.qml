@@ -184,6 +184,7 @@ PageStackWindow {
 
   ToolBarPanelRow {
     id: mainToolBar
+    toolBarName: "toolbar-main"
     toolBarButtonDefList: toolBarButtonDefList
     btnHeight: 48
     btnWidth: 48
