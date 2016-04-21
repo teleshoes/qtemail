@@ -5,6 +5,7 @@ Rectangle {
 
   property ToolBarButtonDefList toolBarButtonDefList
   property ToolBarPanelAbstract mainToolBar
+  property ToolBarPanelAbstract extraToolBar
 
   function resetButtons(activePageNames){
     var okButtonNames = []

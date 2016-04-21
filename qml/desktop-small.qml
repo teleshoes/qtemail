@@ -158,6 +158,7 @@ Rectangle {
     id: toolBarManager
     toolBarButtonDefList: toolBarButtonDefList
     mainToolBar: mainToolBar
+    extraToolBar: extraToolBar
   }
 
   ToolBarPanelRow {
@@ -169,6 +170,17 @@ Rectangle {
 
     anchors.bottom: parent.bottom
     anchors.left: parent.left
+    anchors.right: parent.right
+  }
+  ToolBarPanelColumn {
+    id: extraToolBar
+    toolBarName: "toolbar-extra"
+    toolBarButtonDefList: toolBarButtonDefList
+    btnHeight: 80
+    btnWidth: 300
+
+    anchors.top: parent.top
+    anchors.bottom: mainToolBar.top
     anchors.right: parent.right
   }
 }

@@ -180,6 +180,7 @@ PageStackWindow {
     id: toolBarManager
     toolBarButtonDefList: toolBarButtonDefList
     mainToolBar: mainToolBar
+    extraToolBar: extraToolBar
   }
 
   ToolBarPanelRow {
@@ -191,6 +192,17 @@ PageStackWindow {
 
     anchors.bottom: parent.bottom
     anchors.left: parent.left
+    anchors.right: parent.right
+  }
+  ToolBarPanelColumn {
+    id: extraToolBar
+    toolBarName: "toolbar-extra"
+    toolBarButtonDefList: toolBarButtonDefList
+    btnHeight: 60
+    btnWidth: 240
+
+    anchors.top: parent.top
+    anchors.bottom: mainToolBar.top
     anchors.right: parent.right
   }
 }
