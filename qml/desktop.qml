@@ -183,6 +183,7 @@ Rectangle {
     toolBarButtonDefList: toolBarButtonDefList
     mainToolBar: mainToolBar
     extraToolBar: extraToolBar
+    excludeButtonNames: []
   }
 
   ToolBarPanelRow {

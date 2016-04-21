@@ -6,6 +6,7 @@ Rectangle {
   property ToolBarButtonDefList toolBarButtonDefList
   property ToolBarPanelAbstract mainToolBar
   property ToolBarPanelAbstract extraToolBar
+  property variant excludeButtonNames //list<string>
 
   function isExtraToolBarVisible(){
     return extraToolBar != null && extraToolBar.visible
@@ -32,6 +33,11 @@ Rectangle {
       okExtraButtonNames = okExtraButtonNames.concat(pageExtraButtonNames)
     }
 
+    if(excludeButtonNames != null && excludeButtonNames.length > 0){
+      okMainButtonNames = filterButtonNames(okMainButtonNames, excludeButtonNames)
+      okExtraButtonNames = filterButtonNames(okExtraButtonNames, excludeButtonNames)
+    }
+
     if(extraToolBar == null){
       mainToolBar.setVisibleButtonNames(okMainButtonNames.concat(okExtraButtonNames))
     }else{
@@ -39,5 +45,16 @@ Rectangle {
       extraToolBar.setVisibleButtonNames(okExtraButtonNames)
       extraToolBar.visible = false
     }
+  }
+
+  function filterButtonNames(buttonNames, buttonNamesToRemove) {
+    var filteredButtonNames = []
+    for (var i=0; i < buttonNames.length; i++){
+      var buttonName = buttonNames[i]
+      if(buttonNamesToRemove.indexOf(buttonName) < 0){
+        filteredButtonNames.push(buttonName)
+      }
+    }
+    return filteredButtonNames
   }
 }
