@@ -188,8 +188,8 @@ PageStackWindow {
     id: mainToolBar
     toolBarName: "toolbar-main"
     toolBarButtonDefList: toolBarButtonDefList
-    btnHeight: 48
-    btnWidth: 48
+    btnHeight: 50
+    btnWidth: 75
 
     anchors.bottom: parent.bottom
     anchors.left: parent.left
