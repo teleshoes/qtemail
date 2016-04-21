@@ -12,11 +12,11 @@ QtObject {
       "buttonsExtra": [],
     },
     "headerPage": {
-      "buttons": ["back", "more", "markAllRead"],
+      "buttons": ["back", "more", "markAllRead", "showExtra"],
       "buttonsExtra": ["config", "send", "wayMore", "all", "folder"],
     },
     "bodyPage": {
-      "buttons": ["back", "toggleHtml", "toggleSelectable", "copy"],
+      "buttons": ["back", "toggleHtml", "toggleSelectable", "copy", "showExtra"],
       "buttonsExtra": ["reply", "forward", "attachments", "zoomIn", "zoomOut"],
     },
     "configPage": {
@@ -195,6 +195,11 @@ QtObject {
       name: "attachments"
       text: "attach"
       onClicked: controller.saveCurrentAttachments()
+    },
+    ToolBarButtonDef {
+      name: "showExtra"
+      text: "menu"
+      onClicked: toolBarManager.toggleExtraToolBarVisible()
     }
   ]
 }
