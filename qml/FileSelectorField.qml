@@ -75,6 +75,7 @@ Rectangle {
         if(value){
           addFile(value)
           setValue("")
+          setValueHome()
         }
       }
     }
