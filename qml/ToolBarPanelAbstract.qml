@@ -7,6 +7,7 @@ Rectangle {
   property variant buttonContainer
   property int btnHeight
   property int btnWidth
+  property string direction
 
   function setVisibleButtonNames(visibleButtonNames){
     for (var i = 0; i < buttonContainer.children.length; ++i){
@@ -25,8 +26,18 @@ Rectangle {
         btnCount++;
       }
     }
-    var totalSpace = toolBarPanel.width
-    var usedSpace = toolBarPanel.btnWidth*btnCount
+    var totalSpace
+    var usedSpace
+    if(direction == "horizontal"){
+      totalSpace = toolBarPanel.width
+      usedSpace = toolBarPanel.btnWidth*btnCount
+    } else if(direction == "vertical"){
+      totalSpace = toolBarPanel.height
+      usedSpace = toolBarPanel.btnHeight*btnCount
+    } else {
+      console.log("toolbar direction must be 'horizontal' or 'vertical'")
+      return
+    }
     var emptySpace = totalSpace - usedSpace
 
     var spaceCount = btnCount - 1

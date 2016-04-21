@@ -4,6 +4,7 @@ ToolBarPanelAbstract {
   buttonContainer: toolBarRow
   btnHeight: 48
   btnWidth: 48
+  direction: "horizontal"
 
   height: btnHeight
 
