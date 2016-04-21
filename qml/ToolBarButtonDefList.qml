@@ -42,9 +42,6 @@ QtObject {
     }
     return null
   }
-  function getButtonElemByName(name){
-    return controller.findChild(mainToolBar, "toolbarButton-" + name)
-  }
 
   property list<ToolBarButtonDef> buttonDefs: [
     ToolBarButtonDef {
@@ -162,8 +159,7 @@ QtObject {
         controller.fetchCurrentBodyText(bodyView, bodyView, null)
       }
       function setIsHtml(isHtml){
-        var btnElem = getButtonElemByName(name)
-        btnElem.setText(isHtml ? "text" : "html")
+        text = isHtml ? "text" : "html"
       }
     },
     ToolBarButtonDef {
@@ -176,8 +172,7 @@ QtObject {
         return bodyView.selectable
       }
       function setIsSelectable(isSelectable){
-        var btnElem = getButtonElemByName(name)
-        btnElem.setText(isSelectable ? "select off" : "select on")
+        text = isSelectable ? "select off" : "select on"
         bodyView.selectable = isSelectable
       }
     },
