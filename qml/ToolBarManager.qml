@@ -32,5 +32,6 @@ Rectangle {
 
     mainToolBar.setVisibleButtonNames(okMainButtonNames)
     extraToolBar.setVisibleButtonNames(okExtraButtonNames)
+    extraToolBar.visible = false
   }
 }
