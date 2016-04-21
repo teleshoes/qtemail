@@ -182,7 +182,7 @@ Rectangle {
     id: toolBarManager
     toolBarButtonDefList: toolBarButtonDefList
     mainToolBar: mainToolBar
-    excludeButtonNames: ["showExtra"]
+    excludeButtonNames: ["showExtra", "hideKb"]
   }
 
   ToolBarPanelRow {
