@@ -2,9 +2,6 @@ import QtQuick 1.1
 
 Rectangle {
   id: toolBar
-  anchors.left: parent.left
-  anchors.right: parent.right
-  anchors.bottom: parent.bottom
 
   anchors.leftMargin: 10
   anchors.rightMargin: 10

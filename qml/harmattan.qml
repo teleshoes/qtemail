@@ -181,5 +181,9 @@ PageStackWindow {
     toolBarButtonDefList: toolBarButtonDefList
     btnHeight: 48
     btnWidth: 48
+
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
   }
 }

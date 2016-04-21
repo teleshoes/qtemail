@@ -159,5 +159,9 @@ Rectangle {
     toolBarButtonDefList: toolBarButtonDefList
     btnHeight: 80
     btnWidth: 80
+
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
   }
 }
