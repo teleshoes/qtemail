@@ -26,7 +26,18 @@ Rectangle {
     resetSpacing()
   }
 
-  function resetSpacing() {
+  function resetSpacing(){
+    resetSpacingTimer.restart()
+  }
+  Timer {
+    id: resetSpacingTimer
+    interval: 1; //0.001s
+    onTriggered: resetSpacingImmediately()
+  }
+  function resetSpacingImmediately() {
+    if(!toolBarPanel.visible || toolBarPanel.width <= 0 || toolBarPanel.height <= 0){
+      return
+    }
     var btnCount = 0
     for (var i = 0; i < buttonContainer.children.length; ++i){
       if(buttonContainer.children[i].visible) {
