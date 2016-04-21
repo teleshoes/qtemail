@@ -12,7 +12,7 @@ QtObject {
       "buttonsExtra": [],
     },
     "headerPage": {
-      "buttons": ["back", "more", "markAllRead", "showExtra"],
+      "buttons": ["back", "more", "markAllRead", "hideKb", "showExtra"],
       "buttonsExtra": ["config", "send", "wayMore", "all", "folder"],
     },
     "bodyPage": {
@@ -20,11 +20,11 @@ QtObject {
       "buttonsExtra": ["reply", "forward", "attachments", "zoomIn", "zoomOut"],
     },
     "configPage": {
-      "buttons": ["back", "submit"],
+      "buttons": ["back", "hideKb", "submit"],
       "buttonsExtra": [],
     },
     "sendPage": {
-      "buttons": ["back", "sendEmail"],
+      "buttons": ["back", "hideKb", "sendEmail"],
       "buttonsExtra": [],
     },
   }
@@ -190,6 +190,11 @@ QtObject {
       name: "attachments"
       text: "attach"
       onClicked: controller.saveCurrentAttachments()
+    },
+    ToolBarButtonDef {
+      name: "hideKb"
+      text: "hide KB"
+      onClicked: main.hideKb()
     },
     ToolBarButtonDef {
       name: "sendEmail"
