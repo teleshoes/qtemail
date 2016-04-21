@@ -21,7 +21,30 @@ Rectangle {
       btn.visible = isVisible
     }
 
-    toolBarRow.resetSpacing()
+    resetSpacing()
+  }
+
+  function resetSpacing() {
+    var btnCount = 0
+    for (var i = 0; i < buttonContainer.children.length; ++i){
+      if(buttonContainer.children[i].visible) {
+        btnCount++;
+      }
+    }
+    var totalSpace = toolBarPanel.width
+    var usedSpace = toolBarPanel.btnWidth*btnCount
+    var emptySpace = totalSpace - usedSpace
+
+    var spaceCount = btnCount - 1
+
+    var spacing = 0
+    if(spaceCount > 0){
+      spacing = Math.floor(emptySpace/spaceCount + 0.5)
+    }
+    if(spacing < 2){
+      spacing = 2
+    }
+    buttonContainer.spacing = spacing
   }
 
   Row {
@@ -29,29 +52,6 @@ Rectangle {
     anchors.fill: parent
 
     onWidthChanged: resetSpacing()
-
-    function resetSpacing() {
-      var btnCount = 0
-      for (var i = 0; i < buttonContainer.children.length; ++i){
-        if(buttonContainer.children[i].visible) {
-          btnCount++;
-        }
-      }
-      var totalSpace = toolBarPanel.width
-      var usedSpace = toolBarPanel.btnWidth*btnCount
-      var emptySpace = totalSpace - usedSpace
-
-      var spaceCount = btnCount - 1
-
-      var spacing = 0
-      if(spaceCount > 0){
-        spacing = Math.floor(emptySpace/spaceCount + 0.5)
-      }
-      if(spacing < 2){
-        spacing = 2
-      }
-      toolBarRow.spacing = spacing
-    }
 
     Repeater {
       id: buttonRepeater
