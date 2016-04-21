@@ -3,16 +3,10 @@ import QtQuick 1.1
 Rectangle {
   id: toolBarPanel
 
-  property variant buttonContainer: toolBarRow
-  anchors.leftMargin: 10
-  anchors.rightMargin: 10
-
-  height: btnHeight
-
   property variant toolBarButtonDefList
-
-  property int btnHeight: 48
-  property int btnWidth: 48
+  property variant buttonContainer
+  property int btnHeight
+  property int btnWidth
 
   function setVisibleButtonNames(visibleButtonNames){
     for (var i = 0; i < buttonContainer.children.length; ++i){
@@ -45,30 +39,5 @@ Rectangle {
       spacing = 2
     }
     buttonContainer.spacing = spacing
-  }
-
-  Row {
-    id: toolBarRow
-    anchors.fill: parent
-
-    onWidthChanged: resetSpacing()
-
-    Repeater {
-      id: buttonRepeater
-      model: toolBarButtonDefList.getButtonDefs()
-      Btn {
-        width: btnWidth
-        height: btnHeight
-        Component.onCompleted: {textSize = main.fontTiny}
-        function setText(text){
-          this.text = text
-        }
-        objectName: "toolbarButton-" + modelData.name
-        text: modelData.text
-        imgSource: "/opt/qtemail/icons/buttons/" + modelData.name + ".png"
-        onClicked: modelData.clicked()
-        visible: false
-      }
-    }
   }
 }
