@@ -1,55 +1,44 @@
 import QtQuick 1.1
 
 Rectangle {
-  id: toolBar
+  id: toolBarPanel
 
+  property variant buttonContainer: toolBarRow
   anchors.leftMargin: 10
   anchors.rightMargin: 10
 
-  height: toolBar.btnHeight
+  height: btnHeight
 
   property variant toolBarButtonDefList
 
   property int btnHeight: 48
   property int btnWidth: 48
 
-  function resetButtons(activePageNames){
-    var okButtonNames = []
-    for (var p = 0; p < activePageNames.length; ++p){
-      var pageName = activePageNames[p]
-      var buttonNames = []
-      buttonNames = buttonNames.concat(toolBarButtonDefList.pages[pageName]["buttons"])
-      buttonNames = buttonNames.concat(toolBarButtonDefList.pages[pageName]["buttonsExtra"])
-      for (var b = 0; b < buttonNames.length; ++b){
-        var objectName = "toolbarButton-" + buttonNames[b]
-        okButtonNames.push(objectName)
-      }
-    }
-
-    for (var i = 0; i < toolBarButtonsPanel.children.length; ++i){
-      var btn = toolBarButtonsPanel.children[i]
-      var isVisible = okButtonNames.indexOf(btn.objectName) >= 0
+  function setVisibleButtonNames(visibleButtonNames){
+    for (var i = 0; i < buttonContainer.children.length; ++i){
+      var btn = buttonContainer.children[i]
+      var isVisible = visibleButtonNames.indexOf(btn.objectName) >= 0
       btn.visible = isVisible
     }
 
-    toolBarButtonsPanel.resetSpacing()
+    toolBarRow.resetSpacing()
   }
 
   Row {
-    id: toolBarButtonsPanel
+    id: toolBarRow
     anchors.fill: parent
 
     onWidthChanged: resetSpacing()
 
     function resetSpacing() {
       var btnCount = 0
-      for (var i = 0; i < toolBarButtonsPanel.children.length; ++i){
-        if(toolBarButtonsPanel.children[i].visible) {
+      for (var i = 0; i < buttonContainer.children.length; ++i){
+        if(buttonContainer.children[i].visible) {
           btnCount++;
         }
       }
-      var totalSpace = toolBar.width
-      var usedSpace = toolBar.btnWidth*btnCount
+      var totalSpace = toolBarPanel.width
+      var usedSpace = toolBarPanel.btnWidth*btnCount
       var emptySpace = totalSpace - usedSpace
 
       var spaceCount = btnCount - 1
@@ -61,15 +50,15 @@ Rectangle {
       if(spacing < 2){
         spacing = 2
       }
-      toolBarButtonsPanel.spacing = spacing
+      toolBarRow.spacing = spacing
     }
 
     Repeater {
       id: buttonRepeater
       model: toolBarButtonDefList.getButtonDefs()
       Btn {
-        width: toolBar.btnWidth
-        height: toolBar.btnHeight
+        width: btnWidth
+        height: btnHeight
         Component.onCompleted: {textSize = main.fontTiny}
         function setText(text){
           this.text = text

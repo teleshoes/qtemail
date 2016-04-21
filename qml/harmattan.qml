@@ -63,7 +63,7 @@ PageStackWindow {
   }
 
   function initToolBar() {
-    toolBar.resetButtons([curPage.objectName])
+    toolBarManager.resetButtons([curPage.objectName])
   }
 
   function onLinkActivated(link){
@@ -174,6 +174,12 @@ PageStackWindow {
 
   ToolBarButtonDefList {
     id: toolBarButtonDefList
+  }
+
+  ToolBarManager {
+    id: toolBarManager
+    toolBarButtonDefList: toolBarButtonDefList
+    mainToolBar: mainToolBar
   }
 
   ToolBarPanel {

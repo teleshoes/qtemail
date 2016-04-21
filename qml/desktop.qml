@@ -77,7 +77,7 @@ Rectangle {
         activePageNames.push(p.objectName)
       }
     }
-    toolBar.resetButtons(activePageNames)
+    toolBarManager.resetButtons(activePageNames)
   }
 
   function onLinkActivated(link){
@@ -176,6 +176,12 @@ Rectangle {
 
   ToolBarButtonDefList {
     id: toolBarButtonDefList
+  }
+
+  ToolBarManager {
+    id: toolBarManager
+    toolBarButtonDefList: toolBarButtonDefList
+    mainToolBar: mainToolBar
   }
 
   ToolBarPanel {

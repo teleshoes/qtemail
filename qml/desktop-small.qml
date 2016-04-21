@@ -67,7 +67,7 @@ Rectangle {
   }
 
   function initToolBar() {
-    toolBar.resetButtons([curPage.objectName])
+    toolBarManager.resetButtons([curPage.objectName])
   }
 
   function onLinkActivated(link){
@@ -152,6 +152,12 @@ Rectangle {
 
   ToolBarButtonDefList {
     id: toolBarButtonDefList
+  }
+
+  ToolBarManager {
+    id: toolBarManager
+    toolBarButtonDefList: toolBarButtonDefList
+    mainToolBar: mainToolBar
   }
 
   ToolBarPanel {
