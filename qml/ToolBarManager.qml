@@ -19,14 +19,18 @@ Rectangle {
   }
 
   function resetButtons(activePageNames){
-    var okButtonNames = []
+    var okMainButtonNames = []
+    var okExtraButtonNames = []
     for (var p = 0; p < activePageNames.length; ++p){
       var pageName = activePageNames[p]
-      var buttonNames = []
-      okButtonNames = okButtonNames.concat(toolBarButtonDefList.pages[pageName]["buttons"])
-      okButtonNames = okButtonNames.concat(toolBarButtonDefList.pages[pageName]["buttonsExtra"])
+      var pageMainButtonNames = toolBarButtonDefList.pages[pageName]["buttons"]
+      var pageExtraButtonNames = toolBarButtonDefList.pages[pageName]["buttonsExtra"]
+
+      okMainButtonNames = okMainButtonNames.concat(pageMainButtonNames)
+      okExtraButtonNames = okExtraButtonNames.concat(pageExtraButtonNames)
     }
 
-    mainToolBar.setVisibleButtonNames(okButtonNames)
+    mainToolBar.setVisibleButtonNames(okMainButtonNames)
+    extraToolBar.setVisibleButtonNames(okExtraButtonNames)
   }
 }
