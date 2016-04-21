@@ -95,11 +95,6 @@ QtObject {
       }
     },
     ToolBarButtonDef {
-      name: "sendEmail"
-      text: "send"
-      onClicked: controller.sendEmail(sendView.getForm())
-    },
-    ToolBarButtonDef {
       name: "update"
       text: "update"
       onClicked: accountView.updateAllAccounts()
@@ -195,6 +190,11 @@ QtObject {
       name: "attachments"
       text: "attach"
       onClicked: controller.saveCurrentAttachments()
+    },
+    ToolBarButtonDef {
+      name: "sendEmail"
+      text: "send"
+      onClicked: controller.sendEmail(sendView.getForm())
     },
     ToolBarButtonDef {
       name: "showExtra"
