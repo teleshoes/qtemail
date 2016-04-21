@@ -20,10 +20,10 @@ ToolBarPanelAbstract {
     Repeater {
       id: buttonRepeater
       model: toolBarButtonDefList.getButtonDefs()
-      Btn {
+      BtnWide {
         width: btnWidth
         height: btnHeight
-        Component.onCompleted: {textSize = main.fontTiny}
+        Component.onCompleted: {textSize = main.fontLarge}
         function setText(text){
           this.text = text
         }
