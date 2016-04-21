@@ -3,6 +3,8 @@ import QtQuick 1.1
 BtnAbstract {
   id: button
 
+  property int imgSize: Math.round(Math.min(button.width, button.height)*2.0/3.0)
+
   Text {
     text: button.text
     font.pointSize: button.textSize
@@ -11,11 +13,12 @@ BtnAbstract {
   }
   Image {
     source: button.imgSource
-    anchors.fill: parent
-    anchors.topMargin: button.height / 12
-    anchors.bottomMargin: button.height / 4
-    anchors.leftMargin: button.width / 10
-    anchors.rightMargin: button.width / 10
+    height: imgSize
+    width: imgSize
+    anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+
+    anchors.topMargin: imgSize / 12
   }
 }
 
