@@ -81,7 +81,7 @@ Rectangle {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.bottom: toolBar.top
+    anchors.bottom: mainToolBar.top
     clip: true
 
     // ACCOUNT PAGE
@@ -155,7 +155,7 @@ Rectangle {
   }
 
   ToolBarPanel {
-    id: toolBar
+    id: mainToolBar
     toolBarButtonDefList: toolBarButtonDefList
     btnHeight: 80
     btnWidth: 80

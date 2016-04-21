@@ -43,7 +43,7 @@ QtObject {
     return null
   }
   function getButtonElemByName(name){
-    return controller.findChild(toolBar, "toolbarButton-" + name)
+    return controller.findChild(mainToolBar, "toolbarButton-" + name)
   }
 
   property list<ToolBarButtonDef> buttonDefs: [

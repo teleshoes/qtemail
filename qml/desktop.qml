@@ -91,7 +91,7 @@ Rectangle {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.bottom: toolBar.top
+    anchors.bottom: mainToolBar.top
     clip: true
 
     Row {
@@ -179,7 +179,7 @@ Rectangle {
   }
 
   ToolBarPanel {
-    id: toolBar
+    id: mainToolBar
     toolBarButtonDefList: toolBarButtonDefList
     btnHeight: 70
     btnWidth: 70

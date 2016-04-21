@@ -83,7 +83,7 @@ PageStackWindow {
     id: accountPage
     objectName: "accountPage"
     anchors.topMargin: 30
-    anchors.bottomMargin: 30 + toolBar.height
+    anchors.bottomMargin: 30 + mainToolBar.height
     anchors.leftMargin: 30
     anchors.rightMargin: 30
 
@@ -95,7 +95,7 @@ PageStackWindow {
     id: folderPage
     objectName: "folderPage"
     anchors.topMargin: 30
-    anchors.bottomMargin: 30 + toolBar.height
+    anchors.bottomMargin: 30 + mainToolBar.height
     anchors.leftMargin: 30
     anchors.rightMargin: 30
 
@@ -107,7 +107,7 @@ PageStackWindow {
     id: headerPage
     objectName: "headerPage"
     anchors.topMargin: 30
-    anchors.bottomMargin: 30 + toolBar.height
+    anchors.bottomMargin: 30 + mainToolBar.height
     anchors.leftMargin: 30
     anchors.rightMargin: 30
 
@@ -119,7 +119,7 @@ PageStackWindow {
     id: bodyPage
     objectName: "bodyPage"
     anchors.topMargin: 30
-    anchors.bottomMargin: 30 + toolBar.height
+    anchors.bottomMargin: 30 + mainToolBar.height
     anchors.leftMargin: 30
     anchors.rightMargin: 30
 
@@ -131,7 +131,7 @@ PageStackWindow {
     id: configPage
     objectName: "configPage"
     anchors.topMargin: 30
-    anchors.bottomMargin: 30 + toolBar.height
+    anchors.bottomMargin: 30 + mainToolBar.height
     anchors.leftMargin: 30
     anchors.rightMargin: 30
 
@@ -143,7 +143,7 @@ PageStackWindow {
     id: sendPage
     objectName: "sendPage"
     anchors.topMargin: 30
-    anchors.bottomMargin: 30 + toolBar.height
+    anchors.bottomMargin: 30 + mainToolBar.height
     anchors.leftMargin: 30
     anchors.rightMargin: 30
 
@@ -165,7 +165,7 @@ PageStackWindow {
   Btn {
     id: hideKbBtn
     text: "push to hide keyboard"
-    anchors.bottom: toolBar.top
+    anchors.bottom: mainToolBar.top
     height: 30
     width: parent.width
     onClicked: hideKb()
@@ -177,7 +177,7 @@ PageStackWindow {
   }
 
   ToolBarPanel {
-    id: toolBar
+    id: mainToolBar
     toolBarButtonDefList: toolBarButtonDefList
     btnHeight: 48
     btnWidth: 48
