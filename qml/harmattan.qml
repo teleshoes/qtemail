@@ -202,6 +202,9 @@ PageStackWindow {
     btnHeight: 60
     btnWidth: 240
 
+    opacity: 0.75
+    color: "#dddddd"
+
     anchors.top: parent.top
     anchors.bottom: mainToolBar.top
     anchors.right: parent.right
