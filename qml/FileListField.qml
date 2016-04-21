@@ -40,22 +40,6 @@ Rectangle {
         fileListField.setValue(controller.getHomeDir())
       }
     }
-    Btn {
-      width: buttonPanel.btnWidth
-      height: buttonPanel.btnHeight
-      text: "root"
-      onClicked: {
-        fileListField.setValue("/")
-      }
-    }
-    Btn {
-      width: buttonPanel.btnWidth
-      height: buttonPanel.btnHeight
-      text: "clear"
-      onClicked: {
-        fileListField.setValue("")
-      }
-    }
   }
 
   SuggBox {
