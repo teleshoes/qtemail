@@ -8,14 +8,16 @@ Rectangle {
   property ToolBarPanelAbstract extraToolBar
 
   function isExtraToolBarVisible(){
-    return extraToolBar.visible
+    return extraToolBar != null && extraToolBar.visible
   }
   function toggleExtraToolBarVisible(){
     setExtraToolBarVisible(!isExtraToolBarVisible())
   }
   function setExtraToolBarVisible(isVisible){
-    extraToolBar.visible = isVisible
-    extraToolBar.resetSpacing()
+    if(extraToolBar != null){
+      extraToolBar.visible = isVisible
+      extraToolBar.resetSpacing()
+    }
   }
 
   function resetButtons(activePageNames){
@@ -30,8 +32,12 @@ Rectangle {
       okExtraButtonNames = okExtraButtonNames.concat(pageExtraButtonNames)
     }
 
-    mainToolBar.setVisibleButtonNames(okMainButtonNames)
-    extraToolBar.setVisibleButtonNames(okExtraButtonNames)
-    extraToolBar.visible = false
+    if(extraToolBar == null){
+      mainToolBar.setVisibleButtonNames(okMainButtonNames.concat(okExtraButtonNames))
+    }else{
+      mainToolBar.setVisibleButtonNames(okMainButtonNames)
+      extraToolBar.setVisibleButtonNames(okExtraButtonNames)
+      extraToolBar.visible = false
+    }
   }
 }
