@@ -19,6 +19,7 @@ Rectangle {
 
   border.color: "black"
   border.width: 5
+  radius: 8
 
   MouseArea {
     id: mouseArea
