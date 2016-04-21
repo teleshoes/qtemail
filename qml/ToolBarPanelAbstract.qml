@@ -3,7 +3,7 @@ import QtQuick 1.1
 Rectangle {
   id: toolBarPanel
 
-  property variant toolBarButtonDefList
+  property ToolBarButtonDefList toolBarButtonDefList
   property variant buttonContainer
   property int btnHeight
   property int btnWidth
