@@ -110,6 +110,12 @@ sub cmdUpdate($@){
       }
 
       my ($newMessages, $err) = cacheAllHeaders($accName, $folderName, $c);
+      if(defined $err){
+        warn $err;
+        writeError $accName, $err;
+        writeStatusFiles(@accOrder);
+        next;
+      }
 
       my @unread = $c->unseen;
 
@@ -206,6 +212,13 @@ sub cacheAllHeaders($$$){
   my ($accName, $folderName, $c) = @_;
   print "fetching all message ids\n" if $$GVAR{VERBOSE};
   my @messages = $c->messages;
+  for my $msg(@messages){
+    if(not defined $msg or $msg !~ /^\d+$/){
+      my $badMsgId = defined $msg ? $msg : "";
+      my $err = "Error fetching headers (invalid message id: \"$badMsgId\")";
+      return ([], $err);
+    }
+  }
   print "fetched " . @messages . " ids\n" if $$GVAR{VERBOSE};
 
   my $dir = "$$GVAR{EMAIL_DIR}/$accName/$folderName";
