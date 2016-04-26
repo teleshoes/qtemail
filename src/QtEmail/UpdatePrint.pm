@@ -109,7 +109,7 @@ sub cmdUpdate($@){
         next;
       }
 
-      my @newMessages = cacheAllHeaders($accName, $folderName, $c);
+      my ($newMessages, $err) = cacheAllHeaders($accName, $folderName, $c);
 
       my @unread = $c->unseen;
 
@@ -281,7 +281,7 @@ sub cacheAllHeaders($$$){
 
   writeUidFile $accName, $folderName, "all", keys %okCachedHeaderUids;
 
-  return @messages;
+  return (@messages, undef);
 }
 
 1;
