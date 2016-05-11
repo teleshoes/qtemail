@@ -294,7 +294,7 @@ sub cacheAllHeaders($$$){
 
   writeUidFile $accName, $folderName, "all", keys %okCachedHeaderUids;
 
-  return (@messages, undef);
+  return ([@messages], undef);
 }
 
 1;
