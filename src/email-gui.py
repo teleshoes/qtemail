@@ -953,26 +953,35 @@ class Controller(QObject):
 
   @Slot()
   def markAllRead(self):
-    headers = []
+    headerStates = []
     uids = []
     for header in self.headerModel.getItems():
       if not header.read_:
         header.setLoading(True)
-        headers.append(header)
+        headerStates.append({'header': header, 'uid': header.uid_})
         uids.append(str(header.uid_))
 
     cmd = [EMAIL_BIN, "--mark-read",
       "--folder=" + self.folderName, self.accountName] + uids
 
     self.startEmailCommandThread(cmd, None,
-      self.onMarkAllReadFinished, {'headers': headers})
+      self.onMarkAllReadFinished, {
+        'accountName': self.accountName,
+        'folderName': self.folderName,
+        'headerStates': headerStates})
   def onMarkAllReadFinished(self, isSuccess, output, extraArgs):
-    headers = extraArgs['headers']
-    for header in headers:
-      header.setLoading(False)
-    if isSuccess:
-      for header in self.headerModel.getItems():
-        header.setRead(True)
+    accountName = extraArgs['accountName']
+    folderName = extraArgs['folderName']
+    headerStates = extraArgs['headerStates']
+
+    if accountName == self.accountName and folderName == self.folderName:
+      for headerState in headerStates:
+        header = headerState['header']
+        if headerState['uid'] == header.uid_:
+          header.setLoading(False)
+          if isSuccess:
+            header.setRead(True)
+
     self.setupAccounts()
 
   @Slot(QObject)
