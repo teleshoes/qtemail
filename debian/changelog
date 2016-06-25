@@ -1,3 +1,18 @@
+qtemail (2.0) UNRELEASED; urgency=low
+  * Modularization, huge refactor, performance improvements
+  * Large toolbar improvments (added submenu, style, same for all platforms)
+  * Add --delete and --move support to email.pl
+  * New file selector UI using qmlcompletionbox (for attachments)
+  * Add support for CC and BCC in email.pl and GUI
+  * Add count_include config to optionally ignore folders for unread counts
+  * Fix bug: changing folder did not navigate back to header list
+  * Fix bug: mark-all-read updated UI even if you changed folders
+  * Fix bug: email addresses containing dots failed to parse in send GUI
+  * Improve cmdline args (e.g.: `email-gui.py --account=WORK --page=send`)
+  * Improve config: add descriptions+usage, support multi-line, set-password
+  * Workaround for font point size warnings caused by QT4 bug
+-- teleshoes <elliot.wolk@gmail.com>  Sat, 25 Jun 2016 16:36:47 -0400
+
 qtemail (1.3) UNRELEASED; urgency=low
   * Add support for fremantle/n900 with generic desktop-small platform
   * Add faster, more powerful email-search.pl sqlite database tool
