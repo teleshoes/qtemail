@@ -57,6 +57,7 @@ my $accountConfigSchema = [
   ["new_unread_cmd",  "OPT", "custom alert command"],
   ["update_interval", "OPT", "GUI: seconds between account updates"],
   ["refresh_interval","OPT", "GUI: seconds between account refresh"],
+  ["custom_cmd",      "OPT", "GUI: shell command to run when cmd button is pushed"],
   ["filters",         "OPT", "GUI: list of filter-buttons, e.g.:\"s1=%a% s2=%b%\""],
 ];
 my $optionsConfigSchema = [
@@ -91,6 +92,21 @@ my $longDescriptions = {
     . "unread: cache unread bodies (up to $$GVAR{MAX_BODIES_TO_CACHE})\n"
     . "all:    cache all bodies (up to $$GVAR{MAX_BODIES_TO_CACHE})\n"
     . "none:   do not cache bodies during --update\n"
+  ,
+  custom_cmd => ''
+    . "command is run using 'sh -c', after prepending some environment variables\n"
+    . "the following vars are set:\n"
+    . "  ACCOUNT_NAME   FOLDER_NAME   UID\n"
+    . "e.g.:\n"
+    . "  1) config:\n"
+    . "    email.WORK.custom_cmd = email.pl --delete --folder=\$FOLDER_NAME \$ACCOUNT_NAME \$UID\n"
+    . "  2) runs this shell script:\n"
+    . "    sh -c 'ACCOUNT_NAME=\"WORK\"; \\\n"
+    . "           FOLDER_NAME=\"inbox\"; \\\n"
+    . "           UID=\"42506\"; \\\n"
+    . "           email.pl --delete --folder=\$FOLDER_NAME \$ACCOUNT_NAME \$UID'\n"
+    . "  3) which has the same effect as running:\n"
+    . "    email.pl --delete --folder=inbox WORK 42506\n"
   ,
   filters => ''
     . "each filter is separated by a space, and takes the form:\n"
