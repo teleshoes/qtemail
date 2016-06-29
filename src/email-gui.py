@@ -528,6 +528,22 @@ class Controller(QObject):
   def showSendWindow(self):
     self.sendWindow.show()
 
+  @Slot()
+  def runCustomCommand(self):
+    if self.accountConfig != None and "custom_cmd" in self.accountConfig.keys():
+      cmd = ""
+      if self.accountName != None:
+        cmd += "ACCOUNT_NAME=\"" + self.accountName + "\"; \\\n"
+      if self.folderName != None:
+        cmd += "FOLDER_NAME=\"" + self.folderName + "\"; \\\n"
+      if self.header != None:
+        cmd += "UID=\"" + str(self.header.Uid) + "\"; \\\n"
+      cmd += self.accountConfig["custom_cmd"]
+      print "running command:\n" + cmd
+      self.shellCommand(cmd)
+    else:
+      print "no command to run\n"
+
   @Slot('QVariantList')
   def runCommand(self, cmdArr):
     subprocess.Popen(cmdArr)
