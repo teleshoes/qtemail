@@ -17,7 +17,7 @@ QtObject {
     },
     "bodyPage": {
       "buttons": ["back", "toggleHtml", "toggleSelectable", "copy", "showExtra"],
-      "buttonsExtra": ["reply", "forward", "attachments", "zoomIn", "zoomOut"],
+      "buttonsExtra": ["reply", "forward", "zoomIn", "zoomOut", "attachments"],
     },
     "configPage": {
       "buttons": ["back", "hideKb", "submit"],
