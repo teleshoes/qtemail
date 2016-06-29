@@ -17,7 +17,7 @@ QtObject {
     },
     "bodyPage": {
       "buttons": ["back", "toggleHtml", "toggleSelectable", "copy", "showExtra"],
-      "buttonsExtra": ["reply", "forward", "zoomIn", "zoomOut", "attachments"],
+      "buttonsExtra": ["reply", "forward", "zoomIn", "zoomOut", "cmd", "attachments"],
     },
     "configPage": {
       "buttons": ["back", "hideKb", "submit"],
@@ -185,6 +185,11 @@ QtObject {
       name: "zoomOut"
       text: "zoom out"
       onClicked: bodyView.zoomOut()
+    },
+    ToolBarButtonDef {
+      name: "cmd"
+      text: "cmd"
+      onClicked: controller.runCustomCommand()
     },
     ToolBarButtonDef {
       name: "attachments"
