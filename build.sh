@@ -1,4 +1,4 @@
-dpkg-buildpackage
+dpkg-buildpackage -uc -us
 mv ../qtemail_* .
 rm qtemail_*.changes
 rm qtemail_*.dsc
