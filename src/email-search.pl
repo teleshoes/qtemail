@@ -126,8 +126,10 @@ my $usageFormat = "Usage:
       SIMPLE_HEADER_QUERY = <PATTERN>
         return emails with at least one header field that matches the pattern
       BODY_QUERY = body~<PATTERN>
+                 | b~<PATTERN>
         return emails where the body matches the pattern
       NEGATED_BODY_QUERY = body!~<PATTERN>
+                         | b!~<PATTERN>
         return emails where the body does NOT match the pattern
       BODYTEXT_QUERY = bodytext~<PATTERN>
         return emails where the plaintext body matches the pattern
