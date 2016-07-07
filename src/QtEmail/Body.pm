@@ -320,21 +320,32 @@ sub html2text($){
   if($html !~ /<(html|body|head|table)(\s+[^>]*)?>/){
     return $html;
   }
+
   if(-x $$GVAR{HTML2TEXT_EXEC}){
     my $md5 = md5_hex($html);
-    my $tmpFile = "/tmp/email_tmp_" . int(time*1000) . "_$md5.html";
-    open FH, "> $tmpFile" or die "Could not write to $tmpFile\n";
+    my $tmpPrefix = "/tmp/email_tmp_" . int(time*1000) . "_$md5";
+    my $tmpHtml = "$tmpPrefix.html";
+    my $tmpOut = "$tmpPrefix.out";
+    my $tmpErr = "$tmpPrefix.err";
+    open FH, "> $tmpHtml" or die "Could not write to $tmpHtml\n";
     print FH $html;
     close FH;
-    my $text = `$$GVAR{HTML2TEXT_EXEC} $tmpFile`;
-    system "rm", $tmpFile;
-    return $text;
-  }else{
-    $html =~ s/<[^>]*>//g;
-    $html =~ s/\n(\s*\n)+/\n/g;
-    $html =~ s/^\s+//mg;
-    return $html;
+    system "$$GVAR{HTML2TEXT_EXEC} $tmpHtml 1>$tmpOut 2>$tmpErr";
+    my $out = `cat $tmpOut`;
+    my $err = `cat $tmpErr`;
+    system "rm", $tmpHtml, $tmpOut, $tmpErr;
+    my $success = $out !~ /^(\s|\n)*$/ and $err =~ /^(\s|\n)*$/;
+    if($success){
+      return $out;
+    }else{
+      print STDERR "html2text failed, using simple converter\n";
+    }
   }
+
+  $html =~ s/<[^>]*>//g;
+  $html =~ s/\n(\s*\n)+/\n/g;
+  $html =~ s/^\s+//mg;
+  return $html;
 }
 
 1;
