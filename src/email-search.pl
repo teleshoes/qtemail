@@ -132,8 +132,16 @@ my $usageFormat = "Usage:
                          | b!~<PATTERN>
         return emails where the body does NOT match the pattern
       BODYPLAIN_QUERY = bodyplain~<PATTERN>
+                      | bodytext~<PATTERN>
+                      | bodyplaintext~<PATTERN>
+                      | plain~<PATTERN>
+                      | plaintext~<PATTERN>
         return emails where the plaintext body matches the pattern
       NEGATED_BODYPLAIN_QUERY = bodyplain!~<PATTERN>
+                              | bodytext~<PATTERN>
+                              | bodyplaintext~<PATTERN>
+                              | plain~<PATTERN>
+                              | plaintext~<PATTERN>
         return emails where the plaintext body does NOT match the pattern
       HEADER_FIELD = subject | from | to | cc | bcc | date
         restricts the fields that PATTERN can match
@@ -514,7 +522,7 @@ sub parseFlatQueryStr($){
         @fields = ();
         $negated = $2 eq "!" ? 1 : 0;
         $content = $3;
-      }elsif($and =~ /(bodyplain)(!?)~(.*)/i){
+      }elsif($and =~ /(bodyplain|bodytext|bodyplaintext|plain|plaintext)(!?)~(.*)/i){
         $type = "bodyplain";
         @fields = ();
         $negated = $2 eq "!" ? 1 : 0;
