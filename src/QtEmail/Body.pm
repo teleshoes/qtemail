@@ -357,6 +357,18 @@ sub html2text($;$){
   $html =~ s/(&lt;|&#60;)/</g;
   $html =~ s/(&gt;|&#62;)/>/g;
 
+  $html =~ s/(&apos;|&#39;)/'/g;
+  $html =~ s/(&quot;|&#34;)/"/g;
+
+  $html =~ s/(&ldquo;|&#8220;)/"/g;
+  $html =~ s/(&rdquo;|&#8221;)/"/g;
+  $html =~ s/(&lsquo;|&#8216;)/'/g;
+  $html =~ s/(&rsquo;|&#8217;)/'/g;
+  $html =~ s/(&laquo;|&#171;)/<</g;
+  $html =~ s/(&raquo;|&#187;)/>>/g;
+  $html =~ s/(&lsaquo;|&#8249;)/</g;
+  $html =~ s/(&rsaquo;|&#8250;)/>/g;
+
   $html =~ s/(&amp;|&#38;)/&/;
 
   return $html;
