@@ -344,10 +344,14 @@ sub html2text($;$){
   }
 
   $html =~ s/<\s*style[^>]*>([^<]|\n)*<\s*\/\s*style\s*>//gi;
+  $html =~ s/<\s*br\s*\/?\s*>/&#10;/g;
 
   $html =~ s/<[^>]*>//g;
   $html =~ s/\n(\s*\n)+/\n/g;
   $html =~ s/^\s+//mg;
+
+  $html =~ s/(&#10;)/\n/g;
+
   return $html;
 }
 
