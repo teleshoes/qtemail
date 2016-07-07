@@ -127,6 +127,10 @@ my $usageFormat = "Usage:
         return emails where the body matches the pattern
       NEGATED_BODY_QUERY = body!~<PATTERN>
         return emails where the body does NOT match the pattern
+      BODYTEXT_QUERY = bodytext~<PATTERN>
+        return emails where the plaintext body matches the pattern
+      NEGATED_BODYTEXT_QUERY = bodytext!~<PATTERN>
+        return emails where the plaintext body does NOT match the pattern
       HEADER_FIELD = subject | from | to | cc | bcc | date
         restricts the fields that PATTERN can match
       PATTERN = <string> | <string>\"<string>\"<string>
@@ -417,6 +421,10 @@ sub formatQuery($;$){
     my $content = $$query{content};
     my $like = $$query{negated} ? "NOT LIKE" : "LIKE";
     $fmt .= $indent . "[body] $like $$query{content}\n";
+  }elsif($$query{type} =~ /bodytext/){
+    my $content = $$query{content};
+    my $like = $$query{negated} ? "NOT LIKE" : "LIKE";
+    $fmt .= $indent . "[bodytext] $like $$query{content}\n";
   }
   return $fmt;
 }
@@ -502,6 +510,11 @@ sub parseFlatQueryStr($){
         @fields = ();
         $negated = $2 eq "!" ? 1 : 0;
         $content = $3;
+      }elsif($and =~ /(bodytext)(!?)~(.*)/i){
+        $type = "bodytext";
+        @fields = ();
+        $negated = $2 eq "!" ? 1 : 0;
+        $content = $3;
       }else{
         $type = "header";
         @fields = qw(to cc bcc from subject);
@@ -564,7 +577,7 @@ sub unescapeQuery($$){
     my @parts = @{$$query{parts}};
     @parts = map {unescapeQuery $_, $quotes} @parts;
     $$query{parts} = [@parts];
-  }elsif($type =~ /^(header|body)$/){
+  }elsif($type =~ /^(header|body|bodytext)$/){
     $$query{content} = unescapeQueryStr $$query{content}, $quotes;
   }else{
     die "unknown type: $type\n";
@@ -603,7 +616,7 @@ sub reduceQuery($){
     }else{
       return {type => $type, parts => [@parts]};
     }
-  }elsif($type =~ /^(header|body)$/){
+  }elsif($type =~ /^(header|body|bodytext)$/){
     my @fields = @{$$query{fields}};
     my $negated = $$query{negated};
     my $content = $$query{content};
@@ -687,6 +700,19 @@ sub runQuery($$$@){
     if(@uids < 1000){
       my %okUids = map {$_ => 1} @uids;
       @newUids = grep {defined $okUids{$_}} @newUids;
+    }
+    @uids = @newUids;
+  }elsif($type =~ /^(bodytext)$/){
+    my @fields = @{$$query{fields}};
+    my $content = $$query{content};
+    my $regex = $content;
+    my @newUids;
+    for my $uid(@uids){
+      my $plaintext = `email.pl --body-plain --folder="$folderName" "$accName" "$uid"`;
+      my $matches = $plaintext =~ /$regex/;
+      if(($matches and not $$query{negated}) or (not $matches and $$query{negated})){
+        push @newUids, $uid;
+      }
     }
     @uids = @newUids;
   }
