@@ -111,8 +111,8 @@ my $usageFormat = "Usage:
             | <SIMPLE_HEADER_QUERY>
             | <BODY_QUERY>
             | <NEGATED_BODY_QUERY>
-            | <BODYTEXT_QUERY>
-            | <NEGATED_BODYTEXT_QUERY>
+            | <BODYPLAIN_QUERY>
+            | <NEGATED_BODYPLAIN_QUERY>
             | (<QUERY>)
         return emails that match this QUERY
       LIST_AND = <QUERY> <QUERY>
@@ -131,9 +131,9 @@ my $usageFormat = "Usage:
       NEGATED_BODY_QUERY = body!~<PATTERN>
                          | b!~<PATTERN>
         return emails where the body does NOT match the pattern
-      BODYTEXT_QUERY = bodytext~<PATTERN>
+      BODYPLAIN_QUERY = bodyplain~<PATTERN>
         return emails where the plaintext body matches the pattern
-      NEGATED_BODYTEXT_QUERY = bodytext!~<PATTERN>
+      NEGATED_BODYPLAIN_QUERY = bodyplain!~<PATTERN>
         return emails where the plaintext body does NOT match the pattern
       HEADER_FIELD = subject | from | to | cc | bcc | date
         restricts the fields that PATTERN can match
@@ -425,10 +425,10 @@ sub formatQuery($;$){
     my $content = $$query{content};
     my $like = $$query{negated} ? "NOT LIKE" : "LIKE";
     $fmt .= $indent . "[body] $like $$query{content}\n";
-  }elsif($$query{type} =~ /bodytext/){
+  }elsif($$query{type} =~ /bodyplain/){
     my $content = $$query{content};
     my $like = $$query{negated} ? "NOT LIKE" : "LIKE";
-    $fmt .= $indent . "[bodytext] $like $$query{content}\n";
+    $fmt .= $indent . "[bodyplain] $like $$query{content}\n";
   }
   return $fmt;
 }
@@ -514,8 +514,8 @@ sub parseFlatQueryStr($){
         @fields = ();
         $negated = $2 eq "!" ? 1 : 0;
         $content = $3;
-      }elsif($and =~ /(bodytext)(!?)~(.*)/i){
-        $type = "bodytext";
+      }elsif($and =~ /(bodyplain)(!?)~(.*)/i){
+        $type = "bodyplain";
         @fields = ();
         $negated = $2 eq "!" ? 1 : 0;
         $content = $3;
@@ -581,7 +581,7 @@ sub unescapeQuery($$){
     my @parts = @{$$query{parts}};
     @parts = map {unescapeQuery $_, $quotes} @parts;
     $$query{parts} = [@parts];
-  }elsif($type =~ /^(header|body|bodytext)$/){
+  }elsif($type =~ /^(header|body|bodyplain)$/){
     $$query{content} = unescapeQueryStr $$query{content}, $quotes;
   }else{
     die "unknown type: $type\n";
@@ -620,7 +620,7 @@ sub reduceQuery($){
     }else{
       return {type => $type, parts => [@parts]};
     }
-  }elsif($type =~ /^(header|body|bodytext)$/){
+  }elsif($type =~ /^(header|body|bodyplain)$/){
     my @fields = @{$$query{fields}};
     my $negated = $$query{negated};
     my $content = $$query{content};
@@ -685,14 +685,14 @@ sub runQuery($$$@){
     my %okUids = map {$_ => 1} @uids;
     @newUids = grep {defined $okUids{$_}} @newUids;
     @uids = sort @newUids;
-  }elsif($type =~ /^(body|bodytext)$/){
+  }elsif($type =~ /^(body|bodyplain)$/){
     my @fields = @{$$query{fields}};
     my $content = $$query{content};
     my $regex = $content;
     my $dir;
     if($type =~ /^(body)$/){
       $dir = "$emailDir/$accName/$folderName/bodies";
-    }elsif($type =~ /^(bodytext)$/){
+    }elsif($type =~ /^(bodyplain)$/){
       $dir = "$emailDir/$accName/$folderName/bodies-plain";
     }
     my $matchOp = $$query{negated} ? "-L" : "-l";
