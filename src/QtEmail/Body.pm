@@ -407,6 +407,8 @@ sub html2text($;$){
 
   $html =~ s/(&amp;|&#38;)/&/;
 
+  $html =~ tr/\x00-\x7f//cd;
+
   return $html;
 }
 
