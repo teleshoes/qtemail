@@ -42,6 +42,7 @@ our @EXPORT = qw(
 sub cmdBodyAttachments($$$$$$$$@);
 sub cmdCacheAllBodies($$);
 
+sub newMimeParser($);
 sub cacheBodies($$$$@);
 sub getHeaderFromBody($$);
 sub getBody($$$);
@@ -65,11 +66,10 @@ sub cmdBodyAttachments($$$$$$$$@){
   die "Unknown account $accName\n" if not defined $acc;
   my $imapFolder = accImapFolder($acc, $folderName);
   die "Unknown folder $folderName\n" if not defined $imapFolder;
+
   my $c;
   my $f;
-  require MIME::Parser;
-  my $mimeParser = MIME::Parser->new();
-  $mimeParser->output_dir($destDir);
+  my $mimeParser = undef;
   for my $uid(@uids){
     my $body = readCachedBody($accName, $folderName, $uid);
     if(not defined $body and $noDownload){
@@ -96,6 +96,7 @@ sub cmdBodyAttachments($$$$$$$$@){
       if($wantPlain){
         my $cachedBodyPlain = readCachedBodyPlain($accName, $folderName, $uid);
         if(not defined $cachedBodyPlain){
+          $mimeParser = newMimeParser($destDir) if not defined $mimeParser;
           my $bodyPlain = getBody($mimeParser, $body, $preferHtml);
           $bodyPlain = html2text $bodyPlain;
           cacheBodyPlain($accName, $folderName, $uid, $bodyPlain);
@@ -103,12 +104,14 @@ sub cmdBodyAttachments($$$$$$$$@){
         }
         $bodyFmt = $cachedBodyPlain;
       }else{
+        $mimeParser = newMimeParser($destDir) if not defined $mimeParser;
         $bodyFmt = getBody($mimeParser, $body, $preferHtml);
       }
       chomp $bodyFmt;
       print $bodyFmt;
       print $nulSep ? "\0" : "\n";
     }elsif($modeBodyAttachments eq "attachments"){
+      $mimeParser = newMimeParser($destDir) if not defined $mimeParser;
       my @attachments = writeAttachments($mimeParser, $body);
       for my $attachment(@attachments){
         print " saved att: $attachment\n";
@@ -138,6 +141,14 @@ sub cmdCacheAllBodies($$){
 }
 
 
+
+sub newMimeParser($){
+  my ($destDir) = @_;
+  require MIME::Parser;
+  my $mimeParser = MIME::Parser->new();
+  $mimeParser->output_dir($destDir);
+  return $mimeParser;
+}
 
 sub cacheBodies($$$$@){
   my ($accName, $folderName, $c, $maxCap, @messages) = @_;
