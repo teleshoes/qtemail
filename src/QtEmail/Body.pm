@@ -172,6 +172,8 @@ sub cacheBodies($$$$@){
   my $segment = int($total/20);
   $segment = 100 if $segment > 100;
 
+  my $mimeParser = undef;
+  my $mimeDestDir = $$GVAR{TMP_DIR};
   for my $uid(@messages){
     $count++;
     if($segment > 0 and $count % $segment == 0){
@@ -190,6 +192,11 @@ sub cacheBodies($$$$@){
       open FH, "> $bodiesDir/$uid" or die "Could not write $bodiesDir/$uid\n";
       print FH $body;
       close FH;
+
+      $mimeParser = newMimeParser($mimeDestDir) if not defined $mimeParser;
+      my $bodyPlain = getBody($mimeParser, $body, 0);
+      $bodyPlain = html2text $bodyPlain;
+      cacheBodyPlain($accName, $folderName, $uid, $bodyPlain);
     }
   }
 }
