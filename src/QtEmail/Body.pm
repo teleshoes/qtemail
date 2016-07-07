@@ -2,7 +2,6 @@ package QtEmail::Body;
 use strict;
 use warnings;
 use Time::HiRes qw(time);
-use Digest::MD5 qw(md5_hex);
 use lib "/opt/qtemail/lib";
 
 use QtEmail::Shared qw(GET_GVAR);
@@ -324,8 +323,9 @@ sub html2text($;$){
   }
 
   if(-x $$GVAR{HTML2TEXT_EXEC}){
-    my $md5 = md5_hex($html);
-    my $tmpPrefix = "/tmp/email_tmp_" . int(time*1000) . "_$md5";
+    my $rand = sprintf "%03d", int(rand(1000));
+    my $millis = int(time*1000);
+    my $tmpPrefix = "/tmp/email_tmp_${millis}_${rand}_${id}";
     my $tmpHtml = "$tmpPrefix.html";
     my $tmpOut = "$tmpPrefix.out";
     my $tmpErr = "$tmpPrefix.err";
