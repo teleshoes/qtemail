@@ -111,6 +111,8 @@ my $usageFormat = "Usage:
             | <SIMPLE_HEADER_QUERY>
             | <BODY_QUERY>
             | <NEGATED_BODY_QUERY>
+            | <BODYTEXT_QUERY>
+            | <NEGATED_BODYTEXT_QUERY>
             | (<QUERY>)
         return emails that match this QUERY
       LIST_AND = <QUERY> <QUERY>
