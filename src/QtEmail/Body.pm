@@ -351,6 +351,10 @@ sub html2text($;$){
   $html =~ s/^\s+//mg;
 
   $html =~ s/(&#10;)/\n/g;
+  $html =~ s/(&#47;)/\//g;
+  $html =~ s/(&#45;)/-/g;
+
+  $html =~ s/(&amp;|&#38;)/&/;
 
   return $html;
 }
