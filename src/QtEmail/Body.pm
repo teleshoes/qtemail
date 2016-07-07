@@ -354,6 +354,10 @@ sub html2text($;$){
   $html =~ s/(&#47;)/\//g;
   $html =~ s/(&#45;)/-/g;
 
+  $html =~ s/(&nbsp;|&#160;)/ /g;
+  $html =~ s/(&emsp;|&#8195;)/ /g;
+  $html =~ s/(&ensp;|&#8194;)/ /g;
+
   $html =~ s/(&lt;|&#60;)/</g;
   $html =~ s/(&gt;|&#62;)/>/g;
 
