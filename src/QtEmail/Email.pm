@@ -1,6 +1,7 @@
 package QtEmail::Email;
 use strict;
 use warnings;
+use Time::HiRes qw(time);
 use lib "/opt/qtemail/lib";
 
 use QtEmail::Shared qw(GET_GVAR);
@@ -487,7 +488,8 @@ sub updateGlobalUnreadCountsFile($){
 sub relTime($){
   my ($time) = @_;
   return "never" if not defined $time;
-  my $diff = time - $time;
+  my $now = int(time);
+  my $diff = $now - $time;
 
   return "now" if $diff == 0;
 
@@ -576,8 +578,9 @@ sub readLastUpdated($){
 sub writeLastUpdated($){
   my ($accName) = @_;
   my $f = "$$GVAR{EMAIL_DIR}/$accName/last_updated";
+  my $time = int(time);
   open FH, "> $f" or die "Could not write to $f\n";
-  print FH time . "\n";
+  print FH $time . "\n";
   close FH;
 }
 

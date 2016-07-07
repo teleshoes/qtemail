@@ -1,6 +1,7 @@
 package QtEmail::Body;
 use strict;
 use warnings;
+use Time::HiRes qw(time);
 use lib "/opt/qtemail/lib";
 
 use QtEmail::Shared qw(GET_GVAR);
