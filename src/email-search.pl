@@ -681,11 +681,16 @@ sub runQuery($$$@){
     my %okUids = map {$_ => 1} @uids;
     @newUids = grep {defined $okUids{$_}} @newUids;
     @uids = sort @newUids;
-  }elsif($type =~ /^(body)$/){
+  }elsif($type =~ /^(body|bodytext)$/){
     my @fields = @{$$query{fields}};
     my $content = $$query{content};
     my $regex = $content;
-    my $dir = "$emailDir/$accName/$folderName/bodies";
+    my $dir;
+    if($type =~ /^(body)$/){
+      $dir = "$emailDir/$accName/$folderName/bodies";
+    }elsif($type =~ /^(bodytext)$/){
+      $dir = "$emailDir/$accName/$folderName/bodies-plain";
+    }
     my $matchOp = $$query{negated} ? "-L" : "-l";
     my @cmd = ("grep", "-P", "-i", $matchOp, $regex);
     if(@uids < 1000){
@@ -700,19 +705,6 @@ sub runQuery($$$@){
     if(@uids < 1000){
       my %okUids = map {$_ => 1} @uids;
       @newUids = grep {defined $okUids{$_}} @newUids;
-    }
-    @uids = @newUids;
-  }elsif($type =~ /^(bodytext)$/){
-    my @fields = @{$$query{fields}};
-    my $content = $$query{content};
-    my $regex = $content;
-    my @newUids;
-    for my $uid(@uids){
-      my $plaintext = `email.pl --body-plain --folder="$folderName" "$accName" "$uid"`;
-      my $matches = $plaintext =~ /$regex/;
-      if(($matches and not $$query{negated}) or (not $matches and $$query{negated})){
-        push @newUids, $uid;
-      }
     }
     @uids = @newUids;
   }
