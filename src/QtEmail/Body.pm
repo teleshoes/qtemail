@@ -51,7 +51,7 @@ sub getBody($$$);
 sub writeAttachments($$);
 sub parseMimeEntity($);
 sub getHeaderFromBody($$);
-sub html2text($);
+sub html2text($;$);
 
 my $GVAR = QtEmail::Shared::GET_GVAR;
 
@@ -100,7 +100,7 @@ sub cmdBodyAttachments($$$$$$$$@){
         if(not defined $cachedBodyPlain){
           $mimeParser = newMimeParser($destDir) if not defined $mimeParser;
           my $bodyPlain = getBody($mimeParser, $body, $preferHtml);
-          $bodyPlain = html2text $bodyPlain;
+          $bodyPlain = html2text $bodyPlain, "${accName}=>${folderName}=>${uid}";
           cacheBodyPlain($accName, $folderName, $uid, $bodyPlain);
           $cachedBodyPlain = readCachedBodyPlain($accName, $folderName, $uid);
         }
@@ -197,7 +197,7 @@ sub cacheBodies($$$$@){
 
       $mimeParser = newMimeParser($mimeDestDir) if not defined $mimeParser;
       my $bodyPlain = getBody($mimeParser, $body, 0);
-      $bodyPlain = html2text $bodyPlain;
+      $bodyPlain = html2text $bodyPlain, "${accName}=>${folderName}=>${uid}";
       cacheBodyPlain($accName, $folderName, $uid, $bodyPlain);
     }
   }
@@ -315,8 +315,9 @@ sub getHeaderFromBody($$){
   return $hdr;
 }
 
-sub html2text($){
-  my ($html) = @_;
+sub html2text($;$){
+  my ($html, $errMsg) = @_;
+  $errMsg = "" if not defined $errMsg;
   if($html !~ /<(html|body|head|table)(\s+[^>]*)?>/){
     return $html;
   }
@@ -338,7 +339,7 @@ sub html2text($){
     if($success){
       return $out;
     }else{
-      print STDERR "html2text failed, using simple converter\n";
+      print STDERR "html2text failed, using simple converter: $errMsg\n";
     }
   }
 
