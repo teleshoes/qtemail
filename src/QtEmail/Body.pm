@@ -2,6 +2,7 @@ package QtEmail::Body;
 use strict;
 use warnings;
 use Time::HiRes qw(time);
+use Digest::MD5 qw(md5_hex);
 use lib "/opt/qtemail/lib";
 
 use QtEmail::Shared qw(GET_GVAR);
@@ -320,7 +321,8 @@ sub html2text($){
     return $html;
   }
   if(-x $$GVAR{HTML2TEXT_EXEC}){
-    my $tmpFile = "/tmp/email_tmp_" . int(time*1000) . ".html";
+    my $md5 = md5_hex($html);
+    my $tmpFile = "/tmp/email_tmp_" . int(time*1000) . "_$md5.html";
     open FH, "> $tmpFile" or die "Could not write to $tmpFile\n";
     print FH $html;
     close FH;
