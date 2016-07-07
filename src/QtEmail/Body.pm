@@ -373,6 +373,38 @@ sub html2text($;$){
   $html =~ s/(&lsaquo;|&#8249;)/</g;
   $html =~ s/(&rsaquo;|&#8250;)/>/g;
 
+  $html =~ s/(&iexcl;|&#161;)/!/g;
+  $html =~ s/(&iquest;|&#191;)/?/g;
+
+  $html =~ s/(&para;|&#182;)/[P]/g;
+  $html =~ s/(&sect;|&#167;)/[S]/g;
+  $html =~ s/(&middot;|&#183;)/*/g;
+  $html =~ s/(&bull;|&#8226;)/*/g;
+  $html =~ s/(&deg;|&#176;)/^o/g;
+  $html =~ s/(&hellip;|&#8230;)/.../g;
+
+  $html =~ s/(&cent;|&#162;)/c/g;
+  $html =~ s/(&euro;|&#8364;)/EUR/g;
+  $html =~ s/(&pound;|&#163;)/GBP/g;
+  $html =~ s/(&yen;|&#165;)/JPY/g;
+
+  $html =~ s/(&micro;|&#181;)/u/g;
+
+  $html =~ s/(&trade;|&#8482;)/TM/g;
+  $html =~ s/(&copy;|&#169;)/(C)/g;
+  $html =~ s/(&reg;|&#174;)/(R)/g;
+
+  $html =~ s/(&mdash;|&#8212;)/-/g;
+  $html =~ s/(&ndash;|&#8211;)/-/g;
+
+  $html =~ s/(&divide;|&#247;)/\//g;
+  $html =~ s/(&plusmn;|&#177;)/+\/-/g;
+  $html =~ s/(&sup2;|&#178;)/^2/g;
+  $html =~ s/(&sup3;|&#179;)/^3/g;
+  $html =~ s/(&frac14;|&#188;)/1\/4/g;
+  $html =~ s/(&frac12;|&#189;)/1\/2/g;
+  $html =~ s/(&frac34;|&#190;)/3\/4/g;
+
   $html =~ s/(&amp;|&#38;)/&/;
 
   return $html;
