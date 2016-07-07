@@ -127,7 +127,7 @@ my $usageFormat = "Usage:
         return emails where the body matches the pattern
       NEGATED_BODY_QUERY = body!~<PATTERN>
         return emails where the body does NOT match the pattern
-      HEADER_FIELD = subject | from | to | cc | bcc | date | body
+      HEADER_FIELD = subject | from | to | cc | bcc | date
         restricts the fields that PATTERN can match
       PATTERN = <string> | <string>\"<string>\"<string>
         can be any string, supports doublequote quoting and backslash escaping
