@@ -100,7 +100,7 @@ sub cmdBodyAttachments($$$$$$$$@){
         if(not defined $cachedBodyPlain){
           $mimeParser = newMimeParser($destDir) if not defined $mimeParser;
           my $bodyPlain = getBody($mimeParser, $body, $preferHtml);
-          $bodyPlain = html2text $bodyPlain, "${accName}=>${folderName}=>${uid}";
+          $bodyPlain = html2text $bodyPlain, "${accName}-${folderName}-${uid}";
           cacheBodyPlain($accName, $folderName, $uid, $bodyPlain);
           $cachedBodyPlain = readCachedBodyPlain($accName, $folderName, $uid);
         }
@@ -197,7 +197,7 @@ sub cacheBodies($$$$@){
 
       $mimeParser = newMimeParser($mimeDestDir) if not defined $mimeParser;
       my $bodyPlain = getBody($mimeParser, $body, 0);
-      $bodyPlain = html2text $bodyPlain, "${accName}=>${folderName}=>${uid}";
+      $bodyPlain = html2text $bodyPlain, "${accName}-${folderName}-${uid}";
       cacheBodyPlain($accName, $folderName, $uid, $bodyPlain);
     }
   }
@@ -316,8 +316,9 @@ sub getHeaderFromBody($$){
 }
 
 sub html2text($;$){
-  my ($html, $errMsg) = @_;
-  $errMsg = "" if not defined $errMsg;
+  my ($html, $id) = @_;
+  $id = "no_id" if not defined $id;
+  die "invalid html2text ID: $id\n" if $id !~ /^[a-zA-Z0-9\-_]+$/;
   if($html !~ /<(html|body|head|table)(\s+[^>]*)?>/){
     return $html;
   }
@@ -339,7 +340,7 @@ sub html2text($;$){
     if($success){
       return $out;
     }else{
-      print STDERR "html2text failed, using simple converter: $errMsg\n";
+      print STDERR "html2text failed, using simple converter: $id\n";
     }
   }
 
