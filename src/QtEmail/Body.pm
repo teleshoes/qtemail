@@ -20,6 +20,9 @@ use QtEmail::Cache qw(
 
   readCachedBody
   readCachedHeader
+
+  readCachedBodyPlain
+  cacheBodyPlain
 );
 use QtEmail::Util qw(
   hasWords
@@ -89,10 +92,21 @@ sub cmdBodyAttachments($$$$$$$$@){
       die "No body found for $accName=>$folderName=>$uid\n";
     }
     if($modeBodyAttachments eq "body"){
-      my $fmt = getBody($mimeParser, $body, $preferHtml);
-      chomp $fmt;
-      $fmt = html2text $fmt if $wantPlain;
-      print $fmt;
+      my $bodyFmt;
+      if($wantPlain){
+        my $cachedBodyPlain = readCachedBodyPlain($accName, $folderName, $uid);
+        if(not defined $cachedBodyPlain){
+          my $bodyPlain = getBody($mimeParser, $body, $preferHtml);
+          $bodyPlain = html2text $bodyPlain;
+          cacheBodyPlain($accName, $folderName, $uid, $bodyPlain);
+          $cachedBodyPlain = readCachedBodyPlain($accName, $folderName, $uid);
+        }
+        $bodyFmt = $cachedBodyPlain;
+      }else{
+        $bodyFmt = getBody($mimeParser, $body, $preferHtml);
+      }
+      chomp $bodyFmt;
+      print $bodyFmt;
       print $nulSep ? "\0" : "\n";
     }elsif($modeBodyAttachments eq "attachments"){
       my @attachments = writeAttachments($mimeParser, $body);

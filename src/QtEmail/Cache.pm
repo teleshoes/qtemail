@@ -13,6 +13,9 @@ our @EXPORT = qw(
 
   readCachedBody
   readCachedHeader
+
+  readCachedBodyPlain
+  cacheBodyPlain
 );
 
 sub getCachedHeaderUids($$);
@@ -75,6 +78,25 @@ sub readCachedHeader($$$){
     }
   }
   return $header;
+}
+
+sub readCachedBodyPlain($$$){
+  my ($accName, $folderName, $uid) = @_;
+  my $dir = "$$GVAR{EMAIL_DIR}/$accName/$folderName/bodies-plain";
+  my $bodyFile = "$dir/$uid";
+  if(not -f $bodyFile){
+    return undef;
+  }
+  return `cat "$bodyFile"`;
+}
+sub cacheBodyPlain($$$$){
+  my ($accName, $folderName, $uid, $bodyPlain) = @_;
+  my $dir = "$$GVAR{EMAIL_DIR}/$accName/$folderName/bodies-plain";
+  my $bodyFile = "$dir/$uid";
+  system "mkdir", "-p", $dir;
+  open FH, "> $bodyFile" or die "Could not write $bodyFile: $!\n";
+  print FH $bodyPlain;
+  close FH;
 }
 
 1;
