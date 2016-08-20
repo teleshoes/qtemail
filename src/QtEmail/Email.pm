@@ -90,7 +90,7 @@ sub cmdStatus($@);
 sub cmdHasError(@);
 sub cmdHasNewUnread(@);
 sub cmdHasUnread(@);
-sub cmdReadConfigOptions($$);
+sub cmdReadConfigOptions($$;$);
 sub cmdWriteConfigOptions($$@);
 sub cmdReadConfigOptionsSchema($);
 
@@ -343,12 +343,12 @@ sub cmdHasUnread(@){
   return 0;
 }
 
-sub cmdReadConfigOptions($$){
-  my ($modeAccountOptions, $account) = @_;
+sub cmdReadConfigOptions($$;$){
+  my ($modeAccountOptions, $account, $singleKey) = @_;
   if($modeAccountOptions eq "account" and defined $account){
-    print formatConfig $account;
+    print formatConfig $account, $singleKey;
   }elsif($modeAccountOptions eq "options" and not defined $account){
-    print formatConfig undef;
+    print formatConfig undef, $singleKey;
   }else{
     die "invalid read config/options mode: $modeAccountOptions\n";
   }
