@@ -17,7 +17,7 @@ our @EXPORT = qw(
 );
 
 sub getConfig();
-sub formatConfig($);
+sub formatConfig($;$);
 sub writeConfig($@);
 sub formatSchemaSimple($);
 sub formatSchemaPretty($$);
@@ -132,8 +132,8 @@ sub getConfig(){
   return $config;
 }
 
-sub formatConfig($){
-  my $configGroup = shift;
+sub formatConfig($;$){
+  my ($configGroup, $singleKey) = @_;
   my $config = readSecrets;
   my $accounts = $$config{accounts};
   my $options = $$config{options};
@@ -143,7 +143,11 @@ sub formatConfig($){
     for my $key(sort keys %$vals){
       my $val = $$vals{$key};
       chomp $val;
-      $fmt .= "$key=$val\n";
+      if(not defined $singleKey){
+        $fmt .= "$key=$val\n";
+      }elsif($key eq $singleKey){
+        $fmt .= "$val\n";
+      }
     }
   }
   return $fmt;
