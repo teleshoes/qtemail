@@ -55,18 +55,21 @@ sub email(@){
     --mark-read --mark-unread --delete --delete-local --move
     --accounts --folders --print --summary --status-line --status-short
     --has-error --has-new-unread --has-unread
-    --read-config --write-config --read-options --write-options
+    --get-config-val --read-config --write-config
+    --get-option-val --read-options --write-options
     --read-config-schema --read-options-schema
   );
-  my @configOpts = map {"$_="} qw(
+  my @configKeys = qw(
     user password server sent port ssl smtp_server smtp_port
     new_unread_cmd updateInterval refreshInterval
     preferHtml bodyCacheMode
     filters skip
   );
-  my @optionOpts = map {"$_="} qw(
+  my @configOpts = map {"$_="} @configKeys;
+  my @optionKeys = qw(
     update_cmd encrypt_cmd decrypt_cmd
   );
+  my @optionOpts = map {"$_="} @optionKeys;
 
   my @folderOptExamples = qw(--folder=inbox --folder=sent);
   my @folderArgExamples = qw(inbox sent);
@@ -151,8 +154,15 @@ sub email(@){
     }
   }
 
-  if($cmdArg =~ /^(--folders|--read-config)$/ and @args == 0){
+  if($cmdArg =~ /^(--folders|--read-config|--get-config-val)$/ and @args == 0){
     @complete = (@complete, getAccounts(@accountExamples));
+  }
+
+  if($cmdArg =~ /^(--get-config-val)$/ and @args == 1){
+    @complete = (@complete, @configKeys);
+  }
+  if($cmdArg =~ /^(--get-option-val)$/ and @args == 0){
+    @complete = (@complete, @optionKeys);
   }
 
   if($cmdArg =~ /^(--write-config)$/){
