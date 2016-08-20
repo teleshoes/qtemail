@@ -233,7 +233,7 @@ my $usage = "
   $0 --read-config ACCOUNT_NAME
     reads ".getSecretsFile()."
     for each line of the form \"".getSecretsPrefix().".ACCOUNT_NAME.KEY\\s*=\\s*VAL\"
-      print KEY=VAL
+      print \"KEY=VAL\"
 
   $0 --write-config ACCOUNT_NAME KEY=VAL [KEY=VAL KEY=VAL]
     modifies ".getSecretsFile()."
@@ -244,7 +244,7 @@ my $usage = "
   $0 --read-options
     reads ".getSecretsFile()."
     for each line of the form \"".getSecretsPrefix().".KEY\\s*=\\s*VAL\"
-      print KEY=VAL
+      print \"KEY=VAL\"
 
   $0 --write-options KEY=VAL [KEY=VAL KEY=VAL]
     reads ".getSecretsFile()."
@@ -421,13 +421,13 @@ sub main(@){
     require QtEmail::Email;
     my $account = shift;
     QtEmail::Email::cmdReadConfigOptions("account", $account);
-  }elsif($cmd =~ /^(--read-options)$/ and @_ ==0){
-    require QtEmail::Email;
-    QtEmail::Email::cmdReadConfigOptions("options", undef);
   }elsif($cmd =~ /^(--write-config)$/ and @_ >= 2){
     require QtEmail::Email;
     my $accName = shift;
     QtEmail::Email::cmdWriteConfigOptions("account", $accName, @_);
+  }elsif($cmd =~ /^(--read-options)$/ and @_ ==0){
+    require QtEmail::Email;
+    QtEmail::Email::cmdReadConfigOptions("options", undef);
   }elsif($cmd =~ /^(--write-options)$/ and @_ >= 1){
     require QtEmail::Email;
     QtEmail::Email::cmdWriteConfigOptions("options", undef, @_);
