@@ -230,6 +230,11 @@ my $usage = "
     print \"yes\" and exit with zero exit code if there are unread emails
     otherwise, print \"no\" and exit with non-zero exit code
 
+  $0 --get-config-val ACCOUNT_NAME KEY
+    reads ".getSecretsFile()."
+    find a line of the form \"".getSecretsPrefix().".ACCOUNT_NAME.KEY\\s*=\\s*VAL\"
+      and print \"VAL\"
+
   $0 --read-config ACCOUNT_NAME
     reads ".getSecretsFile()."
     for each line of the form \"".getSecretsPrefix().".ACCOUNT_NAME.KEY\\s*=\\s*VAL\"
@@ -240,6 +245,11 @@ my $usage = "
     for each KEY/VAL pair:
       removes any line that matches \"".getSecretsPrefix().".ACCOUNT_NAME.KEY\\s*=\"
       adds a line at the end \"".getSecretsPrefix().".ACCOUNT_NAME.KEY = VAL\"
+
+  $0 --get-option-val KEY
+    reads ".getSecretsFile()."
+    find a line of the form \"".getSecretsPrefix().".KEY\\s*=\\s*VAL\"
+      and print \"VAL\"
 
   $0 --read-options
     reads ".getSecretsFile()."
@@ -417,6 +427,10 @@ sub main(@){
       print "no\n";
       exit 1;
     }
+  }elsif($cmd =~ /^(--get-config-val)$/ and @_ == 2){
+    require QtEmail::Email;
+    my ($account, $singleKey) = @_;
+    QtEmail::Email::cmdReadConfigOptions("account", $account, $singleKey);
   }elsif($cmd =~ /^(--read-config)$/ and @_ == 1){
     require QtEmail::Email;
     my $account = shift;
@@ -425,6 +439,10 @@ sub main(@){
     require QtEmail::Email;
     my $accName = shift;
     QtEmail::Email::cmdWriteConfigOptions("account", $accName, @_);
+  }elsif($cmd =~ /^(--get-option-val)$/ and @_ == 1){
+    require QtEmail::Email;
+    my ($singleKey) = @_;
+    QtEmail::Email::cmdReadConfigOptions("options", undef, $singleKey);
   }elsif($cmd =~ /^(--read-options)$/ and @_ ==0){
     require QtEmail::Email;
     QtEmail::Email::cmdReadConfigOptions("options", undef);
