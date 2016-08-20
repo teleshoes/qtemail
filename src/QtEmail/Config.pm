@@ -141,7 +141,9 @@ sub formatConfig($){
   my $fmt = '';
   if(defined $vals){
     for my $key(sort keys %$vals){
-      $fmt .= "$key=$$vals{$key}\n";
+      my $val = $$vals{$key};
+      chomp $val;
+      $fmt .= "$key=$val\n";
     }
   }
   return $fmt;
