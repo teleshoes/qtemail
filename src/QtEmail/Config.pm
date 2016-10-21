@@ -137,11 +137,18 @@ sub formatConfig($;$){
   my $config = readSecrets;
   my $accounts = $$config{accounts};
   my $options = $$config{options};
+  my $decryptCmd = $$options{decrypt_cmd};
   my $vals = defined $configGroup ? $$accounts{$configGroup} : $options;
   my $fmt = '';
   if(defined $vals){
     for my $key(sort keys %$vals){
       my $val = $$vals{$key};
+      if(defined $decryptCmd and $key =~ /password/){
+        chomp $decryptCmd;
+        $val =~ s/'/'\\''/g;
+        $val = `$decryptCmd '$val'`;
+        die "error decrypting password\n" if $? != 0;
+      }
       chomp $val;
       if(not defined $singleKey){
         $fmt .= "$key=$val\n";
@@ -230,14 +237,6 @@ sub readSecrets(){
   my $okAccReqConfigKeys = join "|", (@accReqConfigKeys, @accOptConfigKeys);
   my $okOptionsConfigKeys = join "|", (@optionsConfigKeys);
   my $optionsConfig = {};
-  my $decryptCmd;
-  for my $line(@lines){
-    if($line =~ /^$secretsPrefix\.decrypt_cmd\s*=\s*(.*)$/s){
-      $decryptCmd = $1;
-      chomp $decryptCmd;
-      last;
-    }
-  }
 
   @lines = joinTrailingBackslashLines(@lines);
 
@@ -249,11 +248,6 @@ sub readSecrets(){
       if(not defined $$accounts{$accName}){
         $$accounts{$1} = {name => $accName};
         push @$accOrder, $accName;
-      }
-      if(defined $decryptCmd and $key =~ /password/){
-        $val =~ s/'/'\\''/g;
-        $val = `$decryptCmd '$val'`;
-        die "error decrypting password\n" if $? != 0;
       }
       chomp $val;
       $$accounts{$accName}{$key} = $val;

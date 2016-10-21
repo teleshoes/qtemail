@@ -91,6 +91,14 @@ sub getClient($$){
 
   my $user = $$acc{user};
   my $pass = $$acc{password};
+  my $decryptCmd = $$options{decrypt_cmd};
+  if(defined $decryptCmd){
+    chomp $decryptCmd;
+    $pass =~ s/'/'\\''/g;
+    $pass = `$decryptCmd '$pass'`;
+    die "error decrypting password\n" if $? != 0;
+    chomp $pass;
+  }
 
   # quote password if Mail::IMAPClient version > 3.31
   if(not isOldIMAPClientVersion()){
