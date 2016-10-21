@@ -8,6 +8,7 @@ our @ISA = qw(Exporter);
 use Exporter;
 our @EXPORT = qw(
   getConfig
+  getAccPassword
   formatConfig writeConfig
   formatSchemaSimple
   formatSchemaPretty
@@ -17,6 +18,7 @@ our @EXPORT = qw(
 );
 
 sub getConfig();
+sub getAccPassword($$);
 sub formatConfig($;$);
 sub writeConfig($@);
 sub formatSchemaSimple($);
@@ -132,24 +134,40 @@ sub getConfig(){
   return $config;
 }
 
+sub getAccPassword($$){
+  my ($acc, $options) = @_;
+  my $pass = $$acc{password};
+  my $decryptCmd = $$options{decrypt_cmd};
+
+  if(defined $decryptCmd){
+    chomp $decryptCmd;
+    $pass =~ s/'/'\\''/g;
+    $pass = `$decryptCmd '$pass'`;
+    die "error decrypting password\n" if $? != 0;
+    chomp $pass;
+  }
+
+  return $pass;
+}
+
 sub formatConfig($;$){
   my ($configGroup, $singleKey) = @_;
   my $config = readSecrets;
   my $accounts = $$config{accounts};
   my $options = $$config{options};
-  my $decryptCmd = $$options{decrypt_cmd};
   my $vals = defined $configGroup ? $$accounts{$configGroup} : $options;
   my $fmt = '';
   if(defined $vals){
     for my $key(sort keys %$vals){
-      my $val = $$vals{$key};
-      if(defined $decryptCmd and $key =~ /password/){
-        chomp $decryptCmd;
-        $val =~ s/'/'\\''/g;
-        $val = `$decryptCmd '$val'`;
-        die "error decrypting password\n" if $? != 0;
+      my $val;
+      if(defined $configGroup and $key =~ /password/){
+        my $acc = $$accounts{$configGroup};
+        $val = getAccPassword($acc, $options);
+      }else{
+        $val = $$vals{$key};
+        chomp $val;
       }
-      chomp $val;
+
       if(not defined $singleKey){
         $fmt .= "$key=$val\n";
       }elsif($key eq $singleKey){

@@ -4,6 +4,9 @@ use warnings;
 use lib "/opt/qtemail/lib";
 
 use QtEmail::Shared qw(GET_GVAR);
+use QtEmail::Config qw(
+  getAccPassword
+);
 
 our @ISA = qw(Exporter);
 use Exporter;
@@ -90,15 +93,7 @@ sub getClient($$){
   require Mail::IMAPClient;
 
   my $user = $$acc{user};
-  my $pass = $$acc{password};
-  my $decryptCmd = $$options{decrypt_cmd};
-  if(defined $decryptCmd){
-    chomp $decryptCmd;
-    $pass =~ s/'/'\\''/g;
-    $pass = `$decryptCmd '$pass'`;
-    die "error decrypting password\n" if $? != 0;
-    chomp $pass;
-  }
+  my $pass = getAccPassword($acc, $options);
 
   # quote password if Mail::IMAPClient version > 3.31
   if(not isOldIMAPClientVersion()){
