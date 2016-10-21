@@ -82,7 +82,7 @@ sub cmdUpdate($@){
     my $acc = $$config{accounts}{$accName};
     die "Unknown account $accName\n" if not defined $acc;
     clearError $accName;
-    my $c = getClient($acc);
+    my $c = getClient($acc, $$config{options});
     if(not defined $c){
       $success = 0;
       my $msg = "ERROR: Could not authenticate $$acc{name} ($$acc{user})\n";

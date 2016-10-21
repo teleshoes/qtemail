@@ -19,7 +19,7 @@ sub setFlagStatus($$$@);
 sub deleteMessages($@);
 sub moveMessages($$@);
 sub openFolder($$$);
-sub getClient($);
+sub getClient($$);
 sub getSocket($);
 sub isOldIMAPClientVersion();
 
@@ -69,8 +69,8 @@ sub openFolder($$$){
   return $f;
 }
 
-sub getClient($){
-  my ($acc) = @_;
+sub getClient($$){
+  my ($acc, $options) = @_;
   my $network;
   if(defined $$acc{ssl} and $$acc{ssl} =~ /^false$/){
     $network = {

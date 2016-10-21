@@ -129,7 +129,7 @@ sub cmdMarkReadUnread($$$@){
   die "Unknown account $accName\n" if not defined $acc;
   my $imapFolder = accImapFolder($acc, $folderName);
   die "Unknown folder $folderName\n" if not defined $imapFolder;
-  my $c = getClient($acc);
+  my $c = getClient($acc, $$config{options});
   die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
   my $f = openFolder($imapFolder, $c, 1);
   die "Error getting folder $folderName\n" if not defined $f;
@@ -163,7 +163,7 @@ sub cmdDelete($$$@){
 
   my $c;
   if(not $localOnly){
-    $c = getClient($acc);
+    $c = getClient($acc, $$config{options});
     die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
     my $f = openFolder($imapFolder, $c, 1);
     die "Error getting folder $folderName\n" if not defined $f;
@@ -189,7 +189,7 @@ sub cmdMove($$$@){
   die "Unknown folder $folderName\n" if not defined $imapFolder;
   my $destImapFolder = accImapFolder($acc, $destFolderName);
   die "Unknown folder $destFolderName\n" if not defined $destImapFolder;
-  my $c = getClient($acc);
+  my $c = getClient($acc, $$config{options});
   die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
   my $f = openFolder($imapFolder, $c, 1);
   die "Error getting folder $folderName\n" if not defined $f;

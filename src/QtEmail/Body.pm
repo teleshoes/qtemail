@@ -79,7 +79,7 @@ sub cmdBodyAttachments($$$$$$$$@){
     }
     if(not defined $body){
       if(not defined $c){
-        $c = getClient($acc);
+        $c = getClient($acc, $$config{options});
         die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
       }
       if(not defined $f){
@@ -129,7 +129,7 @@ sub cmdCacheAllBodies($$){
 
   my $acc = $$config{accounts}{$accName};
   die "Unknown account $accName\n" if not defined $acc;
-  my $c = getClient($acc);
+  my $c = getClient($acc, $$config{options});
   die "Could not authenticate $accName ($$acc{user})\n" if not defined $c;
 
   my $imapFolder = accImapFolder($acc, $folderName);
