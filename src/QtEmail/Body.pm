@@ -163,7 +163,7 @@ sub cacheBodies($$$$@){
   if(defined $maxCap and $maxCap > 0 and @messages > $maxCap){
     my $count = @messages;
     print "only caching $maxCap out of $count\n" if $$GVAR{VERBOSE};
-    @messages = reverse @messages;
+    @messages = sort {$b <=> $a} @messages;
     @messages = splice @messages, 0, $maxCap;
     @messages = reverse @messages;
   }
