@@ -869,7 +869,8 @@ sub build_message
 			}
 			$message = MIME::Lite->new(
 				Type => $mime_type,
-				Path => $path);
+				Path => $path,
+				Disposition => "attachment");
 		} else {
 			# Message consisting only of attachments
 			$message = mime_message("multipart/mixed", undef);
