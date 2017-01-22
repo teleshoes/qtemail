@@ -151,7 +151,7 @@ Rectangle {
           id: bodyPage
           objectName: "bodyPage"
           border.width: 1
-          height: bodyView.visible ? rightColumn.height*0.5 : 0;
+          height: bodyView.visible ? rightColumn.height*0.7 : 0;
           width: parent.width - 30*2
 
           Rectangle {
