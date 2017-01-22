@@ -29,6 +29,7 @@ Rectangle {
     setIsMain(page != configPage)
 
     configPage.visible = page == configPage
+    bodyView.visible = page == bodyPage
 
     if(page == accountPage){
       controller.setupAccounts()
@@ -140,7 +141,7 @@ Rectangle {
           id: headerPage
           objectName: "headerPage"
           border.width: 1
-          height: parent.height * 0.5
+          height: rightColumn.height - bodyPage.height
           width: parent.width - 30*2
           HeaderView{ id: headerView }
         }
@@ -150,7 +151,7 @@ Rectangle {
           id: bodyPage
           objectName: "bodyPage"
           border.width: 1
-          height: parent.height * 0.5
+          height: bodyView.visible ? rightColumn.height*0.5 : 0;
           width: parent.width - 30*2
 
           Rectangle {
