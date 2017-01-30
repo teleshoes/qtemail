@@ -143,7 +143,10 @@ PageStackWindow {
     anchors.leftMargin: 30
     anchors.rightMargin: 30
 
-    SendView{ id: sendView }
+    SendView{
+      id: sendView
+      sendButtonEnabled: false
+    }
   }
 
   // HACK TO HIDE KEYBOARD
