@@ -5,6 +5,8 @@ Rectangle {
   anchors.fill: parent
   width: 1; height: 1 //retarded hack to get resizing to work
 
+  property bool sendButtonEnabled: true
+
   // NOTIFIER
   Notifier {
     id: sendNotifier
@@ -127,7 +129,8 @@ Rectangle {
     text: "Send"
     id: sendBtn
     anchors {left: parent.left; top: sendFlickable.bottom}
-    height: 50
+    visible: sendButtonEnabled
+    height: sendButtonEnabled ? 50 : 0
     width: 100
 
     onClicked: controller.sendEmail(sendView.getForm())
