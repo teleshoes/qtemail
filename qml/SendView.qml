@@ -66,9 +66,14 @@ Rectangle {
 
   Flickable {
     id: sendFlickable
+    height: parent.height - sendBtn.height
+    width: parent.width
+    anchors {left: parent.left; top: parent.top}
+    clip: true
+
     contentWidth: parent.width
-    contentHeight: to.height + cc.height + bcc.height + subject.height + attachments.height + body.height + sendBtn.height
-    anchors.fill: parent
+    contentHeight: to.height + cc.height + bcc.height + subject.height + attachments.height + body.height
+
     flickableDirection: Flickable.VerticalFlick
     boundsBehavior: Flickable.DragOverBounds
 
@@ -117,15 +122,15 @@ Rectangle {
       cursorFollow: sendFlickable
       fontSize: main.fontMedium
     }
-    Btn{
-      text: "Send"
-      id: sendBtn
-      anchors {left: parent.left; top: body.bottom}
-      height: 50
-      width: 100
+  }
+  Btn{
+    text: "Send"
+    id: sendBtn
+    anchors {left: parent.left; top: sendFlickable.bottom}
+    height: 50
+    width: 100
 
-      onClicked: controller.sendEmail(sendView.getForm())
-    }
+    onClicked: controller.sendEmail(sendView.getForm())
   }
 
   ScrollBar{
