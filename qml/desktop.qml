@@ -52,6 +52,7 @@ Rectangle {
   function clearBody(){
     bodyView.setHeader("")
     bodyView.setBody("")
+    bodyView.visible = false
   }
 
   Timer {
