@@ -52,6 +52,11 @@ PageStackWindow {
     initToolBarTimer.restart()
   }
 
+  function clearBody(){
+    bodyView.setHeader("")
+    bodyView.setBody("")
+  }
+
   Timer {
     id: initToolBarTimer
     interval: 1; //0.001s
