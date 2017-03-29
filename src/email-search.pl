@@ -41,6 +41,7 @@ my @headerFields = qw(
   raw_cc
   raw_bcc
 );
+my @searchableHeaderFields = grep {$_ !~ /^raw_/} @headerFields;
 my @cols = ("uid", map {"header_$_"} @headerFields);
 my @colTypes = ("uid number", map {"header_$_ varchar"} @headerFields);
 my $dbChunkSize = 100;
@@ -143,7 +144,7 @@ my $usageFormat = "Usage:
                               | plaintext~<PATTERN>
                               | b!~<PATTERN>
         return emails where the plaintext body does NOT match the pattern
-      HEADER_FIELD = subject | from | to | cc | bcc | date
+      HEADER_FIELD = " . (join " | ", @searchableHeaderFields) . "
         restricts the fields that PATTERN can match
       PATTERN = <string> | <string>\"<string>\"<string>
         can be any string, supports doublequote quoting and backslash escaping
@@ -512,7 +513,8 @@ sub parseFlatQueryStr($){
       my @fields;
       my $negated;
       my $content;
-      if($and =~ /(to|cc|bcc|from|subject)(!?)~(.*)/i){
+      my $okHeaderFields = join "|", @searchableHeaderFields;
+      if($and =~ /($okHeaderFields)(!?)~(.*)/i){
         $type = "header";
         @fields = (lc $1);
         $negated = $2 eq "!" ? 1 : 0;
@@ -529,7 +531,7 @@ sub parseFlatQueryStr($){
         $content = $3;
       }else{
         $type = "header";
-        @fields = qw(to cc bcc from subject);
+        @fields = @searchableHeaderFields;
         $negated = 0;
         $content = $and;
       }
