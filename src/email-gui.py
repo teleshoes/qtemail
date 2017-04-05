@@ -350,6 +350,7 @@ class EmailManager():
   def getHeader(self, accName, folderName, uid):
     filePath = EMAIL_DIR + "/" + accName + "/" + folderName + "/" + "headers/" + str(uid)
     if not os.path.isfile(filePath):
+      print "MISSING EMAIL HEADER: " + filePath
       return None
     f = open(filePath, 'r')
     header = f.read()
@@ -363,6 +364,7 @@ class EmailManager():
     for line in header.splitlines():
       m = re.match('(\w+): (.*)', line)
       if not m:
+        print "MALFORMED HEADER FILE: " + filePath
         return None
       field = m.group(1)
       val = m.group(2)
