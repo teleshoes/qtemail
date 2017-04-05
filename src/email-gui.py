@@ -361,7 +361,9 @@ class EmailManager():
     hdrCC = ""
     hdrBCC = ""
     hdrSubject = ""
-    for line in header.splitlines():
+    for line in header.split('\n'):
+      if line.strip() == "":
+        continue
       m = re.match('(\w+): (.*)', line)
       if not m:
         print "MALFORMED HEADER FILE: " + filePath
