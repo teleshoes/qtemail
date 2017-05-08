@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use Time::HiRes qw(time);
+use Time::Local;
 
 sub usage();
 sub updateDb($$$);
@@ -148,6 +149,9 @@ my $usageFormat = "Usage:
         restricts the fields that PATTERN can match
       PATTERN = <string> | <string>\"<string>\"<string>
         can be any string, supports doublequote quoting and backslash escaping
+        supports the following variable substition (escape for literals):
+          #{TODAY}     => today's date formatted as YYYY-MM-DD e.g.: 2011-11-21
+          #{YESTERDAY} => yesterday's date formatted as YYYY-MM-DD e.g.: 2011-11-20
 
     EXAMPLES:
       =====\n%s
@@ -200,6 +204,8 @@ sub usage(){
     'subject~b ++ "subject~b"',
     'from!~bob ++ subject!~math',
     '"a ++ b"',
+    'date~#{TODAY} ++ from!~#{YESTERDAY}',
+    'date~\#{TODAY} ++ from~#{YESTERDAY}'
   );
   return sprintf $usageFormat, $examples;
 }
@@ -553,6 +559,7 @@ sub escapeQueryStr($$){
   $queryStr =~ s/%/%boing%/g;
   $queryStr =~ s/\\ /%ws%/g;
   $queryStr =~ s/\\\+/%plus%/g;
+  $queryStr =~ s/\\#/%hash%/g;
   $queryStr =~ s/\\~/%tilde%/g;
   $queryStr =~ s/\\!/%bang%/g;
   $queryStr =~ s/\\"/%dblquote%/g;
@@ -562,6 +569,22 @@ sub escapeQueryStr($$){
   while($queryStr =~ s/"([^"]*)"/%quote$quoteId%/){
     $$quotes{"quote$quoteId"} = $1;
     $quoteId++;
+  }
+
+  if($queryStr =~ /#\{YESTERDAY\}/){
+    my ($tSec, $tMin, $tHour, $tDay, $tMon, $tYear) = localtime();
+    my $ydayNoonSex = timelocal(0,0,12,$tDay,$tMon,$tYear) - 24*60*60;
+    my ($ySec, $yMin, $yHour, $yDay, $yMon, $yYear) = localtime($ydayNoonSex);
+
+    my $ydayFmt = sprintf "%04d-%02d-%02d", $yYear+1900, $yMon+1, $yDay;
+    $queryStr =~ s/#\{YESTERDAY\}/$ydayFmt/g;
+  }
+
+  if($queryStr =~ /#\{TODAY\}/){
+    my ($tSec, $tMin, $tHour, $tDay, $tMon, $tYear) = localtime();
+
+    my $todayFmt = sprintf "%04d-%02d-%02d", $tYear+1900, $tMon+1, $tDay;
+    $queryStr =~ s/#\{TODAY\}/$todayFmt/g;
   }
 
   $queryStr =~ s/\+\+/%or%/g;
@@ -577,6 +600,7 @@ sub unescapeQueryStr($$){
   $queryStr =~ s/%dblquote%/"/g;
   $queryStr =~ s/%bang%/!/g;
   $queryStr =~ s/%tilde%/~/g;
+  $queryStr =~ s/%hash%/#/g;
   $queryStr =~ s/%plus%/+/g;
   $queryStr =~ s/%ws%/ /g;
   $queryStr =~ s/%boing%/%/g;
