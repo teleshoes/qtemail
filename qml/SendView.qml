@@ -6,6 +6,7 @@ Rectangle {
   width: 1; height: 1 //retarded hack to get resizing to work
 
   property bool sendButtonEnabled: true
+  property alias accountLabelText: accountLabel.text
 
   // NOTIFIER
   Notifier {
@@ -79,8 +80,25 @@ Rectangle {
     flickableDirection: Flickable.VerticalFlick
     boundsBehavior: Flickable.DragOverBounds
 
-    EmailListField {
+    Rectangle {
+      id: accountLabelContainer
       anchors {left: parent.left; right: parent.right; top: parent.top}
+      height: main.fontLarge * 2
+      width: parent.width
+      color: "#444444"
+
+      Text {
+        id: accountLabel
+        text: "NO ACCOUNT SELECTED"
+        anchors.fill: parent
+        color: "#ff0000"
+        font.pointSize: main.fontLarge
+        font.capitalization: Font.AllUppercase
+        font.weight: Font.DemiBold
+      }
+    }
+    EmailListField {
+      anchors {left: parent.left; right: parent.right; top: accountLabelContainer.bottom}
       id: to
       labelText: "TO"
       isDark: false

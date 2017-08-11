@@ -8,10 +8,15 @@ Rectangle {
     controller.updateAccount(messageBox, null)
   }
 
-  function initAccountConfig(){
+  function initAccountConfig(accountName){
     var isHtml = controller.getHtmlMode()
     toolBarButtonDefList.getButtonDefByName("toggleHtml").setIsHtml(isHtml)
     controller.resetFilterButtons()
+    if(accountName == null){
+      sendView.accountLabelText = "NO ACCOUNT SELECTED"
+    }else{
+      sendView.accountLabelText = "ACCOUNT: " + accountName
+    }
   }
 
   ListView {
@@ -33,7 +38,7 @@ Rectangle {
           anchors.fill: parent
           onClicked: {
             controller.accountSelected(model.account.Name)
-            initAccountConfig()
+            initAccountConfig(model.account.Name)
             navToPage(headerPage)
           }
         }
