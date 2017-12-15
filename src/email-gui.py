@@ -30,6 +30,7 @@ platform = [None]
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 PAGE_INITIAL_SIZE = 600
+PAGE_INITIAL_WITHOUT_UNREAD_SIZE = 200
 PAGE_MORE_SIZE = 200
 
 EMAIL_DIR = os.getenv("HOME") + "/.cache/email"
@@ -327,11 +328,13 @@ class EmailManager():
     uids = f.read()
     f.close()
     return map(int, uids.splitlines())
-  def fetchHeaders(self, accName, folderName, limit=None, exclude=[], minUid=None):
+  def fetchHeaders(self, accName, folderName, limit=None, limitWithoutUnread=None, exclude=[], minUid=None):
     uids = self.getUids(accName, folderName, "all")
     uids.sort()
     uids.reverse()
     total = len(uids)
+    unread = set(self.getUids(accName, folderName, "unread"))
+
     if minUid != None:
       uids = filter(lambda uid: uid >= minUid, uids)
     if len(exclude) > 0:
@@ -339,7 +342,10 @@ class EmailManager():
       uids = filter(lambda uid: uid not in exUids, uids)
     if limit != None:
       uids = uids[0:limit]
-    unread = set(self.getUids(accName, folderName, "unread"))
+    if limitWithoutUnread != None:
+      while len(uids) > limitWithoutUnread and uids[-1] not in unread:
+        uids.pop()
+
     headers = []
     for uid in uids:
       header = self.getHeader(accName, folderName, uid)
@@ -713,7 +719,8 @@ class Controller(QObject):
     self.headerFilters = []
     (total, headers) = self.emailManager.fetchHeaders(
       self.accountName, self.folderName,
-      limit=PAGE_INITIAL_SIZE, exclude=[], minUid=None)
+      limit=PAGE_INITIAL_SIZE, limitWithoutUnread=PAGE_INITIAL_WITHOUT_UNREAD_SIZE,
+      exclude=[], minUid=None)
     self.totalSize = total
     self.setHeaders(headers)
   @Slot(str)
