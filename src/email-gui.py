@@ -29,7 +29,7 @@ platform = [None]
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-PAGE_INITIAL_SIZE = 200
+PAGE_INITIAL_SIZE = 600
 PAGE_MORE_SIZE = 200
 
 EMAIL_DIR = os.getenv("HOME") + "/.cache/email"
