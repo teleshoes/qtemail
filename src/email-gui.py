@@ -543,11 +543,11 @@ class Controller(QObject):
     if self.accountConfig != None and "custom_cmd" in self.accountConfig.keys():
       cmd = ""
       if self.accountName != None:
-        cmd += "ACCOUNT_NAME=\"" + self.accountName + "\"; \\\n"
+        cmd += "QTEMAIL_ACCOUNT_NAME=\"" + self.accountName + "\"; \\\n"
       if self.folderName != None:
-        cmd += "FOLDER_NAME=\"" + self.folderName + "\"; \\\n"
+        cmd += "QTEMAIL_FOLDER_NAME=\"" + self.folderName + "\"; \\\n"
       if self.header != None:
-        cmd += "UID=\"" + str(self.header.Uid) + "\"; \\\n"
+        cmd += "QTEMAIL_UID=\"" + str(self.header.Uid) + "\"; \\\n"
       cmd += self.accountConfig["custom_cmd"]
       print "running command:\n" + cmd
       self.shellCommand(cmd)
