@@ -692,7 +692,7 @@ sub runQuery($$$@){
         @unknownUids = grep {not defined $isOk{$_}} @unknownUids;
         @okUids = (@okUids, @newOkUids);
       }
-      @uids = sort @okUids;
+      @uids = @okUids;
     }
   }elsif($type =~ /^(header)$/){
     my @fields = @{$$query{fields}};
@@ -718,7 +718,7 @@ sub runQuery($$$@){
     my @newUids = split /\n/, $output;
     my %okUids = map {$_ => 1} @uids;
     @newUids = grep {defined $okUids{$_}} @newUids;
-    @uids = sort @newUids;
+    @uids = @newUids;
   }elsif($type =~ /^(body|bodyplain)$/){
     my @fields = @{$$query{fields}};
     my $content = $$query{content};
@@ -747,6 +747,7 @@ sub runQuery($$$@){
     @uids = @newUids;
   }
 
+  @uids = sort {$a <=> $b} @uids;
   return @uids;
 }
 
