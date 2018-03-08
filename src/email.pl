@@ -39,7 +39,7 @@ use QtEmail::Shared qw(GET_GVAR MODIFY_GVAR);
 use QtEmail::Config qw(
   getConfig
   formatSchemaPretty
-  getSecretsFile getSecretsPrefix
+  getConfigFile getConfigPrefix
   getAccountConfigSchema getOptionsConfigSchema
   getAccReqConfigKeys getAccOptConfigKeys getOptionsConfigKeys
 );
@@ -50,16 +50,16 @@ my $GVAR = QtEmail::Shared::GET_GVAR;
 
 my $usage = "
   Simple IMAP client. {--smtp command is a convenience wrapper around smtp-cli}
-  Configuration is in ".getSecretsFile()."
+  Configuration is in ".getConfigFile()."
     Each config entry is one line of the format:
-      ".getSecretsPrefix().".GLOBAL_OPTION_KEY = <value>
+      ".getConfigPrefix().".GLOBAL_OPTION_KEY = <value>
       or
-      ".getSecretsPrefix().".ACCOUNT_NAME.ACCOUNT_CONFIG_KEY = <value>
+      ".getConfigPrefix().".ACCOUNT_NAME.ACCOUNT_CONFIG_KEY = <value>
 
     Account names can be any word characters (alphanumeric plus underscore)
-    Lines that do not begin with \"".getSecretsPrefix().".\" are ignored.
+    Lines that do not begin with \"".getConfigPrefix().".\" are ignored.
 
-    ACCOUNT_NAME:    the word following \"".getSecretsPrefix().".\" in ".getSecretsFile()."\n
+    ACCOUNT_NAME:    the word following \"".getConfigPrefix().".\" in ".getConfigFile()."\n
     FOLDER_NAME:     \"inbox\", \"sent\" or one of the names from \"folders\"\n
     UID:             an IMAP UID {UIDVALIDITY is assumed to never change}\n
     GLOBAL_OPTION_KEY:\n" . formatSchemaPretty(getOptionsConfigSchema(), "      ") . "
@@ -231,34 +231,34 @@ my $usage = "
     otherwise, print \"no\" and exit with non-zero exit code
 
   $0 --get-config-val ACCOUNT_NAME KEY
-    reads ".getSecretsFile()."
-    find a line of the form \"".getSecretsPrefix().".ACCOUNT_NAME.KEY\\s*=\\s*VAL\"
+    reads ".getConfigFile()."
+    find a line of the form \"".getConfigPrefix().".ACCOUNT_NAME.KEY\\s*=\\s*VAL\"
       and print \"VAL\"
 
   $0 --read-config ACCOUNT_NAME
-    reads ".getSecretsFile()."
-    for each line of the form \"".getSecretsPrefix().".ACCOUNT_NAME.KEY\\s*=\\s*VAL\"
+    reads ".getConfigFile()."
+    for each line of the form \"".getConfigPrefix().".ACCOUNT_NAME.KEY\\s*=\\s*VAL\"
       print \"KEY=VAL\"
 
   $0 --write-config ACCOUNT_NAME KEY=VAL [KEY=VAL KEY=VAL]
-    modifies ".getSecretsFile()."
+    modifies ".getConfigFile()."
     for each KEY/VAL pair:
-      removes any line that matches \"".getSecretsPrefix().".ACCOUNT_NAME.KEY\\s*=\"
-      adds a line at the end \"".getSecretsPrefix().".ACCOUNT_NAME.KEY = VAL\"
+      removes any line that matches \"".getConfigPrefix().".ACCOUNT_NAME.KEY\\s*=\"
+      adds a line at the end \"".getConfigPrefix().".ACCOUNT_NAME.KEY = VAL\"
 
   $0 --get-option-val KEY
-    reads ".getSecretsFile()."
-    find a line of the form \"".getSecretsPrefix().".KEY\\s*=\\s*VAL\"
+    reads ".getConfigFile()."
+    find a line of the form \"".getConfigPrefix().".KEY\\s*=\\s*VAL\"
       and print \"VAL\"
 
   $0 --read-options
-    reads ".getSecretsFile()."
-    for each line of the form \"".getSecretsPrefix().".KEY\\s*=\\s*VAL\"
+    reads ".getConfigFile()."
+    for each line of the form \"".getConfigPrefix().".KEY\\s*=\\s*VAL\"
       print \"KEY=VAL\"
 
   $0 --write-options KEY=VAL [KEY=VAL KEY=VAL]
-    reads ".getSecretsFile()."
-    for each line of the form \"".getSecretsPrefix().".KEY\\s*=\\s*VAL\"
+    reads ".getConfigFile()."
+    for each line of the form \"".getConfigPrefix().".KEY\\s*=\\s*VAL\"
       print KEY=VAL
 
   $0 --read-config-schema

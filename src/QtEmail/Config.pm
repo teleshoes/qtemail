@@ -12,7 +12,7 @@ our @EXPORT = qw(
   formatConfig writeConfig
   formatSchemaSimple
   formatSchemaPretty
-  getSecretsFile getSecretsPrefix
+  getConfigFile getConfigPrefix
   getAccountConfigSchema getOptionsConfigSchema
   getAccReqConfigKeys getAccOptConfigKeys getOptionsConfigKeys
 );
@@ -23,23 +23,23 @@ sub formatConfig($;$);
 sub writeConfig($@);
 sub formatSchemaSimple($);
 sub formatSchemaPretty($$);
-sub getSecretsFile();
-sub getSecretsPrefix();
+sub getConfigFile();
+sub getConfigPrefix();
 sub getAccountConfigSchema();
 sub getOptionsConfigSchema();
 sub getAccReqConfigKeys();
 sub getAccOptConfigKeys();
 sub getOptionsConfigKeys();
 ########
-sub readSecrets();
-sub validateSecrets($);
-sub modifySecrets($$);
+sub readConfig();
+sub validateConfig($);
+sub modifyConfigs($$);
 sub joinTrailingBackslashLines(@);
 
 my $GVAR = QtEmail::Shared::GET_GVAR;
 
-my $secretsFile = "$ENV{HOME}/.secrets";
-my $secretsPrefix = "email";
+my $configFile = "$ENV{HOME}/.secrets";
+my $configPrefix = "email";
 my $accountConfigSchema = [
   ["user",            "REQ", "IMAP username, usually the full email address"],
   ["password",        "REQ", "password, stored with optional encrypt_cmd"],
@@ -129,8 +129,8 @@ my %enums = (
 my @optionsConfigKeys = map {$$_[0]} @$optionsConfigSchema;
 
 sub getConfig(){
-  my $config = readSecrets();
-  validateSecrets $config;
+  my $config = readConfig();
+  validateConfig $config;
   return $config;
 }
 
@@ -152,7 +152,7 @@ sub getAccPassword($$){
 
 sub formatConfig($;$){
   my ($configGroup, $singleKey) = @_;
-  my $config = readSecrets;
+  my $config = readConfig;
   my $accounts = $$config{accounts};
   my $options = $$config{options};
   my $vals = defined $configGroup ? $$accounts{$configGroup} : $options;
@@ -188,7 +188,7 @@ sub writeConfig($@){
       die "Malformed KEY=VAL entry: $keyVal\n";
     }
   }
-  modifySecrets $configGroup, $config;
+  modifyConfig $configGroup, $config;
 }
 
 sub formatSchemaSimple($){
@@ -224,11 +224,11 @@ sub formatSchemaPretty($$){
   return $fmt;
 }
 
-sub getSecretsFile(){
-  return $secretsFile;
+sub getConfigFile(){
+  return $configFile;
 }
-sub getSecretsPrefix(){
-  return $secretsPrefix;
+sub getConfigPrefix(){
+  return $configPrefix;
 }
 sub getAccountConfigSchema(){
   return $accountConfigSchema;
@@ -248,8 +248,8 @@ sub getOptionsConfigKeys(){
 
 #######################
 
-sub readSecrets(){
-  my @lines = `cat $secretsFile 2>/dev/null`;
+sub readConfig(){
+  my @lines = `cat $configFile 2>/dev/null`;
   my $accounts = {};
   my $accOrder = [];
   my $okAccReqConfigKeys = join "|", (@accReqConfigKeys, @accOptConfigKeys);
@@ -259,9 +259,9 @@ sub readSecrets(){
   @lines = joinTrailingBackslashLines(@lines);
 
   for my $line(@lines){
-    if($line =~ /^$secretsPrefix\.($okOptionsConfigKeys)\s*=\s*(.+)$/s){
+    if($line =~ /^$configPrefix\.($okOptionsConfigKeys)\s*=\s*(.+)$/s){
       $$optionsConfig{$1} = $2;
-    }elsif($line =~ /^$secretsPrefix\.(\w+)\.($okAccReqConfigKeys)\s*=\s*(.+)$/s){
+    }elsif($line =~ /^$configPrefix\.(\w+)\.($okAccReqConfigKeys)\s*=\s*(.+)$/s){
       my ($accName, $key, $val)= ($1, $2, $3);
       if(not defined $$accounts{$accName}){
         $$accounts{$1} = {name => $accName};
@@ -269,27 +269,27 @@ sub readSecrets(){
       }
       chomp $val;
       $$accounts{$accName}{$key} = $val;
-    }elsif($line =~ /^$secretsPrefix\./){
+    }elsif($line =~ /^$configPrefix\./){
       die "unknown config entry: $line";
     }
   }
   return {accounts => $accounts, accOrder => $accOrder, options => $optionsConfig};
 }
 
-sub validateSecrets($){
+sub validateConfig($){
   my $config = shift;
   my $accounts = $$config{accounts};
   for my $accName(keys %$accounts){
     my $acc = $$accounts{$accName};
     for my $key(sort @accReqConfigKeys){
-      die "Missing '$key' for '$accName' in $secretsFile\n" if not defined $$acc{$key};
+      die "Missing '$key' for '$accName' in $configFile\n" if not defined $$acc{$key};
     }
   }
 }
 
-sub modifySecrets($$){
+sub modifyConfig($$){
   my ($configGroup, $config) = @_;
-  my $prefix = "$secretsPrefix";
+  my $prefix = "$configPrefix";
   if(defined $configGroup){
     if($configGroup !~ /^\w+$/){
       die "invalid account name, must be a word i.e.: \\w+\n";
@@ -297,12 +297,12 @@ sub modifySecrets($$){
     $prefix .= ".$configGroup";
   }
 
-  my @lines = `cat $secretsFile 2>/dev/null`;
+  my @lines = `cat $configFile 2>/dev/null`;
   @lines = joinTrailingBackslashLines(@lines);
 
   my $encryptCmd;
   for my $line(@lines){
-    if($line =~ /^$secretsPrefix\.encrypt_cmd\s*=\s*(.*)$/s){
+    if($line =~ /^$configPrefix\.encrypt_cmd\s*=\s*(.*)$/s){
       $encryptCmd = $1;
       chomp $encryptCmd;
       last;
@@ -347,7 +347,7 @@ sub modifySecrets($$){
     push @lines, $newLine if not $found;
   }
 
-  open FH, "> $secretsFile" or die "Could not write $secretsFile\n";
+  open FH, "> $configFile" or die "Could not write $configFile\n";
   print FH @lines;
   close FH;
 }
