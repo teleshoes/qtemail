@@ -38,7 +38,7 @@ sub joinTrailingBackslashLines(@);
 
 my $GVAR = QtEmail::Shared::GET_GVAR;
 
-my $configFile = "$ENV{HOME}/.secrets";
+my $configFile = "$ENV{HOME}/.config/qtemail/qtemail.conf";
 my $configPrefix = "email";
 my $accountConfigSchema = [
   ["user",            "REQ", "IMAP username, usually the full email address"],
