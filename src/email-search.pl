@@ -119,8 +119,10 @@ my $usageFormat = "Usage:
         return emails that match this QUERY
       LIST_AND = <QUERY> <QUERY>
         return only emails that match both QUERYs
-      LIST_OR = <QUERY> ++ <QUERY>
+      LIST_OR = <QUERY> || <QUERY>
+              | <QUERY> ++ <QUERY>
         return emails that match either QUERY or both
+        (QUERYs can be joined with '++' or '||')
       HEADER_QUERY = <HEADER_FIELD>~<PATTERN>
         return emails where the indicated header field matches the pattern
       NEGATED_HEADER_QUERY = <HEADER_FIELD>!~<PATTERN>
@@ -559,6 +561,7 @@ sub escapeQueryStr($$){
   $queryStr =~ s/%/%boing%/g;
   $queryStr =~ s/\\ /%ws%/g;
   $queryStr =~ s/\\\+/%plus%/g;
+  $queryStr =~ s/\\\|/%bar%/g;
   $queryStr =~ s/\\#/%hash%/g;
   $queryStr =~ s/\\~/%tilde%/g;
   $queryStr =~ s/\\!/%bang%/g;
@@ -588,7 +591,10 @@ sub escapeQueryStr($$){
   }
 
   $queryStr =~ s/ +/%AND%/g;
+
+  $queryStr =~ s/\|\|/%OR%/g;
   $queryStr =~ s/\+\+/%OR%/g;
+  $queryStr =~ s/\|/%bar%/g;
   $queryStr =~ s/\+/%plus%/g;
 
   return $queryStr;
@@ -601,6 +607,7 @@ sub unescapeQueryStr($$){
   $queryStr =~ s/%bang%/!/g;
   $queryStr =~ s/%tilde%/~/g;
   $queryStr =~ s/%hash%/#/g;
+  $queryStr =~ s/%bar%/|/g;
   $queryStr =~ s/%plus%/+/g;
   $queryStr =~ s/%ws%/ /g;
   $queryStr =~ s/%boing%/%/g;
