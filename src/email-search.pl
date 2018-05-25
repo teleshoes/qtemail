@@ -509,11 +509,11 @@ sub parseQueryStr($){
 
 sub parseFlatQueryStr($){
   my $flatQueryStr = shift;
-  my @ors = split /\+/, $flatQueryStr;
+  my @ors = split /%OR%/, $flatQueryStr;
   my $outerQuery = {type => "or", parts=>[]};
   for my $or(@ors){
     my $innerQuery = {type => "and", parts=>[]};
-    my @ands = split /\s+/, $or;
+    my @ands = split /%AND%/, $or;
     for my $and(@ands){
       my $type;
       my @fields;
@@ -587,9 +587,9 @@ sub escapeQueryStr($$){
     $queryStr =~ s/#\{TODAY\}/$todayFmt/g;
   }
 
-  $queryStr =~ s/\+\+/%or%/g;
+  $queryStr =~ s/ +/%AND%/g;
+  $queryStr =~ s/\+\+/%OR%/g;
   $queryStr =~ s/\+/%plus%/g;
-  $queryStr =~ s/%or%/+/g;
 
   return $queryStr;
 }
