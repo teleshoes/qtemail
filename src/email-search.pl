@@ -117,8 +117,10 @@ my $usageFormat = "Usage:
             | <NEGATED_BODYPLAIN_QUERY>
             | (<QUERY>)
         return emails that match this QUERY
-      LIST_AND = <QUERY> <QUERY>
+      LIST_AND = <QUERY> && <QUERY>
+               | <QUERY>    <QUERY>
         return only emails that match both QUERYs
+        (QUERYs can be joined with whitespace or '&&')
       LIST_OR = <QUERY> || <QUERY>
               | <QUERY> ++ <QUERY>
         return emails that match either QUERY or both
@@ -560,6 +562,7 @@ sub escapeQueryStr($$){
   $queryStr =~ s/[\t\n\r]/ /g;
   $queryStr =~ s/%/%boing%/g;
   $queryStr =~ s/\\ /%ws%/g;
+  $queryStr =~ s/\\\&/%amp%/g;
   $queryStr =~ s/\\\+/%plus%/g;
   $queryStr =~ s/\\\|/%bar%/g;
   $queryStr =~ s/\\#/%hash%/g;
@@ -590,10 +593,13 @@ sub escapeQueryStr($$){
     $queryStr =~ s/#\{TODAY\}/$todayFmt/g;
   }
 
+  $queryStr =~ s/\&\&/%AND%/g;
   $queryStr =~ s/ +/%AND%/g;
 
   $queryStr =~ s/\|\|/%OR%/g;
   $queryStr =~ s/\+\+/%OR%/g;
+
+  $queryStr =~ s/\&/%amp%/g;
   $queryStr =~ s/\|/%bar%/g;
   $queryStr =~ s/\+/%plus%/g;
 
@@ -609,6 +615,7 @@ sub unescapeQueryStr($$){
   $queryStr =~ s/%hash%/#/g;
   $queryStr =~ s/%bar%/|/g;
   $queryStr =~ s/%plus%/+/g;
+  $queryStr =~ s/%amp%/&/g;
   $queryStr =~ s/%ws%/ /g;
   $queryStr =~ s/%boing%/%/g;
 
