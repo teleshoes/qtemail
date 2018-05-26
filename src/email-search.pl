@@ -593,11 +593,12 @@ sub escapeQueryStr($$){
     $queryStr =~ s/#\{TODAY\}/$todayFmt/g;
   }
 
-  $queryStr =~ s/\&\&/%AND%/g;
-  $queryStr =~ s/ +/%AND%/g;
+  $queryStr =~ s/\s*\&\&\s*/%AND%/g;
 
-  $queryStr =~ s/\|\|/%OR%/g;
-  $queryStr =~ s/\+\+/%OR%/g;
+  $queryStr =~ s/\s*\|\|\s*/%OR%/g;
+  $queryStr =~ s/\s*\+\+\s*/%OR%/g;
+
+  $queryStr =~ s/\s+/%AND%/g;
 
   $queryStr =~ s/\&/%amp%/g;
   $queryStr =~ s/\|/%bar%/g;
