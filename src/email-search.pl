@@ -481,7 +481,7 @@ sub parseQueryStr($){
         $cur .= $ch;
       }
       $parens = 0 if $parens < 0; #ignore unmatched ')'
-    }elsif($ch eq "+"){
+    }elsif($ch eq "|"){
       if($parens == 0){
         push @parensGroups, $cur;
         $cur = "";
@@ -513,11 +513,11 @@ sub parseQueryStr($){
 
 sub parseFlatQueryStr($){
   my $flatQueryStr = shift;
-  my @ors = split /%OR%/, $flatQueryStr;
+  my @ors = split /\|/, $flatQueryStr;
   my $outerQuery = {type => "or", parts=>[]};
   for my $or(@ors){
     my $innerQuery = {type => "and", parts=>[]};
-    my @ands = split /%AND%/, $or;
+    my @ands = split /&/, $or;
     for my $and(@ands){
       my $type;
       my @fields;
@@ -603,6 +603,9 @@ sub escapeQueryStr($$){
   $queryStr =~ s/\&/%amp%/g;
   $queryStr =~ s/\|/%bar%/g;
   $queryStr =~ s/\+/%plus%/g;
+
+  $queryStr =~ s/%AND%/&/g;
+  $queryStr =~ s/%OR%/\|/g;
 
   return $queryStr;
 }
