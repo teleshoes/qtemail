@@ -171,6 +171,8 @@ sub formatConfig($;$){
         chomp $val;
       }
 
+      $val =~ s/\n/\\n/g;
+
       if(not defined $singleKey){
         $fmt .= "$key=$val\n";
       }elsif($key eq $singleKey){
@@ -381,16 +383,23 @@ sub joinMultilineConfigEntries(@){
   my @lines = @_;
   my @entries;
 
-  my $curEntry = undef;
+  my $curEntry = "";
   for my $line(@lines){
-    my $isBackslashLine = $line =~ /\\\s*\n?/;
+    my $isContinuation;
+    if($line =~ /^\s+/ or $curEntry =~ /\\$/){
+      $isContinuation = 1;
+    }else{
+      $isContinuation = 0;
+    }
 
-    $curEntry = '' if not defined $curEntry;
-    $curEntry .= $line;
+    $line =~ s/(\s|\r|\n|\x00)+$//;
 
-    if(not $isBackslashLine){
-      push @entries, $curEntry;
-      $curEntry = undef;
+    if($isContinuation){
+      $curEntry =~ s/\\$//;
+      $curEntry .= "\n$line";
+    }else{
+      push @entries, $curEntry if defined $curEntry;
+      $curEntry = $line;
     }
   }
   push @entries, $curEntry if defined $curEntry;
