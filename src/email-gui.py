@@ -817,10 +817,16 @@ class Controller(QObject):
       self.header.setSelected(True)
   def setAccountConfig(self, accountConfig):
     self.accountConfig = accountConfig
-    if self.accountConfig == None or not 'filters' in self.accountConfig.keys():
-      filterButtons = []
-    else:
-      filterButtons = self.parseFilterButtons(self.accountConfig['filters'])
+
+    filterButtons = []
+    if self.accountConfig != None:
+      for key in self.accountConfig.keys():
+        value = self.accountConfig[key]
+        filterMatch = re.match("^filter.(\\w+)$", key, re.IGNORECASE)
+        if filterMatch != None:
+          filterName = filterMatch.group(1)
+          filterStr = value
+          filterButtons.append(FilterButton(filterName, filterStr, False))
     self.setFilterButtons(filterButtons)
 
     preferHtml = "false"
@@ -834,17 +840,6 @@ class Controller(QObject):
     self.setHeader(None)
     self.currentBodyText = None
 
-  def parseFilterButtons(self, filterButtonStr):
-    filterButtonRegex = "(\\w+)=%(.+?)%\\s*"
-    usedNames = set()
-    filterButtons = []
-    for f in re.findall(filterButtonRegex, filterButtonStr, re.DOTALL):
-      name = f[0]
-      filterStr = f[1]
-      if not name in usedNames:
-        filterButtons.append(FilterButton(name, filterStr, False))
-      usedNames.add(name)
-    return filterButtons
   def setFilterButtons(self, filterButtons):
     self.filterButtons = []
     self.filterButtons.append(FilterButton(
