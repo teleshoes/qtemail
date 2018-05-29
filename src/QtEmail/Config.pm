@@ -36,7 +36,7 @@ sub getOptionsConfigKeys();
 sub readConfig();
 sub validateConfig($);
 sub modifyConfigs($$);
-sub joinTrailingBackslashLines(@);
+sub joinMultilineConfigEntries(@);
 
 my $GVAR = QtEmail::Shared::GET_GVAR;
 
@@ -272,12 +272,12 @@ sub readConfig(){
   my $okOptionsConfigKeys = join "|", @optionsConfigKeys;
   my $optionsConfig = {};
 
-  @lines = joinTrailingBackslashLines(@lines);
+  my @entries = joinMultilineConfigEntries(@lines);
 
-  for my $line(@lines){
-    if($line =~ /^$configPrefix\.($okOptionsConfigKeys)\s*=\s*(.+)$/s){
+  for my $entry(@entries){
+    if($entry =~ /^$configPrefix\.($okOptionsConfigKeys)\s*=\s*(.+)$/s){
       $$optionsConfig{$1} = $2;
-    }elsif($line =~ /^$configPrefix\.(\w+)\.($okAccConfigKeys)\s*=\s*(.+)$/s){
+    }elsif($entry =~ /^$configPrefix\.(\w+)\.($okAccConfigKeys)\s*=\s*(.+)$/s){
       my ($accName, $key, $val)= ($1, $2, $3);
       if(not defined $$accounts{$accName}){
         $$accounts{$1} = {name => $accName};
@@ -285,8 +285,8 @@ sub readConfig(){
       }
       chomp $val;
       $$accounts{$accName}{$key} = $val;
-    }elsif($line =~ /^$configPrefix\./){
-      die "unknown config entry: $line";
+    }elsif($entry =~ /^$configPrefix\./){
+      die "unknown config entry: $entry";
     }
   }
   return {accounts => $accounts, accOrder => $accOrder, options => $optionsConfig};
@@ -314,11 +314,11 @@ sub modifyConfig($$){
   }
 
   my @lines = `cat $configFile 2>/dev/null`;
-  @lines = joinTrailingBackslashLines(@lines);
+  my @entries = joinMultilineConfigEntries(@lines);
 
   my $encryptCmd;
-  for my $line(@lines){
-    if($line =~ /^$configPrefix\.encrypt_cmd\s*=\s*(.*)$/s){
+  for my $entry(@entries){
+    if($entry =~ /^$configPrefix\.encrypt_cmd\s*=\s*(.*)$/s){
       $encryptCmd = $1;
       chomp $encryptCmd;
       last;
@@ -357,10 +357,10 @@ sub modifyConfig($$){
       die "error encrypting password\n" if $? != 0;
       chomp $val;
     }
-    my $newLine = $valEmpty ? '' : "$prefix.$key = $val\n";
+    my $newEntry = $valEmpty ? '' : "$prefix.$key = $val\n";
     my $found = 0;
-    for my $line(@lines){
-      if($line =~ s/^$prefix\.$key\s*=.*\n$/$newLine/s){
+    for my $entry(@entries){
+      if($entry =~ s/^$prefix\.$key\s*=.*\n$/$newEntry/s){
         $found = 1;
         last;
       }
@@ -369,33 +369,33 @@ sub modifyConfig($$){
       my $okEnum = join '|', @{$enums{$key}};
       die "invalid $key: $val\nexpects: $okEnum" if $val !~ /^($okEnum)$/;
     }
-    push @lines, $newLine if not $found;
+    push @entries, $newEntry if not $found;
   }
 
   open FH, "> $configFile" or die "Could not write $configFile\n";
-  print FH @lines;
+  print FH @entries;
   close FH;
 }
 
-sub joinTrailingBackslashLines(@){
-  my @oldLines = @_;
-  my @lines;
+sub joinMultilineConfigEntries(@){
+  my @lines = @_;
+  my @entries;
 
-  my $curLine = undef;
-  for my $line(@oldLines){
+  my $curEntry = undef;
+  for my $line(@lines){
     my $isBackslashLine = $line =~ /\\\s*\n?/;
 
-    $curLine = '' if not defined $curLine;
-    $curLine .= $line;
+    $curEntry = '' if not defined $curEntry;
+    $curEntry .= $line;
 
     if(not $isBackslashLine){
-      push @lines, $curLine;
-      $curLine = undef;
+      push @entries, $curEntry;
+      $curEntry = undef;
     }
   }
-  push @lines, $curLine if defined $curLine;
+  push @entries, $curEntry if defined $curEntry;
 
-  return @lines;
+  return @entries;
 }
 
 1;
