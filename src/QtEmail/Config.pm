@@ -14,7 +14,8 @@ our @EXPORT = qw(
   formatSchemaPretty
   getConfigFile getConfigPrefix
   getAccountConfigSchema getOptionsConfigSchema
-  getAccReqConfigKeys getAccOptConfigKeys getOptionsConfigKeys
+  getAccReqConfigKeys getAccOptConfigKeys getAccMapConfigKeys
+  getOptionsConfigKeys
 );
 
 sub getConfig();
@@ -29,6 +30,7 @@ sub getAccountConfigSchema();
 sub getOptionsConfigSchema();
 sub getAccReqConfigKeys();
 sub getAccOptConfigKeys();
+sub getAccMapConfigKeys();
 sub getOptionsConfigKeys();
 ########
 sub readConfig();
@@ -123,6 +125,7 @@ my $longDescriptions = {
 
 my @accReqConfigKeys = map {$$_[0]} grep {$$_[1] eq "REQ"} @$accountConfigSchema;
 my @accOptConfigKeys = map {$$_[0]} grep {$$_[1] eq "OPT"} @$accountConfigSchema;
+my @accMapConfigKeys = map {$$_[0]} grep {$$_[1] eq "MAP"} @$accountConfigSchema;
 my %enums = (
   body_cache_mode => [qw(all unread none)],
 );
@@ -242,6 +245,9 @@ sub getAccReqConfigKeys(){
 sub getAccOptConfigKeys(){
   return @accOptConfigKeys;
 }
+sub getAccMapConfigKeys(){
+  return @accMapConfigKeys;
+}
 sub getOptionsConfigKeys(){
   return @optionsConfigKeys;
 }
@@ -252,8 +258,18 @@ sub readConfig(){
   my @lines = `cat $configFile 2>/dev/null`;
   my $accounts = {};
   my $accOrder = [];
-  my $okAccReqConfigKeys = join "|", (@accReqConfigKeys, @accOptConfigKeys);
-  my $okOptionsConfigKeys = join "|", (@optionsConfigKeys);
+
+  my $okAccReqConfigKeys = join "|", @accReqConfigKeys;
+  my $okAccOptConfigKeys = join "|", @accOptConfigKeys;
+  my $okAccMapConfigKeys = join "|", @accMapConfigKeys;
+  my $okAccConfigKeys = ""
+    . "(?:(?:$okAccReqConfigKeys)"
+    .   "|(?:$okAccOptConfigKeys)"
+    .   "|(?:(?:$okAccMapConfigKeys)\\.\\w+)"
+    . ")"
+    ;
+
+  my $okOptionsConfigKeys = join "|", @optionsConfigKeys;
   my $optionsConfig = {};
 
   @lines = joinTrailingBackslashLines(@lines);
@@ -261,7 +277,7 @@ sub readConfig(){
   for my $line(@lines){
     if($line =~ /^$configPrefix\.($okOptionsConfigKeys)\s*=\s*(.+)$/s){
       $$optionsConfig{$1} = $2;
-    }elsif($line =~ /^$configPrefix\.(\w+)\.($okAccReqConfigKeys)\s*=\s*(.+)$/s){
+    }elsif($line =~ /^$configPrefix\.(\w+)\.($okAccConfigKeys)\s*=\s*(.+)$/s){
       my ($accName, $key, $val)= ($1, $2, $3);
       if(not defined $$accounts{$accName}){
         $$accounts{$1} = {name => $accName};
@@ -311,13 +327,22 @@ sub modifyConfig($$){
 
   my %requiredConfigKeys = map {$_ => 1} @accReqConfigKeys;
 
-  my $okConfigKeys = join "|", (@accReqConfigKeys, @accOptConfigKeys);
-  my $okOptionsKeys = join "|", (@optionsConfigKeys);
+  my $okAccReqConfigKeys = join "|", @accReqConfigKeys;
+  my $okAccOptConfigKeys = join "|", @accOptConfigKeys;
+  my $okAccMapConfigKeys = join "|", @accMapConfigKeys;
+  my $okAccConfigKeys = ""
+    . "(?:(?:$okAccReqConfigKeys)"
+    .   "|(?:$okAccOptConfigKeys)"
+    .   "|(?:(?:$okAccMapConfigKeys)\\.\\w+)"
+    . ")"
+    ;
+  my $okOptionsConfigKeys = join "|", @optionsConfigKeys;
+
   for my $key(sort keys %$config){
     if(defined $configGroup){
-      die "Unknown config key: $key\n" if $key !~ /^($okConfigKeys)$/;
+      die "Unknown config key: $key\n" if $key !~ /^($okAccConfigKeys)$/;
     }else{
-      die "Unknown options key: $key\n" if $key !~ /^($okOptionsKeys)$/;
+      die "Unknown options key: $key\n" if $key !~ /^($okOptionsConfigKeys)$/;
     }
     my $val = $$config{$key};
     my $valEmpty = $val =~ /^\s*$/;

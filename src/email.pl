@@ -41,7 +41,8 @@ use QtEmail::Config qw(
   formatSchemaPretty
   getConfigFile getConfigPrefix
   getAccountConfigSchema getOptionsConfigSchema
-  getAccReqConfigKeys getAccOptConfigKeys getOptionsConfigKeys
+  getAccReqConfigKeys getAccOptConfigKeys getAccMapConfigKeys
+  getOptionsConfigKeys
 );
 
 sub optFolder($$);
@@ -265,8 +266,10 @@ my $usage = "
     print the allowed keys and descriptions for account config entries
     formatted, one per line, like this:
     <KEY_NAME>=<DESC>
-      KEY_NAME: one of: " .
-        join(" ", (getAccReqConfigKeys(), getAccOptConfigKeys())) . "
+      KEY_NAME: one of:
+        REQUIRED: " . join(" ", getAccReqConfigKeys()) . "
+        OPTIONAL: " . join(" ", getAccOptConfigKeys()) . "
+        MAPPED:   " . join(" ", map{"$_.NAME"} getAccMapConfigKeys()) . "
       DESC:     text description
 
   $0 --read-options-schema
