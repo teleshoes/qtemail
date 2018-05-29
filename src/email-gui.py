@@ -194,16 +194,13 @@ class EmailManager():
 
     if cmd != None:
       configOut = self.readProc(cmd)
-      configOut = configOut.replace('%', '%boing%')
-      configOut = configOut.replace('\\\n', '%linebreak%')
 
       for line in configOut.splitlines():
-        m = re.match("(\w+)=(.*)", line)
+        m = re.match("(\w+(?:\.\w+))=(.*)", line)
         if m:
           fieldName = m.group(1)
           value = m.group(2)
-          value = value.replace('%linebreak%', '\n')
-          value = value.replace('%boing%', '%')
+          value = value.replace('\\n', '\n')
           configValues[fieldName] = value
     return configValues
   def writeConfig(self, configValues, configMode, accName=None):
