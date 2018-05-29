@@ -62,7 +62,8 @@ my $accountConfigSchema = [
   ["update_interval", "OPT", "GUI: seconds between account updates"],
   ["refresh_interval","OPT", "GUI: seconds between account refresh"],
   ["custom_cmd",      "OPT", "GUI: shell command to run when cmd button is pushed"],
-  ["filters",         "OPT", "GUI: list of filter-buttons, e.g.:\"s1=%a% s2=%b%\""],
+
+  ["filter",          "MAP", "list of named search filters: filter.NAME = SEARCH_QUERY"],
 ];
 my $optionsConfigSchema = [
   ["update_cmd",      "OPT", "command to run after all updates"],
@@ -112,14 +113,18 @@ my $longDescriptions = {
     . "  3) which has the same effect as running:\n"
     . "    email.pl --delete --folder=inbox WORK 42506\n"
   ,
-  filters => ''
-    . "each filter is separated by a space, and takes the form:\n"
-    . "  <FILTER_NAME>=%<FILTER_STRING>%\n"
-    . "FILTER_NAME:   the text of the button in the GUI\n"
-    . "FILTER_STRING: query for $$GVAR{EMAIL_SEARCH_EXEC}\n"
+  filter => ''
+    . "one filter per config line:\n"
+    . "  email.Z.filter.FILTER_NAME = SEARCH_STRING\n"
+    . "FILTER_NAME:   name to pass to $$GVAR{EMAIL_SEARCH_EXEC}\n"
+    . "SEARCH_STRING: query that $$GVAR{EMAIL_SEARCH_EXEC} will use\n"
     . "e.g.:\n"
-    . "  email.Z.filters = mary=%from~\"mary sue\"% ok=%body!~viagra%\n"
-    . "    => [\"mary\", \"ok\"]\n"
+    . "  email.Z.filter.mary = from~mary.smith\@gmaul.com\n"
+    . "  email.Z.filter.jenkins = \n"
+    . "    subject~jenkins \n"
+    . "    ++ \n"
+    . "    subject~\"build failed\"\n"
+    . "  email.Z.filter.urgent = urgent\n"
   ,
 };
 
