@@ -196,7 +196,7 @@ class EmailManager():
       configOut = self.readProc(cmd)
 
       for line in configOut.splitlines():
-        m = re.match("(\w+(?:\.\w+))=(.*)", line)
+        m = re.match("(\w+(?:\.\w+)?)=(.*)", line)
         if m:
           fieldName = m.group(1)
           value = m.group(2)
