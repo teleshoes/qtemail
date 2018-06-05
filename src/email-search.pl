@@ -13,6 +13,7 @@ sub rowMapToInsert($);
 sub getAllUids($$);
 sub getCachedUids($$);
 
+sub readFilterFromConfig($$);
 sub search($$$$$$);
 sub buildQuery($);
 sub prettyPrintQueryStr($;$);
@@ -26,6 +27,7 @@ sub reduceQuery($);
 sub runQuery($$$@);
 
 my $EMAIL_DIR = "$ENV{HOME}/.cache/email";
+my $EMAIL_EXEC = "/opt/qtemail/bin/email.pl";
 
 my $emailTable = "email";
 my @headerFields = qw(
@@ -58,6 +60,12 @@ my $usageFormat = "Usage:
 
   $0 --format WORD [WORD WORD..]
     parse and format QUERY=\"WORD WORD WORD\" for testing
+
+  $0 --filter [OPTIONS] ACCOUNT_NAME FILTER_NAME
+    read named filter for given account in config file, and do --search
+    roughly equivalent to:
+      QUERY=`$EMAIL_EXEC --get-config-val \$ACCCOUNT_NAME filter.\$FILTER_NAME`
+      $0 --filter \$OPTIONS \$ACCOUNT_NAME \$QUERY
 
   $0 --search [OPTIONS] ACCOUNT_NAME WORD [WORD WORD..]
     print UIDs of emails matching QUERY=\"WORD WORD WORD ..\"
@@ -171,7 +179,7 @@ sub main(@){
   }elsif($cmd =~ /^(--format)$/ and @_ >= 1){
     my $query = "@_";
     print prettyPrintQueryStr $query;
-  }elsif($cmd =~ /^(--search)$/ and @_ >= 2){
+  }elsif($cmd =~ /^(--search|--filter)$/ and @_ >= 2){
     my $minUid = undef;
     my $maxUid = undef;
     my $limit = undef;
@@ -190,9 +198,20 @@ sub main(@){
         die usage();
       }
     }
-    my $accName = shift;
-    die usage() if @_ == 0 or not defined $accName;
-    my $query = "@_";
+
+    my ($accName, $query);
+    if($cmd =~ /^(--search)$/){
+      die usage() if @_ < 2;
+      my @queryWords;
+      ($accName, @queryWords) = @_;
+      $query = "@queryWords";
+    }else{
+      die usage() if @_ != 2;
+      my $filterName;
+      ($accName, $filterName) = @_;
+      $query = readFilterFromConfig $accName, $filterName;
+    }
+
     my @uids = search $accName, $folderName, $minUid, $maxUid, $limit, $query;
     print (map { "$_\n" } @uids);
   }else{
@@ -379,6 +398,18 @@ sub getCachedUids($$){
   return @uids;
 }
 
+
+sub readFilterFromConfig($$){
+  my ($accName, $filterName) = @_;
+  my @cmd = ($EMAIL_EXEC, "--get-config-val", $accName, "filter.$filterName");
+  open CMD, "-|", @cmd or die "could not run '@cmd'\n$!\n";
+  my $query = join '', <CMD>;
+  close CMD;
+  die "error running '@cmd'\n" if $? != 0;
+  $query =~ s/\\*\\n/\n/g;
+  die "filter empty or not found: $filterName\n" if $query =~ /^\s*$/;
+  return $query;
+}
 
 sub search($$$$$$){
   my ($accName, $folderName, $minUid, $maxUid, $limit, $queryStr) = @_;
