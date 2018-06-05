@@ -820,13 +820,23 @@ class Controller(QObject):
 
     filterButtons = []
     if self.accountConfig != None:
+      filterNames = []
+      filterQueries = dict()
       for key in self.accountConfig.keys():
-        value = self.accountConfig[key]
-        filterMatch = re.match("^filter.(\\w+)$", key, re.IGNORECASE)
+        filterMatch = re.match("^filter\\.(\\w+)$", key, re.IGNORECASE)
         if filterMatch != None:
+          value = self.accountConfig[key]
           filterName = filterMatch.group(1)
           filterStr = value
-          filterButtons.append(FilterButton(filterName, filterStr, False))
+          filterQueries[filterName] = filterStr
+        elif key == "filterButtons":
+          value = self.accountConfig[key]
+          filterNames = map(str.strip, value.split(','))
+
+      for filterName in filterNames:
+        if filterName in filterQueries:
+          query = filterQueries[filterName]
+          filterButtons.append(FilterButton(filterName, query, False))
     self.setFilterButtons(filterButtons)
 
     preferHtml = "false"
