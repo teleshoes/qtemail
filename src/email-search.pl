@@ -25,7 +25,7 @@ sub unescapeQuery($$);
 sub reduceQuery($);
 sub runQuery($$$@);
 
-my $emailDir = "$ENV{HOME}/.cache/email";
+my $EMAIL_DIR = "$ENV{HOME}/.cache/email";
 
 my $emailTable = "email";
 my @headerFields = qw(
@@ -216,7 +216,7 @@ sub usage(){
 
 sub updateDb($$$){
   my ($accName, $folderName, $limit) = @_;
-  my $db = "$emailDir/$accName/$folderName/db";
+  my $db = "$EMAIL_DIR/$accName/$folderName/db";
   if(not -f $db){
     createDb $accName, $folderName;
   }
@@ -295,7 +295,7 @@ sub updateDb($$$){
 
 sub createDb($$){
   my ($accName, $folderName) = @_;
-  my $db = "$emailDir/$accName/$folderName/db";
+  my $db = "$EMAIL_DIR/$accName/$folderName/db";
   die "database already exists $db\n" if -e $db;
   runSql $accName, $folderName,
     "create table $emailTable (" . join(", ", @colTypes) . ")";
@@ -303,7 +303,7 @@ sub createDb($$){
 
 sub runSql($$$){
   my ($accName, $folderName, $sql) = @_;
-  my $db = "$emailDir/$accName/$folderName/db";
+  my $db = "$EMAIL_DIR/$accName/$folderName/db";
 
   $sql =~ s/\s*;\s*\n*$//;
   $sql = "$sql;\n";
@@ -327,7 +327,7 @@ sub runSql($$$){
 
 sub fetchHeaderRowMap($$$){
   my ($accName, $folderName, $uid) = @_;
-  my $hdr = `cat $emailDir/$accName/$folderName/headers/$uid`;
+  my $hdr = `cat $EMAIL_DIR/$accName/$folderName/headers/$uid`;
   my $rowMap = {};
   $$rowMap{"uid"} = $uid;
   for my $field(@headerFields){
@@ -363,7 +363,7 @@ sub rowMapToInsert($){
 
 sub getAllUids($$){
   my ($accName, $folderName) = @_;
-  my $file = "$emailDir/$accName/$folderName/all";
+  my $file = "$EMAIL_DIR/$accName/$folderName/all";
 
   return () if not -f $file;
 
@@ -743,9 +743,9 @@ sub runQuery($$$@){
     my $regex = $content;
     my $dir;
     if($type =~ /^(body)$/){
-      $dir = "$emailDir/$accName/$folderName/bodies";
+      $dir = "$EMAIL_DIR/$accName/$folderName/bodies";
     }elsif($type =~ /^(bodyplain)$/){
-      $dir = "$emailDir/$accName/$folderName/bodies-plain";
+      $dir = "$EMAIL_DIR/$accName/$folderName/bodies-plain";
     }
     my $matchOp = $$query{negated} ? "-L" : "-l";
     my @cmd = ("grep", "-P", "-i", $matchOp, $regex);
