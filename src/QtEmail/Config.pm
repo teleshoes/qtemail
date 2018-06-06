@@ -62,6 +62,7 @@ my $accountConfigSchema = [
   ["update_interval", "OPT", "GUI: seconds between account updates"],
   ["refresh_interval","OPT", "GUI: seconds between account refresh"],
   ["custom_cmd",      "OPT", "GUI: shell command to run when cmd button is pushed"],
+  ["filterButtons",   "OPT", "GUI: comma-separated list of list of filter names to use in GUI"],
 
   ["filter",          "MAP", "list of named search filters: filter.NAME = SEARCH_QUERY"],
 ];
