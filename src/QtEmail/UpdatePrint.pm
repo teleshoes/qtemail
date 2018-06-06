@@ -59,6 +59,7 @@ our @EXPORT = qw(
 sub cmdUpdate($@);
 sub cmdPrint($@);
 
+sub formatUidBodies($$$$);
 sub cacheAllHeaders($$$);
 
 my $GVAR = QtEmail::Shared::GET_GVAR;
@@ -181,31 +182,36 @@ sub cmdPrint($@){
   for my $accName(@accNames){
     my @unread = readUidFile $accName, $folderName, "unread";
     for my $uid(@unread){
-      my $hdr = readCachedHeader($accName, $folderName, $uid);
-      my $cachedBody = readCachedBody($accName, $folderName, $uid);
-      my $body = getBody($mimeParser, $cachedBody, 0);
-      $body = "" if not defined $body;
-      $body = "[NO BODY]" if $body =~ /^[ \t\n]*$/;
-      $body = html2text($body);
-      $body =~ s/^\n(\s*\n)*//;
-      $body =~ s/\n(\s*\n)*$//;
-      $body =~ s/\n\s*\n(\s*\n)+/\n\n/g;
-      $body =~ s/^/  /mg;
-      my $bodySep = "="x30;
-      print "\n"
-        . "ACCOUNT: $accName\n"
-        . "UID: $uid\n"
-        . "DATE: $$hdr{Date}\n"
-        . "FROM: $$hdr{From}\n"
-        . "TO: $$hdr{To}\n"
-        . "CC: $$hdr{CC}\n"
-        . "BCC: $$hdr{BCC}\n"
-        . "SUBJECT: $$hdr{Subject}\n"
-        . "BODY:\n$bodySep\n$body\n$bodySep\n"
-        . "\n"
-        ;
+      my $fmt = formatUidBodies($mimeParser, $accName, $folderName, $uid);
+      print "\n$fmt\n";
     }
   }
+}
+
+sub formatUidBodies($$$$){
+  my ($mimeParser, $accName, $folderName, $uid) = @_;
+  my $hdr = readCachedHeader($accName, $folderName, $uid);
+  my $cachedBody = readCachedBody($accName, $folderName, $uid);
+  my $body = getBody($mimeParser, $cachedBody, 0);
+  $body = "" if not defined $body;
+  $body = "[NO BODY]" if $body =~ /^[ \t\n]*$/;
+  $body = html2text($body);
+  $body =~ s/^\n(\s*\n)*//;
+  $body =~ s/\n(\s*\n)*$//;
+  $body =~ s/\n\s*\n(\s*\n)+/\n\n/g;
+  $body =~ s/^/  /mg;
+  my $bodySep = "="x30;
+  return ""
+    . "ACCOUNT: $accName\n"
+    . "UID: $uid\n"
+    . "DATE: $$hdr{Date}\n"
+    . "FROM: $$hdr{From}\n"
+    . "TO: $$hdr{To}\n"
+    . "CC: $$hdr{CC}\n"
+    . "BCC: $$hdr{BCC}\n"
+    . "SUBJECT: $$hdr{Subject}\n"
+    . "BODY:\n$bodySep\n$body\n$bodySep\n"
+    ;
 }
 
 sub cacheAllHeaders($$$){
