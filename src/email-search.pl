@@ -67,6 +67,8 @@ my $usageFormat = "Usage:
       QUERY=`$EMAIL_EXEC --get-config-val \$ACCCOUNT_NAME filter.\$FILTER_NAME`
       $0 --filter \$OPTIONS \$ACCOUNT_NAME \$QUERY
 
+    OPTIONS: [see --search]
+
   $0 --search [OPTIONS] ACCOUNT_NAME WORD [WORD WORD..]
     print UIDs of emails matching QUERY=\"WORD WORD WORD ..\"
 
