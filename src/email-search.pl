@@ -11,10 +11,11 @@ sub runSql($$$);
 sub fetchHeaderRowMap($$$);
 sub rowMapToInsert($);
 sub getAllUids($$);
+sub getUnreadUids($$);
 sub getCachedUids($$);
 
 sub readFilterFromConfig($$);
-sub search($$$$$$);
+sub search($$$$$$$);
 sub buildQuery($);
 sub prettyPrintQueryStr($;$);
 sub formatQuery($;$);
@@ -81,6 +82,8 @@ my $usageFormat = "Usage:
         ignore all UIDs above MAX_UID
       --limit=UID_LIMIT
         ignore all except the last UID_LIMIT UIDs
+      --unread
+        only include unread UIDs
 
     SEARCH FORMAT:
       -all words separated by spaces must match one of subject/date/from/to/cc/bcc
@@ -185,6 +188,7 @@ sub main(@){
     my $minUid = undef;
     my $maxUid = undef;
     my $limit = undef;
+    my $unreadOnly = 0;
     my $folderName = "inbox";
     while(@_ > 0 and $_[0] =~ /^-/){
       my $arg = shift;
@@ -196,6 +200,8 @@ sub main(@){
         $maxUid = $1;
       }elsif($arg =~ /^--limit=(\d+)$/){
         $limit = $1;
+      }elsif($arg =~ /^--unread$/){
+        $unreadOnly = 1;
       }else{
         die usage();
       }
@@ -214,7 +220,7 @@ sub main(@){
       $query = readFilterFromConfig $accName, $filterName;
     }
 
-    my @uids = search $accName, $folderName, $minUid, $maxUid, $limit, $query;
+    my @uids = search $accName, $folderName, $minUid, $maxUid, $limit, $unreadOnly, $query;
     print (map { "$_\n" } @uids);
   }else{
     die usage();
@@ -393,6 +399,17 @@ sub getAllUids($$){
   return @uids;
 }
 
+sub getUnreadUids($$){
+  my ($accName, $folderName) = @_;
+  my $file = "$EMAIL_DIR/$accName/$folderName/unread";
+
+  return () if not -f $file;
+
+  my @uids = `cat "$file"`;
+  chomp foreach @uids;
+  return @uids;
+}
+
 sub getCachedUids($$){
   my ($accName, $folderName) = @_;
   my $output = runSql $accName, $folderName, "select uid from $emailTable";
@@ -413,17 +430,23 @@ sub readFilterFromConfig($$){
   return $query;
 }
 
-sub search($$$$$$){
-  my ($accName, $folderName, $minUid, $maxUid, $limit, $queryStr) = @_;
+sub search($$$$$$$){
+  my ($accName, $folderName, $minUid, $maxUid, $limit, $unreadOnly, $queryStr) = @_;
   my $query = buildQuery $queryStr;
 
-  my @allUids = getAllUids $accName, $folderName;
-  @allUids = grep {$_ >= $minUid} @allUids if defined $minUid;
-  @allUids = grep {$_ <= $maxUid} @allUids if defined $maxUid;
-  @allUids = sort {$a <=> $b} @allUids;
-  @allUids = @allUids[0-$limit .. -1] if defined $limit and @allUids > $limit;
-  my @uids = runQuery $accName, $folderName, $query, @allUids;
-  return @uids;
+  my @uids;
+  if($unreadOnly){
+    @uids = getUnreadUids $accName, $folderName;
+  }else{
+    @uids = getAllUids $accName, $folderName;
+  }
+  @uids = grep {$_ >= $minUid} @uids if defined $minUid;
+  @uids = grep {$_ <= $maxUid} @uids if defined $maxUid;
+  @uids = sort {$a <=> $b} @uids;
+  @uids = @uids[0-$limit .. -1] if defined $limit and @uids > $limit;
+
+  my @queryUids = runQuery $accName, $folderName, $query, @uids;
+  return @queryUids;
 }
 
 sub buildQuery($){
