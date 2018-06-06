@@ -205,7 +205,7 @@ sub cmdPrintUids($$$@){
     my $fmt;
     if($formatType eq "short"){
       my $fmt = formatUidShort($accName, $folderName, $uid);
-      print "$fmt\n";
+      print "$fmt";
     }elsif($formatType eq "headers"){
       my $fmt = formatUidHeaders($accName, $folderName, $uid);
       print "$fmt\n";
