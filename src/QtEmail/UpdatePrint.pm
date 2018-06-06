@@ -54,11 +54,15 @@ use Exporter;
 our @EXPORT = qw(
   cmdUpdate
   cmdPrint
+  cmdPrintUids
 );
 
 sub cmdUpdate($@);
 sub cmdPrint($@);
+sub cmdPrintUids($$$@);
 
+sub formatUidShort($$$);
+sub formatUidHeaders($$$);
 sub formatUidBodies($$$$);
 sub cacheAllHeaders($$$);
 
@@ -186,6 +190,62 @@ sub cmdPrint($@){
       print "\n$fmt\n";
     }
   }
+}
+
+sub cmdPrintUids($$$@){
+  my ($accName, $folderName, $formatType, @uids) = @_;
+  my $mimeParser = undef;
+  if($formatType eq "bodies"){
+    require MIME::Parser;
+    $mimeParser = MIME::Parser->new();
+    $mimeParser->output_dir($$GVAR{TMP_DIR});
+  }
+  binmode STDOUT, ':utf8';
+  for my $uid(@uids){
+    my $fmt;
+    if($formatType eq "short"){
+      my $fmt = formatUidShort($accName, $folderName, $uid);
+      print "$fmt\n";
+    }elsif($formatType eq "headers"){
+      my $fmt = formatUidHeaders($accName, $folderName, $uid);
+      print "$fmt\n";
+    }elsif($formatType eq "bodies"){
+      my $fmt = formatUidBodies($mimeParser, $accName, $folderName, $uid);
+      print "\n$fmt\n";
+    }else{
+      die "invalid format type: $formatType\n";
+    }
+  }
+}
+
+sub formatUidShort($$$){
+  my ($accName, $folderName, $uid) = @_;
+  my $hdr = readCachedHeader($accName, $folderName, $uid);
+  return ""
+    . " $$hdr{Date}"
+    . " $$hdr{From}"
+    . " $$hdr{To}"
+    . " $$hdr{CC}"
+    . " $$hdr{BCC}"
+    . "\n"
+    . "  $$hdr{Subject}"
+    . "\n"
+    ;
+}
+
+sub formatUidHeaders($$$){
+  my ($accName, $folderName, $uid) = @_;
+  my $hdr = readCachedHeader($accName, $folderName, $uid);
+  return ""
+    . "ACCOUNT: $accName\n"
+    . "UID: $uid\n"
+    . "DATE: $$hdr{Date}\n"
+    . "FROM: $$hdr{From}\n"
+    . "TO: $$hdr{To}\n"
+    . "CC: $$hdr{CC}\n"
+    . "BCC: $$hdr{BCC}\n"
+    . "SUBJECT: $$hdr{Subject}\n"
+    ;
 }
 
 sub formatUidBodies($$$$){

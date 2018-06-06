@@ -170,6 +170,15 @@ my $usage = "
     formats whitespace in bodies, compressing multiple empty lines to a max of 2,
       and prepending every line with 2 spaces
 
+  $0 --print-uid-headers [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ..]
+    format and print message headers for the given UIDs
+
+  $0 --print-uid-bodies [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ..]
+    format and print message headers and bodies for the given UIDs
+
+  $0 --print-uid-short [--folder=FOLDER_NAME] ACCOUNT_NAME UID [UID UID ..]
+    format and print one-line header summaries for the given UIDs
+
   $0 --summary [--folder=FOLDER_NAME] [ACCOUNT_NAME ACCOUNT_NAME ...]
     format and print cached unread message headers
 
@@ -383,6 +392,14 @@ sub main(@){
     my $folderName = optFolder \@_, "inbox";
     my @accNames = @_;
     QtEmail::UpdatePrint::cmdPrint($folderName, @accNames);
+  }elsif($cmd =~ /^--print-uid-(headers|bodies|short)$/ and @_ >= 0){
+    my $formatType = $1;
+    require QtEmail::UpdatePrint;
+    my $folderName = optFolder \@_, "inbox";
+    my ($accName, @uids) = @_;
+    die "$usage\nmissing account name\n" if not defined $accName;
+    die "$usage\nmust specify at least one UID\n" if @uids == 0;
+    QtEmail::UpdatePrint::cmdPrintUids($accName, $folderName, $formatType, @uids);
   }elsif($cmd =~ /^(--summary)$/ and @_ >= 0){
     require QtEmail::Email;
     my $folderName = optFolder \@_, "inbox";
