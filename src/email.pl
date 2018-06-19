@@ -128,7 +128,7 @@ my $usage = "
 
   $0 --accounts
     format and print information about each account
-    \"ACCOUNT_NAME:<timestamp>:<relative_time>:<update_interval>s:<unread_count>/<total_count>:<error>\"
+    \"ACCOUNT_NAME:<timestamp>:<relative_time>:<update_interval>s:<refresh_interval>s:<unread_count>/<total_count>:<error>\"
 
   $0 --folders ACCOUNT_NAME
     format and print information about each folder for the given account
