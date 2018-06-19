@@ -99,6 +99,20 @@ my $longDescriptions = {
     . "all:    cache all bodies (up to $$GVAR{MAX_BODIES_TO_CACHE})\n"
     . "none:   do not cache bodies during --update\n"
   ,
+  new_unread_cmd => ''
+    . "run command after update if there are new unread UIDs\n"
+    . "command is run using 'sh -c', after prepending environment variables\n"
+    . "the following vars are set:\n"
+    . "  QTEMAIL_ACCOUNT_NAME\n"
+    . "e.g.:\n"
+    . "  1) config:\n"
+    . "    email.WORK.new_unread_cmd = alert-email \$QTEMAIL_ACCOUNT_NAME\n"
+    . "  2) runs this shell script:\n"
+    . "    sh -c 'QTEMAIL_ACCOUNT_NAME=\"WORK\"; \\\n"
+    . "           alert-email \$QTEMAIL_ACCOUNT_NAME'\n"
+    . "  3) which has the same effect as running:\n"
+    . "    alert-email WORK\n"
+  ,
   custom_cmd => ''
     . "command is run using 'sh -c', after prepending some environment variables\n"
     . "the following vars are set:\n"

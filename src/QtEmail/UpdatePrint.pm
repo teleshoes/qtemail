@@ -155,6 +155,7 @@ sub cmdUpdate($@){
       writeLastUpdated $accName;
       if($hasNewUnread){
         my $cmd = $$acc{new_unread_cmd};
+        $cmd = "sh -c 'QTEMAIL_ACCOUNT_NAME=$accName; $cmd'";
         push @newUnreadCommands, $cmd if defined $cmd and $cmd !~ /^\s*$/;
       }
     }
@@ -168,7 +169,7 @@ sub cmdUpdate($@){
   }
   for my $cmd(@newUnreadCommands){
     print "running new_unread_cmd: $cmd\n";
-    system "$cmd";
+    system $cmd;
   }
 
   return $success;
