@@ -93,6 +93,10 @@ my $usageFormat = "Usage:
         ignore all UIDs above MAX_UID
       --limit=UID_LIMIT
         ignore all except the last UID_LIMIT UIDs
+      --match
+        instead of printing UIDs:
+          print \"yes\" if there is at least one uid,
+          or \"no\" otherwise
 
     SEARCH FORMAT:
       -all words separated by spaces must match one of subject/date/from/to/cc/bcc
@@ -201,6 +205,7 @@ sub main(@){
     my $minUid = undef;
     my $maxUid = undef;
     my $limit = undef;
+    my $printIsMatch = 0;
     while(@_ > 0 and $_[0] =~ /^-/){
       my $arg = shift;
       if($arg =~ /^--folder=([a-z]+)$/){
@@ -220,6 +225,8 @@ sub main(@){
         $maxUid = $1;
       }elsif($arg =~ /^--limit=(\d+)$/){
         $limit = $1;
+      }elsif($arg =~ /^--match$/){
+        $printIsMatch = 1;
       }else{
         die usage();
       }
@@ -250,7 +257,11 @@ sub main(@){
     }
 
     my @uids = search $accName, $folderName, $uidFile, $minUid, $maxUid, $limit, $query;
-    print (map { "$_\n" } @uids);
+    if($printIsMatch){
+      print @uids > 0 ? "yes\n" : "no\n";
+    }else{
+      print (map { "$_\n" } @uids);
+    }
   }else{
     die usage();
   }
