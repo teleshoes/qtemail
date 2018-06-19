@@ -10,8 +10,7 @@ sub createDb($$);
 sub runSql($$$);
 sub fetchHeaderRowMap($$$);
 sub rowMapToInsert($);
-sub getAllUids($$);
-sub getUnreadUids($$);
+sub getUids($);
 sub getCachedUids($$);
 
 sub readFilterFromConfig($$);
@@ -76,14 +75,24 @@ my $usageFormat = "Usage:
     OPTIONS:
       --folder=FOLDER_NAME
         use FOLDER_NAME instead of \"inbox\"
+      --uid-file=UID_FILE
+        only include UIDs in UID_FILE
+          conflicts with --unread and --new-unread
+          default is: \"$EMAIL_DIR/\$ACCOUNT_NAME/\$FOLDER_NAME/all\"
+      --unread
+        only include unread UIDs
+        same as: --uid-file=\"$EMAIL_DIR/\$ACCOUNT_NAME/\$FOLDER_NAME/unread\"
+          conflicts with --uid-file and --new-unread
+      --new-unread
+        only include unread UIDs fetched in the last update
+        same as: --uid-file=\"$EMAIL_DIR/\$ACCOUNT_NAME/\$FOLDER_NAME/new-unread\"
+          conflicts with --uid-file and --unread
       --minuid=MIN_UID
         ignore all UIDs below MIN_UID
       --maxuid=MAX_UID
         ignore all UIDs above MAX_UID
       --limit=UID_LIMIT
         ignore all except the last UID_LIMIT UIDs
-      --unread
-        only include unread UIDs
 
     SEARCH FORMAT:
       -all words separated by spaces must match one of subject/date/from/to/cc/bcc
@@ -185,23 +194,32 @@ sub main(@){
     my $query = "@_";
     print prettyPrintQueryStr $query;
   }elsif($cmd =~ /^(--search|--filter)$/ and @_ >= 2){
+    my $folderName = "inbox";
+    my $uidFileArg = undef;
+    my $uidFileUnread = 0;
+    my $uidFileNewUnread = 0;
     my $minUid = undef;
     my $maxUid = undef;
     my $limit = undef;
-    my $unreadOnly = 0;
-    my $folderName = "inbox";
     while(@_ > 0 and $_[0] =~ /^-/){
       my $arg = shift;
       if($arg =~ /^--folder=([a-z]+)$/){
         $folderName = $1;
+      }elsif($arg =~ /^--uid-file=(.+)$/){
+        $uidFileArg = $1;
+        die usage() if $uidFileUnread or $uidFileNewUnread;
+      }elsif($arg =~ /^--new-unread$/){
+        $uidFileNewUnread = 1;
+        die usage() if defined $uidFileArg or $uidFileUnread;
+      }elsif($arg =~ /^--unread$/){
+        $uidFileUnread = 1;
+        die usage() if defined $uidFileArg or $uidFileNewUnread;
       }elsif($arg =~ /^--minuid=(\d+)$/){
         $minUid = $1;
       }elsif($arg =~ /^--maxuid=(\d+)$/){
         $maxUid = $1;
       }elsif($arg =~ /^--limit=(\d+)$/){
         $limit = $1;
-      }elsif($arg =~ /^--unread$/){
-        $unreadOnly = 1;
       }else{
         die usage();
       }
@@ -220,7 +238,18 @@ sub main(@){
       $query = readFilterFromConfig $accName, $filterName;
     }
 
-    my @uids = search $accName, $folderName, $minUid, $maxUid, $limit, $unreadOnly, $query;
+    my $uidFile;
+    if(defined $uidFileArg){
+      $uidFile = $uidFileArg;
+    }elsif($uidFileNewUnread){
+      $uidFile = "$EMAIL_DIR/$accName/$folderName/new-unread";
+    }elsif($uidFileUnread){
+      $uidFile = "$EMAIL_DIR/$accName/$folderName/unread";
+    }else{
+      $uidFile = "$EMAIL_DIR/$accName/$folderName/all";
+    }
+
+    my @uids = search $accName, $folderName, $uidFile, $minUid, $maxUid, $limit, $query;
     print (map { "$_\n" } @uids);
   }else{
     die usage();
@@ -252,7 +281,9 @@ sub updateDb($$$){
   my @cachedUids = getCachedUids $accName, $folderName;
   my $cachedUidsCount = @cachedUids;
 
-  my @allUids = getAllUids $accName, $folderName;
+  my $uidFile = "$EMAIL_DIR/$accName/$folderName/all";
+
+  my @allUids = getUids $uidFile;
   my $allUidsCount = @allUids;
   my %isValidUid = map {$_ => 1} @allUids;
 
@@ -388,24 +419,12 @@ sub rowMapToInsert($){
     ;
 }
 
-sub getAllUids($$){
-  my ($accName, $folderName) = @_;
-  my $file = "$EMAIL_DIR/$accName/$folderName/all";
+sub getUids($){
+  my ($uidFile) = @_;
 
-  return () if not -f $file;
+  return () if not -f $uidFile;
 
-  my @uids = `cat "$file"`;
-  chomp foreach @uids;
-  return @uids;
-}
-
-sub getUnreadUids($$){
-  my ($accName, $folderName) = @_;
-  my $file = "$EMAIL_DIR/$accName/$folderName/unread";
-
-  return () if not -f $file;
-
-  my @uids = `cat "$file"`;
+  my @uids = `cat "$uidFile"`;
   chomp foreach @uids;
   return @uids;
 }
@@ -431,15 +450,10 @@ sub readFilterFromConfig($$){
 }
 
 sub search($$$$$$$){
-  my ($accName, $folderName, $minUid, $maxUid, $limit, $unreadOnly, $queryStr) = @_;
+  my ($accName, $folderName, $uidFile, $minUid, $maxUid, $limit, $queryStr) = @_;
   my $query = buildQuery $queryStr;
 
-  my @uids;
-  if($unreadOnly){
-    @uids = getUnreadUids $accName, $folderName;
-  }else{
-    @uids = getAllUids $accName, $folderName;
-  }
+  my @uids = getUids $uidFile;
   @uids = grep {$_ >= $minUid} @uids if defined $minUid;
   @uids = grep {$_ <= $maxUid} @uids if defined $maxUid;
   @uids = sort {$a <=> $b} @uids;
