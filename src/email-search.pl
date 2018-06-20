@@ -14,7 +14,7 @@ sub getUids($);
 sub getCachedUids($$);
 
 sub readFilterFromConfig($$);
-sub search($$$$$$$);
+sub search($$$$$$$$);
 sub buildQuery($);
 sub prettyPrintQueryStr($;$);
 sub formatQuery($;$);
@@ -93,9 +93,11 @@ my $usageFormat = "Usage:
         ignore all UIDs above MAX_UID
       --limit=UID_LIMIT
         ignore all except the last UID_LIMIT UIDs
+      --not | --negate | --inverse
+        negate query/filter: print instead the UIDs excluded by the query
       --match
         instead of printing UIDs:
-          print \"yes\" if there is at least one uid,
+          print \"yes\" if at least one uid would have been printed,
           or \"no\" otherwise
 
     SEARCH FORMAT:
@@ -205,6 +207,7 @@ sub main(@){
     my $minUid = undef;
     my $maxUid = undef;
     my $limit = undef;
+    my $negate = 0;
     my $printIsMatch = 0;
     while(@_ > 0 and $_[0] =~ /^-/){
       my $arg = shift;
@@ -225,6 +228,8 @@ sub main(@){
         $maxUid = $1;
       }elsif($arg =~ /^--limit=(\d+)$/){
         $limit = $1;
+      }elsif($arg =~ /^(--not|--negate|--inverse)$/){
+        $negate = 1;
       }elsif($arg =~ /^--match$/){
         $printIsMatch = 1;
       }else{
@@ -256,7 +261,7 @@ sub main(@){
       $uidFile = "$EMAIL_DIR/$accName/$folderName/all";
     }
 
-    my @uids = search $accName, $folderName, $uidFile, $minUid, $maxUid, $limit, $query;
+    my @uids = search $accName, $folderName, $uidFile, $minUid, $maxUid, $limit, $negate, $query;
     if($printIsMatch){
       print @uids > 0 ? "yes\n" : "no\n";
     }else{
@@ -460,8 +465,8 @@ sub readFilterFromConfig($$){
   return $query;
 }
 
-sub search($$$$$$$){
-  my ($accName, $folderName, $uidFile, $minUid, $maxUid, $limit, $queryStr) = @_;
+sub search($$$$$$$$){
+  my ($accName, $folderName, $uidFile, $minUid, $maxUid, $limit, $negate, $queryStr) = @_;
   my $query = buildQuery $queryStr;
 
   my @uids = getUids $uidFile;
@@ -471,6 +476,15 @@ sub search($$$$$$$){
   @uids = @uids[0-$limit .. -1] if defined $limit and @uids > $limit;
 
   my @queryUids = runQuery $accName, $folderName, $query, @uids;
+
+  if($negate){
+    my %okQueryUids = map {$_ => 1} @queryUids;
+    @queryUids = ();
+    for my $uid(@uids){
+      push @queryUids, $uid if not defined $okQueryUids{$uid};
+    }
+  }
+
   return @queryUids;
 }
 
