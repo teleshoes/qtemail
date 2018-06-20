@@ -1,3 +1,33 @@
+qtemail (2.5) UNRELEASED; urgency=low
+  * main: Prevent collisions when caching bodies in two separate email.pl instances
+  * main: Add --get-config-val and --get-option-val to email.pl
+  * main: Cache more recent messages first (higher-valued message IDs, anyway)
+  * main: Add encodings-install.sh to install optional encodings on debian
+  * main: Warn on missing header files
+  * main: Move config file "~/.secrets" => "~/.config/qtemail/qtemail.conf"
+  * main: Add dependencies-install to install dependencies from control file
+  * main: Allow multi-line config (lines that start with whitespace)
+  * main: Improve filter config format
+  * main: Install symlinks from /opt/qtemail/bin to /usr/local/bin
+  * main: Add commands: --print-uid-short, --print-uid-headers, --print-uid-bodies
+  * ui: Add decent HTML=>plaintext when html2text fails (invalid HTML)
+  * ui: Cleanup UI, resize components
+  * ui: Close email body when hitting escape (or navigating away)
+  * ui: Display account name at the top of Send view
+  * ui: Display up to 600 unread emails initially (still 200 for read emails)
+  * ui: Add config to change displayed order of filter search buttons
+  * search: Add searching by body
+  * search: Add all fields to header-search (including date~)
+  * search: Add #{TODAY} and #{YESTERDAY} substitution variables
+  * search: Fix sort order (numerical by message ID, instead of alphabetical)
+  * search: Add "&&" and "||" synonums for "AND" and "OR"
+  * search: Allow command-line searching by named filters from config
+  * search: Add cmdline options --unread, --uid-file, --new-unread
+  * search: Add cmdline option --match, to print simple yes/no
+  * search: Add cmdline option --not|--negate|--inverse to negate search
+  * smtp: Fix password decrypting in --smtp
+ -- teleshoes <elliot.wolk@gmail.com>  Wed, 20 Jun 2018 15:31:14 -0400
+
 qtemail (2.0) UNRELEASED; urgency=low
   * Modularization, huge refactor, performance improvements
   * Large toolbar improvments (added submenu, style, same for all platforms)
