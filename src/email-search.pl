@@ -815,9 +815,8 @@ sub runQuery($$$@){
       ;
     my $output = runSql $accName, $folderName, $sql;
     my @newUids = split /\n/, $output;
-    my %okUids = map {$_ => 1} @uids;
-    @newUids = grep {defined $okUids{$_}} @newUids;
-    @uids = @newUids;
+    my %okNewUids = map {$_ => 1} @newUids;
+    @uids = grep {defined $okNewUids{$_}} @uids;
   }elsif($type =~ /^(body|bodyplain)$/){
     my @fields = @{$$query{fields}};
     my $content = $$query{content};
