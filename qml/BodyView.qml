@@ -1,4 +1,4 @@
-import QtQuick 1.1
+import QtQuick 2.3
 
 Rectangle {
   anchors.fill: parent
@@ -118,6 +118,7 @@ Rectangle {
       }
       TextEdit {
         id: bodyText
+        textFormat: TextEdit.AutoText
         anchors.top: headerText.bottom
         height: parent.height
         width: parent.width

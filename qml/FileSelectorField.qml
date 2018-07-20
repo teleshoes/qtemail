@@ -1,4 +1,4 @@
-import QtQuick 1.1
+import QtQuick 2.3
 
 Rectangle {
   height: isExpanded ? 500 : labelContainer.height

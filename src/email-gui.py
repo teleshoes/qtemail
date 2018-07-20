@@ -6,9 +6,10 @@
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
-from PySide.QtGui import *
-from PySide.QtCore import *
-from PySide.QtDeclarative import *
+from PySide2.QtGui import *
+from PySide2.QtCore import *
+from PySide2.QtQuick import *
+from PySide2.QtWidgets import *
 
 import os
 import os.path
@@ -146,7 +147,7 @@ def main():
     if showSendWindowAtStart:
       sendWindow.show()
 
-  mainWindow.window().show()
+  mainWindow.show()
 
   app.exec_()
 
@@ -1237,7 +1238,7 @@ class BaseListModel(QAbstractListModel):
   def setItems(self, items):
     self.clear()
     if len(items) > 0:
-      self.beginInsertRows(QModelIndex(), 0, 0)
+      self.beginInsertRows(QModelIndex(), 0, len(items) - 1)
       self.items = items
       self.endInsertRows()
     else:
@@ -1280,49 +1281,57 @@ class AccountModel(BaseListModel):
   COLUMNS = ('account',)
   def __init__(self):
     BaseListModel.__init__(self)
-    self.setRoleNames(dict(enumerate(AccountModel.COLUMNS)))
+  def roleNames(self):
+    return dict(enumerate(AccountModel.COLUMNS))
 
 class FolderModel(BaseListModel):
   COLUMNS = ('folder',)
   def __init__(self):
     BaseListModel.__init__(self)
-    self.setRoleNames(dict(enumerate(FolderModel.COLUMNS)))
+  def roleNames(self):
+    return dict(enumerate(FolderModel.COLUMNS))
 
 class HeaderModel(BaseListModel):
   COLUMNS = ('header',)
   def __init__(self):
     BaseListModel.__init__(self)
-    self.setRoleNames(dict(enumerate(HeaderModel.COLUMNS)))
+  def roleNames(self):
+    return dict(enumerate(HeaderModel.COLUMNS))
 
 class ConfigModel(BaseListModel):
   COLUMNS = ('config',)
   def __init__(self):
     BaseListModel.__init__(self)
-    self.setRoleNames(dict(enumerate(ConfigModel.COLUMNS)))
+  def roleNames(self):
+    return dict(enumerate(ConfigModel.COLUMNS))
 
 class FilterButtonModel(BaseListModel):
   COLUMNS = ('filterButton',)
   def __init__(self):
     BaseListModel.__init__(self)
-    self.setRoleNames(dict(enumerate(FilterButtonModel.COLUMNS)))
+  def roleNames(self):
+    return dict(enumerate(FilterButtonModel.COLUMNS))
 
 class AddressBookModel(BaseListModel):
   COLUMNS = ('address',)
   def __init__(self):
     BaseListModel.__init__(self)
-    self.setRoleNames(dict(enumerate(AddressBookModel.COLUMNS)))
+  def roleNames(self):
+    return dict(enumerate(AddressBookModel.COLUMNS))
 
 class FileListModel(BaseListModel):
   COLUMNS = ('path',)
   def __init__(self):
     BaseListModel.__init__(self)
-    self.setRoleNames(dict(enumerate(FileListModel.COLUMNS)))
+  def roleNames(self):
+    return dict(enumerate(FileListModel.COLUMNS))
 
 class FileInfoModel(BaseListModel):
   COLUMNS = ('fileInfo',)
   def __init__(self):
     BaseListModel.__init__(self)
-    self.setRoleNames(dict(enumerate(FileInfoModel.COLUMNS)))
+  def roleNames(self):
+    return dict(enumerate(FileInfoModel.COLUMNS))
 
 
 class Account(QObject):
@@ -1555,7 +1564,7 @@ class FileInfo(QObject):
   MtimeFmt = Property(unicode, MtimeFmt, notify=changed)
   ErrorMsg = Property(unicode, ErrorMsg, notify=changed)
 
-class MainWindow(QDeclarativeView):
+class MainWindow(QQuickView):
   def __init__(self, qmlFile, controller,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
     addressBookModel, fileListModel, fileInfoModel):
@@ -1572,10 +1581,10 @@ class MainWindow(QDeclarativeView):
     context.setContextProperty('fileInfoModel', fileInfoModel)
     context.setContextProperty('controller', controller)
 
-    self.setResizeMode(QDeclarativeView.SizeRootObjectToView)
+    self.setResizeMode(QQuickView.SizeRootObjectToView)
     self.setSource(qmlFile)
 
-class SendWindow(QDeclarativeView):
+class SendWindow(QQuickView):
   def __init__(self, qmlFile, controller, main,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
     addressBookModel, fileListModel, fileInfoModel):
@@ -1593,7 +1602,7 @@ class SendWindow(QDeclarativeView):
     context.setContextProperty('fileInfoModel', fileInfoModel)
     context.setContextProperty('controller', controller)
 
-    self.setResizeMode(QDeclarativeView.SizeRootObjectToView)
+    self.setResizeMode(QQuickView.SizeRootObjectToView)
     self.setSource(qmlFile)
 
 if __name__ == "__main__":
