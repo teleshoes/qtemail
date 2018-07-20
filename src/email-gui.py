@@ -23,7 +23,6 @@ EMAIL_SEARCH_BIN = "/opt/qtemail/bin/email-search.pl"
 QML_DIR = "/opt/qtemail/qml"
 
 PLATFORM_OTHER = 0
-PLATFORM_HARMATTAN = 1
 PLATFORM_FREMANTLE = 2
 platform = [None]
 
@@ -85,16 +84,12 @@ def main():
 
   issue = open('/etc/issue').read().strip().lower()
   platform[0] = None
-  if "harmattan" in issue:
-    platform[0] = PLATFORM_HARMATTAN
-  elif "maemo 5" in issue:
+  if "maemo 5" in issue:
     platform[0] = PLATFORM_FREMANTLE
   else:
     platform[0] = PLATFORM_OTHER
 
-  if platform[0] == PLATFORM_HARMATTAN:
-    qmlFile = QML_DIR + "/harmattan.qml"
-  elif platform[0] == PLATFORM_FREMANTLE:
+  if platform[0] == PLATFORM_FREMANTLE:
     qmlFile = QML_DIR + "/desktop-small.qml"
   else:
     qmlFile = QML_DIR + "/desktop.qml"
@@ -151,10 +146,7 @@ def main():
     if showSendWindowAtStart:
       sendWindow.show()
 
-  if platform[0] == PLATFORM_HARMATTAN:
-    mainWindow.window().showFullScreen()
-  else:
-    mainWindow.window().show()
+  mainWindow.window().show()
 
   app.exec_()
 
