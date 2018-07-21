@@ -600,7 +600,7 @@ class Controller(QObject):
     sendForm.setBCC([]) #do not retain bccEmails in reply/forward
     sendForm.setSubject(subject)
 
-    self.fetchCurrentBodyText(sendForm, None,
+    self.fetchCurrentBodyTextWithTransform(sendForm, None,
       lambda body: self.wrapBody(body, date, firstFrom), True)
 
   def wrapBody(self, body, date, author):
@@ -1035,8 +1035,12 @@ class Controller(QObject):
   def setHtmlMode(self, htmlMode):
     self.htmlMode = htmlMode
 
-  @Slot(QObject, QObject, object)
-  def fetchCurrentBodyText(self, bodyBox, headerBox, transform, forcePlain=False):
+  @Slot(QObject, QObject)
+  def fetchCurrentBodyText(self, bodyBox, headerBox):
+    self.fetchCurrentBodyTextWithTransform(bodyBox, headerBox, None, False)
+
+  def fetchCurrentBodyTextWithTransform(self, bodyBox, headerBox,
+      transform, forcePlain=False):
     self.currentBodyText = None
     bodyBox.setBody("...loading body")
     if self.header == None:

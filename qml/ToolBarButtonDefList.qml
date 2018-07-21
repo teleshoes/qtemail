@@ -151,7 +151,7 @@ QtObject {
         var wasHtml = controller.getHtmlMode()
         controller.setHtmlMode(!wasHtml)
         setIsHtml(!wasHtml)
-        controller.fetchCurrentBodyText(bodyView, bodyView, null)
+        controller.fetchCurrentBodyText(bodyView, bodyView)
       }
       function setIsHtml(isHtml){
         text = isHtml ? "text" : "html"

@@ -39,7 +39,7 @@ Rectangle {
     }else if(page == folderPage){
       controller.setupFolders()
     }else if(page == bodyPage){
-      controller.fetchCurrentBodyText(bodyView, bodyView, null)
+      controller.fetchCurrentBodyText(bodyView, bodyView)
     }else if(page == configPage){
       controller.setupConfig()
     }else if(page == sendPage){
