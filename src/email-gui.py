@@ -6,10 +6,10 @@
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
-from PySide2.QtGui import *
-from PySide2.QtCore import *
-from PySide2.QtQuick import *
-from PySide2.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtQuick import *
+from PyQt5.QtWidgets import *
 
 import os
 import os.path
@@ -472,11 +472,11 @@ class Controller(QObject):
     self.counterBox = None
     self.fileListDir = None
 
-  @Slot(result=str)
+  @pyqtSlot(result=str)
   def getHomeDir(self):
     return os.getenv("HOME")
 
-  @Slot(str)
+  @pyqtSlot(str)
   def addFileInfo(self, filePath):
     sizeFmt = ""
     mtimeFmt = ""
@@ -503,7 +503,7 @@ class Controller(QObject):
     if not isDupe:
       self.fileInfoModel.appendItems([FileInfo(filePath, sizeFmt, mtimeFmt, error)])
 
-  @Slot(str)
+  @pyqtSlot(str)
   def removeFileInfo(self, filePath):
     files = []
     for fileInfo in self.fileInfoModel.getItems():
@@ -513,22 +513,22 @@ class Controller(QObject):
         files.append(fileInfo)
     self.fileInfoModel.setItems(files)
 
-  @Slot(str)
+  @pyqtSlot(str)
   def clearFileInfo(self):
     self.fileInfoModel.clear()
 
-  @Slot(QObject)
+  @pyqtSlot(QObject)
   def setCounterBox(self, counterBox):
     self.counterBox = counterBox
 
   def setSendWindow(self, sendWindow):
     self.sendWindow = sendWindow
 
-  @Slot()
+  @pyqtSlot()
   def showSendWindow(self):
     self.sendWindow.show()
 
-  @Slot()
+  @pyqtSlot()
   def runCustomCommand(self):
     if self.accountConfig != None and "custom_cmd" in self.accountConfig.keys():
       cmd = ""
@@ -544,18 +544,18 @@ class Controller(QObject):
     else:
       print "no command to run\n"
 
-  @Slot('QVariantList')
+  @pyqtSlot('QVariantList')
   def runCommand(self, cmdArr):
     subprocess.Popen(cmdArr)
-  @Slot(str)
+  @pyqtSlot(str)
   def shellCommand(self, cmdStr):
     subprocess.Popen(['sh', '-c', cmdStr])
 
-  @Slot(QObject, str, result=QObject)
+  @pyqtSlot(QObject, str, result=QObject)
   def findChild(self, obj, name):
     return obj.findChild(QObject, name)
 
-  @Slot(str, QObject)
+  @pyqtSlot(str, QObject)
   def initSend(self, sendType, sendForm):
     if self.accountName == None or self.folderName == None or self.header == None:
       self.notifierModel.notify("Missing source email for " + sendType)
@@ -609,7 +609,7 @@ class Controller(QObject):
     indentedBody = "\n".join(map(lambda line: "> " + line, lines)) + "\n"
     return bodyPrefix + indentedBody
 
-  @Slot(str, result=bool)
+  @pyqtSlot(str, result=bool)
   def updateFileList(self, text):
     oldDir = self.fileListDir
     self.fileListDir = self.extractDir(text)
@@ -662,7 +662,7 @@ class Controller(QObject):
       print "FAILED TO LIST DIR: " + path
       return None
 
-  @Slot(QObject)
+  @pyqtSlot(QObject)
   def sendEmail(self, sendForm):
     to = sendForm.getTo().toVariant()
     cc = sendForm.getCC().toVariant()
@@ -698,14 +698,14 @@ class Controller(QObject):
     else:
       self.notifierModel.notify("\nSUCCESS\n\n" + output, False)
 
-  @Slot()
+  @pyqtSlot()
   def setupAccounts(self):
     self.accountModel.setItems(self.emailManager.getAccounts())
     self.ensureAccountModelSelected()
-  @Slot()
+  @pyqtSlot()
   def setupFolders(self):
     self.folderModel.setItems(self.emailManager.getFolders(self.accountName))
-  @Slot()
+  @pyqtSlot()
   def setupHeaders(self):
     self.headerFilters = []
     (total, headers) = self.emailManager.fetchHeaders(
@@ -714,10 +714,10 @@ class Controller(QObject):
       exclude=[], minUid=None)
     self.totalSize = total
     self.setHeaders(headers)
-  @Slot(str)
+  @pyqtSlot()
   def setConfigMode(self, mode):
     self.configMode = mode
-  @Slot()
+  @pyqtSlot()
   def setupConfig(self):
     if self.configMode == "account":
       self.setupAccountConfig()
@@ -730,10 +730,10 @@ class Controller(QObject):
     fields = self.emailManager.getOptionsConfigFields()
     self.configModel.setItems(fields)
 
-  @Slot(QObject, str)
+  @pyqtSlot(QObject, str)
   def updateConfigFieldValue(self, field, value):
     field.value_ = value
-  @Slot(result=bool)
+  @pyqtSlot(result=bool)
   def saveConfig(self):
     fields = self.configModel.getItems()
     if self.configMode == "account":
@@ -748,7 +748,7 @@ class Controller(QObject):
       self.notifierModel.notify("FAILURE\n" + res['stdout'] + res['stderr'])
       return False
 
-  @Slot(str)
+  @pyqtSlot(str)
   def accountSelected(self, accountName):
     self.setAccountName(accountName)
     self.setFolderName("inbox")
@@ -756,13 +756,13 @@ class Controller(QObject):
     self.setupFolders()
     self.ensureAccountModelSelected()
     self.ensureAddressBook()
-  @Slot(QObject)
+  @pyqtSlot(QObject)
   def folderSelected(self, folder):
     self.setFolderName(folder.Name)
-  @Slot(QObject)
+  @pyqtSlot(QObject)
   def headerSelected(self, header):
     self.setHeader(header)
-  @Slot()
+  @pyqtSlot()
   def clearAccount(self):
     self.reset()
 
@@ -787,13 +787,13 @@ class Controller(QObject):
         items.append(Suggestion(emailAddress))
       self.addressBookModel.setItems(items)
 
-  @Slot(str, result=str)
+  @pyqtSlot(str, result=str)
   def getAccountConfigValue(self, configKey):
     if self.accountConfig != None and configKey in self.accountConfig:
       return self.accountConfig[configKey]
     return ''
 
-  @Slot(result=str)
+  @pyqtSlot(result=str)
   def getInitialPageName(self):
     return self.initialPageName
   def setInitialPageName(self, pageName):
@@ -857,7 +857,7 @@ class Controller(QObject):
         return False
     return True
 
-  @Slot(str, str)
+  @pyqtSlot(str, str)
   def replaceHeaderFilterStr(self, name, headerFilterStr):
     headerFilterStr = headerFilterStr.strip()
     print headerFilterStr
@@ -910,10 +910,10 @@ class Controller(QObject):
       print "Error parsing filter string:", e
       self.removeHeaderFilter(name)
     self.refreshHeaderFilters()
-  @Slot(str)
+  @pyqtSlot(str)
   def removeHeaderFilter(self, name):
     self.headerFilters = filter(lambda f: f.name != name, self.headerFilters)
-  @Slot()
+  @pyqtSlot()
   def refreshHeaderFilters(self):
     self.setHeaders(self.currentHeaders)
 
@@ -922,7 +922,7 @@ class Controller(QObject):
     self.headerFilters = filter(lambda f: f.name != name, self.headerFilters)
     self.headerFilters.append(headerFilter)
 
-  @Slot()
+  @pyqtSlot()
   def resetFilterButtons(self):
     for filterButton in self.filterButtonModel.getItems():
       filterButton.setChecked(False)
@@ -948,11 +948,11 @@ class Controller(QObject):
       self.headerModel.appendItems(newFilteredHeaders)
     self.updateCounterBox()
 
-  @Slot(str)
+  @pyqtSlot(str)
   def onSearchTextChanged(self, searchText):
     self.replaceHeaderFilterStr("quick-filter", searchText)
 
-  @Slot(QObject, QObject)
+  @pyqtSlot(QObject, QObject)
   def updateAccount(self, messageBox, account):
     if account == None:
       accMsg = "ALL ACCOUNTS WITHOUT SKIP"
@@ -974,7 +974,7 @@ class Controller(QObject):
     if self.accountName != None:
       self.ensureHeadersUpToDate()
 
-  @Slot()
+  @pyqtSlot()
   def markAllRead(self):
     headerStates = []
     uids = []
@@ -1007,7 +1007,7 @@ class Controller(QObject):
 
     self.setupAccounts()
 
-  @Slot(QObject)
+  @pyqtSlot(QObject)
   def toggleRead(self, header):
     header.setLoading(True)
 
@@ -1028,14 +1028,14 @@ class Controller(QObject):
       header.setRead(not header.read_)
     self.setupAccounts()
 
-  @Slot(result=bool)
+  @pyqtSlot(result=bool)
   def getHtmlMode(self):
     return self.htmlMode
-  @Slot(bool)
+  @pyqtSlot(bool)
   def setHtmlMode(self, htmlMode):
     self.htmlMode = htmlMode
 
-  @Slot(QObject, QObject)
+  @pyqtSlot(QObject, QObject)
   def fetchCurrentBodyText(self, bodyBox, headerBox):
     self.fetchCurrentBodyTextWithTransform(bodyBox, headerBox, None, False)
 
@@ -1082,7 +1082,7 @@ class Controller(QObject):
       self.currentBodyText = None
       bodyBox.setBody("ERROR FETCHING BODY\n")
 
-  @Slot(QObject)
+  @pyqtSlot(QObject)
   def copyBodyToClipboard(self, bodyView):
     curBody = self.currentBodyText
     curSel = bodyView.getSelectedText()
@@ -1096,7 +1096,7 @@ class Controller(QObject):
       QClipboard().setText(text)
     self.notifierModel.notify("Copied text to clipboard: " + text)
 
-  @Slot()
+  @pyqtSlot()
   def saveCurrentAttachments(self):
     if self.header == None:
       self.notifierModel.notify("MISSING CURRENT MESSAGE")
@@ -1147,7 +1147,7 @@ class Controller(QObject):
       messageBox.setText(oldText + message)
       messageBox.scrollToBottom()
 
-  @Slot()
+  @pyqtSlot()
   def ensureHeadersUpToDate(self):
     minUid = min(map(lambda header: header.Uid, self.currentHeaders))
     (total, headers) = self.emailManager.fetchHeaders(
@@ -1155,7 +1155,7 @@ class Controller(QObject):
       limit=None, exclude=self.currentHeaders, minUid=minUid)
     self.totalSize = total
     self.prependHeaders(headers)
-  @Slot(int)
+  @pyqtSlot(int)
   def moreHeaders(self, percentage):
     if percentage != None:
       limit = int(self.totalSize * percentage / 100)
@@ -1206,9 +1206,9 @@ class HeaderFilterAtt(HeaderFilter):
 
 
 class EmailCommandThread(QThread):
-  commandFinished = Signal(bool, str, object, list)
-  setMessage = Signal(QObject, str)
-  appendMessage = Signal(QObject, str)
+  commandFinished = pyqtSignal(bool, str, object, dict)
+  setMessage = pyqtSignal(QObject, str)
+  appendMessage = pyqtSignal(QObject, str)
   def __init__(self, command, messageBox=None, finishedAction=None, extraArgs=None):
     QThread.__init__(self)
     self.command = command
@@ -1259,12 +1259,12 @@ class BaseListModel(QAbstractListModel):
     self.items.extend(items)
     self.endInsertRows()
     self.changed.emit()
-  @Slot(result=int)
+  @pyqtSlot(result=int)
   def rowCount(self, parent=QModelIndex()):
     return len(self.items)
   def count(self):
     return len(self.items)
-  @Slot(int, result=QObject)
+  @pyqtSlot(int, result=QObject)
   def get(self, index):
     return self.items[index]
   def data(self, index, role):
@@ -1279,8 +1279,8 @@ class BaseListModel(QAbstractListModel):
       rowCount -= 1
     self.endRemoveRows()
     self.changed.emit()
-  changed = Signal()
-  count = Property(int, count, notify=changed)
+  changed = pyqtSignal()
+  count = pyqtProperty(int, count, notify=changed)
 
 class AccountModel(BaseListModel):
   COLUMNS = ('account',)
@@ -1378,17 +1378,17 @@ class Account(QObject):
   def setSelected(self, selected_):
     self.selected_ = selected_
     self.changed.emit()
-  changed = Signal()
-  Name = Property(unicode, Name, notify=changed)
-  LastUpdated = Property(int, LastUpdated, notify=changed)
-  LastUpdatedRel = Property(unicode, LastUpdatedRel, notify=changed)
-  UpdateInterval = Property(int, UpdateInterval, notify=changed)
-  RefreshInterval = Property(int, RefreshInterval, notify=changed)
-  Unread = Property(int, Unread, notify=changed)
-  Total = Property(int, Total, notify=changed)
-  Error = Property(unicode, Error, notify=changed)
-  IsLoading = Property(bool, IsLoading, notify=changed)
-  Selected = Property(bool, Selected, notify=changed)
+  changed = pyqtSignal()
+  Name = pyqtProperty(unicode, Name, notify=changed)
+  LastUpdated = pyqtProperty(int, LastUpdated, notify=changed)
+  LastUpdatedRel = pyqtProperty(unicode, LastUpdatedRel, notify=changed)
+  UpdateInterval = pyqtProperty(int, UpdateInterval, notify=changed)
+  RefreshInterval = pyqtProperty(int, RefreshInterval, notify=changed)
+  Unread = pyqtProperty(int, Unread, notify=changed)
+  Total = pyqtProperty(int, Total, notify=changed)
+  Error = pyqtProperty(unicode, Error, notify=changed)
+  IsLoading = pyqtProperty(bool, IsLoading, notify=changed)
+  Selected = pyqtProperty(bool, Selected, notify=changed)
 
 class Folder(QObject):
   def __init__(self, name_, unread_, total_):
@@ -1402,10 +1402,10 @@ class Folder(QObject):
     return self.unread_
   def Total(self):
     return self.total_
-  changed = Signal()
-  Name = Property(unicode, Name, notify=changed)
-  Unread = Property(int, Unread, notify=changed)
-  Total = Property(int, Total, notify=changed)
+  changed = pyqtSignal()
+  Name = pyqtProperty(unicode, Name, notify=changed)
+  Unread = pyqtProperty(int, Unread, notify=changed)
+  Total = pyqtProperty(int, Total, notify=changed)
 
 class Header(QObject):
   def __init__(self, uid_, date_, from_, to_, cc_, bcc_, subject_, isSent_, read_, isLoading_):
@@ -1452,18 +1452,18 @@ class Header(QObject):
   def setSelected(self, selected_):
     self.selected_ = selected_
     self.changed.emit()
-  changed = Signal()
-  Uid = Property(int, Uid, notify=changed)
-  Date = Property(unicode, Date, notify=changed)
-  From = Property(unicode, From, notify=changed)
-  To = Property(unicode, To, notify=changed)
-  CC = Property(unicode, CC, notify=changed)
-  BCC = Property(unicode, BCC, notify=changed)
-  Subject = Property(unicode, Subject, notify=changed)
-  IsSent = Property(bool, IsSent, notify=changed)
-  Read = Property(bool, Read, notify=changed)
-  IsLoading = Property(bool, IsLoading, notify=changed)
-  Selected = Property(bool, Selected, notify=changed)
+  changed = pyqtSignal()
+  Uid = pyqtProperty(int, Uid, notify=changed)
+  Date = pyqtProperty(unicode, Date, notify=changed)
+  From = pyqtProperty(unicode, From, notify=changed)
+  To = pyqtProperty(unicode, To, notify=changed)
+  CC = pyqtProperty(unicode, CC, notify=changed)
+  BCC = pyqtProperty(unicode, BCC, notify=changed)
+  Subject = pyqtProperty(unicode, Subject, notify=changed)
+  IsSent = pyqtProperty(bool, IsSent, notify=changed)
+  Read = pyqtProperty(bool, Read, notify=changed)
+  IsLoading = pyqtProperty(bool, IsLoading, notify=changed)
+  Selected = pyqtProperty(bool, Selected, notify=changed)
 
 class Field(QObject):
   def __init__(self, fieldName_, isPassword_, value_, description_):
@@ -1480,11 +1480,11 @@ class Field(QObject):
     return self.value_
   def Description(self):
     return self.description_
-  changed = Signal()
-  FieldName = Property(unicode, FieldName, notify=changed)
-  IsPassword = Property(bool, IsPassword, notify=changed)
-  Value = Property(unicode, Value, notify=changed)
-  Description = Property(unicode, Description, notify=changed)
+  changed = pyqtSignal()
+  FieldName = pyqtProperty(unicode, FieldName, notify=changed)
+  IsPassword = pyqtProperty(bool, IsPassword, notify=changed)
+  Value = pyqtProperty(unicode, Value, notify=changed)
+  Description = pyqtProperty(unicode, Description, notify=changed)
 
 class FilterButton(QObject):
   def __init__(self, name_, filterString_, isChecked_):
@@ -1498,14 +1498,14 @@ class FilterButton(QObject):
     return self.filterString_
   def IsChecked(self):
     return self.isChecked_
-  @Slot(bool)
+  @pyqtSlot(bool)
   def setChecked(self, isChecked_):
     self.isChecked_ = isChecked_
     self.changed.emit()
-  changed = Signal()
-  Name = Property(unicode, Name, notify=changed)
-  FilterString = Property(unicode, FilterString, notify=changed)
-  IsChecked = Property(bool, IsChecked, notify=changed)
+  changed = pyqtSignal()
+  Name = pyqtProperty(unicode, Name, notify=changed)
+  FilterString = pyqtProperty(unicode, FilterString, notify=changed)
+  IsChecked = pyqtProperty(bool, IsChecked, notify=changed)
 
 class NotifierModel(QObject):
   def __init__(self):
@@ -1530,14 +1530,14 @@ class NotifierModel(QObject):
     self.changed.emit()
   def hide(self):
     self.setShowing(False)
-  @Slot(bool)
+  @pyqtSlot(bool)
   def setShowing(self, showing_):
     self.showing_ = showing_
     self.changed.emit()
-  changed = Signal()
-  Text = Property(unicode, Text, notify=changed)
-  Showing = Property(bool, Showing, notify=changed)
-  HideDelay = Property(bool, HideDelay, notify=changed)
+  changed = pyqtSignal()
+  Text = pyqtProperty(unicode, Text, notify=changed)
+  Showing = pyqtProperty(bool, Showing, notify=changed)
+  HideDelay = pyqtProperty(bool, HideDelay, notify=changed)
 
 class Suggestion(QObject):
   def __init__(self, suggestionText_):
@@ -1545,8 +1545,8 @@ class Suggestion(QObject):
     self.suggestionText_ = suggestionText_
   def name(self):
     return self.suggestionText_
-  changed = Signal()
-  name = Property(unicode, name, notify=changed)
+  changed = pyqtSignal()
+  name = pyqtProperty(unicode, name, notify=changed)
 
 class FileInfo(QObject):
   def __init__(self, filePath_, sizeFmt_, mtimeFmt_, errorMsg_):
@@ -1563,11 +1563,11 @@ class FileInfo(QObject):
     return self.mtimeFmt_
   def ErrorMsg(self):
     return self.errorMsg_
-  changed = Signal()
-  FilePath = Property(unicode, FilePath, notify=changed)
-  SizeFmt = Property(unicode, SizeFmt, notify=changed)
-  MtimeFmt = Property(unicode, MtimeFmt, notify=changed)
-  ErrorMsg = Property(unicode, ErrorMsg, notify=changed)
+  changed = pyqtSignal()
+  FilePath = pyqtProperty(unicode, FilePath, notify=changed)
+  SizeFmt = pyqtProperty(unicode, SizeFmt, notify=changed)
+  MtimeFmt = pyqtProperty(unicode, MtimeFmt, notify=changed)
+  ErrorMsg = pyqtProperty(unicode, ErrorMsg, notify=changed)
 
 class MainWindow(QQuickView):
   def __init__(self, qmlFile, controller,
@@ -1587,7 +1587,7 @@ class MainWindow(QQuickView):
     context.setContextProperty('controller', controller)
 
     self.setResizeMode(QQuickView.SizeRootObjectToView)
-    self.setSource(qmlFile)
+    self.setSource(QUrl(qmlFile))
 
 class SendWindow(QQuickView):
   def __init__(self, qmlFile, controller, main,
@@ -1608,7 +1608,7 @@ class SendWindow(QQuickView):
     context.setContextProperty('controller', controller)
 
     self.setResizeMode(QQuickView.SizeRootObjectToView)
-    self.setSource(qmlFile)
+    self.setSource(QUrl(qmlFile))
 
 if __name__ == "__main__":
   sys.exit(main())
