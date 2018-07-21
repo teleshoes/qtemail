@@ -25,6 +25,7 @@ QML_DIR = "/opt/qtemail/qml"
 
 PLATFORM_OTHER = 0
 PLATFORM_FREMANTLE = 2
+PLATFORM_SAILFISH = 3
 platform = [None]
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -87,10 +88,14 @@ def main():
   platform[0] = None
   if "maemo 5" in issue:
     platform[0] = PLATFORM_FREMANTLE
+  elif "mer" in issue:
+    platform[0] = PLATFORM_SAILFISH
   else:
     platform[0] = PLATFORM_OTHER
 
   if platform[0] == PLATFORM_FREMANTLE:
+    qmlFile = QML_DIR + "/desktop-small.qml"
+  elif platform[0] == PLATFORM_SAILFISH:
     qmlFile = QML_DIR + "/desktop-small.qml"
   else:
     qmlFile = QML_DIR + "/desktop.qml"
