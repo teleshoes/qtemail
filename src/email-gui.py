@@ -135,6 +135,8 @@ def main():
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
     addressBookModel, fileListModel, fileInfoModel)
 
+  mainWindow.setTitle(os.path.basename(__file__))
+
   if useSendWindow:
     sendWindow = SendWindow(QML_DIR + "/SendView.qml", controller, mainWindow.rootObject(),
       accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
