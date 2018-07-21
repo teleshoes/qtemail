@@ -43,6 +43,8 @@ Rectangle {
     }
   }
   function initPage(){
+    hideKb()
+
     if(curPage == accountPage){
       controller.setupAccounts()
     }else if(curPage == headerPage){
@@ -154,6 +156,28 @@ Rectangle {
       SendView{ id: sendView }
     }
   }
+
+  // HACK TO HIDE KEYBOARD
+  function hideKb(){
+    hideKbTimer.start()
+  }
+  function hideKbNow(){
+    hideKbDummyEdit.focus = true
+    hideKbDummyEdit.focus = false
+  }
+  Timer {
+    id: hideKbTimer
+    interval: 50
+    repeat: false
+    onTriggered: hideKbNow()
+  }
+  TextInput {
+    id: hideKbDummyEdit
+    activeFocusOnPress: false
+    width: 0
+    height: 0
+  }
+  // HACK TO HIDE KEYBOARD
 
   ToolBarButtonDefList {
     id: toolBarButtonDefList
