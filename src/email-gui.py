@@ -664,12 +664,13 @@ class Controller(QObject):
 
   @Slot(QObject)
   def sendEmail(self, sendForm):
-    to = sendForm.getTo()
-    cc = sendForm.getCC()
-    bcc = sendForm.getBCC()
+    to = sendForm.getTo().toVariant()
+    cc = sendForm.getCC().toVariant()
+    bcc = sendForm.getBCC().toVariant()
     subject = sendForm.getSubject()
     body = sendForm.getBody()
-    attachments = sendForm.getAttachments()
+    attachments = sendForm.getAttachments().toVariant()
+
     if len(to) == 0:
       self.notifierModel.notify("TO is empty\n")
       return
