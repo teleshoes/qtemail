@@ -1100,7 +1100,7 @@ class Controller(QObject):
       text = curBody
 
     if text != None:
-      QClipboard().setText(text)
+      QApplication.clipboard().setText(text)
     self.notifierModel.notify("Copied text to clipboard: " + text)
 
   @pyqtSlot()
