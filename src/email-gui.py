@@ -306,6 +306,9 @@ class EmailManager():
           accName, lastUpdated, lastUpdatedRel, updateInterval, refreshInterval, unreadCount, totalCount, error, False))
     return accounts
   def getFolders(self, accountName):
+    if accountName == None:
+      return []
+
     folderOut = self.readProc([EMAIL_BIN, "--folders", accountName])
     folders = []
     for line in folderOut.splitlines():
@@ -722,7 +725,7 @@ class Controller(QObject):
       exclude=[], minUid=None)
     self.totalSize = total
     self.setHeaders(headers)
-  @pyqtSlot()
+  @pyqtSlot(str)
   def setConfigMode(self, mode):
     self.configMode = mode
   @pyqtSlot()
@@ -985,6 +988,9 @@ class Controller(QObject):
 
   @pyqtSlot()
   def markAllRead(self):
+    if self.accountName == None:
+      return
+
     headerStates = []
     uids = []
     for header in self.headerModel.getItems():
@@ -1103,7 +1109,7 @@ class Controller(QObject):
 
     if text != None:
       QApplication.clipboard().setText(text)
-    self.notifierModel.notify("Copied text to clipboard: " + text)
+      self.notifierModel.notify("Copied text to clipboard: " + text)
 
   @pyqtSlot()
   def saveCurrentAttachments(self):
