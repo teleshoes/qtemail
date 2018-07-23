@@ -1166,6 +1166,9 @@ class Controller(QObject):
     self.prependHeaders(headers)
   @pyqtSlot(int)
   def moreHeaders(self, percentage):
+    if self.accountName == None:
+      return
+
     if percentage != None:
       limit = int(self.totalSize * percentage / 100)
     else:
@@ -1177,6 +1180,7 @@ class Controller(QObject):
       limit=limit, exclude=self.currentHeaders, minUid=None)
     self.totalSize = total
     self.appendHeaders(headers)
+  @pyqtSlot()
   def updateCounterBox(self):
     if self.counterBox == None:
       return
