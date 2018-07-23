@@ -636,6 +636,7 @@ class Controller(QObject):
         else:
           print "filelist: clearing"
           self.fileListModel.clear()
+          return False
       else:
         print "filelist: adding " + str(len(items)) + " items"
         self.fileListModel.setItems(items)
