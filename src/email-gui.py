@@ -627,7 +627,7 @@ class Controller(QObject):
       items = []
       if self.fileListDir != None:
         for f in self.listDir(self.fileListDir):
-          items.append(Suggestion(f))
+          items.append(Suggestion(f, self))
 
       if len(items) == 0:
         if len(self.fileListModel.getItems()) == 0:
@@ -741,6 +741,7 @@ class Controller(QObject):
   @pyqtSlot(QObject, str)
   def updateConfigFieldValue(self, field, value):
     field.value_ = value
+
   @pyqtSlot(result=bool)
   def saveConfig(self):
     fields = self.configModel.getItems()
@@ -792,7 +793,7 @@ class Controller(QObject):
     else:
       items = []
       for emailAddress in accEmails:
-        items.append(Suggestion(emailAddress))
+        items.append(Suggestion(emailAddress, self))
       self.addressBookModel.setItems(items)
 
   @pyqtSlot(str, result=str)
@@ -1548,8 +1549,8 @@ class NotifierModel(QObject):
   HideDelay = pyqtProperty(bool, HideDelay, notify=changed)
 
 class Suggestion(QObject):
-  def __init__(self, suggestionText_):
-    QObject.__init__(self)
+  def __init__(self, suggestionText_, parent):
+    QObject.__init__(self, parent)
     self.suggestionText_ = suggestionText_
   def name(self):
     return self.suggestionText_
