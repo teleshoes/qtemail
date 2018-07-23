@@ -1251,23 +1251,23 @@ class BaseListModel(QAbstractListModel):
     return self.items
   def setItems(self, items):
     self.clear()
-    if len(items) > 0:
-      self.beginInsertRows(QModelIndex(), 0, len(items) - 1)
-      self.items = items
-      self.endInsertRows()
-    else:
-      self.items = []
-    self.changed.emit()
+    self.prependItems(items)
   def prependItems(self, items):
-    self.beginInsertRows(QModelIndex(), 0, len(items) - 1)
-    self.items = items + self.items
-    self.endInsertRows()
-    self.changed.emit()
+    if len(items) > 0:
+      firstNewRow = 0
+      lastNewRow = len(items) - 1
+      self.beginInsertRows(QModelIndex(), firstNewRow, lastNewRow)
+      self.items = items + self.items
+      self.endInsertRows()
+      self.changed.emit()
   def appendItems(self, items):
-    self.beginInsertRows(QModelIndex(), len(self.items), len(self.items))
-    self.items.extend(items)
-    self.endInsertRows()
-    self.changed.emit()
+    if len(items) > 0:
+      firstNewRow = len(self.items)
+      lastNewRow = len(self.items) + len(items) - 1
+      self.beginInsertRows(QModelIndex(), firstNewRow, lastNewRow)
+      self.items.extend(items)
+      self.endInsertRows()
+      self.changed.emit()
   @pyqtSlot(result=int)
   def rowCount(self, parent=QModelIndex()):
     return len(self.items)
@@ -1281,6 +1281,7 @@ class BaseListModel(QAbstractListModel):
       return self.items[index.row()]
   def clear(self):
     self.removeRows(0, len(self.items))
+    self.items = []
   def removeRows(self, firstRow, rowCount, parent = QModelIndex()):
     self.beginRemoveRows(parent, firstRow, firstRow+rowCount-1)
     while rowCount > 0:
