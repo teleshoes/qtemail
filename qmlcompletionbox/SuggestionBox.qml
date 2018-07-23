@@ -30,6 +30,7 @@ Rectangle {
     property alias suggestionsModel: filterItem.model
     property alias filter: filterItem.filter
     property alias property: filterItem.property
+    property int fontSize: 8
     signal itemSelected(variant item)
 
     // --- behaviours
@@ -100,6 +101,7 @@ Rectangle {
                     width: parent.width - 7
                     Text {
                         id: textComponent
+                        font.pointSize: container.fontSize
                         color: delegateItem.selected ? "yellow" : "white"
                         text: suggestion.name
                         width: parent.width - 4

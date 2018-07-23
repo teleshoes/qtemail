@@ -12,6 +12,8 @@ FocusScope {
     property alias clearButton: clearButtonComponent
     property alias textInput: textInputComponent
     property alias text: textInputComponent.text
+    property alias fontSizeText: textInputComponent.font.pointSize
+    property alias fontSizeHint: hintComponent.font.pointSize
 
     // --- signals
     signal accepted
