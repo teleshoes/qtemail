@@ -210,6 +210,7 @@ sub getBody($$$){
   my @text = map {$_->{handle}} grep {$_->{partType} eq "text"} @parts;
   my @html = map {$_->{handle}} grep {$_->{partType} eq "html"} @parts;
   my @atts = map {$_->{handle}} grep {$_->{partType} eq "attachment"} @parts;
+  my @inlineAtts = map {$_->{handle}} grep {$_->{partType} eq "attachment-inline"} @parts;
 
   my $body = "";
   for my $isHtml($preferHtml ? (1, 0) : (0, 1)){
@@ -224,24 +225,35 @@ sub getBody($$$){
   chomp $body;
   $body .= "\n" if length($body) > 0;
 
-  my $attachments = "";
-  my $first = 1;
-  for my $att(@atts){
-    my $path = $att->path;
-    my $attName = $path;
-    $attName =~ s/.*\///;
+  my $attFmt = "";
+
+  my @attNames = map {my $p = $_->path; $p =~ s/.*\///; $p} @atts;
+  if(@attNames > 0){
     if($preferHtml){
-      $attachments .= "<br/>" if $first;
-      $attachments .= "<i>attachment: $attName</i><br/>";
+      for my $attName(@attNames){
+        $attFmt .= "<i>attachment: $attName</i><br/>";
+      }
+      $attFmt .= "<br/>";
     }else{
-      $attachments .= "\n" if $first;
-      $attachments .= "attachment: $attName\n";
+      for my $attName(@attNames){
+        $attFmt .= "attachment: $attName\n";
+      }
+      $attFmt .= "\n";
     }
-    $first = 0;
+  }
+
+  my @inlineAttNames = map {my $p = $_->path; $p =~ s/.*\///; $p} @inlineAtts;
+  if(@inlineAttNames > 0){
+    my $count = @inlineAttNames;
+    if($preferHtml){
+      $attFmt .= "<small><i>inline-atts($count): @inlineAttNames</i></small><br/><br/>";
+    }else{
+      $attFmt .= "inline-atts($count): @inlineAttNames\n\n";
+    }
   }
 
   $mimeParser->filer->purge;
-  return $attachments . $body;
+  return $attFmt . $body;
 }
 
 sub writeAttachments($$){
@@ -282,6 +294,8 @@ sub parseMimeEntity($){
       $partType = "html";
     }elsif(defined $disposition and $disposition =~ /attachment/){
       $partType = "attachment";
+    }elsif(defined $disposition and $disposition =~ /inline/){
+      $partType = "attachment-inline";
     }else{
       $partType = "unknown";
     }
