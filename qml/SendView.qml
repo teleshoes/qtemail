@@ -26,12 +26,18 @@ Rectangle {
     function getTo(){
       return to.getEmails()
     }
+    function getToModel(){
+      return to.getEmailsModel()
+    }
     function setTo(emails){
       return to.setEmails(emails)
     }
 
     function getCC(){
       return cc.getEmails()
+    }
+    function getCCModel(){
+      return cc.getEmailsModel()
     }
     function setCC(emails){
       return cc.setEmails(emails)
@@ -40,12 +46,18 @@ Rectangle {
     function getBCC(){
       return bcc.getEmails()
     }
+    function getBCCModel(){
+      return bcc.getEmailsModel()
+    }
     function setBCC(emails){
       return bcc.setEmails(emails)
     }
 
     function getAttachments(){
       return attachments.getFiles()
+    }
+    function getAttachmentsModel(){
+      return attachments.getFilesModel()
     }
     function setAttachments(files){
       return attachments.setFiles(files)

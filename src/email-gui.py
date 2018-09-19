@@ -675,12 +675,16 @@ class Controller(QObject):
 
   @pyqtSlot(QObject)
   def sendEmail(self, sendForm):
-    to = sendForm.getTo().toVariant()
-    cc = sendForm.getCC().toVariant()
-    bcc = sendForm.getBCC().toVariant()
+    to = listModelToArray(sendForm.getToModel())
+    cc = listModelToArray(sendForm.getCCModel())
+    bcc = listModelToArray(sendForm.getBCCModel())
     subject = sendForm.getSubject()
     body = sendForm.getBody()
-    attachments = sendForm.getAttachments().toVariant()
+
+    attachments = []
+    attFilePaths = listModelToArray(sendForm.getAttachmentsModel())
+    for attFilePath in attFilePaths:
+      attachments.append(attFilePath.FilePath)
 
     if len(to) == 0:
       self.notifierModel.notify("TO is empty\n")
@@ -1661,6 +1665,14 @@ class SendWindow(QQuickView):
 
     self.setResizeMode(QQuickView.SizeRootObjectToView)
     self.setSource(QUrl(qmlFile))
+
+def listModelToArray(listModel, obj=None):
+  arr = []
+  for row in range(0, listModel.rowCount()):
+    index = listModel.index(row, 0)
+    val = listModel.data(index, 0)
+    arr.append(val)
+  return arr
 
 if __name__ == "__main__":
   sys.exit(main())

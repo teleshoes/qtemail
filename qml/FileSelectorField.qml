@@ -19,6 +19,9 @@ Rectangle {
     }
     return filePaths
   }
+  function getFilesModel(){
+    return fileListView.model
+  }
   function setFiles(filePaths){
     clearFiles()
     for(var i=0; i<filePaths.length; i++){

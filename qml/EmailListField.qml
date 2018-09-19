@@ -12,6 +12,9 @@ Rectangle {
     }
     return emails
   }
+  function getEmailsModel(){
+    return emailListView.model
+  }
   function setEmails(emails){
     clearEmails()
     for(var i=0; i<emails.length; i++){
