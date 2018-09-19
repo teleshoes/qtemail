@@ -828,6 +828,7 @@ class Controller(QObject):
 
   def setAccountName(self, accName):
     self.accountName = accName
+    self.accountNameChanged.emit()
   def setFolderName(self, folderName):
     self.folderName = folderName
   def setHeader(self, header):
@@ -1213,6 +1214,10 @@ class Controller(QObject):
       msg += "(" + str(showingLen) + " showing)  "
     msg += str(curLen) + " / " + str(totalLen)
     self.counterBox.setCounterText(msg)
+  def AccountName(self):
+    return self.accountName
+  accountNameChanged = pyqtSignal()
+  AccountName = pyqtProperty(unicode, AccountName, notify=accountNameChanged)
 
 class HeaderFilter():
   def __init__(self, name):
