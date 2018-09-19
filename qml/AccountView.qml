@@ -8,10 +8,6 @@ Rectangle {
     controller.updateAccount(messageBox, null)
   }
 
-  function initAccountConfig(accountName){
-    controller.resetFilterButtons()
-  }
-
   Timer {
     id: labelRefreshTimer
     interval: 10 * 1000
@@ -42,7 +38,6 @@ Rectangle {
           anchors.fill: parent
           onClicked: {
             controller.accountSelected(model.account.Name)
-            initAccountConfig(model.account.Name)
             navToPage(headerPage)
           }
         }

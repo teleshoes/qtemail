@@ -783,6 +783,7 @@ class Controller(QObject):
     self.setupFolders()
     self.ensureAccountModelSelected()
     self.ensureAddressBook()
+    self.resetFilterButtons()
   @pyqtSlot(QObject)
   def folderSelected(self, folder):
     self.setFolderName(folder.Name)
