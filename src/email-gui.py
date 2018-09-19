@@ -714,6 +714,21 @@ class Controller(QObject):
     self.accountModel.setItems(self.emailManager.getAccounts())
     self.ensureAccountModelSelected()
   @pyqtSlot()
+  def refreshAccountLabels(self):
+    labels = self.accountModel.getItems()
+    accs = self.emailManager.getAccounts()
+    for label in labels:
+      for acc in accs:
+        if acc.Name == label.Name:
+          label.refresh(
+            acc.LastUpdated,
+            acc.LastUpdatedRel,
+            acc.UpdateInterval,
+            acc.RefreshInterval,
+            acc.Unread,
+            acc.Total,
+            acc.Error)
+  @pyqtSlot()
   def setupFolders(self):
     self.folderModel.setItems(self.emailManager.getFolders(self.accountName))
   @pyqtSlot()
@@ -1392,6 +1407,15 @@ class Account(QObject):
     return self.isLoading_
   def Selected(self):
     return self.selected_
+  def refresh(self, lastUpdated_, lastUpdatedRel_, updateInterval_, refreshInterval_, unread_, total_, error_):
+    self.lastUpdated_ = lastUpdated_
+    self.lastUpdatedRel_ = lastUpdatedRel_
+    self.updateInterval_ = updateInterval_
+    self.refreshInterval_ = refreshInterval_
+    self.unread_ = unread_
+    self.total_ = total_
+    self.error_ = error_
+    self.changed.emit()
   def setLoading(self, isLoading_):
     self.isLoading_ = isLoading_
     self.changed.emit()

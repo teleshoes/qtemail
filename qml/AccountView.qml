@@ -19,6 +19,17 @@ Rectangle {
     }
   }
 
+  Timer {
+    id: labelRefreshTimer
+    interval: 10 * 1000
+    running: true
+    repeat: true
+
+    onTriggered: {
+      controller.refreshAccountLabels()
+    }
+  }
+
   ListView {
     id: accountFlickable
     spacing: 15
@@ -87,7 +98,6 @@ Rectangle {
                 console.log("skipping refresh while updating")
               }else{
                 console.log("refreshing account " + model.account.Name)
-                controller.setupAccounts()
                 controller.ensureHeadersUpToDate()
               }
             }
