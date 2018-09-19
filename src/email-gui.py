@@ -88,7 +88,7 @@ def main():
   platform[0] = None
   if "maemo 5" in issue:
     platform[0] = PLATFORM_FREMANTLE
-  elif "mer" in issue:
+  elif "mer" in issue or "sailfish" in issue:
     platform[0] = PLATFORM_SAILFISH
   else:
     platform[0] = PLATFORM_OTHER
