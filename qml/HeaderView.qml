@@ -44,6 +44,9 @@ Rectangle {
         id: filterToggleBox
         width: parent.width
         height: 30
+
+        property int filterFontSize: main.fontSmall
+
         ListView {
           id: filterButtonList
           model: filterButtonModel
@@ -57,6 +60,7 @@ Rectangle {
 
             property bool checked: model.filterButton.IsChecked
             text: model.filterButton.Name
+            textSize: filterToggleBox.filterFontSize
             buttonColorDefault: checked ? "blue" : "gray"
 
 
