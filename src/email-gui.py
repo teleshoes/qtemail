@@ -1059,12 +1059,10 @@ class Controller(QObject):
       header.setRead(not header.read_)
     self.setupAccounts()
 
-  @pyqtSlot(result=bool)
-  def getHtmlMode(self):
-    return self.htmlMode
   @pyqtSlot(bool)
   def setHtmlMode(self, htmlMode):
     self.htmlMode = htmlMode
+    self.htmlModeChanged.emit()
 
   @pyqtSlot(QObject, QObject)
   def fetchCurrentBodyText(self, bodyBox, headerBox):
@@ -1216,8 +1214,12 @@ class Controller(QObject):
     self.counterBox.setCounterText(msg)
   def AccountName(self):
     return self.accountName
+  def HtmlMode(self):
+    return self.htmlMode
   accountNameChanged = pyqtSignal()
   AccountName = pyqtProperty(unicode, AccountName, notify=accountNameChanged)
+  htmlModeChanged = pyqtSignal()
+  HtmlMode = pyqtProperty(bool, HtmlMode, notify=htmlModeChanged)
 
 class HeaderFilter():
   def __init__(self, name):

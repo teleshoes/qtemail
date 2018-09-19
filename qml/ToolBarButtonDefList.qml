@@ -146,15 +146,13 @@ QtObject {
     },
     ToolBarButtonDef {
       name: "toggleHtml"
-      text: "html"
+      text: getButtonText(controller.HtmlMode)
       onClicked: {
-        var wasHtml = controller.getHtmlMode()
-        controller.setHtmlMode(!wasHtml)
-        setIsHtml(!wasHtml)
+        controller.setHtmlMode(!controller.HtmlMode)
         controller.fetchCurrentBodyText(bodyView, bodyView)
       }
-      function setIsHtml(isHtml){
-        text = isHtml ? "text" : "html"
+      function getButtonText(htmlMode){
+        return htmlMode ? "text" : "html"
       }
     },
     ToolBarButtonDef {

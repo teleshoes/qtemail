@@ -9,8 +9,6 @@ Rectangle {
   }
 
   function initAccountConfig(accountName){
-    var isHtml = controller.getHtmlMode()
-    toolBarButtonDefList.getButtonDefByName("toggleHtml").setIsHtml(isHtml)
     controller.resetFilterButtons()
   }
 
