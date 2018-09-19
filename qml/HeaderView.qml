@@ -43,7 +43,7 @@ Rectangle {
       Row {
         id: filterToggleBox
         width: parent.width
-        height: 30
+        height: filterFontSize * 2.14
 
         property int filterFontSize: main.fontSmall
 
@@ -56,7 +56,7 @@ Rectangle {
           spacing: 10
           delegate: Btn {
             height: filterToggleBox.height
-            width: model.filterButton.Name.length * 16
+            width: model.filterButton.Name.length * 1.14 * textSize
 
             property bool checked: model.filterButton.IsChecked
             text: model.filterButton.Name
@@ -200,7 +200,7 @@ Rectangle {
           id: wideDateLabel
           text: model.header.Date
           font.pointSize: main.fontSmall
-          width: 200
+          width: font.pointSize * 14.3
         }
         Text {
           id: wideAddressLabel
