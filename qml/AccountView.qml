@@ -12,11 +12,6 @@ Rectangle {
     var isHtml = controller.getHtmlMode()
     toolBarButtonDefList.getButtonDefByName("toggleHtml").setIsHtml(isHtml)
     controller.resetFilterButtons()
-    if(accountName == null){
-      sendView.accountLabelText = "NO ACCOUNT SELECTED"
-    }else{
-      sendView.accountLabelText = "ACCOUNT: " + accountName
-    }
   }
 
   Timer {

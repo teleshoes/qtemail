@@ -6,7 +6,6 @@ Rectangle {
   width: 1; height: 1 //retarded hack to get resizing to work
 
   property bool sendButtonEnabled: true
-  property alias accountLabelText: accountLabel.text
 
   // NOTIFIER
   Notifier {
@@ -89,12 +88,20 @@ Rectangle {
 
       Text {
         id: accountLabel
-        text: "NO ACCOUNT SELECTED"
+        text: getAccountLabelText(controller.AccountName)
         anchors.fill: parent
         color: "#ff0000"
         font.pointSize: main.fontLarge
         font.capitalization: Font.AllUppercase
         font.weight: Font.DemiBold
+
+        function getAccountLabelText(accountName){
+          if(accountName == null || accountName.length == 0){
+            return "NO ACCOUNT SELECTED"
+          }else{
+            return "ACCOUNT: " + accountName
+          }
+        }
       }
     }
     EmailListField {
