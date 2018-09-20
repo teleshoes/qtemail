@@ -92,7 +92,15 @@ Rectangle {
   Notifier { id: notifier }
 
   Rectangle {
+    id: topBar
     anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 50
+  }
+
+  Rectangle {
+    anchors.top: topBar.bottom
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: mainToolBar.top
