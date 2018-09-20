@@ -99,6 +99,18 @@ Rectangle {
     anchors.left: parent.left
     anchors.right: parent.right
     height: 50
+
+    Btn {
+      id: hideKbBtn
+      text: "hide kb"
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      anchors.left: parent.left
+      width: parent.width * 0.50
+      onClicked: {
+        hideKb()
+      }
+    }
   }
 
   Rectangle {
