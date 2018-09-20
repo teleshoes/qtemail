@@ -111,6 +111,25 @@ Rectangle {
         hideKb()
       }
     }
+    Btn {
+      id: orientationBtn
+      text: "rotate"
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      anchors.right: parent.right
+      width: parent.width * 0.50
+      onClicked: {
+        if(main.rotation == 0){
+          main.rotation = 90
+          main.width = Screen.desktopAvailableHeight
+          main.height = Screen.desktopAvailableWidth
+        }else{
+          main.rotation = 0
+          main.width = Screen.desktopAvailableWidth
+          main.height = Screen.desktopAvailableHeight
+        }
+      }
+    }
   }
 
   Rectangle {
