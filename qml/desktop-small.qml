@@ -3,7 +3,9 @@ import QtQuick.Window 2.2
 
 Rectangle {
   id: main
-  width: 1; height: 1 //retarded hack to get resizing to work
+  anchors.centerIn: parent
+  width: Screen.desktopAvailableWidth
+  height: Screen.desktopAvailableHeight
 
   property double defaultPixelDensity: 6.2
 
