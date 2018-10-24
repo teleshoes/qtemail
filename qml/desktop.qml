@@ -43,6 +43,7 @@ Rectangle {
     }else if(page == headerPage){
       controller.setCounterBox(headerView.getCounterBox())
       controller.setupHeaders()
+      headerView.resetScroll()
     }else if(page == folderPage){
       controller.setupFolders()
     }else if(page == bodyPage){

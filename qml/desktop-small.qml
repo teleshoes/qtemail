@@ -59,6 +59,7 @@ Rectangle {
     }else if(curPage == headerPage){
       controller.setCounterBox(headerView.getCounterBox())
       controller.setupHeaders()
+      headerView.resetScroll()
     }else if(curPage == folderPage){
       controller.setupFolders()
     }else if(curPage == bodyPage){

@@ -7,6 +7,10 @@ Rectangle {
     return counterBox
   }
 
+  function resetScroll(){
+    headerFlickable.positionViewAtBeginning()
+  }
+
   Rectangle {
     id: counterBox
     anchors.left: parent.left
