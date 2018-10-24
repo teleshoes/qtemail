@@ -18,23 +18,30 @@ Item {
     property Flickable flickable               : null;
     property int       handleSize              : 20;
 
+    function getFlickableY(){
+      return flickable.contentY - flickable.originY
+    }
+    function setFlickableY(flickableY){
+      flickable.contentY = flickableY + flickable.originY
+    }
+
     function scrollDown () {
-        flickable.contentY = Math.min (flickable.contentY + (flickable.height / 4), flickable.contentHeight - flickable.height);
+        setFlickableY(Math.min (getFlickableY() + (flickable.height / 4), flickable.contentHeight - flickable.height));
     }
     function scrollUp () {
-        flickable.contentY = Math.max (flickable.contentY - (flickable.height / 4), 0);
+        setFlickableY(Math.max (getFlickableY() - (flickable.height / 4), 0));
     }
 
    Binding {
         target: handle;
         property: "y";
-        value: (flickable.contentY * clicker.drag.maximumY / (flickable.contentHeight - flickable.height));
-        when: (!clicker.drag.active);
+        value: (getFlickableY() * clicker.drag.maximumY / (flickable.contentHeight - flickable.height));
+        when: (!clicker.drag.active && !clicker.pressed);
     }
     Binding {
         target: flickable;
         property: "contentY";
-        value: (handle.y * (flickable.contentHeight - flickable.height) / clicker.drag.maximumY);
+        value: flickable.originY + (handle.y * (flickable.contentHeight - flickable.height) / clicker.drag.maximumY);
         when: (clicker.drag.active || clicker.pressed);
     }
     Rectangle {
@@ -107,7 +114,7 @@ Item {
                 axis: Drag.YAxis;
             }
             anchors { fill: parent; }
-            onClicked: { flickable.contentY = (mouse.y / groove.height * (flickable.contentHeight - flickable.height)); }
+            onClicked: { setFlickableY(mouse.y / groove.height * (flickable.contentHeight - flickable.height)); }
         }
         Item {
             id: handle;
