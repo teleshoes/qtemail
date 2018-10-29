@@ -120,7 +120,7 @@ Rectangle {
       Column {
         id: leftColumn
         height: parent.height
-        width: Math.max(parent.width * 0.20, 400)
+        width: Math.max(parent.width * 0.20, 160 + 15*fontMedium)
 
         // ACCOUNT PAGE
         Rectangle {
