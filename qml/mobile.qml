@@ -26,18 +26,6 @@ Rectangle {
   function navToPageByName(pageName){
     navToPage(controller.findChild(main, pageName + "Page"))
   }
-  function navToPage(page){
-    accountPage.visible = false
-    folderPage.visible = false
-    headerPage.visible = false
-    bodyPage.visible = false
-    configPage.visible = false
-    sendPage.visible = false
-
-    page.visible = true
-    curPage = page
-    initPage()
-  }
   function backPage(){
     if(headerPage.visible){
       navToPage(accountPage);
@@ -51,9 +39,27 @@ Rectangle {
       navToPage(headerPage);
     }
   }
-  function initPage(){
-    hideKb()
 
+  function navToPage(page){
+    setCurrentPage(page)
+
+    hideKb()
+    initPage()
+    initToolBarTimer.restart()
+  }
+
+  function setCurrentPage(page){
+    accountPage.visible = false
+    folderPage.visible = false
+    headerPage.visible = false
+    bodyPage.visible = false
+    configPage.visible = false
+    sendPage.visible = false
+
+    page.visible = true
+    curPage = page
+  }
+  function initPage(){
     if(curPage == accountPage){
       controller.setupAccounts()
     }else if(curPage == headerPage){
@@ -68,8 +74,6 @@ Rectangle {
       controller.setupConfig()
     }else if(curPage == sendPage){
     }
-
-    initToolBarTimer.restart()
   }
 
   function clearBody(){
