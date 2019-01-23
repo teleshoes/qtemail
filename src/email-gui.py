@@ -94,9 +94,9 @@ def main():
     platform[0] = PLATFORM_OTHER
 
   if platform[0] == PLATFORM_FREMANTLE:
-    qmlFile = QML_DIR + "/desktop-small.qml"
+    qmlFile = QML_DIR + "/mobile.qml"
   elif platform[0] == PLATFORM_SAILFISH:
-    qmlFile = QML_DIR + "/desktop-small.qml"
+    qmlFile = QML_DIR + "/mobile.qml"
   else:
     qmlFile = QML_DIR + "/desktop.qml"
 
