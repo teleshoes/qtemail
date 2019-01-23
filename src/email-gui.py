@@ -52,6 +52,10 @@ usage = """Usage:
       default the folder to ACCOUNT_NAME {only useful with --page}
     --uid=UID
       default the message to UID {only useful with --page}
+    --desktop
+      override /etc/issue detection and use desktop platform
+    --mobile
+      override /etc/issue detection and use mobile platform
 """ % {"exec": sys.argv[0], "okPages": okPages}
 
 def warn(msg):
@@ -65,12 +69,15 @@ def main():
   args.pop(0)
 
   opts = {}
+  platform = None
   while len(args) > 0 and args[0].startswith("-"):
     arg = args.pop(0)
     pageMatch = re.match("^--page=(" + okPages + ")$", arg)
     accountMatch = re.match("^--account=(\\w+)$", arg)
     folderMatch = re.match("^--folder=(\\w+)$", arg)
     uidMatch = re.match("^--uid=(\\w+)$", arg)
+    desktopMatch = re.match("^--desktop$", arg)
+    mobileMatch = re.match("^--mobile$", arg)
     if pageMatch:
       opts['page'] = pageMatch.group(1)
     elif accountMatch:
@@ -79,12 +86,14 @@ def main():
       opts['folder'] = folderMatch.group(1)
     elif uidMatch:
       opts['uid'] = uidMatch.group(1)
+    elif desktopMatch:
+      platform = PLATFORM_DESKTOP
+    elif mobileMatch:
+      platform = PLATFORM_MOBILE
     else:
       die(usage)
   if len(args) > 0:
     die(usage)
-
-  platform = None
 
   if platform == None:
     issue = open('/etc/issue').read().strip().lower()
