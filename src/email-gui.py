@@ -24,8 +24,7 @@ EMAIL_SEARCH_BIN = "/opt/qtemail/bin/email-search.pl"
 QML_DIR = "/opt/qtemail/qml"
 
 PLATFORM_OTHER = 0
-PLATFORM_FREMANTLE = 2
-PLATFORM_SAILFISH = 3
+PLATFORM_MOBILE = 2
 platform = [None]
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -87,15 +86,13 @@ def main():
   issue = open('/etc/issue').read().strip().lower()
   platform[0] = None
   if "maemo 5" in issue:
-    platform[0] = PLATFORM_FREMANTLE
+    platform[0] = PLATFORM_MOBILE
   elif "mer" in issue or "sailfish" in issue:
-    platform[0] = PLATFORM_SAILFISH
+    platform[0] = PLATFORM_MOBILE
   else:
     platform[0] = PLATFORM_OTHER
 
-  if platform[0] == PLATFORM_FREMANTLE:
-    qmlFile = QML_DIR + "/mobile.qml"
-  elif platform[0] == PLATFORM_SAILFISH:
+  if platform[0] == PLATFORM_MOBILE:
     qmlFile = QML_DIR + "/mobile.qml"
   else:
     qmlFile = QML_DIR + "/desktop.qml"
