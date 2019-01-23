@@ -23,9 +23,10 @@ EMAIL_BIN = "/opt/qtemail/bin/email.pl"
 EMAIL_SEARCH_BIN = "/opt/qtemail/bin/email-search.pl"
 QML_DIR = "/opt/qtemail/qml"
 
-PLATFORM_OTHER = 0
-PLATFORM_MOBILE = 2
-platform = [None]
+PLATFORM_DESKTOP = "desktop"
+PLATFORM_MOBILE = "mobile"
+
+PLATFORM_MOBILE_ISSUE_KEYWORDS = ["maemo", "mer", "sailfish"]
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -83,19 +84,29 @@ def main():
   if len(args) > 0:
     die(usage)
 
-  issue = open('/etc/issue').read().strip().lower()
-  platform[0] = None
-  if "maemo 5" in issue:
-    platform[0] = PLATFORM_MOBILE
-  elif "mer" in issue or "sailfish" in issue:
-    platform[0] = PLATFORM_MOBILE
-  else:
-    platform[0] = PLATFORM_OTHER
+  platform = None
 
-  if platform[0] == PLATFORM_MOBILE:
-    qmlFile = QML_DIR + "/mobile.qml"
-  else:
+  if platform == None:
+    issue = open('/etc/issue').read().strip().lower()
+    for keyword in PLATFORM_MOBILE_ISSUE_KEYWORDS:
+      if keyword in issue:
+        platform = PLATFORM_MOBILE
+        break
+
+  if platform == None:
+    platform = PLATFORM_DESKTOP
+
+  qmlFile = None
+  useSendWindow = None
+
+  if platform == PLATFORM_DESKTOP:
     qmlFile = QML_DIR + "/desktop.qml"
+    useSendWindow = True
+  elif platform == PLATFORM_MOBILE:
+    qmlFile = QML_DIR + "/mobile.qml"
+    useSendWindow = False
+  else:
+    die("unknown plaform: " + platform)
 
   emailManager = EmailManager()
   accountModel = AccountModel()
@@ -113,7 +124,6 @@ def main():
 
   controller.setupAccounts()
 
-  useSendWindow = platform[0] == PLATFORM_OTHER
   showSendWindowAtStart = False
 
   if 'page' in opts:
