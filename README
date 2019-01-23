@@ -35,6 +35,7 @@ FILES
       essentially a wrapper around email.pl
     should work anywhere QT/python/perl work with little effort
     explicitly supported platforms:
+      Sailfish OS
       Debian GNU/Linux
     QML is located in /opt/email-gui/
 
