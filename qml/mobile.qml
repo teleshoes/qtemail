@@ -30,7 +30,9 @@ Rectangle {
     if(headerPage.visible){
       navToPage(accountPage);
     }else if(bodyPage.visible){
-      navToPage(headerPage);
+      setCurrentPage(headerPage)
+      hideKb()
+      initToolBarTimer.restart()
     }else if(folderPage.visible){
       navToPage(headerPage);
     }else if(configPage.visible){
