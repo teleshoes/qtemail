@@ -1,3 +1,21 @@
+qtemail (3.0) UNRELEASED; urgency=low
+  * main: QT4/pyside => QT5/pyqt
+  * main: Add explicit support for Sailfish OS
+  * main: Drop support for Nokia N9 / Meego Harmattan
+  * ui: Scale font/widget sizes using screen DPI
+  * ui: Keep current header list in mobile when hitting back from body view
+  * ui: Add always-visible [Hide KB] button to mobile (workaround SFOS bugs)
+  * ui: Add always-visible [Rotate] button to mobile
+  * ui: Update account labels every 10s while they are being displayed
+  * ui: Add Home/End key support to list of headers
+  * ui: Add --desktop/--mobile cmdline options to select platform
+  * ui: Fix scrollbar miscalculations (include flickable.originY)
+  * ui: Display inline attachments as text (instead of as nothing)
+  * ui: Set window title
+  * ui: Fix frequent crashing in buggy file-suggestions widget
+  * ui: Fix numerous crashes when doing things before selecting account
+ -- teleshoes <elliot.wolk@gmail.com>  Wed, 23 Jan 2019 14:55:13 -0500
+
 qtemail (2.5) UNRELEASED; urgency=low
   * main: Prevent collisions when caching bodies in two separate email.pl instances
   * main: Add --get-config-val and --get-option-val to email.pl
