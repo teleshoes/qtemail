@@ -5,7 +5,13 @@ Rectangle {
   id: main
   width: 1; height: 1 //retarded hack to get resizing to work
 
-  property double defaultPixelDensity: 6.2
+  property double defaultWidthPx: 1920
+  property double defaultWidthMM: 310
+  property double defaultHeightPx: 1080
+  property double defaultHeightMM: 174
+  property double defaultPixelDensity: {
+    0.5 * (defaultWidthPx/defaultWidthMM + defaultHeightPx/defaultHeightMM)
+  }
 
   property int fontHuge:   scaleFontSize(20)
   property int fontLarge:  scaleFontSize(18)
@@ -14,7 +20,8 @@ Rectangle {
   property int fontTiny:   scaleFontSize(12)
 
   function scaleFontSize(fontSize){
-    return Math.round(fontSize * Screen.pixelDensity / defaultPixelDensity)
+    var pxdScale = Screen.pixelDensity / defaultPixelDensity
+    return Math.round(fontSize * pxdScale)
   }
 
   // NAVIGATION
