@@ -56,6 +56,8 @@ usage = """Usage:
       override /etc/issue detection and use desktop platform
     --mobile
       override /etc/issue detection and use mobile platform
+    --font-scale=FONT_SCALE
+      in addition to pixel density scaling, apply FONT_SCALE to all fonts
 """ % {"exec": sys.argv[0], "okPages": okPages}
 
 def warn(msg):
@@ -78,6 +80,7 @@ def main():
     uidMatch = re.match("^--uid=(\\w+)$", arg)
     desktopMatch = re.match("^--desktop$", arg)
     mobileMatch = re.match("^--mobile$", arg)
+    fontScaleMatch = re.match("^--font-scale=(\\d+|\\d*\\.\\d+)", arg)
     if pageMatch:
       opts['page'] = pageMatch.group(1)
     elif accountMatch:
@@ -90,6 +93,8 @@ def main():
       platform = PLATFORM_DESKTOP
     elif mobileMatch:
       platform = PLATFORM_MOBILE
+    elif fontScaleMatch:
+      opts['fontScale'] = float(fontScaleMatch.group(1))
     else:
       die(usage)
   if len(args) > 0:
@@ -150,6 +155,9 @@ def main():
 
   if 'account' in opts or 'folder' in opts:
     controller.setupHeaders()
+
+  if 'fontScale' in opts:
+    controller.setFontScale(opts['fontScale'])
 
   app = QApplication([])
   mainWindow = MainWindow(qmlFile, controller,
@@ -470,6 +478,7 @@ class Controller(QObject):
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
     addressBookModel, fileListModel, fileInfoModel):
     QObject.__init__(self)
+    self.fontScale = 1.0
     self.emailManager = emailManager
     self.accountModel = accountModel
     self.folderModel = folderModel
@@ -497,6 +506,12 @@ class Controller(QObject):
     self.sendWindow = None
     self.counterBox = None
     self.fileListDir = None
+
+  @pyqtSlot(result=float)
+  def getFontScale(self):
+    return self.fontScale
+  def setFontScale(self, fontScale):
+    self.fontScale = fontScale
 
   @pyqtSlot(result=str)
   def getHomeDir(self):
