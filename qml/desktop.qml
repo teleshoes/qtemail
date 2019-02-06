@@ -21,6 +21,7 @@ Rectangle {
 
   function scaleFontSize(fontSize){
     var pxdScale = Screen.pixelDensity / defaultPixelDensity
+    var fontScaleArg = controller.getFontScale()
     return Math.round(fontSize * pxdScale)
   }
 
