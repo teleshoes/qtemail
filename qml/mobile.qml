@@ -15,17 +15,14 @@ Rectangle {
     0.5 * (defaultWidthPx/defaultWidthMM + defaultHeightPx/defaultHeightMM)
   }
 
-  property int fontHuge:   scaleFontSize(20)
-  property int fontLarge:  scaleFontSize(18)
-  property int fontMedium: scaleFontSize(16)
-  property int fontSmall:  scaleFontSize(14)
-  property int fontTiny:   scaleFontSize(12)
+  property double scalePixelDensity: Screen.pixelDensity / defaultPixelDensity
+  property double scale: scalePixelDensity * controller.getFontScale()
 
-  function scaleFontSize(fontSize){
-    var pxdScale = Screen.pixelDensity / defaultPixelDensity
-    var fontScaleArg = controller.getFontScale()
-    return Math.round(fontSize * pxdScale)
-  }
+  property int fontHuge:   scale * 20
+  property int fontLarge:  scale * 18
+  property int fontMedium: scale * 16
+  property int fontSmall:  scale * 14
+  property int fontTiny:   scale * 12
 
   // NAVIGATION
   Component.onCompleted: navToPageByName(controller.getInitialPageName())
