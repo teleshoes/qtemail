@@ -17,8 +17,12 @@ Rectangle {
   width: main.scalePixelDensity * 100
   height: main.scalePixelDensity * 120
 
+  property double borderMin: 2
+  property double borderMax: 5
+  property double borderWidth: main.scalePixelDensity * 5
+
   border.color: "black"
-  border.width: 5
+  border.width: Math.round(Math.min(borderMax, Math.max(borderMin, borderWidth)))
   radius: 8
 
   MouseArea {
