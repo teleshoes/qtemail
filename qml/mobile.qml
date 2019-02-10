@@ -110,7 +110,7 @@ Rectangle {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 50
+    height: scalePixelDensity * 50
 
     Btn {
       id: hideKbBtn
@@ -255,8 +255,8 @@ Rectangle {
     id: mainToolBar
     toolBarName: "toolbar-main"
     toolBarButtonDefList: toolBarButtonDefList
-    btnHeight: 80
-    btnWidth: 80
+    btnHeight: scalePixelDensity * 80
+    btnWidth: scalePixelDensity * 80
 
     anchors.bottom: parent.bottom
     anchors.left: parent.left
@@ -266,8 +266,8 @@ Rectangle {
     id: extraToolBar
     toolBarName: "toolbar-extra"
     toolBarButtonDefList: toolBarButtonDefList
-    btnHeight: 80
-    btnWidth: 300
+    btnHeight: scalePixelDensity * 80
+    btnWidth: scalePixelDensity * 300
 
     anchors.top: parent.top
     anchors.bottom: mainToolBar.top

@@ -14,8 +14,8 @@ Rectangle {
   property variant buttonColorGradient: "white"
   property variant buttonColor: buttonColorDefault
 
-  width: 100
-  height: 120
+  width: main.scalePixelDensity * 100
+  height: main.scalePixelDensity * 120
 
   border.color: "black"
   border.width: 5

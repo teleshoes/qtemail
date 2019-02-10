@@ -2,8 +2,8 @@ import QtQuick 2.3
 
 ToolBarPanelAbstract {
   buttonContainer: toolBarColumn
-  btnHeight: 60
-  btnWidth: 240
+  btnHeight: main.scalePixelDensity * 60
+  btnWidth: main.scalePixelDensity * 240
   direction: "vertical"
 
   width: btnWidth
