@@ -21,11 +21,11 @@ Rectangle {
     }
   }
 
-  function resetButtons(activePageNames){
+  function getButtonNamesForPages(pageNames){
     var okMainButtonNames = []
     var okExtraButtonNames = []
-    for (var p = 0; p < activePageNames.length; ++p){
-      var pageName = activePageNames[p]
+    for (var p=0; p<pageNames.length; p++){
+      var pageName = pageNames[p]
       var pageMainButtonNames = toolBarButtonDefList.pages[pageName]["buttons"]
       var pageExtraButtonNames = toolBarButtonDefList.pages[pageName]["buttonsExtra"]
 
@@ -38,12 +38,24 @@ Rectangle {
       okExtraButtonNames = filterButtonNames(okExtraButtonNames, excludeButtonNames)
     }
 
+    return {
+      "main":  okMainButtonNames,
+      "extra": okExtraButtonNames,
+    };
+  }
+
+  function resetButtons(activePageNames){
+    var buttonNamesForPages = getButtonNamesForPages(activePageNames);
+
+    var okMainButtonNames = buttonNamesForPages["main"];
+    var okExtraButtonNames = buttonNamesForPages["extra"];
+
     if(extraToolBar == null){
-      mainToolBar.setVisibleButtonNames(okMainButtonNames.concat(okExtraButtonNames))
+      mainToolBar.setVisibleButtonNames(okMainButtonNames.concat(okExtraButtonNames));
     }else{
-      mainToolBar.setVisibleButtonNames(okMainButtonNames)
-      extraToolBar.setVisibleButtonNames(okExtraButtonNames)
-      extraToolBar.visible = false
+      mainToolBar.setVisibleButtonNames(okMainButtonNames);
+      extraToolBar.setVisibleButtonNames(okExtraButtonNames);
+      extraToolBar.visible = false;
     }
   }
 
