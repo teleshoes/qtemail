@@ -37,6 +37,8 @@ Rectangle {
       okMainButtonNames = filterButtonNames(okMainButtonNames, excludeButtonNames)
       okExtraButtonNames = filterButtonNames(okExtraButtonNames, excludeButtonNames)
     }
+    okMainButtonNames = uniqueList(okMainButtonNames)
+    okExtraButtonNames = uniqueList(okExtraButtonNames)
 
     return {
       "main":  okMainButtonNames,
@@ -57,6 +59,19 @@ Rectangle {
       extraToolBar.setVisibleButtonNames(okExtraButtonNames);
       extraToolBar.visible = false;
     }
+  }
+
+  function uniqueList(list) {
+    var seenKeys = {};
+    var newList = [];
+    for(var i=0; i<list.length; i++){
+      var e = list[i];
+      if(seenKeys[e] == null){
+        seenKeys[e] = 1;
+        newList.push(e);
+      }
+    }
+    return newList;
   }
 
   function filterButtonNames(buttonNames, buttonNamesToRemove) {
