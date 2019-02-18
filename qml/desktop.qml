@@ -209,8 +209,8 @@ Rectangle {
     id: mainToolBar
     toolBarName: "toolbar-main"
     toolBarButtonDefList: toolBarButtonDefList
-    btnHeight: scalePixelDensity * 70
-    btnWidth: Math.max(scalePixelDensity*20, parent.width/23)
+
+    maxBtnCount: 21
 
     anchors.bottom: parent.bottom
     anchors.left: parent.left

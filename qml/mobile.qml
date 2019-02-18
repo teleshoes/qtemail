@@ -255,8 +255,8 @@ Rectangle {
     id: mainToolBar
     toolBarName: "toolbar-main"
     toolBarButtonDefList: toolBarButtonDefList
-    btnHeight: scalePixelDensity * 80
-    btnWidth: scalePixelDensity * 80
+
+    maxBtnCount: 5
 
     anchors.bottom: parent.bottom
     anchors.left: parent.left
@@ -266,8 +266,8 @@ Rectangle {
     id: extraToolBar
     toolBarName: "toolbar-extra"
     toolBarButtonDefList: toolBarButtonDefList
-    btnHeight: scalePixelDensity * 80
-    btnWidth: scalePixelDensity * 300
+
+    maxBtnCount: 6
 
     anchors.top: parent.top
     anchors.bottom: mainToolBar.top

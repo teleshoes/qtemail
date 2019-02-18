@@ -2,9 +2,14 @@ import QtQuick 2.3
 
 ToolBarPanelAbstract {
   buttonContainer: toolBarRow
-  btnHeight: main.scalePixelDensity * 48
-  btnWidth: main.scalePixelDensity * 48
   direction: "horizontal"
+
+  desiredBtnHeight: main.scalePixelDensity * 70
+  desiredBtnWidth: main.scalePixelDensity * 70
+  minBtnHeight: 40
+  minBtnWidth: 40
+  maxBtnHeight: (width / maxBtnCount) - (2*maxBtnCount)
+  maxBtnWidth: (width / maxBtnCount) - (2*maxBtnCount)
 
   height: btnHeight
 

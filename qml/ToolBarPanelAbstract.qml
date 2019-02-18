@@ -5,10 +5,21 @@ Rectangle {
 
   property ToolBarButtonDefList toolBarButtonDefList
   property variant buttonContainer
-  property int btnHeight
-  property int btnWidth
   property string toolBarName
   property string direction
+
+  property int btnHeight: Math.max(Math.min(desiredBtnHeight, maxBtnHeight), minBtnHeight)
+  property int btnWidth: Math.max(Math.min(desiredBtnWidth, maxBtnWidth), minBtnWidth)
+
+  property int desiredBtnHeight
+  property int desiredBtnWidth
+
+  property int minBtnHeight
+  property int maxBtnHeight
+  property int minBtnWidth
+  property int maxBtnWidth
+
+  property int maxBtnCount
 
   function prefixStrList(prefix, listStr){
     return listStr.map(function(s){ return prefix + s })
