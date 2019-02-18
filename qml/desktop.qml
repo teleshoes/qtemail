@@ -210,7 +210,8 @@ Rectangle {
     toolBarName: "toolbar-main"
     toolBarButtonDefList: toolBarButtonDefList
 
-    maxBtnCount: 21
+    maxBtnCount: toolBarManager.getTotalBtnCount(
+                   "main", ["accountPage", "folderPage", "headerPage", "bodyPage"])
 
     anchors.bottom: parent.bottom
     anchors.left: parent.left

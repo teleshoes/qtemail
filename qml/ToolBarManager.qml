@@ -8,6 +8,46 @@ Rectangle {
   property ToolBarPanelAbstract extraToolBar
   property variant excludeButtonNames //list<string>
 
+  function getAllPageNames(){
+    return Object.keys(toolBarButtonDefList.pages);
+  }
+
+  function getTotalBtnCount(mainOrExtra, pageNames){
+    var buttonNamesForPages = getButtonNamesForPages(pageNames);
+    if(mainOrExtra == "main" && extraToolBar == null){
+      return buttonNamesForPages["main"].length + buttonNamesForPages["extra"].length;
+    }else if(mainOrExtra == "main" && extraToolBar != null){
+      return buttonNamesForPages["main"].length;
+    }else if(mainOrExtra == "extra" && extraToolBar == null){
+      return 0;
+    }else if(mainOrExtra == "extra" && extraToolBar != null){
+      return buttonNamesForPages["extra"].length;
+    }
+  }
+
+  function getMaxBtnCount(mainOrExtra, pageNames){
+    var maxBtnCount = 0;
+    for(var i=0; i<pageNames.length; i++){
+      var pageName = pageNames[i];
+      var buttonNames = getButtonNamesForPages([pageName]);
+      var btnCount;
+      if(mainOrExtra == "main" && extraToolBar == null){
+        btnCount = buttonNames["main"].length + buttonNames["extra"].length;
+      }else if(mainOrExtra == "main" && extraToolBar != null){
+        btnCount = buttonNames["main"].length;
+      }else if(mainOrExtra == "extra" && extraToolBar == null){
+        btnCount = 0;
+      }else if(mainOrExtra == "extra" && extraToolBar != null){
+        btnCount = buttonNames["extra"].length;
+      }
+
+      if(btnCount > maxBtnCount){
+        maxBtnCount = btnCount;
+      }
+    }
+    return maxBtnCount;
+  }
+
   function isExtraToolBarVisible(){
     return extraToolBar != null && extraToolBar.visible
   }

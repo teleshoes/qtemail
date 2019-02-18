@@ -256,7 +256,8 @@ Rectangle {
     toolBarName: "toolbar-main"
     toolBarButtonDefList: toolBarButtonDefList
 
-    maxBtnCount: 5
+    maxBtnCount: toolBarManager.getMaxBtnCount(
+                   "main", toolBarManager.getAllPageNames())
 
     anchors.bottom: parent.bottom
     anchors.left: parent.left
@@ -267,7 +268,8 @@ Rectangle {
     toolBarName: "toolbar-extra"
     toolBarButtonDefList: toolBarButtonDefList
 
-    maxBtnCount: 6
+    maxBtnCount: toolBarManager.getMaxBtnCount(
+                   "extra", toolBarManager.getAllPageNames())
 
     anchors.top: parent.top
     anchors.bottom: mainToolBar.top
