@@ -188,7 +188,7 @@ my $usageFormat = "Usage:
           if sqlite3-pcre ($PCRE_LIB) is available:
             <HEADER_FIELD> LIKE '%<PATTERN>%'
           otherwise:
-            <HEADER_FILE> REGEXP '<PATTERN>'
+            <HEADER_FILE> REGEXP '(?i)<PATTERN>'
         for body queries, this is matched using grep -P (perl-compatible regex)
         supports the following variable substition (escape for literals):
           #{TODAY}     => today's date formatted as YYYY-MM-DD e.g.: 2011-11-21
@@ -833,7 +833,7 @@ sub runQuery($$$@){
     if($USE_REGEX and -f $PCRE_LIB){
       my $regexp = $$query{negated} == 1 ? "not regexp" : "regexp";
       for my $field(@fields){
-        push @conds, "header_$field $regexp '$content'";
+        push @conds, "header_$field $regexp '(?i)$content'";
       };
     }else{
       my $like = $$query{negated} == 1 ? "not like" : "like";
