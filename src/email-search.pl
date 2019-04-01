@@ -29,6 +29,9 @@ sub runQuery($$$@);
 my $EMAIL_DIR = "$ENV{HOME}/.cache/email";
 my $EMAIL_EXEC = "/opt/qtemail/bin/email.pl";
 
+my $USE_REGEX = 1;
+my $PCRE_LIB = "/usr/lib/sqlite3/pcre.so";
+
 my $emailTable = "email";
 my @headerFields = qw(
   date
@@ -181,6 +184,12 @@ my $usageFormat = "Usage:
         restricts the fields that PATTERN can match
       PATTERN = <string> | <string>\"<string>\"<string>
         can be any string, supports doublequote quoting and backslash escaping
+        for header queries, this is matched using either sqlite LIKE or REGEXP
+          if sqlite3-pcre ($PCRE_LIB) is available:
+            <HEADER_FIELD> LIKE '%<PATTERN>%'
+          otherwise:
+            <HEADER_FILE> REGEXP '<PATTERN>'
+        for body queries, this is matched using grep -P (perl-compatible regex)
         supports the following variable substition (escape for literals):
           #{TODAY}     => today's date formatted as YYYY-MM-DD e.g.: 2011-11-21
           #{YESTERDAY} => yesterday's date formatted as YYYY-MM-DD e.g.: 2011-11-20
@@ -388,7 +397,12 @@ sub runSql($$$){
   print TMPFH $sql;
   close TMPFH;
 
-  my @cmd = ("sqlite3", $db, ".read $tmpSqlFile");
+  my @libLoads;
+  if($USE_REGEX and -f $PCRE_LIB){
+    @libLoads = (@libLoads, "-cmd", ".load $PCRE_LIB");
+  }
+
+  my @cmd = ("sqlite3", $db, @libLoads, ".read $tmpSqlFile");
   open SQLITECMD, "-|", @cmd;
   my @lines = <SQLITECMD>;
   close SQLITECMD;
@@ -815,10 +829,18 @@ sub runQuery($$$@){
     $content =~ s/\\/\\\\/g;
     $content =~ s/%/\\%/g;
     $content =~ s/_/\\_/g;
-    my $like = $$query{negated} == 1 ? "not like" : "like";
-    for my $field(@fields){
-      push @conds, "header_$field $like '%$content%' escape '\\'";
-    };
+
+    if($USE_REGEX and -f $PCRE_LIB){
+      my $regexp = $$query{negated} == 1 ? "not regexp" : "regexp";
+      for my $field(@fields){
+        push @conds, "header_$field $regexp '$content'";
+      };
+    }else{
+      my $like = $$query{negated} == 1 ? "not like" : "like";
+      for my $field(@fields){
+        push @conds, "header_$field $like '%$content%' escape '\\'";
+      };
+    }
     my $sql = ""
       . " select uid"
       . " from email"
