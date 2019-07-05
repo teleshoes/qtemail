@@ -186,9 +186,9 @@ my $usageFormat = "Usage:
         can be any string, supports doublequote quoting and backslash escaping
         for header queries, this is matched using either sqlite LIKE or REGEXP
           if sqlite3-pcre ($PCRE_LIB) is available:
-            <HEADER_FIELD> LIKE '%<PATTERN>%'
-          otherwise:
             <HEADER_FILE> REGEXP '(?i)<PATTERN>'
+          otherwise:
+            <HEADER_FIELD> LIKE '%<PATTERN>%'
         for body queries, this is matched using grep -P (perl-compatible regex)
         supports the following variable substition (escape for literals):
           #{TODAY}     => today's date formatted as YYYY-MM-DD e.g.: 2011-11-21
