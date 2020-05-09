@@ -1,3 +1,12 @@
+qtemail (3.1) UNRELEASED; urgency=low
+  * search: use sqlite3 regexp instead of like, if sqlite3-pcre is installed
+  * ui: calculate btn height/width using expected number of buttons and min/max values
+  * ui: scale buttons by pixel density
+  * ui: scale fonts by pixel-density and --font-scale
+  * ui: define default-pixel-density in terms of default WxH, in MM and px
+  * ui: add --font-scale cmdline arg
+ -- teleshoes <elliot.wolk@gmail.com>  Fri, 5 Jul 2019 10:21:51 -04:00
+
 qtemail (3.0) UNRELEASED; urgency=low
   * main: QT4/pyside => QT5/pyqt
   * main: Add explicit support for Sailfish OS
