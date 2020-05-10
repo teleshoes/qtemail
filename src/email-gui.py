@@ -970,7 +970,7 @@ class Controller(QObject):
         self.removeHeaderFilter(name)
       else:
         self.replaceHeaderFilter(headerFilter)
-    except Exception, e:
+    except Exception as e:
       print("Error parsing filter string: " + str(e))
       self.removeHeaderFilter(name)
     self.refreshHeaderFilters()
