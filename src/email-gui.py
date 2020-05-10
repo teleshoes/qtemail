@@ -74,13 +74,13 @@ def main():
   platform = None
   while len(args) > 0 and args[0].startswith("-"):
     arg = args.pop(0)
-    pageMatch = re.match("^--page=(" + okPages + ")$", arg)
-    accountMatch = re.match("^--account=(\\w+)$", arg)
-    folderMatch = re.match("^--folder=(\\w+)$", arg)
-    uidMatch = re.match("^--uid=(\\w+)$", arg)
-    desktopMatch = re.match("^--desktop$", arg)
-    mobileMatch = re.match("^--mobile$", arg)
-    fontScaleMatch = re.match("^--font-scale=(\\d+|\\d*\\.\\d+)", arg)
+    pageMatch = regexMatch("^--page=(" + okPages + ")$", arg)
+    accountMatch = regexMatch("^--account=(\\w+)$", arg)
+    folderMatch = regexMatch("^--folder=(\\w+)$", arg)
+    uidMatch = regexMatch("^--uid=(\\w+)$", arg)
+    desktopMatch = regexMatch("^--desktop$", arg)
+    mobileMatch = regexMatch("^--mobile$", arg)
+    fontScaleMatch = regexMatch("^--font-scale=(\\d+|\\d*\\.\\d+)", arg)
     if pageMatch:
       opts['page'] = pageMatch.group(1)
     elif accountMatch:
@@ -220,7 +220,7 @@ class EmailManager():
       configOut = self.readProc(cmd)
 
       for line in configOut.splitlines():
-        m = re.match("(\w+(?:\.\w+)?)=(.*)", line)
+        m = regexMatch("(\w+(?:\.\w+)?)=(.*)", line)
         if m:
           fieldName = m.group(1)
           value = m.group(2)
@@ -260,7 +260,7 @@ class EmailManager():
 
     schema = []
     for line in out.splitlines():
-      m = re.match("(\w+)\s*=\s*(.+)", line)
+      m = regexMatch("(\w+)\s*=\s*(.+)", line)
       if m:
         key = m.group(1)
         desc = m.group(2)
@@ -316,7 +316,7 @@ class EmailManager():
     accountOut = self.readProc([EMAIL_BIN, "--accounts"])
     accounts = []
     for line in accountOut.splitlines():
-      m = re.match("(\w+):(\d+):([a-z0-9_\- ]+):(\d+)s:(\d+)s:(\d+)/(\d+):(.*)", line)
+      m = regexMatch("(\w+):(\d+):([a-z0-9_\- ]+):(\d+)s:(\d+)s:(\d+)/(\d+):(.*)", line)
       if m:
         accName = m.group(1)
         lastUpdated = int(m.group(2))
@@ -336,7 +336,7 @@ class EmailManager():
     folderOut = self.readProc([EMAIL_BIN, "--folders", accountName])
     folders = []
     for line in folderOut.splitlines():
-      m = re.match("([a-zA-Z_]+):(\d+)/(\d+)", line)
+      m = regexMatch("([a-zA-Z_]+):(\d+)/(\d+)", line)
       if m:
         folderName = m.group(1)
         unreadCount = int(m.group(2))
@@ -394,7 +394,7 @@ class EmailManager():
     for line in header.split('\n'):
       if line.strip() == "":
         continue
-      m = re.match('(\w+): (.*)', line)
+      m = regexMatch('(\w+): (.*)', line)
       if not m:
         print("MALFORMED HEADER FILE: " + filePath)
         return None
@@ -454,9 +454,9 @@ class EmailManager():
     addressBook = dict()
     curAccName = None
     for line in addressBookContents.splitlines():
-      if re.match(commentRegex, line):
+      if regexMatch(commentRegex, line):
         continue
-      accNameMatcher = re.match(accNameRegex, line)
+      accNameMatcher = regexMatch(accNameRegex, line)
       if accNameMatcher:
         curAccName = accNameMatcher.group(1)
       else:
@@ -881,7 +881,7 @@ class Controller(QObject):
       filterNames = []
       filterQueries = dict()
       for key in self.accountConfig.keys():
-        filterMatch = re.match("^filter\\.(\\w+)$", key, re.IGNORECASE)
+        filterMatch = regexMatch("^filter\\.(\\w+)$", key, re.IGNORECASE)
         if filterMatch != None:
           value = self.accountConfig[key]
           filterName = filterMatch.group(1)
@@ -925,7 +925,7 @@ class Controller(QObject):
   def replaceHeaderFilterStr(self, name, headerFilterStr):
     headerFilterStr = headerFilterStr.strip()
     print(headerFilterStr)
-    attMatch = re.match("^(read)=(true|false)$", headerFilterStr, re.IGNORECASE)
+    attMatch = regexMatch("^(read)=(true|false)$", headerFilterStr, re.IGNORECASE)
     headers = self.currentHeaders
 
     if headerFilterStr == "" or len(headers) == 0:
@@ -1704,6 +1704,11 @@ def listModelToArray(listModel, obj=None):
     val = listModel.data(index, 0)
     arr.append(val)
   return arr
+
+def regexMatch(pattern, string, flags=0):
+  if type(string) != str:
+    string = string.decode("utf-8")
+  return re.match(pattern, string, flags)
 
 if __name__ == "__main__":
   sys.exit(main())
