@@ -1,3 +1,8 @@
+qtemail (4.0) UNRELEASED; urgency=low
+  * main: add support for python3
+  * main: default python3 over python2
+ -- teleshoes <elliot.wolk@gmail.com>  Sun, 10 May 2020 00:48:03 -04:00
+
 qtemail (3.1) UNRELEASED; urgency=low
   * search: use sqlite3 regexp instead of like, if sqlite3-pcre is installed
   * ui: calculate btn height/width using expected number of buttons and min/max values
