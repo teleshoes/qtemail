@@ -1301,7 +1301,10 @@ class EmailCommandThread(QThread):
   def run(self):
     proc = subprocess.Popen(self.command, stdout=subprocess.PIPE)
     output = ""
-    for line in iter(proc.stdout.readline,''):
+    while True:
+      line = proc.stdout.readline()
+      if not line:
+         break
       self.appendMessage.emit(self.messageBox, line)
       output += line
     proc.wait()
