@@ -1361,56 +1361,56 @@ class BaseListModel(QAbstractListModel):
   count = pyqtProperty(int, count, notify=changed)
 
 class AccountModel(BaseListModel):
-  COLUMNS = ('account',)
+  COLUMNS = (b'account',)
   def __init__(self):
     BaseListModel.__init__(self)
   def roleNames(self):
     return dict(enumerate(AccountModel.COLUMNS))
 
 class FolderModel(BaseListModel):
-  COLUMNS = ('folder',)
+  COLUMNS = (b'folder',)
   def __init__(self):
     BaseListModel.__init__(self)
   def roleNames(self):
     return dict(enumerate(FolderModel.COLUMNS))
 
 class HeaderModel(BaseListModel):
-  COLUMNS = ('header',)
+  COLUMNS = (b'header',)
   def __init__(self):
     BaseListModel.__init__(self)
   def roleNames(self):
     return dict(enumerate(HeaderModel.COLUMNS))
 
 class ConfigModel(BaseListModel):
-  COLUMNS = ('config',)
+  COLUMNS = (b'config',)
   def __init__(self):
     BaseListModel.__init__(self)
   def roleNames(self):
     return dict(enumerate(ConfigModel.COLUMNS))
 
 class FilterButtonModel(BaseListModel):
-  COLUMNS = ('filterButton',)
+  COLUMNS = (b'filterButton',)
   def __init__(self):
     BaseListModel.__init__(self)
   def roleNames(self):
     return dict(enumerate(FilterButtonModel.COLUMNS))
 
 class AddressBookModel(BaseListModel):
-  COLUMNS = ('address',)
+  COLUMNS = (b'address',)
   def __init__(self):
     BaseListModel.__init__(self)
   def roleNames(self):
     return dict(enumerate(AddressBookModel.COLUMNS))
 
 class FileListModel(BaseListModel):
-  COLUMNS = ('path',)
+  COLUMNS = (b'path',)
   def __init__(self):
     BaseListModel.__init__(self)
   def roleNames(self):
     return dict(enumerate(FileListModel.COLUMNS))
 
 class FileInfoModel(BaseListModel):
-  COLUMNS = ('fileInfo',)
+  COLUMNS = (b'fileInfo',)
   def __init__(self):
     BaseListModel.__init__(self)
   def roleNames(self):
