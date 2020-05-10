@@ -1305,6 +1305,7 @@ class EmailCommandThread(QThread):
       line = proc.stdout.readline()
       if not line:
          break
+      line = toStr(line)
       self.appendMessage.emit(self.messageBox, line)
       output += line
     proc.wait()
@@ -1718,6 +1719,13 @@ def regexMatch(pattern, string, flags=0):
   if type(string) != str:
     string = string.decode("utf-8")
   return re.match(pattern, string, flags)
+
+def toStr(string):
+  if type(string) == str:
+    return string
+  else:
+    return string.decode("utf-8")
+  return string
 
 if __name__ == "__main__":
   sys.exit(main())
