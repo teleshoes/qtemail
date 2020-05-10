@@ -61,7 +61,7 @@ usage = """Usage:
 """ % {"exec": sys.argv[0], "okPages": okPages}
 
 def warn(msg):
-  print >> sys.stderr, msg
+  sys.stderr.write(msg)
 def die(msg):
   warn(msg)
   sys.exit(1)
@@ -380,7 +380,7 @@ class EmailManager():
   def getHeader(self, accName, folderName, uid):
     filePath = EMAIL_DIR + "/" + accName + "/" + folderName + "/" + "headers/" + str(uid)
     if not os.path.isfile(filePath):
-      print "MISSING EMAIL HEADER: " + filePath
+      print("MISSING EMAIL HEADER: " + filePath)
       return None
     f = open(filePath, 'r')
     header = f.read()
@@ -396,7 +396,7 @@ class EmailManager():
         continue
       m = re.match('(\w+): (.*)', line)
       if not m:
-        print "MALFORMED HEADER FILE: " + filePath
+        print("MALFORMED HEADER FILE: " + filePath)
         return None
       field = m.group(1)
       val = m.group(2)
@@ -539,7 +539,7 @@ class Controller(QObject):
     isDupe = False
     for fileInfo in self.fileInfoModel.getItems():
       if fileInfo.FilePath == filePath:
-        print "skipping duplicate file: " + str(filePath)
+        print("skipping duplicate file: " + str(filePath))
         isDupe = True
     if not isDupe:
       self.fileInfoModel.appendItems([FileInfo(filePath, sizeFmt, mtimeFmt, error)])
@@ -549,7 +549,7 @@ class Controller(QObject):
     files = []
     for fileInfo in self.fileInfoModel.getItems():
       if fileInfo.FilePath == filePath:
-        print "removing " + str(filePath)
+        print("removing " + str(filePath))
       else:
         files.append(fileInfo)
     self.fileInfoModel.setItems(files)
@@ -580,10 +580,10 @@ class Controller(QObject):
       if self.header != None:
         cmd += "QTEMAIL_UID=\"" + str(self.header.Uid) + "\"; \\\n"
       cmd += self.accountConfig["custom_cmd"]
-      print "running command:\n" + cmd
+      print("running command:\n" + cmd)
       self.shellCommand(cmd)
     else:
-      print "no command to run\n"
+      print("no command to run\n")
 
   @pyqtSlot('QVariantList')
   def runCommand(self, cmdArr):
@@ -655,7 +655,7 @@ class Controller(QObject):
     oldDir = self.fileListDir
     self.fileListDir = self.extractDir(text)
     if oldDir == self.fileListDir:
-      print "filelist: skipping, same dir '" + str(self.fileListDir) + "'"
+      print("filelist: skipping, same dir '" + str(self.fileListDir) + "'")
       return False
     else:
       items = []
@@ -665,14 +665,14 @@ class Controller(QObject):
 
       if len(items) == 0:
         if len(self.fileListModel.getItems()) == 0:
-          print "filelist: skipping, suggestions empty now and were empty"
+          print("filelist: skipping, suggestions empty now and were empty")
           return False
         else:
-          print "filelist: clearing"
+          print("filelist: clearing")
           self.fileListModel.clear()
           return False
       else:
-        print "filelist: adding " + str(len(items)) + " items"
+        print("filelist: adding " + str(len(items)) + " items")
         self.fileListModel.setItems(items)
         return True
   def extractDir(self, filePath):
@@ -685,7 +685,7 @@ class Controller(QObject):
       else:
         return None
     except:
-      print "FAILED TO EXTRACT DIR: " + path
+      print("FAILED TO EXTRACT DIR: " + path)
       return None
   def listDir(self, dirPath):
     try:
@@ -701,7 +701,7 @@ class Controller(QObject):
           files.append(path)
       return dirs + files
     except:
-      print "FAILED TO LIST DIR: " + path
+      print("FAILED TO LIST DIR: " + path)
       return None
 
   @pyqtSlot(QObject)
@@ -924,7 +924,7 @@ class Controller(QObject):
   @pyqtSlot(str, str)
   def replaceHeaderFilterStr(self, name, headerFilterStr):
     headerFilterStr = headerFilterStr.strip()
-    print headerFilterStr
+    print(headerFilterStr)
     attMatch = re.match("^(read)=(true|false)$", headerFilterStr, re.IGNORECASE)
     headers = self.currentHeaders
 
@@ -971,7 +971,7 @@ class Controller(QObject):
       else:
         self.replaceHeaderFilter(headerFilter)
     except Exception, e:
-      print "Error parsing filter string:", e
+      print("Error parsing filter string: " + str(e))
       self.removeHeaderFilter(name)
     self.refreshHeaderFilters()
   @pyqtSlot(str)
