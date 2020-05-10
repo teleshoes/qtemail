@@ -37,6 +37,12 @@ PAGE_MORE_SIZE = 200
 EMAIL_DIR = os.getenv("HOME") + "/.cache/email"
 CONFIG_DIR = os.getenv("HOME") + "/.config/qtemail"
 
+STR_TYPE = None
+try:
+  STR_TYPE = unicode
+except:
+  STR_TYPE = str
+
 pages = ["account", "header", "config", "send", "folder", "body"]
 okPages = "|".join(pages)
 
@@ -1253,7 +1259,7 @@ class Controller(QObject):
   def HtmlMode(self):
     return self.htmlMode
   accountNameChanged = pyqtSignal()
-  AccountName = pyqtProperty(unicode, AccountName, notify=accountNameChanged)
+  AccountName = pyqtProperty(STR_TYPE, AccountName, notify=accountNameChanged)
   htmlModeChanged = pyqtSignal()
   HtmlMode = pyqtProperty(bool, HtmlMode, notify=htmlModeChanged)
 
@@ -1466,14 +1472,14 @@ class Account(QObject):
     self.selected_ = selected_
     self.changed.emit()
   changed = pyqtSignal()
-  Name = pyqtProperty(unicode, Name, notify=changed)
+  Name = pyqtProperty(STR_TYPE, Name, notify=changed)
   LastUpdated = pyqtProperty(int, LastUpdated, notify=changed)
-  LastUpdatedRel = pyqtProperty(unicode, LastUpdatedRel, notify=changed)
+  LastUpdatedRel = pyqtProperty(STR_TYPE, LastUpdatedRel, notify=changed)
   UpdateInterval = pyqtProperty(int, UpdateInterval, notify=changed)
   RefreshInterval = pyqtProperty(int, RefreshInterval, notify=changed)
   Unread = pyqtProperty(int, Unread, notify=changed)
   Total = pyqtProperty(int, Total, notify=changed)
-  Error = pyqtProperty(unicode, Error, notify=changed)
+  Error = pyqtProperty(STR_TYPE, Error, notify=changed)
   IsLoading = pyqtProperty(bool, IsLoading, notify=changed)
   Selected = pyqtProperty(bool, Selected, notify=changed)
 
@@ -1490,7 +1496,7 @@ class Folder(QObject):
   def Total(self):
     return self.total_
   changed = pyqtSignal()
-  Name = pyqtProperty(unicode, Name, notify=changed)
+  Name = pyqtProperty(STR_TYPE, Name, notify=changed)
   Unread = pyqtProperty(int, Unread, notify=changed)
   Total = pyqtProperty(int, Total, notify=changed)
 
@@ -1541,12 +1547,12 @@ class Header(QObject):
     self.changed.emit()
   changed = pyqtSignal()
   Uid = pyqtProperty(int, Uid, notify=changed)
-  Date = pyqtProperty(unicode, Date, notify=changed)
-  From = pyqtProperty(unicode, From, notify=changed)
-  To = pyqtProperty(unicode, To, notify=changed)
-  CC = pyqtProperty(unicode, CC, notify=changed)
-  BCC = pyqtProperty(unicode, BCC, notify=changed)
-  Subject = pyqtProperty(unicode, Subject, notify=changed)
+  Date = pyqtProperty(STR_TYPE, Date, notify=changed)
+  From = pyqtProperty(STR_TYPE, From, notify=changed)
+  To = pyqtProperty(STR_TYPE, To, notify=changed)
+  CC = pyqtProperty(STR_TYPE, CC, notify=changed)
+  BCC = pyqtProperty(STR_TYPE, BCC, notify=changed)
+  Subject = pyqtProperty(STR_TYPE, Subject, notify=changed)
   IsSent = pyqtProperty(bool, IsSent, notify=changed)
   Read = pyqtProperty(bool, Read, notify=changed)
   IsLoading = pyqtProperty(bool, IsLoading, notify=changed)
@@ -1568,10 +1574,10 @@ class Field(QObject):
   def Description(self):
     return self.description_
   changed = pyqtSignal()
-  FieldName = pyqtProperty(unicode, FieldName, notify=changed)
+  FieldName = pyqtProperty(STR_TYPE, FieldName, notify=changed)
   IsPassword = pyqtProperty(bool, IsPassword, notify=changed)
-  Value = pyqtProperty(unicode, Value, notify=changed)
-  Description = pyqtProperty(unicode, Description, notify=changed)
+  Value = pyqtProperty(STR_TYPE, Value, notify=changed)
+  Description = pyqtProperty(STR_TYPE, Description, notify=changed)
 
 class FilterButton(QObject):
   def __init__(self, name_, filterString_, isChecked_):
@@ -1590,8 +1596,8 @@ class FilterButton(QObject):
     self.isChecked_ = isChecked_
     self.changed.emit()
   changed = pyqtSignal()
-  Name = pyqtProperty(unicode, Name, notify=changed)
-  FilterString = pyqtProperty(unicode, FilterString, notify=changed)
+  Name = pyqtProperty(STR_TYPE, Name, notify=changed)
+  FilterString = pyqtProperty(STR_TYPE, FilterString, notify=changed)
   IsChecked = pyqtProperty(bool, IsChecked, notify=changed)
 
 class NotifierModel(QObject):
@@ -1622,7 +1628,7 @@ class NotifierModel(QObject):
     self.showing_ = showing_
     self.changed.emit()
   changed = pyqtSignal()
-  Text = pyqtProperty(unicode, Text, notify=changed)
+  Text = pyqtProperty(STR_TYPE, Text, notify=changed)
   Showing = pyqtProperty(bool, Showing, notify=changed)
   HideDelay = pyqtProperty(bool, HideDelay, notify=changed)
 
@@ -1633,7 +1639,7 @@ class Suggestion(QObject):
   def name(self):
     return self.suggestionText_
   changed = pyqtSignal()
-  name = pyqtProperty(unicode, name, notify=changed)
+  name = pyqtProperty(STR_TYPE, name, notify=changed)
 
 class FileInfo(QObject):
   def __init__(self, filePath_, sizeFmt_, mtimeFmt_, errorMsg_):
@@ -1651,10 +1657,10 @@ class FileInfo(QObject):
   def ErrorMsg(self):
     return self.errorMsg_
   changed = pyqtSignal()
-  FilePath = pyqtProperty(unicode, FilePath, notify=changed)
-  SizeFmt = pyqtProperty(unicode, SizeFmt, notify=changed)
-  MtimeFmt = pyqtProperty(unicode, MtimeFmt, notify=changed)
-  ErrorMsg = pyqtProperty(unicode, ErrorMsg, notify=changed)
+  FilePath = pyqtProperty(STR_TYPE, FilePath, notify=changed)
+  SizeFmt = pyqtProperty(STR_TYPE, SizeFmt, notify=changed)
+  MtimeFmt = pyqtProperty(STR_TYPE, MtimeFmt, notify=changed)
+  ErrorMsg = pyqtProperty(STR_TYPE, ErrorMsg, notify=changed)
 
 class MainWindow(QQuickView):
   def __init__(self, qmlFile, controller,
