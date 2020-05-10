@@ -37,6 +37,9 @@ PAGE_MORE_SIZE = 200
 EMAIL_DIR = os.getenv("HOME") + "/.cache/email"
 CONFIG_DIR = os.getenv("HOME") + "/.config/qtemail"
 
+PYTHON2 = sys.version_info < (3, 0)
+PYTHON3 = sys.version_info >= (3, 0)
+
 STR_TYPE = None
 try:
   STR_TYPE = unicode
