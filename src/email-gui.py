@@ -40,11 +40,7 @@ CONFIG_DIR = os.getenv("HOME") + "/.config/qtemail"
 PYTHON2 = sys.version_info < (3, 0)
 PYTHON3 = sys.version_info >= (3, 0)
 
-STR_TYPE = None
-try:
-  STR_TYPE = unicode
-except:
-  STR_TYPE = str
+STR_TYPE = unicode if PYTHON2 else str
 
 pages = ["account", "header", "config", "send", "folder", "body"]
 okPages = "|".join(pages)
@@ -409,10 +405,11 @@ class EmailManager():
         return None
       field = m.group(1)
       val = m.group(2)
-      try:
-        val = val.encode('utf-8')
-      except:
-        val = val.decode('utf-8')
+      if PYTHON2:
+        try:
+          val = val.encode('utf-8')
+        except:
+          val = val.decode('utf-8')
 
       if field == "Date":
         hdrDate = val
