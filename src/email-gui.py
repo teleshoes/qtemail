@@ -268,7 +268,7 @@ class EmailManager():
     return schema
 
   def getConfigFields(self, schema, configValues):
-    fieldNames = map(lambda (k,v): k, schema)
+    fieldNames = list(map(lambda k,v: k, schema))
     fieldDescriptions = dict(schema)
 
     fields = []
@@ -351,7 +351,7 @@ class EmailManager():
     f = open(filePath, 'r')
     uids = f.read()
     f.close()
-    return map(int, uids.splitlines())
+    return list(map(int, uids.splitlines()))
   def fetchHeaders(self, accName, folderName, limit=None, limitWithoutUnread=None, exclude=[], minUid=None):
     uids = self.getUids(accName, folderName, "all")
     uids.sort()
@@ -360,10 +360,10 @@ class EmailManager():
     unread = set(self.getUids(accName, folderName, "unread"))
 
     if minUid != None:
-      uids = filter(lambda uid: uid >= minUid, uids)
+      uids = list(filter(lambda uid: uid >= minUid, uids))
     if len(exclude) > 0:
       exUids = set(map(lambda header: header.uid_, exclude))
-      uids = filter(lambda uid: uid not in exUids, uids)
+      uids = list(filter(lambda uid: uid not in exUids, uids))
     if limit != None:
       uids = uids[0:limit]
     if limitWithoutUnread != None:
@@ -424,7 +424,7 @@ class EmailManager():
     else:
       bodyArg = "--body-plain"
     cmd = [EMAIL_BIN, bodyArg, "--no-download", "-0",
-      "--folder=" + folderName, accountName] + map(str,uids)
+      "--folder=" + folderName, accountName] + list(map(str,uids))
     bodyNuls = self.readProc(cmd)
     bodies = bodyNuls.split("\0")
     if len(bodies) > 0 and bodies[-1] == "":
@@ -889,7 +889,7 @@ class Controller(QObject):
           filterQueries[filterName] = filterStr
         elif key == "filterButtons":
           value = self.accountConfig[key]
-          filterNames = map(str.strip, value.split(','))
+          filterNames = list(map(str.strip, value.split(',')))
 
       for filterName in filterNames:
         if filterName in filterQueries:
@@ -963,7 +963,7 @@ class Controller(QObject):
       self.notifierModel.notify("\nSEARCH FAILED\n\n" + output, False)
       return
     try:
-      uids = map(int, output.splitlines())
+      uids = list(map(int, output.splitlines()))
       name = extraArgs["headerFilterName"]
       headerFilter = HeaderFilterWhitelist(name, uids)
       if headerFilter == None:
@@ -976,14 +976,14 @@ class Controller(QObject):
     self.refreshHeaderFilters()
   @pyqtSlot(str)
   def removeHeaderFilter(self, name):
-    self.headerFilters = filter(lambda f: f.name != name, self.headerFilters)
+    self.headerFilters = list(filter(lambda f: f.name != name, self.headerFilters))
   @pyqtSlot()
   def refreshHeaderFilters(self):
     self.setHeaders(self.currentHeaders)
 
   def replaceHeaderFilter(self, headerFilter):
     name = headerFilter.name
-    self.headerFilters = filter(lambda f: f.name != name, self.headerFilters)
+    self.headerFilters = list(filter(lambda f: f.name != name, self.headerFilters))
     self.headerFilters.append(headerFilter)
 
   @pyqtSlot()
@@ -993,20 +993,20 @@ class Controller(QObject):
 
   def setHeaders(self, headers):
     self.currentHeaders = headers
-    filteredHeaders = filter(self.filterHeader, headers)
+    filteredHeaders = list(filter(self.filterHeader, headers))
     if len(filteredHeaders) == 0:
       self.headerModel.clear()
     else:
       self.headerModel.setItems(filteredHeaders)
     self.updateCounterBox()
   def prependHeaders(self, headers):
-    newFilteredHeaders = filter(self.filterHeader, headers)
+    newFilteredHeaders = list(filter(self.filterHeader, headers))
     self.currentHeaders += headers
     if len(newFilteredHeaders) > 0:
       self.headerModel.prependItems(newFilteredHeaders)
     self.updateCounterBox()
   def appendHeaders(self, headers):
-    newFilteredHeaders = filter(self.filterHeader, headers)
+    newFilteredHeaders = list(filter(self.filterHeader, headers))
     self.currentHeaders += headers
     if len(newFilteredHeaders) > 0:
       self.headerModel.appendItems(newFilteredHeaders)
