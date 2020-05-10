@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #qtbtn.py
 #Copyright 2012,2015,2020 Elliot Wolk
 # This program is free software: you can redistribute it and/or modify
