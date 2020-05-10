@@ -1719,7 +1719,7 @@ def listModelToArray(listModel, obj=None):
   return arr
 
 def regexMatch(pattern, string, flags=0):
-  if type(string) != str:
+  if PYTHON3 and type(string) != str:
     string = string.decode("utf-8")
   return re.match(pattern, string, flags)
 
