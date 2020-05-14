@@ -446,7 +446,7 @@ class EmailManager():
         try:
           body = body.decode('utf-8')
         except:
-          body = re.sub(r'[^\x00-\x7F]', ' ', body).encode('utf-8')
+          body = regexSub(r'[^\x00-\x7F]', ' ', body).encode('utf-8')
     return uidBodies
   def getAddressBook(self):
     filePath = CONFIG_DIR + "/" + "addressbook"
@@ -1719,6 +1719,11 @@ def regexMatch(pattern, string, flags=0):
   if PYTHON3 and type(string) != str:
     string = string.decode("utf-8")
   return re.match(pattern, string, flags)
+
+def regexSub(pattern, repl, string, count=0, flags=0):
+  if PYTHON3 and type(string) != str:
+    string = string.decode("utf-8")
+  return re.sub(pattern, repl, string, count, flags)
 
 def toStr(string):
   if type(string) == str:
