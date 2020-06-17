@@ -1730,7 +1730,6 @@ def toStr(string):
     return string
   else:
     return string.decode("utf-8")
-  return string
 
 if __name__ == "__main__":
   sys.exit(main())
