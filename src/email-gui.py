@@ -1716,13 +1716,13 @@ def listModelToArray(listModel, obj=None):
   return arr
 
 def regexMatch(pattern, string, flags=0):
-  if PYTHON3 and type(string) != str:
-    string = string.decode("utf-8")
+  if PYTHON3:
+    string = toStr(string)
   return re.match(pattern, string, flags)
 
 def regexSub(pattern, repl, string, count=0, flags=0):
-  if PYTHON3 and type(string) != str:
-    string = string.decode("utf-8")
+  if PYTHON3:
+    string = toStr(string)
   return re.sub(pattern, repl, string, count, flags)
 
 def toStr(string):
