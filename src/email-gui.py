@@ -1729,7 +1729,10 @@ def toStr(string):
   if type(string) == str:
     return string
   else:
-    return string.decode("utf-8")
+    try:
+      return string.decode("utf-8")
+    except:
+      return str(string)
 
 if __name__ == "__main__":
   sys.exit(main())
