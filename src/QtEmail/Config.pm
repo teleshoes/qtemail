@@ -297,7 +297,7 @@ sub readConfig(){
   my @entries = joinMultilineConfigEntries(@lines);
 
   for my $entry(@entries){
-    if($entry =~ /^$configPrefix\.($okOptionsConfigKeys)\s*=\s*(.+)$/s){
+    if($entry =~ /^$configPrefix\.($okOptionsConfigKeys)\s*=\s*(.+)\s*$/){
       $$optionsConfig{$1} = $2;
     }elsif($entry =~ /^$configPrefix\.(\w+)\.($okAccConfigKeys)\s*=\s*(.+)$/s){
       my ($accName, $key, $val)= ($1, $2, $3);
