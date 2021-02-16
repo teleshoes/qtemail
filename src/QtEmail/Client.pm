@@ -114,32 +114,37 @@ sub getClient($$){
     $pass = Mail::IMAPClient->Quote($pass);
   }
 
-  my $c;
+  my $c = Mail::IMAPClient->new(
+    %$network,
+    %{$$GVAR{IMAP_CLIENT_SETTINGS}},
+  );
 
   if(defined $oauthToken){
     my $oauthSign = encode_base64("user=$user\x01auth=Bearer $oauthToken\x01\x01", '');
-    $c = Mail::IMAPClient->new(
-      %$network,
-      User     => $user,
-      %{$$GVAR{IMAP_CLIENT_SETTINGS}},
-    );
     my $authSub = sub { return $oauthSign; };
-    if(!$c->authenticate('XOAUTH2', $authSub)){
-      print STDERR "ERROR: could not authenticate with XOAUTH2 - " . $c->LastError . "\n";
-      $c = undef;
+    $c->User($user);
+    $c->Authmechanism("XOAUTH2");
+    $c->Authcallback($authSub);
+    if(not $c->login()){
+      print STDERR "WARNING: could not authenticate with XOAUTH2 - " . $c->LastError . "\n";
+      $c->User(undef);
+      $c->Authmechanism(undef);
+      $c->Authcallback(undef);
     }
   }
 
-  if(not defined $c){
-    $c = Mail::IMAPClient->new(
-      %$network,
-      User     => $user,
-      Password => $pass,
-      %{$$GVAR{IMAP_CLIENT_SETTINGS}},
-    );
+  if(not $c->IsAuthenticated()){
+    $c->User($user);
+    $c->Password($pass);
+    if(not $c->login()){
+      print STDERR "ERROR: could not authenticate with password - " . $c->LastError . "\n";
+    }
   }
 
-  return undef if not defined $c or not $c->IsAuthenticated();
+  if(not $c->IsAuthenticated){
+    $c = undef;
+  }
+
   return $c;
 }
 
