@@ -9,6 +9,9 @@ use Exporter;
 our @EXPORT = qw(
   getConfig
   getAccPassword
+  getAccRefreshOauthToken
+  getClientID
+  getClientSecret
   formatConfig writeConfig
   formatSchemaSimple
   formatSchemaPretty
@@ -20,6 +23,9 @@ our @EXPORT = qw(
 
 sub getConfig();
 sub getAccPassword($$);
+sub getAccRefreshOauthToken($$);
+sub getClientID($);
+sub getClientSecret($);
 sub formatConfig($;$);
 sub writeConfig($@);
 sub formatSchemaSimple($);
@@ -45,6 +51,7 @@ my $configPrefix = "email";
 my $accountConfigSchema = [
   ["user",                "REQ", "IMAP username, usually the full email address"],
   ["password",            "REQ", "password, stored with optional encrypt_cmd"],
+  ["refresh_oauth_token", "OPT", "OAUTH2 refresh token, stored with optional encrypt_cmd"],
   ["server",              "REQ", "IMAP server, e.g.: \"imap.gmail.com\""],
   ["port",                "REQ", "IMAP server port"],
 
@@ -70,6 +77,8 @@ my $optionsConfigSchema = [
   ["update_cmd",        "OPT", "command to run after all updates"],
   ["encrypt_cmd",       "OPT", "command to encrypt passwords on disk"],
   ["decrypt_cmd",       "OPT", "command to decrypt saved passwords"],
+  ["client_id",         "OPT", "google API client ID, stored with optional encrypt_cmd"],
+  ["client_secret",     "OPT", "google API client secret, stored with optional encrypt_cmd"],
 ];
 my $longDescriptions = {
   folders => ''
@@ -171,6 +180,60 @@ sub getAccPassword($$){
   }
 
   return $pass;
+}
+
+sub getAccRefreshOauthToken($$){
+  my ($acc, $options) = @_;
+  my $token = $$acc{refresh_oauth_token};
+  my $decryptCmd = $$options{decrypt_cmd};
+
+  return undef if not defined $token;
+
+  if(defined $decryptCmd){
+    chomp $decryptCmd;
+    $token =~ s/'/'\\''/g;
+    $token = `$decryptCmd '$token'`;
+    die "error decrypting refreshOauthToken\n" if $? != 0;
+    chomp $token;
+  }
+
+  return $token;
+}
+
+sub getClientID($){
+  my ($options) = @_;
+  my $clientID = $$options{client_id};
+  my $decryptCmd = $$options{decrypt_cmd};
+
+  return undef if not defined $clientID;
+
+  if(defined $decryptCmd){
+    chomp $decryptCmd;
+    $clientID =~ s/'/'\\''/g;
+    $clientID = `$decryptCmd '$clientID'`;
+    die "error decrypting clientID\n" if $? != 0;
+    chomp $clientID;
+  }
+
+  return $clientID;
+}
+
+sub getClientSecret($){
+  my ($options) = @_;
+  my $clientSecret = $$options{client_secret};
+  my $decryptCmd = $$options{decrypt_cmd};
+
+  return undef if not defined $clientSecret;
+
+  if(defined $decryptCmd){
+    chomp $decryptCmd;
+    $clientSecret =~ s/'/'\\''/g;
+    $clientSecret = `$decryptCmd '$clientSecret'`;
+    die "error decrypting clientSecret\n" if $? != 0;
+    chomp $clientSecret;
+  }
+
+  return $clientSecret;
 }
 
 sub formatConfig($;$){

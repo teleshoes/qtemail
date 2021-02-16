@@ -3,9 +3,14 @@ use strict;
 use warnings;
 use lib "/opt/qtemail/lib";
 
+use MIME::Base64;
+
 use QtEmail::Shared qw(GET_GVAR);
 use QtEmail::Config qw(
   getAccPassword
+  getAccRefreshOauthToken
+  getClientID
+  getClientSecret
 );
 
 our @ISA = qw(Exporter);
@@ -25,6 +30,7 @@ sub openFolder($$$);
 sub getClient($$);
 sub getSocket($);
 sub isOldIMAPClientVersion();
+sub fetchOauthToken($$$);
 
 my $IMAPCLIENT_OLD_MAJOR_VERSION = 3;
 my $IMAPCLIENT_OLD_MINOR_VERSION = 31;
@@ -95,17 +101,44 @@ sub getClient($$){
   my $user = $$acc{user};
   my $pass = getAccPassword($acc, $options);
 
+  my $refreshOauthToken = getAccRefreshOauthToken($acc, $options);
+  my $clientID = getClientID($options);
+  my $clientSecret = getClientSecret($options);
+  my $oauthToken;
+  if(defined $refreshOauthToken and defined $clientID and defined $clientSecret){
+    $oauthToken = fetchOauthToken($refreshOauthToken, $clientID, $clientSecret);
+  }
+
   # quote password if Mail::IMAPClient version > 3.31
   if(not isOldIMAPClientVersion()){
     $pass = Mail::IMAPClient->Quote($pass);
   }
 
-  my $c = Mail::IMAPClient->new(
-    %$network,
-    User     => $user,
-    Password => $pass,
-    %{$$GVAR{IMAP_CLIENT_SETTINGS}},
-  );
+  my $c;
+
+  if(defined $oauthToken){
+    my $oauthSign = encode_base64("user=$user\x01auth=Bearer $oauthToken\x01\x01", '');
+    $c = Mail::IMAPClient->new(
+      %$network,
+      User     => $user,
+      %{$$GVAR{IMAP_CLIENT_SETTINGS}},
+    );
+    my $authSub = sub { return $oauthSign; };
+    if(!$c->authenticate('XOAUTH2', $authSub)){
+      print STDERR "ERROR: could not authenticate with XOAUTH2 - " . $c->LastError . "\n";
+      $c = undef;
+    }
+  }
+
+  if(not defined $c){
+    $c = Mail::IMAPClient->new(
+      %$network,
+      User     => $user,
+      Password => $pass,
+      %{$$GVAR{IMAP_CLIENT_SETTINGS}},
+    );
+  }
+
   return undef if not defined $c or not $c->IsAuthenticated();
   return $c;
 }
@@ -133,6 +166,26 @@ sub isOldIMAPClientVersion(){
   }else{
     return 0;
   }
+}
+
+sub fetchOauthToken($$$){
+  my ($refreshOauthToken, $clientID, $clientSecret) = @_;
+  my @curlCmd = ("curl", "--silent", "https://oauth2.googleapis.com/token",
+    "-d", "client_id=$clientID",
+    "-d", "client_secret=$clientSecret",
+    "-d", "grant_type=refresh_token",
+    "-d", "refresh_token=$refreshOauthToken",
+  );
+
+  open CMD, "-|", @curlCmd;
+  my $content = join '', <CMD>;
+  close CMD;
+
+  if($content =~ /"access_token"\s*:\s*"([^"]+)"/){
+    return $1;
+  }
+
+  return undef;
 }
 
 1;
