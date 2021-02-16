@@ -22,6 +22,7 @@ our @EXPORT = qw(
 );
 
 sub getConfig();
+sub maybeDecryptValue($$$);
 sub getAccPassword($$);
 sub getAccRefreshOauthToken($$);
 sub getClientID($);
@@ -166,74 +167,39 @@ sub getConfig(){
   return $config;
 }
 
-sub getAccPassword($$){
-  my ($acc, $options) = @_;
-  my $pass = $$acc{password};
+sub maybeDecryptValue($$$){
+  my ($val, $valName, $options) = @_;
   my $decryptCmd = $$options{decrypt_cmd};
 
-  if(defined $decryptCmd){
+  if(defined $decryptCmd and defined $val){
     chomp $decryptCmd;
-    $pass =~ s/'/'\\''/g;
-    $pass = `$decryptCmd '$pass'`;
-    die "error decrypting password\n" if $? != 0;
-    chomp $pass;
+    $val =~ s/'/'\\''/g;
+    $val = `$decryptCmd '$val'`;
+    die "error decrypting $valName\n" if $? != 0;
+    chomp $val;
   }
 
-  return $pass;
+  return $val;
+}
+
+sub getAccPassword($$){
+  my ($acc, $options) = @_;
+  return maybeDecryptValue($$acc{password}, "password", $options);
 }
 
 sub getAccRefreshOauthToken($$){
   my ($acc, $options) = @_;
-  my $token = $$acc{refresh_oauth_token};
-  my $decryptCmd = $$options{decrypt_cmd};
-
-  return undef if not defined $token;
-
-  if(defined $decryptCmd){
-    chomp $decryptCmd;
-    $token =~ s/'/'\\''/g;
-    $token = `$decryptCmd '$token'`;
-    die "error decrypting refreshOauthToken\n" if $? != 0;
-    chomp $token;
-  }
-
-  return $token;
+  return maybeDecryptValue($$acc{refresh_oauth_token}, "refresh_oauth_token", $options);
 }
 
 sub getClientID($){
   my ($options) = @_;
-  my $clientID = $$options{client_id};
-  my $decryptCmd = $$options{decrypt_cmd};
-
-  return undef if not defined $clientID;
-
-  if(defined $decryptCmd){
-    chomp $decryptCmd;
-    $clientID =~ s/'/'\\''/g;
-    $clientID = `$decryptCmd '$clientID'`;
-    die "error decrypting clientID\n" if $? != 0;
-    chomp $clientID;
-  }
-
-  return $clientID;
+  return maybeDecryptValue($$options{client_id}, "client_id", $options);
 }
 
 sub getClientSecret($){
   my ($options) = @_;
-  my $clientSecret = $$options{client_secret};
-  my $decryptCmd = $$options{decrypt_cmd};
-
-  return undef if not defined $clientSecret;
-
-  if(defined $decryptCmd){
-    chomp $decryptCmd;
-    $clientSecret =~ s/'/'\\''/g;
-    $clientSecret = `$decryptCmd '$clientSecret'`;
-    die "error decrypting clientSecret\n" if $? != 0;
-    chomp $clientSecret;
-  }
-
-  return $clientSecret;
+  return maybeDecryptValue($$options{client_secret}, "client_secret", $options);
 }
 
 sub formatConfig($;$){
