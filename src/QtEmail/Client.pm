@@ -175,21 +175,24 @@ sub isOldIMAPClientVersion(){
 
 sub fetchOauthToken($$$){
   my ($refreshOauthToken, $clientID, $clientSecret) = @_;
-  my @curlCmd = ("curl", "--silent", "https://oauth2.googleapis.com/token",
-    "-d", "client_id=$clientID",
-    "-d", "client_secret=$clientSecret",
-    "-d", "grant_type=refresh_token",
-    "-d", "refresh_token=$refreshOauthToken",
-  );
+  my $tokenEndpoint = "https://oauth2.googleapis.com/token";
 
-  open CMD, "-|", @curlCmd;
-  my $content = join '', <CMD>;
-  close CMD;
+  my $params = {
+    client_id     => $clientID,
+    client_secret => $clientSecret,
+    grant_type    => "refresh_token",
+    refresh_token => $refreshOauthToken,
+  };
 
-  if($content =~ /"access_token"\s*:\s*"([^"]+)"/){
+  require LWP::UserAgent;
+  my $ua = LWP::UserAgent->new();
+  my $response = $ua->post($tokenEndpoint, $params);
+
+  if($response->content =~ /"access_token"\s*:\s*"([^"]+)"/){
     return $1;
   }else{
-    print STDERR "WARNING: could not obtain OAUTH token\n";
+    print STDERR "WARNING: could not obtain OAUTH token\n"
+      . $response->code . "\n" . $response->content . "\n";
     return undef;
   }
 }
