@@ -43,33 +43,33 @@ my $GVAR = QtEmail::Shared::GET_GVAR;
 my $configFile = "$ENV{HOME}/.config/qtemail/qtemail.conf";
 my $configPrefix = "email";
 my $accountConfigSchema = [
-  ["user",            "REQ", "IMAP username, usually the full email address"],
-  ["password",        "REQ", "password, stored with optional encrypt_cmd"],
-  ["server",          "REQ", "IMAP server, e.g.: \"imap.gmail.com\""],
-  ["port",            "REQ", "IMAP server port"],
+  ["user",                "REQ", "IMAP username, usually the full email address"],
+  ["password",            "REQ", "password, stored with optional encrypt_cmd"],
+  ["server",              "REQ", "IMAP server, e.g.: \"imap.gmail.com\""],
+  ["port",                "REQ", "IMAP server port"],
 
-  ["smtp_server",     "OPT", "SMTP server, e.g.: \"smtp.gmail.com\""],
-  ["smtp_port",       "OPT", "SMTP server port"],
-  ["ssl",             "OPT", "set to false to forcibly disable security"],
-  ["inbox",           "OPT", "primary IMAP folder name (default=\"INBOX\")"],
-  ["sent",            "OPT", "IMAP folder name to use for sent mail, e.g.:\"Sent\""],
-  ["folders",         "OPT", "extra IMAP folders to fetch (sep=\":\")"],
-  ["count_include",   "OPT", "FOLDER_NAMEs for counts (default=\"inbox\", sep=\":\")"],
-  ["skip",            "OPT", "set to true to skip during --update"],
-  ["body_cache_mode", "OPT", "one of [unread|all|none] (default=\"unread\")"],
-  ["prefer_html",     "OPT", "prefer html over plaintext (default=\"false\")"],
-  ["new_unread_cmd",  "OPT", "custom alert command"],
-  ["update_interval", "OPT", "GUI: seconds between account updates"],
-  ["refresh_interval","OPT", "GUI: seconds between account refresh"],
-  ["custom_cmd",      "OPT", "GUI: shell command to run when cmd button is pushed"],
-  ["filterButtons",   "OPT", "GUI: comma-separated list of list of filter names to use in GUI"],
+  ["smtp_server",         "OPT", "SMTP server, e.g.: \"smtp.gmail.com\""],
+  ["smtp_port",           "OPT", "SMTP server port"],
+  ["ssl",                 "OPT", "set to false to forcibly disable security"],
+  ["inbox",               "OPT", "primary IMAP folder name (default=\"INBOX\")"],
+  ["sent",                "OPT", "IMAP folder name to use for sent mail, e.g.:\"Sent\""],
+  ["folders",             "OPT", "extra IMAP folders to fetch (sep=\":\")"],
+  ["count_include",       "OPT", "FOLDER_NAMEs for counts (default=\"inbox\", sep=\":\")"],
+  ["skip",                "OPT", "set to true to skip during --update"],
+  ["body_cache_mode",     "OPT", "one of [unread|all|none] (default=\"unread\")"],
+  ["prefer_html",         "OPT", "prefer html over plaintext (default=\"false\")"],
+  ["new_unread_cmd",      "OPT", "custom alert command"],
+  ["update_interval",     "OPT", "GUI: seconds between account updates"],
+  ["refresh_interval",    "OPT", "GUI: seconds between account refresh"],
+  ["custom_cmd",          "OPT", "GUI: shell command to run when cmd button is pushed"],
+  ["filterButtons",       "OPT", "GUI: comma-separated list of list of filter names to use in GUI"],
 
-  ["filter",          "MAP", "list of named search filters: filter.NAME = SEARCH_QUERY"],
+  ["filter",              "MAP", "list of named search filters: filter.NAME = SEARCH_QUERY"],
 ];
 my $optionsConfigSchema = [
-  ["update_cmd",      "OPT", "command to run after all updates"],
-  ["encrypt_cmd",     "OPT", "command to encrypt passwords on disk"],
-  ["decrypt_cmd",     "OPT", "command to decrypt saved passwords"],
+  ["update_cmd",        "OPT", "command to run after all updates"],
+  ["encrypt_cmd",       "OPT", "command to encrypt passwords on disk"],
+  ["decrypt_cmd",       "OPT", "command to decrypt saved passwords"],
 ];
 my $longDescriptions = {
   folders => ''
