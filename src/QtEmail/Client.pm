@@ -188,9 +188,10 @@ sub fetchOauthToken($$$){
 
   if($content =~ /"access_token"\s*:\s*"([^"]+)"/){
     return $1;
+  }else{
+    print STDERR "WARNING: could not obtain OAUTH token\n";
+    return undef;
   }
-
-  return undef;
 }
 
 1;
