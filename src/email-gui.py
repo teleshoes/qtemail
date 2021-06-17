@@ -1057,6 +1057,9 @@ class Controller(QObject):
         headerStates.append({'header': header, 'uid': header.uid_})
         uids.append(str(header.uid_))
 
+    if len(uids) == 0:
+      return
+
     cmd = [EMAIL_BIN, "--mark-read",
       "--folder=" + self.folderName, self.accountName] + uids
 
