@@ -1,4 +1,5 @@
 import QtQuick 2.3
+import QtQml 2.15
 
 // written by Thomas BOUTROUE
 // https://stackoverflow.com/users/1195141/thebootroo
@@ -37,12 +38,14 @@ Item {
         property: "y";
         value: (getFlickableY() * clicker.drag.maximumY / (flickable.contentHeight - flickable.height));
         when: (!clicker.drag.active && !clicker.pressed);
+        restoreMode: Binding.RestoreNone;
     }
     Binding {
         target: flickable;
         property: "contentY";
         value: flickable.originY + (handle.y * (flickable.contentHeight - flickable.height) / clicker.drag.maximumY);
         when: (clicker.drag.active || clicker.pressed);
+        restoreMode: Binding.RestoreNone;
     }
     Rectangle {
         id: backScrollbar;
