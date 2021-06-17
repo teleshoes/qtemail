@@ -1,5 +1,4 @@
 import QtQuick 2.3
-import QtQml 2.15
 
 // written by Thomas BOUTROUE
 // https://stackoverflow.com/users/1195141/thebootroo
@@ -33,19 +32,28 @@ Item {
         setFlickableY(Math.max (getFlickableY() - (flickable.height / 4), 0));
     }
 
-   Binding {
+    Component.onCompleted: {
+      try {
+        bindingHandle.restoreMode = 0    //should be Binding.RestoreNonde
+        bindingFlickable.restoreMode = 0 //should be Binding.RestoreNonde
+      } catch(error) {
+        //ignore possibly unimplemented restoreMode
+      }
+    }
+
+    Binding {
+        id: bindingHandle
         target: handle;
         property: "y";
         value: (getFlickableY() * clicker.drag.maximumY / (flickable.contentHeight - flickable.height));
         when: (!clicker.drag.active && !clicker.pressed);
-        restoreMode: Binding.RestoreNone;
     }
     Binding {
+        id: bindingFlickable
         target: flickable;
         property: "contentY";
         value: flickable.originY + (handle.y * (flickable.contentHeight - flickable.height) / clicker.drag.maximumY);
         when: (clicker.drag.active || clicker.pressed);
-        restoreMode: Binding.RestoreNone;
     }
     Rectangle {
         id: backScrollbar;
