@@ -37,7 +37,8 @@ Rectangle {
   }
 
 
-  Row {
+  Rectangle {
+    color: parent.color
     width: parent.width
     height: 40
     id: labelContainer
