@@ -3,7 +3,7 @@ import QtQuick 2.3
 Item {
     id: delegate
     property string text
-    width: parent.width
+    width: parent ? parent.width : 0
     height: itemRect.height + 2
 
     Rectangle {
