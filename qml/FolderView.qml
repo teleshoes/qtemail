@@ -11,7 +11,7 @@ Rectangle {
     delegate: Component  {
       Rectangle {
         height: 80
-        width: parent.width
+        width: parent ? parent.width : 0
         color: "gray"
         MouseArea{
           anchors.fill: parent

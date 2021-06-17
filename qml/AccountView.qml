@@ -32,7 +32,7 @@ Rectangle {
     delegate: Component  {
       Rectangle {
         height: Math.max(nameUnreadLabel.paintedHeight, lastUpdatedLabel.paintedHeight) + errorLabel.paintedHeight
-        width: parent.width
+        width: parent ? parent.width : 0
         color: model.account.Selected ? "#FF6666" : "#AAAAAA"
         MouseArea{
           anchors.fill: parent

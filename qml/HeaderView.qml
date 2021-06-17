@@ -159,7 +159,8 @@ Rectangle {
       color: model.header.Selected ? "#FF6666" : "#AAAAAA"
 
       height: headerFlickable.isWideView ? wideView.height : narrowView.height
-      width: parent.width
+      width: parent ? parent.width : 0
+
 
       MouseArea {
         anchors.fill: parent
