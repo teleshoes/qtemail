@@ -608,6 +608,7 @@ sub readUidFile($$$){
   }else{
     my @uids = `cat "$dir/$fileName"`;
     chomp foreach @uids;
+    @uids = grep {/^\d+$/} @uids;
     return @uids;
   }
 }
