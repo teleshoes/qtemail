@@ -354,9 +354,10 @@ class EmailManager():
     if not os.path.isfile(filePath):
       return []
     f = open(filePath, 'r')
-    uids = f.read()
+    uids = f.read().splitlines()
     f.close()
-    return list(map(int, uids.splitlines()))
+    uids = filter(lambda uid: re.match("^\d+$", uid), uids)
+    return list(map(int, uids))
   def fetchHeaders(self, accName, folderName, limit=None, limitWithoutUnread=None, exclude=[], minUid=None):
     uids = self.getUids(accName, folderName, "all")
     uids.sort()
