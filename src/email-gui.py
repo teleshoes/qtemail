@@ -1150,12 +1150,17 @@ class Controller(QObject):
     else:
       body = output
 
+    body = self.removeInlineCidImages(body)
+
     if isSuccess:
       self.currentBodyText = body
       bodyBox.setBody(body)
     else:
       self.currentBodyText = None
       bodyBox.setBody("ERROR FETCHING BODY\n")
+
+  def removeInlineCidImages(self, text):
+    return regexSub('src="cid:[^"]*"', '', text)
 
   @pyqtSlot(QObject)
   def copyBodyToClipboard(self, bodyView):
