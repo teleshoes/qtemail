@@ -15,6 +15,8 @@ Rectangle {
     0.5 * (defaultWidthPx/defaultWidthMM + defaultHeightPx/defaultHeightMM)
   }
 
+  property double headerWideViewMinPx: 700
+
   property double scalePixelDensity: Screen.pixelDensity / defaultPixelDensity
   property double scale: scalePixelDensity * controller.getFontScale()
 
