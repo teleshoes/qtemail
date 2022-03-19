@@ -11,6 +11,9 @@ QtObject {
   property double defaultHeightPx: 1080
   property double defaultHeightMM: 174
 
+  /* limit scaling down for larger screens (usually also further away) */
+  property double minScalePhysicalSize: 0.8
+
   // RUNTIME VALUES
 
   property double screenWidthPx: Screen.width
@@ -29,8 +32,11 @@ QtObject {
     (screenWidthMM/defaultWidthMM + screenHeightMM/defaultHeightMM) / 2.0
   }
 
-  /* scale up for smaller screens, scale down for larger */
-  property double scalePhysicalSize: 1/ratioPhysicalSize
+  /* scale up for smaller screens, scale down to a certain point for larger */
+  property double scalePhysicalSize: Math.max(
+    minScalePhysicalSize,
+    1/ratioPhysicalSize
+  )
 
   /* scale up for higher resolution, scale down for lower resolution */
   property double scalePxSize: ratioPx
