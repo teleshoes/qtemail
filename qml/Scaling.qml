@@ -2,21 +2,43 @@ import QtQuick 2.3
 import QtQuick.Window 2.2
 
 QtObject {
+
+  // CONFIG
+
   /* default screen size to scale (14" 1080p) */
   property double defaultWidthPx: 1920
   property double defaultWidthMM: 310
   property double defaultHeightPx: 1080
   property double defaultHeightMM: 174
 
-  /* average of pixels per mm by height and width of default screen size */
-  property double defaultPixelDensity: {
-    0.5 * (defaultWidthPx/defaultWidthMM + defaultHeightPx/defaultHeightMM)
+  // RUNTIME VALUES
+
+  property double screenWidthPx: Screen.width
+  property double screenWidthMM: Screen.width / Screen.pixelDensity
+  property double screenHeightPx: Screen.height
+  property double screenHeightMM: Screen.height / Screen.pixelDensity
+
+  // CALCULATIONS
+
+  /* average of height and width pixel count ratio */
+  property double ratioPx: {
+    (screenWidthPx/defaultWidthPx + screenHeightPx/defaultHeightPx) / 2.0
+  }
+  /* average of height and width physical size ratio */
+  property double ratioPhysicalSize: {
+    (screenWidthMM/defaultWidthMM + screenHeightMM/defaultHeightMM) / 2.0
   }
 
-  /* larger values means a physically smaller screen for the same pixel size */
-  property double scalePixelDensity: Screen.pixelDensity / defaultPixelDensity
+  /* scale up for smaller screens, scale down for larger */
+  property double scalePhysicalSize: 1/ratioPhysicalSize
 
-  /* scale based on screen size and optional command-line arg */
+  /* scale up for higher resolution, scale down for lower resolution */
+  property double scalePxSize: ratioPx
+
+  /* scale based on physical size and resolution */
+  property double scalePixelDensity: scalePhysicalSize * scalePxSize
+
+  /* scale based on resolution, screen size and optional command-line arg */
   property double scale: scalePixelDensity * controller.getFontScale()
 
   property int fontHuge:   scale * 20
