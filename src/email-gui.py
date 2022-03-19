@@ -172,7 +172,7 @@ def main():
   mainWindow.setTitle(os.path.basename(__file__))
 
   if useSendWindow:
-    sendWindow = SendWindow(QML_DIR + "/SendView.qml", controller, mainWindow.rootObject(),
+    sendWindow = SendWindow(QML_DIR + "/SendView.qml", controller, mainWindow,
       accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
       addressBookModel, fileListModel, fileInfoModel)
     sendView = sendWindow.rootObject()
@@ -1695,13 +1695,16 @@ class MainWindow(QQuickView):
     self.setResizeMode(QQuickView.SizeRootObjectToView)
     self.setSource(QUrl(qmlFile))
 
+    # copy QObject properties into context *after* QML initialization
+    context.setContextProperty('main', self.rootObject())
+
 class SendWindow(QQuickView):
-  def __init__(self, qmlFile, controller, main,
+  def __init__(self, qmlFile, controller, mainWindow,
     accountModel, folderModel, headerModel, configModel, filterButtonModel, notifierModel,
     addressBookModel, fileListModel, fileInfoModel):
     super(SendWindow, self).__init__(None)
+
     context = self.rootContext()
-    context.setContextProperty('main', main)
     context.setContextProperty('accountModel', accountModel)
     context.setContextProperty('folderModel', folderModel)
     context.setContextProperty('headerModel', headerModel)
@@ -1713,8 +1716,12 @@ class SendWindow(QQuickView):
     context.setContextProperty('fileInfoModel', fileInfoModel)
     context.setContextProperty('controller', controller)
 
+    # copy MainWindow QObject properties into context *before* SendWindow QML initialization
+    context.setContextProperty('main', mainWindow.rootObject())
+
     self.setResizeMode(QQuickView.SizeRootObjectToView)
     self.setSource(QUrl(qmlFile))
+
 
 def listModelToArray(listModel, obj=None):
   arr = []
