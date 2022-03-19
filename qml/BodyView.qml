@@ -114,7 +114,7 @@ Rectangle {
         color: "#0000FF"
         width: parent.width
         wrapMode: Text.Wrap
-        font.pointSize: main.fontSmall
+        font.pointSize: scaling.fontSmall
       }
       TextEdit {
         id: bodyText
@@ -124,7 +124,7 @@ Rectangle {
         width: parent.width
         wrapMode: TextEdit.Wrap
         selectByMouse: bodyView.selectable
-        font.pointSize: main.fontLarge
+        font.pointSize: scaling.fontLarge
         onLinkActivated: main.onLinkActivated(link)
         onFocusChanged: cursorVisible = false
         activeFocusOnPress: false

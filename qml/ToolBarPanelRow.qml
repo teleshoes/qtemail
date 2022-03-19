@@ -4,8 +4,8 @@ ToolBarPanelAbstract {
   buttonContainer: toolBarRow
   direction: "horizontal"
 
-  desiredBtnHeight: main.scalePixelDensity * 70
-  desiredBtnWidth: main.scalePixelDensity * 70
+  desiredBtnHeight: scaling.scalePixelDensity * 70
+  desiredBtnWidth: scaling.scalePixelDensity * 70
   minBtnHeight: 40
   minBtnWidth: 40
   maxBtnHeight: (width / maxBtnCount) - (2*maxBtnCount)
@@ -28,7 +28,7 @@ ToolBarPanelAbstract {
       Btn {
         width: btnWidth
         height: btnHeight
-        Component.onCompleted: {textSize = main.fontTiny}
+        Component.onCompleted: {textSize = scaling.fontTiny}
         function setText(text){
           this.text = text
         }

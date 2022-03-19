@@ -28,7 +28,7 @@ Rectangle {
       id: counterTextArea
       anchors.margins: 5
       anchors.right: parent.right
-      font.pointSize: main.fontTiny
+      font.pointSize: scaling.fontTiny
     }
   }
 
@@ -49,7 +49,7 @@ Rectangle {
         width: parent.width
         height: filterFontSize * 2.14
 
-        property int filterFontSize: main.fontSmall
+        property int filterFontSize: scaling.fontSmall
 
         ListView {
           id: filterButtonList
@@ -95,7 +95,7 @@ Rectangle {
           id: searchTextBox
           width: parent.width
           height: font.pointSize * 2
-          font.pointSize: main.fontSmall
+          font.pointSize: scaling.fontSmall
           Keys.onReturnPressed: {
             controller.onSearchTextChanged(searchTextBox.text)
           }
@@ -203,20 +203,20 @@ Rectangle {
         Text {
           id: wideSubjectLabel
           text: model.header.Subject
-          font.pointSize: main.fontSmall
+          font.pointSize: scaling.fontSmall
           width: parent.width * 0.5
           clip: true
         }
         Text {
           id: wideDateLabel
           text: model.header.Date
-          font.pointSize: main.fontSmall
+          font.pointSize: scaling.fontSmall
           width: font.pointSize * 14.3
         }
         Text {
           id: wideAddressLabel
           text: model.header.IsSent ? "=>" + model.header.To : model.header.From
-          font.pointSize: main.fontSmall
+          font.pointSize: scaling.fontSmall
           width: parent.width - wideSubjectLabel.width - wideDateLabel.width
         }
       }
@@ -228,17 +228,17 @@ Rectangle {
         Text {
           id: narrowAddressLabel
           text: model.header.IsSent ? "=>" + model.header.To : model.header.From
-          font.pointSize: main.fontLarge
+          font.pointSize: scaling.fontLarge
         }
         Text {
           id: narrowDateLabel
           text: model.header.Date
-          font.pointSize: main.fontMedium
+          font.pointSize: scaling.fontMedium
         }
         Text {
           id: narrowSubjectLabel
           text: model.header.Subject
-          font.pointSize: main.fontSmall
+          font.pointSize: scaling.fontSmall
         }
       }
     }

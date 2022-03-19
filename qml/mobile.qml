@@ -99,7 +99,7 @@ Rectangle {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    height: scalePixelDensity * 50
+    height: scaling.scalePixelDensity * 50
 
     Btn {
       id: hideKbBtn

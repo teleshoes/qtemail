@@ -45,7 +45,7 @@ Rectangle {
     Text {
       id: label
       height: parent.height
-      font.pointSize: main.fontMedium
+      font.pointSize: scaling.fontMedium
       font.weight: Font.DemiBold
     }
     Btn {
@@ -136,7 +136,7 @@ Rectangle {
                 id: filePathLabel
                 width: parent.width
                 text: model.fileInfo.FilePath
-                font.pointSize: main.fontSmall
+                font.pointSize: scaling.fontSmall
                 wrapMode: Text.Wrap
               }
             }
@@ -149,7 +149,7 @@ Rectangle {
                 id: errorLabel
                 width: parent.width
                 text: model.fileInfo.ErrorMsg
-                font.pointSize: main.fontSmall
+                font.pointSize: scaling.fontSmall
                 wrapMode: Text.Wrap
               }
             }
@@ -173,7 +173,7 @@ Rectangle {
                 id: detailsLabel
                 width: parent.width
                 text: detailsPanel.formatDetails()
-                font.pointSize: main.fontSmall
+                font.pointSize: scaling.fontSmall
                 wrapMode: Text.Wrap
               }
             }
@@ -183,7 +183,7 @@ Rectangle {
             height: fileInfoCol.height
             width: parent.width * 0.10
             text: "X"
-            textSize: main.fontLarge
+            textSize: scaling.fontLarge
             onClicked: {
               controller.removeFileInfo(model.fileInfo.FilePath)
             }

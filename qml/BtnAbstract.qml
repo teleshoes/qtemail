@@ -7,19 +7,19 @@ Rectangle {
 
   property string imgSource: ""
   property string text: ""
-  property int textSize: main.fontSmall
+  property int textSize: scaling.fontSmall
 
   property variant hover: false
   property variant buttonColorDefault: "gray"
   property variant buttonColorGradient: "white"
   property variant buttonColor: buttonColorDefault
 
-  width: main.scalePixelDensity * 100
-  height: main.scalePixelDensity * 120
+  width: scaling.scalePixelDensity * 100
+  height: scaling.scalePixelDensity * 120
 
   property double borderMin: 2
   property double borderMax: 5
-  property double borderWidth: main.scalePixelDensity * 5
+  property double borderWidth: scaling.scalePixelDensity * 5
 
   border.color: "black"
   border.width: Math.round(Math.min(borderMax, Math.max(borderMin, borderWidth)))

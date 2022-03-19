@@ -25,9 +25,9 @@ Rectangle {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            height: main.fontTiny * 2
-            fontSizeText: main.fontMedium
-            fontSizeHint: main.fontTiny
+            height: scaling.fontTiny * 2
+            fontSizeText: scaling.fontMedium
+            fontSizeHint: scaling.fontTiny
 
             hint.text: "Enter text. It will be completed with lines below"
             borderColor: "white"
@@ -72,7 +72,7 @@ Rectangle {
             model: suggModel
             width: parent.width
             height: popupHeight
-            fontSize: main.fontTiny
+            fontSize: scaling.fontTiny
             anchors.top: inputField.bottom
             anchors.left: inputField.left
             filter: inputField.textInput.text

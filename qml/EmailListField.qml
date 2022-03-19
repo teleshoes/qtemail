@@ -31,7 +31,7 @@ Rectangle {
 
   SuggField {
     id: textField
-    fontSize: main.fontMedium
+    fontSize: scaling.fontMedium
     popupHeight: parent.height - 30
     anchors.top: parent.top
     anchors.left: parent.left
@@ -85,7 +85,7 @@ Rectangle {
           id: emailListLabel
           width: parent.width * 0.90
           text: model['email']
-          font.pointSize: main.fontSmall
+          font.pointSize: scaling.fontSmall
         }
         Btn {
           anchors {left: emailListLabel.right}

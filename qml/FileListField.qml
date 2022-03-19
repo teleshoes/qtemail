@@ -26,8 +26,8 @@ Rectangle {
   Row {
     id: buttonPanel
     width: parent.width
-    height: main.scalePixelDensity * 30
-    spacing: main.scalePixelDensity * 20
+    height: scaling.scalePixelDensity * 30
+    spacing: scaling.scalePixelDensity * 20
 
     property double btnWidth: (width - (spacing*(children.length-1))) * 1/children.length
     property double btnHeight: height

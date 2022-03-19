@@ -97,21 +97,21 @@ Rectangle {
           anchors.left: parent.left
           anchors.margins: 2
           text: model.account.Name + ": " + model.account.Unread
-          font.pointSize: main.fontHuge
+          font.pointSize: scaling.fontHuge
         }
         Text {
           id: lastUpdatedLabel
           anchors.right: parent.right
           anchors.rightMargin: parent.width * 0.15
           text: model.account.LastUpdatedRel
-          font.pointSize: main.fontLarge
+          font.pointSize: scaling.fontLarge
         }
         Text {
           id: errorLabel
           anchors.left: parent.left
           anchors.bottom: parent.bottom
           text: model.account.Error
-          font.pointSize: main.fontLarge
+          font.pointSize: scaling.fontLarge
         }
       }
     }

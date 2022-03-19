@@ -103,7 +103,7 @@ Rectangle {
         text: getAccountLabelText(controller.AccountName)
         anchors.fill: parent
         color: "#ff0000"
-        font.pointSize: main.fontLarge
+        font.pointSize: scaling.fontLarge
         font.capitalization: Font.AllUppercase
         font.weight: Font.DemiBold
 
@@ -151,7 +151,7 @@ Rectangle {
       id: subject
       labelText: "SUBJECT"
       isDark: false
-      fontSize: main.fontMedium
+      fontSize: scaling.fontMedium
     }
     MultiLineField {
       anchors {left: parent.left; right: parent.right; top: subject.bottom}
@@ -159,7 +159,7 @@ Rectangle {
       labelText: "BODY"
       isDark: true
       cursorFollow: sendFlickable
-      fontSize: main.fontMedium
+      fontSize: scaling.fontMedium
     }
   }
   Btn{

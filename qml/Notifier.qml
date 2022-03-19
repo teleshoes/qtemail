@@ -54,7 +54,7 @@ Rectangle {
     id: notificationBox
     width: parent.width
     wrapMode: Text.Wrap
-    font.pointSize: main.fontHuge
+    font.pointSize: scaling.fontHuge
     text: notificationArea.text
   }
 }
