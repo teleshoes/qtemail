@@ -1697,6 +1697,7 @@ class MainWindow(QQuickView):
 
     # copy QObject properties into context *after* QML initialization
     context.setContextProperty('main', self.rootObject())
+    context.setContextProperty('scaling', self.rootObject().property('scaling'))
 
 class SendWindow(QQuickView):
   def __init__(self, qmlFile, controller, mainWindow,
@@ -1718,6 +1719,7 @@ class SendWindow(QQuickView):
 
     # copy MainWindow QObject properties into context *before* SendWindow QML initialization
     context.setContextProperty('main', mainWindow.rootObject())
+    context.setContextProperty('scaling', mainWindow.rootObject().property('scaling'))
 
     self.setResizeMode(QQuickView.SizeRootObjectToView)
     self.setSource(QUrl(qmlFile))
