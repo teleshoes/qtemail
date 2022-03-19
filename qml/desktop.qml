@@ -3,7 +3,7 @@ import QtQuick.Window 2.2
 
 Rectangle {
   id: main
-  width: 1; height: 1 //retarded hack to get resizing to work
+  width: 1; height: 1 // hack to get resizing to work
 
   property double defaultWidthPx: 1920
   property double defaultWidthMM: 310
