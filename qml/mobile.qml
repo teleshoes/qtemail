@@ -7,24 +7,11 @@ Rectangle {
   width: Screen.desktopAvailableWidth
   height: Screen.desktopAvailableHeight
 
-  property double defaultWidthPx: 1920
-  property double defaultWidthMM: 310
-  property double defaultHeightPx: 1080
-  property double defaultHeightMM: 174
-  property double defaultPixelDensity: {
-    0.5 * (defaultWidthPx/defaultWidthMM + defaultHeightPx/defaultHeightMM)
-  }
-
   property double headerWideViewMinPx: 1100
 
-  property double scalePixelDensity: Screen.pixelDensity / defaultPixelDensity
-  property double scale: scalePixelDensity * controller.getFontScale()
-
-  property int fontHuge:   scale * 20
-  property int fontLarge:  scale * 18
-  property int fontMedium: scale * 16
-  property int fontSmall:  scale * 14
-  property int fontTiny:   scale * 12
+  Scaling {
+    id: scaling
+  }
 
   // NAVIGATION
   Component.onCompleted: navToPageByName(controller.getInitialPageName())

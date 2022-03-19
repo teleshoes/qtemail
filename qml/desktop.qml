@@ -1,28 +1,12 @@
 import QtQuick 2.3
-import QtQuick.Window 2.2
 
 Rectangle {
   id: main
   width: 1; height: 1 // hack to get resizing to work
 
-  property double defaultWidthPx: 1920
-  property double defaultWidthMM: 310
-  property double defaultHeightPx: 1080
-  property double defaultHeightMM: 174
-  property double defaultPixelDensity: {
-    0.5 * (defaultWidthPx/defaultWidthMM + defaultHeightPx/defaultHeightMM)
-  }
-
   property double headerWideViewMinPx: 700
 
-  property double scalePixelDensity: Screen.pixelDensity / defaultPixelDensity
-  property double scale: scalePixelDensity * controller.getFontScale()
-
-  property int fontHuge:   scale * 20
-  property int fontLarge:  scale * 18
-  property int fontMedium: scale * 16
-  property int fontSmall:  scale * 14
-  property int fontTiny:   scale * 12
+  property var scaling: Scaling{}
 
   // NAVIGATION
   Component.onCompleted: navToPageByName(controller.getInitialPageName())
