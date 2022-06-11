@@ -220,7 +220,7 @@ def buildMsg(fromEmail, toEmails, ccEmails, subject, bodyHTML, bodyPlain, attFil
 
   for attFile in attFiles:
     attName = os.path.basename(attFile)
-    with open(f, "rb") as fh:
+    with open(attFile, "rb") as fh:
       attContents = fh.read()
     attPart = MIMEApplication(attContents, Name=attName)
     attPart['Content-Disposition'] = "attachment; filename=\"" + attName + "\""
