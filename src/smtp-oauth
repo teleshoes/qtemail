@@ -239,7 +239,7 @@ def sendMsg(server, port, xoauth2StrArg, fromEmail, toEmails, ccEmails, bccEmail
   server.ehlo('localhost')
   server.starttls()
   server.docmd('AUTH', 'XOAUTH2 ' + xoauth2StrArg)
-  server.sendmail(fromEmail, toEmails, mimeMsg.as_string())
+  server.sendmail(fromEmail, rcptEmails, mimeMsg.as_string())
   server.quit()
 
 if __name__ == "__main__":
