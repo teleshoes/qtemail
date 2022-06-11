@@ -7,6 +7,7 @@ FILE(GLOB programs
   src/email-search.pl
   src/email-gui.py
   src/smtp-cli
+  src/smtp-oauth
   src/bash-complete.pl
 )
 INSTALL(PROGRAMS ${programs}
