@@ -72,7 +72,7 @@ def main():
     (a plaintext copy of BODY is attached as an alternative text/plain part)
     see: --html-only / --plain
   """)
-  parser.add_argument('--attachment', '--att', action='append', default=[], dest='ATT_FILE', help="""
+  parser.add_argument('--attachment', '--attach', '--att', action='append', default=[], dest='ATT_FILE', help="""
     single file path to file to attach as a MIME part (can be given multiple times)
   """)
 
