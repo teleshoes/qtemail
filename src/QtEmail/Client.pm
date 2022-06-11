@@ -21,6 +21,7 @@ our @EXPORT = qw(
   setFlagStatus
   deleteMessages
   moveMessages
+  fetchAccOauthToken
 );
 
 sub setFlagStatus($$$@);
