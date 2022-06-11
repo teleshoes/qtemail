@@ -30,6 +30,7 @@ sub openFolder($$$);
 sub getClient($$);
 sub getSocket($);
 sub isOldIMAPClientVersion();
+sub fetchAccOauthToken($$);
 sub fetchOauthToken($$$);
 
 my $IMAPCLIENT_OLD_MAJOR_VERSION = 3;
@@ -101,13 +102,7 @@ sub getClient($$){
   my $user = $$acc{user};
   my $pass = getAccPassword($acc, $options);
 
-  my $refreshOauthToken = getAccRefreshOauthToken($acc, $options);
-  my $clientID = getClientID($options);
-  my $clientSecret = getClientSecret($options);
-  my $oauthToken;
-  if(defined $refreshOauthToken and defined $clientID and defined $clientSecret){
-    $oauthToken = fetchOauthToken($refreshOauthToken, $clientID, $clientSecret);
-  }
+  my $oauthToken = fetchAccOauthToken($acc, $options);
 
   # quote password if Mail::IMAPClient version > 3.31
   if(not isOldIMAPClientVersion()){
@@ -170,6 +165,20 @@ sub isOldIMAPClientVersion(){
     return 1;
   }else{
     return 0;
+  }
+}
+
+sub fetchAccOauthToken($$){
+  my ($acc, $options) = @_;
+
+  my $refreshOauthToken = getAccRefreshOauthToken($acc, $options);
+  my $clientID = getClientID($options);
+  my $clientSecret = getClientSecret($options);
+
+  if(defined $refreshOauthToken and defined $clientID and defined $clientSecret){
+    return fetchOauthToken($refreshOauthToken, $clientID, $clientSecret);
+  }else{
+    return undef;
   }
 }
 
