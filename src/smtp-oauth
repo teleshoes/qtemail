@@ -1,0 +1,246 @@
+#!/usr/bin/env python
+
+#smtp-oauth - Copyright 2022 Elliot Wolk
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+import argparse
+import base64
+import lxml.html
+import os.path
+import smtplib
+import sys
+
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+def main():
+  parser = argparse.ArgumentParser(
+    description='smtplib wrapper with XOAUTH2',
+    formatter_class=ArgparseFmt,
+    add_help=False,
+    allow_abbrev=False)
+
+  parser.add_argument('-h', '--help', action='help', help="""
+    show this message and exit
+  """)
+
+  parser.add_argument('--server', required=True, help="""
+    SMTP server, e.g.: smtp.server.com
+  """)
+  parser.add_argument('--port', required=True, help="""
+    SMTP port, e.g.: 587
+  """)
+
+  parser.add_argument('--username', '--user', '--from', required=True, help="""
+    the email/username for the SMTP account
+    used as:
+      -'user' in XOAUTH2 command
+      -'from_addr' in sendmail command (MAIL FROM smtp command)
+      -'From' in MIME header
+  """)
+  parser.add_argument('--auth-token', '--bearer-auth-token', '--token', required=True, help="""
+   \'auth\' to pass in to XOAUTH2 command, after prefixing with \'Bearer \'
+     NOTE: Bearer auth_token is usually obtained by making an auth call with a
+           refresh token. It is NOT the same as the refresh token.
+  """)
+
+  parser.add_argument('--to', required=True, action='append', default=[], help="""
+    single email address of normal recipient (can be given multiple times)
+    user as:
+      -'To' in MIME header (multiple --to args joined with ',')
+      -added to 'to_addrs' in sendmail command (RCPT smtp command)
+  """)
+  parser.add_argument('--cc', action='append', default=[], help="""
+    single email address of CC recipient (can be given multiple times)
+      'Cc' in MIME header (multiple --cc args joined with ',')
+      -added to 'to_addrs' in sendmail command (RCPT smtp command)
+  """)
+  parser.add_argument('--bcc', action='append', default=[], help="""
+    single email address of BCC recipient (can be given multiple times)
+      -added to 'to_addrs' in sendmail command (RCPT smtp command)
+  """)
+
+  parser.add_argument('--subject', help="""
+    'Subject' in MIME contents
+  """)
+  parser.add_argument('--body', help="""
+    HTML email subject, set in MIME contents as text/html part
+    (a plaintext copy of BODY is attached as an alternative text/plain part)
+    see: --html-only / --plain
+  """)
+  parser.add_argument('--attachment', '--att', action='append', default=[], dest='ATT_FILE', help="""
+    single file path to file to attach as a MIME part (can be given multiple times)
+  """)
+
+  parser.add_argument('--plain', '-p', action='store_true', help="""
+    if given, treat BODY as plaintext, and pass in only text/plain MIME part
+  """)
+  parser.add_argument('--html-only', action='store_true', help="""
+    if given, do NOT include a plaintext alternative of BODY
+    NOTE: by default, a copy of BODY is converted to plaintext and attached
+          as a text/plain part before unmodified BODY is attached as a text/html part
+  """)
+
+  args = parser.parse_args()
+
+  xoauth2StrArg = formatXOAUTH2(args.username, args.auth_token)
+
+  attFileList = args.ATT_FILE
+
+  bodyHTML = None
+  bodyPlain = None
+  if args.body == None:
+    bodyHTML = None
+    bodyPlain = None
+  elif args.plain:
+    bodyHTML = None
+    bodyPlain = args.body
+  elif args.html_only:
+    bodyHTML = args.body
+    bodyPlain = None
+  else:
+    bodyHTML = args.body
+    bodyPlain = lxml.html.fromstring(args.body).text_content()
+
+  mimeMsg = buildMsg(args.username, args.to, args.cc, args.subject, bodyHTML, bodyPlain, attFileList)
+
+  sendMsg(args.server, args.port, xoauth2StrArg, args.username, args.to, args.cc, args.bcc, mimeMsg)
+
+  return 0
+
+class ArgparseFmt(argparse.RawTextHelpFormatter):
+  def __init__(self, prog, indent_increment=2, max_help_position=24, width=None):
+    super().__init__(prog, indent_increment, max_help_position, width)
+
+  def _split_lines(self, text, width):
+    #leave leading whitespace except for newlines
+    #remove all trailing whitespace
+    #otherwise, do nothing
+    return text.lstrip("\r\n").rstrip(" \t\r\n").splitlines()
+
+  def _format_action(self, action):
+      # determine the required width and the entry label
+      help_position = min(self._action_max_length + 2,
+                          self._max_help_position)
+      ### START HACK ###
+      help_position = 0
+      ### END HACK ###
+
+      help_width = max(self._width - help_position, 11)
+      action_width = help_position - self._current_indent - 2
+      action_header = self._format_action_invocation(action)
+
+      # no help; start on same line and add a final newline
+      if not action.help:
+          tup = self._current_indent, '', action_header
+          action_header = '%*s%s\n' % tup
+
+      # short action name; start on the same line and pad two spaces
+      elif len(action_header) <= action_width:
+          tup = self._current_indent, '', action_width, action_header
+          action_header = '%*s%-*s  ' % tup
+          indent_first = 0
+
+      # long action name; start on the next line
+      else:
+          tup = self._current_indent, '', action_header
+          action_header = '%*s%s\n' % tup
+          indent_first = help_position
+
+      # collect the pieces of the action help
+      parts = [action_header]
+
+      # if there was help for the action, add lines of help text
+      if action.help and action.help.strip():
+          help_text = self._expand_help(action)
+          if help_text:
+              help_lines = self._split_lines(help_text, help_width)
+              parts.append('%*s%s\n' % (indent_first, '', help_lines[0]))
+              for line in help_lines[1:]:
+                  parts.append('%*s%s\n' % (help_position, '', line))
+
+      # or add a newline if the description doesn't end with one
+      elif not action_header.endswith('\n'):
+          parts.append('\n')
+
+      # if there are any sub-actions, add their help as well
+      for subaction in self._iter_indented_subactions(action):
+          parts.append(self._format_action(subaction))
+
+      # return a single string
+      return self._join_parts(parts)
+
+def formatXOAUTH2(username, accessToken):
+  xoauth2StrArg = (''
+    + 'user=' + username + '\1'
+    + 'auth=' + 'Bearer ' + accessToken + '\1\1'
+  )
+  return base64.b64encode(xoauth2StrArg.encode()).decode()
+
+def buildBodyMIMEPart(bodyHTML, bodyPlain):
+  partHTML = None
+  partPlain = None
+
+  if bodyHTML != None:
+    partHTML = MIMEText(bodyHTML.encode(), _subtype='html', _charset='UTF-8')
+  if bodyPlain != None:
+    partPlain = MIMEText(bodyPlain.encode(), _subtype='plain', _charset='UTF-8')
+
+  if partPlain != None and partHTML != None:
+    partAlt = MIMEMultipart('alternative')
+    partAlt.attach(partPlain)
+    partAlt.attach(partHTML)
+    return partAlt
+  elif partPlain != None:
+    return partPlain
+  elif partHTML != None:
+    return partHTML
+  else:
+    return MIMEText(''.encode(), _subtype='plain', _charset='UTF-8')
+
+def buildMsg(fromEmail, toEmails, ccEmails, subject, bodyHTML, bodyPlain, attFiles):
+  mimeMsg = None
+  bodyPart = buildBodyMIMEPart(bodyHTML, bodyPlain)
+
+  if len(attFiles) > 0:
+    mimeMsg = MIMEMultipart('mixed')
+    mimeMsg.attach(bodyPart)
+  else:
+    mimeMsg = bodyPart
+
+  mimeMsg['Subject'] = subject
+  mimeMsg['From'] = fromEmail
+  mimeMsg['To'] = ','.join(toEmails)
+  if len(ccEmails) > 0:
+    mimeMsg['Cc'] = ','.join(toEmails)
+
+  for attFile in attFiles:
+    attName = os.path.basename(attFile)
+    with open(f, "rb") as fh:
+      attContents = fh.read()
+    attPart = MIMEApplication(attContents, Name=attName)
+    attPart['Content-Disposition'] = "attachment; filename=\"" + attName + "\""
+    mimeMsg.attach(attPart)
+
+  print(mimeMsg.as_string())
+  return mimeMsg
+
+def sendMsg(server, port, xoauth2StrArg, fromEmail, toEmails, ccEmails, bccEmails, mimeMsg):
+  rcptEmails = []
+  rcptEmails.extend(toEmails)
+  rcptEmails.extend(ccEmails)
+  rcptEmails.extend(bccEmails)
+
+  server = smtplib.SMTP(server + ":" + port)
+  server.ehlo('localhost')
+  server.starttls()
+  server.docmd('AUTH', 'XOAUTH2 ' + xoauth2StrArg)
+  server.sendmail(fromEmail, toEmails, mimeMsg.as_string())
+  server.quit()
+
+if __name__ == "__main__":
+  sys.exit(main())
