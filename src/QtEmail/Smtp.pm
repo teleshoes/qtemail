@@ -4,6 +4,7 @@ use warnings;
 use lib "/opt/qtemail/lib";
 
 use QtEmail::Shared qw(GET_GVAR);
+use QtEmail::Client qw(fetchAccOauthToken);
 use QtEmail::Config qw(getConfig getAccPassword);
 
 our @ISA = qw(Exporter);
@@ -22,13 +23,25 @@ sub cmdSmtp($$$$@){
   my $acc = $$config{accounts}{$accName};
   my $options = $$config{options};
   die "Unknown account $accName\n" if not defined $acc;
-  my $pass = getAccPassword($acc, $options);
-  exec $$GVAR{SMTP_CLI_EXEC},
-    "--server=$$acc{smtp_server}", "--port=$$acc{smtp_port}",
-    "--user=$$acc{user}", "--pass=$pass",
-    "--from=$$acc{user}",
-    "--subject=$subject", "--body-plain=$body", "--to=$to",
-    @args;
+
+  my $token = fetchAccOauthToken($acc, $options);
+
+  if(defined $token){
+    exec $$GVAR{SMTP_OAUTH_EXEC},
+      "--server=$$acc{smtp_server}", "--port=$$acc{smtp_port}",
+      "--user=$$acc{user}", "--auth-token=$token",
+      "--subject=$subject", "--body=$body", "--plain",
+      "--to=$to",
+      @args;
+  }else{
+    my $pass = getAccPassword($acc, $options);
+    exec $$GVAR{SMTP_CLI_EXEC},
+      "--server=$$acc{smtp_server}", "--port=$$acc{smtp_port}",
+      "--user=$$acc{user}", "--pass=$pass",
+      "--from=$$acc{user}",
+      "--subject=$subject", "--body-plain=$body", "--to=$to",
+      @args;
+  }
 }
 
 1;

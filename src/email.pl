@@ -17,6 +17,7 @@ BEGIN {
 
     EMAIL_SEARCH_EXEC => "/opt/qtemail/bin/email-search.pl",
     SMTP_CLI_EXEC => "/opt/qtemail/bin/smtp-cli",
+    SMTP_OAUTH_EXEC => "/opt/qtemail/bin/smtp-oauth",
     HTML2TEXT_EXEC => "/usr/bin/html2text",
 
     TMP_DIR => "/var/tmp",
@@ -101,8 +102,17 @@ my $usage = "
     config must include global client_id + client_secret, and account refresh_token
 
   $0 --smtp ACCOUNT_NAME SUBJECT BODY TO [ARG ARG ..]
-    simple wrapper around smtp-cli. {you can add extra recipients with --to}
-    calls:
+    simple wrapper around smtp-cli or smtp-oauth.
+      {you can add extra recipients with --to in either}
+    if ACCOUNT_NAME.refresh_token is defined, fetch token as in `--token`
+    if OAUTH_TOKEN is defined, call:
+      $$GVAR{SMTP_OAUTH_EXEC} \\
+        --server=<smtp_server> --port=<smtp_port> \\
+        --user=<user> --auth-token=<OAUTH_TOKEN>\\
+        --subject=SUBJECT --body=BODY --plain\\
+        --to=TO \\
+        ARG ARG ..
+    otherwise, call:
       $$GVAR{SMTP_CLI_EXEC} \\
         --server=<smtp_server> --port=<smtp_port> \\
         --user=<user> --pass=<password> \\
