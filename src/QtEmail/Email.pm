@@ -22,6 +22,7 @@ use QtEmail::Client qw(
   setFlagStatus
   deleteMessages
   moveMessages
+  fetchAccOauthToken
 );
 use QtEmail::Cache qw(
   getCachedHeaderUids
@@ -37,6 +38,7 @@ use QtEmail::Util qw(
 our @ISA = qw(Exporter);
 use Exporter;
 our @EXPORT = qw(
+  cmdToken
   cmdMarkReadUnread
   cmdDelete
   cmdMove
@@ -119,6 +121,15 @@ sub formatHeaderField($$);
 sub formatDate($);
 
 my $GVAR = QtEmail::Shared::GET_GVAR;
+
+sub cmdToken($){
+  my ($accName) = @_;
+  my $config = getConfig();
+  my $acc = $$config{accounts}{$accName};
+  my $options = $$config{options};
+  die "ERROR: unknown account $accName\n" if not defined $acc;
+  return fetchAccOauthToken($acc, $options);
+}
 
 sub cmdMarkReadUnread($$$@){
   my ($readStatus, $accName, $folderName, @uids) = @_;

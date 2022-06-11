@@ -96,6 +96,10 @@ my $usage = "
             6:GMAIL
             0:WORK_GMAIL
 
+  $0 --token ACCOUNT_NAME
+    fetch OAUTH Bearer access_token using google
+    config must include global client_id + client_secret, and account refresh_token
+
   $0 --smtp ACCOUNT_NAME SUBJECT BODY TO [ARG ARG ..]
     simple wrapper around smtp-cli. {you can add extra recipients with --to}
     calls:
@@ -302,6 +306,13 @@ sub main(@){
     my $success = QtEmail::UpdatePrint::cmdUpdate($folderNameFilter, @accNames);
     my $exitCode = $success ? 0 : 1;
     exit $exitCode;
+  }elsif($cmd =~ /^(--token)$/ and @_ == 1){
+    require QtEmail::Email;
+    my ($accName) = @_;
+    my $token = QtEmail::Email::cmdToken($accName);
+    if(defined $token){
+      print "$token\n";
+    }
   }elsif($cmd =~ /^(--smtp)$/ and @_ >= 4){
     require QtEmail::Smtp;
     my ($accName, $subject, $body, $to, @args) = @_;
