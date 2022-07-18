@@ -225,7 +225,6 @@ def buildMsg(fromEmail, toEmails, ccEmails, subject, bodyHTML, bodyPlain, attFil
     attPart['Content-Disposition'] = "attachment; filename=\"" + attName + "\""
     mimeMsg.attach(attPart)
 
-  print(mimeMsg.as_string())
   return mimeMsg
 
 def sendMsg(server, port, xoauth2StrArg, fromEmail, toEmails, ccEmails, bccEmails, mimeMsg):
