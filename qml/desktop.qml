@@ -7,6 +7,8 @@ Rectangle {
   property string env: "desktop"
   property double headerWideViewMinPx: 700
 
+  property bool isFullScreenBody: false
+
   property var scaling: Scaling{}
 
   // NAVIGATION
@@ -47,6 +49,10 @@ Rectangle {
     }
 
     initToolBarTimer.restart()
+  }
+
+  function toggleFullScreenBody(){
+    main.isFullScreenBody = !main.isFullScreenBody;
   }
 
   function clearBody(){
@@ -111,7 +117,7 @@ Rectangle {
 
       Column {
         id: leftColumn
-        height: parent.height
+        height: main.isFullScreenBody ? 0 : parent.height
         width: Math.max(parent.width * 0.20, 160 + 15*scaling.fontMedium)
 
         // ACCOUNT PAGE
@@ -140,7 +146,7 @@ Rectangle {
       Column {
         id: rightColumn
         height: parent.height
-        width: parent.width - leftColumn.width
+        width: main.isFullScreenBody ? parent.width : parent.width - leftColumn.width
 
         // HEADER PAGE
         Rectangle {
@@ -148,7 +154,7 @@ Rectangle {
           objectName: "headerPage"
           border.width: 1
           height: rightColumn.height - bodyPage.height
-          width: parent.width - 30*2
+          width: rightColumn.width - 30*2
           HeaderView{ id: headerView }
         }
 
@@ -157,13 +163,22 @@ Rectangle {
           id: bodyPage
           objectName: "bodyPage"
           border.width: 1
-          height: bodyView.visible ? rightColumn.height*0.7 : 0;
-          width: parent.width - 30*2
+          height: rightColumn.height*(
+            !bodyView.visible ? 0 : (main.isFullScreenBody ? 1.0 : 0.7)
+          );
+          width: rightColumn.width - 30*2
 
           Rectangle {
             anchors.fill: parent
             anchors.margins: 1
-            BodyView{ id: bodyView }
+            BodyView{
+              id: bodyView
+              onVisibleChanged: {
+                if(!visible){
+                  main.isFullScreenBody = false;
+                }
+              }
+            }
           }
         }
       }

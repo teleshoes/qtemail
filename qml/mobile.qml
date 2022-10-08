@@ -73,6 +73,10 @@ Rectangle {
     }
   }
 
+  function toggleFullScreenBody(){
+    //body is always full screen in mobile
+  }
+
   function clearBody(){
     bodyView.setHeader("")
     bodyView.setBody("")
