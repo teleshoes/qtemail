@@ -103,17 +103,6 @@ Rectangle {
       resizeContent(contentWidth * scale, contentHeight * scale, Qt.point(0,0))
     }
 
-    Btn{
-      visible: main.env == "desktop"
-      height: scaling.scalePixelDensity * 30
-      text: "full"
-      anchors.top: parent.top
-      anchors.right: parent.right
-      z: 2
-      onClicked: {
-        main.toggleFullScreenBody()
-      }
-    }
     Rectangle{
       width: parent.width
       height: parent.height
