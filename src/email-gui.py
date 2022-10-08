@@ -1235,6 +1235,7 @@ class Controller(QObject):
       limit=None, exclude=self.currentHeaders, minUid=minUid)
     self.totalSize = total
     self.prependHeaders(headers)
+
   @pyqtSlot(int)
   def moreHeaders(self, percentage):
     if self.accountName == None:
@@ -1251,6 +1252,7 @@ class Controller(QObject):
       limit=limit, exclude=self.currentHeaders, minUid=None)
     self.totalSize = total
     self.appendHeaders(headers)
+
   @pyqtSlot()
   def updateCounterBox(self):
     if self.counterBox == None:
@@ -1263,10 +1265,13 @@ class Controller(QObject):
       msg += "(" + str(showingLen) + " showing)  "
     msg += str(curLen) + " / " + str(totalLen)
     self.counterBox.setCounterText(msg)
+
   def AccountName(self):
     return self.accountName
+
   def HtmlMode(self):
     return self.htmlMode
+
   accountNameChanged = pyqtSignal()
   AccountName = pyqtProperty(STR_TYPE, AccountName, notify=accountNameChanged)
   htmlModeChanged = pyqtSignal()
