@@ -24,6 +24,13 @@ Rectangle {
   property real minScale: 0.1
   property real maxScale: 10.0
 
+  function scrollUp(){
+    bodyScrollBar.scrollUp();
+  }
+  function scrollDown(){
+    bodyScrollBar.scrollDown();
+  }
+
   function zoomIn(){
     setZoom(getNextScale("in"))
   }
@@ -166,6 +173,7 @@ Rectangle {
   }
 
   ScrollBar{
+    id: bodyScrollBar
     flickable: bodyFlickable
     anchors.rightMargin: 0 - 30
   }

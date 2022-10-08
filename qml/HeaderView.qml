@@ -139,6 +139,10 @@ Rectangle {
       } else if (event.key == Qt.Key_End){
         positionViewAtEnd()
         event.accepted = true
+      } else if (event.key == Qt.Key_PageUp){
+        bodyView.scrollUp()
+      } else if (event.key == Qt.Key_PageDown){
+        bodyView.scrollDown()
       } else if (event.key == Qt.Key_F){
         main.toggleFullScreenBody()
       }
