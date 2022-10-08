@@ -7,6 +7,7 @@ Rectangle {
   width: Screen.desktopAvailableWidth
   height: Screen.desktopAvailableHeight
 
+  property string env: "mobile"
   property double headerWideViewMinPx: 1100
 
   Scaling {

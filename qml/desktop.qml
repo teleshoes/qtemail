@@ -4,6 +4,7 @@ Rectangle {
   id: main
   width: 1; height: 1 // hack to get resizing to work
 
+  property string env: "desktop"
   property double headerWideViewMinPx: 700
 
   property var scaling: Scaling{}
