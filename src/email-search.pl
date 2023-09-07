@@ -298,6 +298,7 @@ sub usage(){
     '((a b) ++ (c d) ++ (e f))',
     'subject~b ++ "subject~b"',
     'from!~bob ++ subject!~math',
+    'a ++ b',
     '"a ++ b"',
     'date~#{TODAY} ++ from!~abcdef',
     'date!~#{TODAY} && date!~#{YESTERDAY}',
@@ -561,16 +562,12 @@ sub formatQuery($;$){
   }elsif($$query{type} =~ /^(header)$/){
     my $content = $$query{content};
     my @fields = @{$$query{fields}};
-    my $like = $$query{negated} ? "NOT LIKE" : "LIKE";
-    $fmt .= $indent . "[@fields] $like $$query{content}\n";
-  }elsif($$query{type} =~ /^(body)$/){
-    my $content = $$query{content};
-    my $like = $$query{negated} ? "NOT LIKE" : "LIKE";
-    $fmt .= $indent . "[body] $like $$query{content}\n";
-  }elsif($$query{type} =~ /^(bodyplain)$/){
-    my $content = $$query{content};
-    my $like = $$query{negated} ? "NOT LIKE" : "LIKE";
-    $fmt .= $indent . "[bodyplain] $like $$query{content}\n";
+    my $op = $$query{negated} ? "DOES-NOT-MATCH" : "MATCHES";
+    $fmt .= $indent . "[@fields] $op '$$query{content}'\n";
+  }elsif($$query{type} =~ /^(body|bodyplain)$/){
+    my $grepL = $$query{negated} ? "--files-without-match" : "--files-with-match";
+    my $dir = $$query{type} eq "bodyplain" ? "DIR/bodies-plain" : "DIR/bodies";
+    $fmt .= $indent . "[uid] in (`grep -iPR $dir $grepL '$$query{content}'`)\n";
   }elsif($$query{type} =~ /^(date)$/){
     my $dateVals = parseDateParam($$query{content});
     my $opEQ = $$query{negated} ? "!=" : "=";
