@@ -586,9 +586,9 @@ sub formatQuery($;$){
     my $opEQ = $$query{negated} ? "!=" : "=";
     my $opBETWEEN = $$query{negated} ? "not between" : "between";
     if(defined $$dateVals{single}){
-      $fmt .= $indent . "[date] $opEQ '$$dateVals{single}'\n";
+      $fmt .= $indent . "[date_yyyy_mm_dd] $opEQ '$$dateVals{single}'\n";
     }elsif(defined $$dateVals{start} and defined $$dateVals{end}){
-      $fmt .= $indent . "[date] $opBETWEEN '$$dateVals{start}' and '$$dateVals{end}'\n";
+      $fmt .= $indent . "[date_yyyy_mm_dd] $opBETWEEN '$$dateVals{start}' and '$$dateVals{end}'\n";
     }
   }
   return $fmt;
