@@ -310,10 +310,11 @@ sub usage(){
     'subject~b ++ "subject~b"',
     'from!~bob ++ subject!~math',
     '"a ++ b"',
-    'date~#{TODAY} ++ from!~#{YESTERDAY}',
-    'date~\#{TODAY} ++ from~#{YESTERDAY}'
-    'd~1990-01-01',
-    'd~2000-01-01..2000-12-31 ++ d~2011-01-01~2011-12-31',
+    'date~#{TODAY} ++ from!~abcdef',
+    'date!~#{TODAY} && date!~#{YESTERDAY}',
+    'subject~\#{TODAY}',
+    'd~1990-01-01 ++ d~#{TODAY}',
+    'd~2000-01-01..2000-12-31 ++ d~2011-01-01~#{YESTERDAY}',
     'd~1999-01-01...1999-12-31 && d!~1999-05-01...1999-05-10',
   );
   return sprintf $usageFormat, $examples;
