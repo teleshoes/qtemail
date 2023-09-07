@@ -558,7 +558,7 @@ sub formatQuery($;$){
   $noDashIndent =~ s/-/ /g;
 
   my $type = $$query{type};
-  if($type =~ /and|or/){
+  if($type =~ /^(and|or)$/){
     my $typeFmt = $type eq "and" ? "ALL" : "ANY";
     my $typeFmtSpacer = ' ' x length($typeFmt);
     my @parts = @{$$query{parts}};
@@ -568,20 +568,20 @@ sub formatQuery($;$){
       $fmt .= formatQuery $part, $newIndent;
     }
     $fmt .= $noDashIndent . "$typeFmtSpacer)\n";
-  }elsif($$query{type} =~ /header/){
+  }elsif($$query{type} =~ /^(header)$/){
     my $content = $$query{content};
     my @fields = @{$$query{fields}};
     my $like = $$query{negated} ? "NOT LIKE" : "LIKE";
     $fmt .= $indent . "[@fields] $like $$query{content}\n";
-  }elsif($$query{type} =~ /body/){
+  }elsif($$query{type} =~ /^(body)$/){
     my $content = $$query{content};
     my $like = $$query{negated} ? "NOT LIKE" : "LIKE";
     $fmt .= $indent . "[body] $like $$query{content}\n";
-  }elsif($$query{type} =~ /bodyplain/){
+  }elsif($$query{type} =~ /^(bodyplain)$/){
     my $content = $$query{content};
     my $like = $$query{negated} ? "NOT LIKE" : "LIKE";
     $fmt .= $indent . "[bodyplain] $like $$query{content}\n";
-  }elsif($$query{type} =~ /date/){
+  }elsif($$query{type} =~ /^(date)$/){
     my $dateVals = parseDateParam($$query{content});
     my $opEQ = $$query{negated} ? "!=" : "=";
     my $opBETWEEN = $$query{negated} ? "not between" : "between";
