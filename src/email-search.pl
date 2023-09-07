@@ -20,6 +20,7 @@ sub prettyPrintQueryStr($;$);
 sub formatQuery($;$);
 sub parseQueryStr($);
 sub parseFlatQueryStr($);
+sub parseDateParam($);
 sub escapeQueryStr($$);
 sub unescapeQueryStr($$);
 sub unescapeQuery($$);
@@ -146,6 +147,10 @@ my $usageFormat = "Usage:
             | <NEGATED_BODY_QUERY>
             | <BODYPLAIN_QUERY>
             | <NEGATED_BODYPLAIN_QUERY>
+            | <SINGLE_DATE_QUERY>
+            | <NEGATED_SINGLE_DATE_QUERY>
+            | <DATE_RANGE_QUERY>
+            | <NEGATED_DATE_RANGE_QUERY>
             | (<QUERY>)
         return emails that match this QUERY
       LIST_AND = <QUERY> && <QUERY>
@@ -180,6 +185,22 @@ my $usageFormat = "Usage:
                               | plaintext~<PATTERN>
                               | b!~<PATTERN>
         return emails where the plaintext body does NOT match the pattern
+      SINGLE_DATE_QUERY = d~<DATE_YYYY_MM_DD>
+        return emails where the calendar date exactly matches <DATE_YYYY_MM_DD>
+        (calendar date is email date header field with time removed)
+      DATE_RANGE_QUERY = d~<DATE_YYYY_MM_DD>..<DATE_YYYY_MM_DD>
+                       | d~<DATE_YYYY_MM_DD>...<DATE_YYYY_MM_DD>
+                       | d~<DATE_YYYY_MM_DD>~<DATE_YYYY_MM_DD>
+        return emails where calendar date is between the two dates, inclusive on both ends
+        (calendar date is email date header field with time removed)
+      DATE_YYYY_MM_DD = <string>
+        date formatted as YYYY-MM-DD, e.g.: 1995-07-31
+      NEGATED_SINGLE_DATE_QUERY = d!~<DATE_YYYY_MM_DD>
+        return emails where the calendar date does NOT match <DATE_YYYY_MM_DD>
+      NEGATED_DATE_RANGE_QUERY = d!~<DATE_YYYY_MM_DD>..<DATE_YYYY_MM_DD>
+                               | d!~<DATE_YYYY_MM_DD>...<DATE_YYYY_MM_DD>
+                               | d!~<DATE_YYYY_MM_DD>~<DATE_YYYY_MM_DD>
+        return emails where the calendar date is NOT between the two dates
       HEADER_FIELD = " . (join " | ", @searchableHeaderFields) . "
         restricts the fields that PATTERN can match
       PATTERN = <string> | <string>\"<string>\"<string>
@@ -291,6 +312,9 @@ sub usage(){
     '"a ++ b"',
     'date~#{TODAY} ++ from!~#{YESTERDAY}',
     'date~\#{TODAY} ++ from~#{YESTERDAY}'
+    'd~1990-01-01',
+    'd~2000-01-01..2000-12-31 ++ d~2011-01-01~2011-12-31',
+    'd~1999-01-01...1999-12-31 && d!~1999-05-01...1999-05-10',
   );
   return sprintf $usageFormat, $examples;
 }
@@ -557,6 +581,15 @@ sub formatQuery($;$){
     my $content = $$query{content};
     my $like = $$query{negated} ? "NOT LIKE" : "LIKE";
     $fmt .= $indent . "[bodyplain] $like $$query{content}\n";
+  }elsif($$query{type} =~ /date/){
+    my $dateVals = parseDateParam($$query{content});
+    my $opEQ = $$query{negated} ? "!=" : "=";
+    my $opBETWEEN = $$query{negated} ? "not between" : "between";
+    if(defined $$dateVals{single}){
+      $fmt .= $indent . "[date] $opEQ '$$dateVals{single}'\n";
+    }elsif(defined $$dateVals{start} and defined $$dateVals{end}){
+      $fmt .= $indent . "[date] $opBETWEEN '$$dateVals{start}' and '$$dateVals{end}'\n";
+    }
   }
   return $fmt;
 }
@@ -648,6 +681,11 @@ sub parseFlatQueryStr($){
         @fields = ();
         $negated = $2 eq "!" ? 1 : 0;
         $content = $3;
+      }elsif($and =~ /(d)(!?)~(.*)/i){
+        $type = "date";
+        @fields = ();
+        $negated = $2 eq "!" ? 1 : 0;
+        $content = $3;
       }else{
         $type = "header";
         @fields = @searchableHeaderFields;
@@ -664,6 +702,22 @@ sub parseFlatQueryStr($){
     push @{$$outerQuery{parts}}, $innerQuery;
   }
   return $outerQuery;
+}
+
+sub parseDateParam($){
+  my ($date) = @_;
+  my $dateVals = {
+    single => undef,
+    start  => undef,
+    end    => undef,
+  };
+  if($date =~ /^(\d\d\d\d-\d\d-\d\d)(?:\.\.|\.\.\.|~)(\d\d\d\d-\d\d-\d\d)$/){
+    $$dateVals{start} = $1;
+    $$dateVals{end} = $2;
+  }elsif($date =~ /^(\d\d\d\d-\d\d-\d\d)$/){
+    $$dateVals{single} = $1;
+  }
+  return $dateVals;
 }
 
 sub escapeQueryStr($$){
@@ -742,7 +796,7 @@ sub unescapeQuery($$){
     my @parts = @{$$query{parts}};
     @parts = map {unescapeQuery $_, $quotes} @parts;
     $$query{parts} = [@parts];
-  }elsif($type =~ /^(header|body|bodyplain)$/){
+  }elsif($type =~ /^(header|body|bodyplain|date)$/){
     $$query{content} = unescapeQueryStr $$query{content}, $quotes;
   }else{
     die "unknown type: $type\n";
@@ -781,7 +835,7 @@ sub reduceQuery($){
     }else{
       return {type => $type, parts => [@parts]};
     }
-  }elsif($type =~ /^(header|body|bodyplain)$/){
+  }elsif($type =~ /^(header|body|bodyplain|date)$/){
     my @fields = @{$$query{fields}};
     my $negated = $$query{negated};
     my $content = $$query{content};
@@ -821,26 +875,39 @@ sub runQuery($$$@){
       }
       @uids = @okUids;
     }
-  }elsif($type =~ /^(header)$/){
+  }elsif($type =~ /^(header|date)$/){
     my @fields = @{$$query{fields}};
     my $content = $$query{content};
     my @conds;
-    $content =~ s/'/''/g;
-    $content =~ s/\\/\\\\/g;
-    $content =~ s/%/\\%/g;
-    $content =~ s/_/\\_/g;
 
-    if($USE_REGEX and -f $PCRE_LIB){
-      my $regexp = $$query{negated} == 1 ? "not regexp" : "regexp";
-      for my $field(@fields){
-        push @conds, "header_$field $regexp '(?i)$content'";
-      };
-    }else{
-      my $like = $$query{negated} == 1 ? "not like" : "like";
-      for my $field(@fields){
-        push @conds, "header_$field $like '%$content%' escape '\\'";
-      };
+    if($type eq "header"){
+      $content =~ s/'/''/g;
+      $content =~ s/\\/\\\\/g;
+      $content =~ s/%/\\%/g;
+      $content =~ s/_/\\_/g;
+
+      if($USE_REGEX and -f $PCRE_LIB){
+        my $regexp = $$query{negated} == 1 ? "not regexp" : "regexp";
+        for my $field(@fields){
+          push @conds, "header_$field $regexp '(?i)$content'";
+        };
+      }else{
+        my $like = $$query{negated} == 1 ? "not like" : "like";
+        for my $field(@fields){
+          push @conds, "header_$field $like '%$content%' escape '\\'";
+        };
+      }
+    }elsif($type eq "date"){
+      my $dateVals = parseDateParam($$query{content});
+      my $opEQ = $$query{negated} ? "!=" : "=";
+      my $opBETWEEN = $$query{negated} ? "not between" : "between";
+      if(defined $$dateVals{single}){
+        push @conds, "substr(header_date, 1, 10) $opEQ '$$dateVals{single}'";
+      }elsif(defined $$dateVals{start} and defined $$dateVals{end}){
+        push @conds, "substr(header_date, 1, 10) $opBETWEEN '$$dateVals{start}' and '$$dateVals{end}'";
+      }
     }
+
     my $sql = ""
       . " select uid"
       . " from email"
