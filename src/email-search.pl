@@ -140,69 +140,58 @@ my $usageFormat = "Usage:
     GRAMMAR:
       QUERY = <LIST_AND>
             | <LIST_OR>
+            | <QUERY_PARENS>
             | <HEADER_QUERY>
-            | <NEGATED_HEADER_QUERY>
-            | <SIMPLE_HEADER_QUERY>
             | <BODY_QUERY>
-            | <NEGATED_BODY_QUERY>
             | <BODYPLAIN_QUERY>
-            | <NEGATED_BODYPLAIN_QUERY>
             | <SINGLE_DATE_QUERY>
-            | <NEGATED_SINGLE_DATE_QUERY>
             | <DATE_RANGE_QUERY>
-            | <NEGATED_DATE_RANGE_QUERY>
-            | (<QUERY>)
+            | <SIMPLE_HEADER_QUERY>
         return emails that match this QUERY
       LIST_AND = <QUERY> && <QUERY>
                | <QUERY>    <QUERY>
-        return only emails that match both QUERYs
-        (QUERYs can be joined with whitespace or '&&')
+        return emails that match both <QUERY>s
+        (<QUERY>s can be joined with whitespace or '&&')
+          e.g.: a && b c && d
       LIST_OR = <QUERY> || <QUERY>
               | <QUERY> ++ <QUERY>
-        return emails that match either QUERY or both
-        (QUERYs can be joined with '++' or '||')
-      HEADER_QUERY = <HEADER_FIELD>~<PATTERN>
+        return emails that match either <QUERY> or both <QUERY>s
+        (<QUERY>s can be joined with '++' or '||')
+          e.g.: a || b ++ c || d
+      QUERY_PARENS = (<QUERY>)
+        parse <QUERY> into inner component elements before parsing outer components
+          e.g:  a || (b && (c || d))
+      HEADER_QUERY = <HEADER_FIELD>~<PATTERN>  |  <HEADER_FIELD>!~<PATTERN>
         return emails where the indicated header field matches the pattern
-      NEGATED_HEADER_QUERY = <HEADER_FIELD>!~<PATTERN>
-        return emails where the indicated header field does NOT match the pattern
-      SIMPLE_HEADER_QUERY = <PATTERN>
-        return emails with at least one header field that matches the pattern
-      BODY_QUERY = body~<PATTERN>
+        (negated if operator is '!~')
+      BODY_QUERY = body~<PATTERN>  |  body!~<PATTERN>
         return emails where the body matches the pattern
-      NEGATED_BODY_QUERY = body!~<PATTERN>
-        return emails where the body does NOT match the pattern
-      BODYPLAIN_QUERY = bodyplain~<PATTERN>
-                      | bodytext~<PATTERN>
-                      | bodyplaintext~<PATTERN>
-                      | plain~<PATTERN>
-                      | plaintext~<PATTERN>
-                      | b~<PATTERN>
+        (negated if operator is '!~')
+      BODYPLAIN_QUERY = bodyplain~<PATTERN>      |  bodyplain!~<PATTERN>
+                      | bodytext~<PATTERN>       |  bodytext!~<PATTERN>
+                      | bodyplaintext~<PATTERN>  |  bodyplaintext!~<PATTERN>
+                      | plain~<PATTERN>          |  plain!~<PATTERN>
+                      | plaintext~<PATTERN>      |  plaintext!~<PATTERN>
+                      | b~<PATTERN>              |  b!~<PATTERN>
         return emails where the plaintext body matches the pattern
-      NEGATED_BODYPLAIN_QUERY = bodyplain!~<PATTERN>
-                              | bodytext~<PATTERN>
-                              | bodyplaintext~<PATTERN>
-                              | plain~<PATTERN>
-                              | plaintext~<PATTERN>
-                              | b!~<PATTERN>
-        return emails where the plaintext body does NOT match the pattern
-      SINGLE_DATE_QUERY = d~<DATE_YYYY_MM_DD>
+        (negated if operator is '!~')
+      SINGLE_DATE_QUERY = d~<DATE_YYYY_MM_DD>  |  d!~<DATE_YYYY_MM_DD>
         return emails where the calendar date exactly matches <DATE_YYYY_MM_DD>
         (calendar date is email date header field with time removed)
-      DATE_RANGE_QUERY = d~<DATE_YYYY_MM_DD>..<DATE_YYYY_MM_DD>
-                       | d~<DATE_YYYY_MM_DD>...<DATE_YYYY_MM_DD>
-                       | d~<DATE_YYYY_MM_DD>~<DATE_YYYY_MM_DD>
+        (negated if operator is '!~')
+      DATE_RANGE_QUERY = d~<DATE_YMD>..<DATE_YMD>   |  d!~<DATE_YMD>..<DATE_YMD>
+                       | d~<DATE_YMD>...<DATE_YMD>  |  d!~<DATE_YMD>...<DATE_YMD>
+                       | d~<DATE_YMD>~<DATE_YMD>    |  d!~<DATE_YMD>~<DATE_YMD>
         return emails where calendar date is between the two dates, inclusive on both ends
         (calendar date is email date header field with time removed)
+        (negated if operator is '!~')
       DATE_YYYY_MM_DD = <string>
         date formatted as YYYY-MM-DD, e.g.: 1995-07-31
-      NEGATED_SINGLE_DATE_QUERY = d!~<DATE_YYYY_MM_DD>
-        return emails where the calendar date does NOT match <DATE_YYYY_MM_DD>
-      NEGATED_DATE_RANGE_QUERY = d!~<DATE_YYYY_MM_DD>..<DATE_YYYY_MM_DD>
-                               | d!~<DATE_YYYY_MM_DD>...<DATE_YYYY_MM_DD>
-                               | d!~<DATE_YYYY_MM_DD>~<DATE_YYYY_MM_DD>
-        return emails where the calendar date is NOT between the two dates
       HEADER_FIELD = " . (join " | ", @searchableHeaderFields) . "
-        restricts the fields that PATTERN can match
+        match <PATTERN> to this <HEADER_FIELD>
+      SIMPLE_HEADER_QUERY = <PATTERN>
+        return emails where <PATTERN> matches any of the <HEADER_FIELD>s
+        (this is the default query if <PATTERN> does not match any other <QUERY>)
       PATTERN = <string> | <string>\"<string>\"<string>
         can be any string, supports doublequote quoting and backslash escaping
         for header queries, this is matched using either sqlite LIKE or REGEXP
