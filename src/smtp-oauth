@@ -215,7 +215,7 @@ def buildMsg(fromEmail, toEmails, ccEmails, subject, bodyHTML, bodyPlain, attFil
   mimeMsg['From'] = fromEmail
   mimeMsg['To'] = ','.join(toEmails)
   if len(ccEmails) > 0:
-    mimeMsg['Cc'] = ','.join(toEmails)
+    mimeMsg['Cc'] = ','.join(ccEmails)
 
   for attFile in attFiles:
     attName = os.path.basename(attFile)
