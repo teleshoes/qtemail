@@ -72,8 +72,8 @@ Rectangle {
 
             onCheckedChanged: {
               if(checked){
-                controller.replaceHeaderFilterStr(model.filterButton.Name,
-                  model.filterButton.FilterString)
+                var filterStr = model.filterButton.FilterString
+                controller.replaceHeaderFilterStr(model.filterButton.Name, filterStr, negated)
               }else{
                 controller.removeHeaderFilter(model.filterButton.Name)
               }

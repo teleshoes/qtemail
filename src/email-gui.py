@@ -928,8 +928,8 @@ class Controller(QObject):
         return False
     return True
 
-  @pyqtSlot(str, str)
-  def replaceHeaderFilterStr(self, name, headerFilterStr):
+  @pyqtSlot(str, str, bool)
+  def replaceHeaderFilterStr(self, name, headerFilterStr, isNegated):
     headerFilterStr = headerFilterStr.strip()
     attMatch = regexMatch("^(read)=(true|false)$", headerFilterStr, re.IGNORECASE)
     headers = self.currentHeaders
@@ -938,6 +938,7 @@ class Controller(QObject):
       self.removeHeaderFilter(name)
       self.refreshHeaderFilters()
     elif attMatch:
+      negatedFmt = "[NEGATED] " if isNegated else ""
       print("att filter: " + headerFilterStr)
       att = attMatch.group(1)
       val = attMatch.group(2)
@@ -945,10 +946,15 @@ class Controller(QObject):
         val = True
       elif val.lower() == "false":
         val = False
+
+      if isNegated:
+        val = not val
       headerFilter = HeaderFilterAtt(name, att, val)
       self.replaceHeaderFilter(headerFilter)
       self.refreshHeaderFilters()
     else:
+      if isNegated:
+        headerFilterStr = "!(" + headerFilterStr + ")"
       print("search filter: " + headerFilterStr)
       minUid = None
       maxUid = None
@@ -1022,7 +1028,7 @@ class Controller(QObject):
 
   @pyqtSlot(str)
   def onSearchTextChanged(self, searchText):
-    self.replaceHeaderFilterStr("quick-filter", searchText)
+    self.replaceHeaderFilterStr("quick-filter", searchText, False)
 
   @pyqtSlot(QObject, QObject)
   def updateAccount(self, messageBox, account):
