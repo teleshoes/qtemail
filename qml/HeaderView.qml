@@ -63,6 +63,8 @@ Rectangle {
             width: (model.filterButton.Name.length + 1) * 1.14 * textSize
 
             property bool checked: model.filterButton.IsChecked
+            property bool negated: model.filterButton.IsNegated
+
             text: model.filterButton.Name
             textSize: filterToggleBox.filterFontSize
             buttonColorDefault: checked ? "blue" : "gray"

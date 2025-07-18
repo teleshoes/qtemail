@@ -901,7 +901,7 @@ class Controller(QObject):
       for filterName in filterNames:
         if filterName in filterQueries:
           query = filterQueries[filterName]
-          filterButtons.append(FilterButton(filterName, query, False))
+          filterButtons.append(FilterButton(filterName, query, False, False))
     self.setFilterButtons(filterButtons)
 
     preferHtml = "false"
@@ -918,7 +918,7 @@ class Controller(QObject):
   def setFilterButtons(self, filterButtons):
     self.filterButtons = []
     self.filterButtons.append(FilterButton(
-      'unread', 'read=False', False))
+      'unread', 'read=False', False, False))
     self.filterButtons += filterButtons
     self.filterButtonModel.setItems(self.filterButtons)
 
@@ -1600,26 +1600,31 @@ class Field(QObject):
   Description = pyqtProperty(STR_TYPE, Description, notify=changed)
 
 class FilterButton(QObject):
-  def __init__(self, name_, filterString_, isChecked_):
+  def __init__(self, name_, filterString_, isChecked_, isNegated_):
     QObject.__init__(self)
     self.name_ = name_
     self.filterString_ = filterString_
     self.isChecked_ = isChecked_
+    self.isNegated_ = isNegated_
   def Name(self):
     return self.name_
   def FilterString(self):
     return self.filterString_
   def IsChecked(self):
     return self.isChecked_
+  def IsNegated(self):
+    return self.isNegated_
   @pyqtSlot(bool)
   def setChecked(self, isChecked_):
     self.isChecked_ = isChecked_
     self.checkedChanged.emit()
   cfgChanged = pyqtSignal()
   checkedChanged = pyqtSignal()
+  negatedChanged = pyqtSignal()
   Name = pyqtProperty(STR_TYPE, Name, notify=cfgChanged)
   FilterString = pyqtProperty(STR_TYPE, FilterString, notify=cfgChanged)
   IsChecked = pyqtProperty(bool, IsChecked, notify=checkedChanged)
+  IsNegated = pyqtProperty(bool, IsNegated, notify=negatedChanged)
 
 class NotifierModel(QObject):
   def __init__(self):
