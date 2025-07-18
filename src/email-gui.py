@@ -997,7 +997,7 @@ class Controller(QObject):
   @pyqtSlot()
   def resetFilterButtons(self):
     for filterButton in self.filterButtonModel.getItems():
-      filterButton.setChecked(False)
+      filterButton.setChecked(False, False)
 
   def setHeaders(self, headers):
     self.currentHeaders = headers
@@ -1614,8 +1614,12 @@ class FilterButton(QObject):
     return self.isChecked_
   def IsNegated(self):
     return self.isNegated_
-  @pyqtSlot(bool)
-  def setChecked(self, isChecked_):
+  @pyqtSlot(bool, bool)
+  def setChecked(self, isChecked_, isNegated_):
+    # notify on negated first
+    self.isNegated_ = isNegated_
+    self.negatedChanged.emit()
+
     self.isChecked_ = isChecked_
     self.checkedChanged.emit()
   cfgChanged = pyqtSignal()

@@ -81,7 +81,9 @@ Rectangle {
             }
 
             onClicked: {
-              model.filterButton.setChecked(!model.filterButton.IsChecked)
+              var isChecked = !model.filterButton.IsChecked
+              var isNegated = False
+              model.filterButton.setChecked(isChecked, isNegated)
             }
           }
         }
