@@ -3,7 +3,7 @@ import QtQuick 2.3
 Rectangle {
   id: button
 
-  signal clicked()
+  signal clicked(var mouse)
 
   property string imgSource: ""
   property string text: ""
@@ -29,7 +29,7 @@ Rectangle {
     id: mouseArea
     hoverEnabled: true
     anchors.fill: parent
-    onClicked: button.clicked()
+    onClicked: button.clicked(mouse)
     function setColor(){
       if(this.pressed){
         parent.buttonColor = Qt.lighter(parent.buttonColorDefault)
