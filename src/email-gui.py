@@ -943,7 +943,7 @@ class Controller(QObject):
       val = attMatch.group(2)
       if val.lower() == "true":
         val = True
-      if val.lower() == "false":
+      elif val.lower() == "false":
         val = False
       headerFilter = HeaderFilterAtt(name, att, val)
       self.replaceHeaderFilter(headerFilter)
