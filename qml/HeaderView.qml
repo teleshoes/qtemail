@@ -65,9 +65,9 @@ Rectangle {
             property bool checked: model.filterButton.IsChecked
             property bool negated: model.filterButton.IsNegated
 
-            text: model.filterButton.Name
+            text: negated ? "!" + model.filterButton.Name : model.filterButton.Name
             textSize: filterToggleBox.filterFontSize
-            buttonColorDefault: checked ? "blue" : "gray"
+            buttonColorDefault: checked ? (negated ? "red" : "blue") : "gray"
 
 
             onCheckedChanged: {
