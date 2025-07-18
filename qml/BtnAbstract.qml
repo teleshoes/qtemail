@@ -4,6 +4,7 @@ Rectangle {
   id: button
 
   signal clicked(var mouse)
+  signal pressAndHold(var mouse)
 
   property string imgSource: ""
   property string text: ""
@@ -31,6 +32,7 @@ Rectangle {
     anchors.fill: parent
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     onClicked: button.clicked(mouse)
+    onPressAndHold: button.pressAndHold(mouse)
     function setColor(){
       if(this.pressed){
         parent.buttonColor = Qt.lighter(parent.buttonColorDefault)

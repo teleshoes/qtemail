@@ -85,6 +85,11 @@ Rectangle {
               var isNegated = isChecked && mouse.button === Qt.RightButton
               model.filterButton.setChecked(isChecked, isNegated)
             }
+            onPressAndHold: {
+              var isChecked = !model.filterButton.IsChecked
+              var isNegated = isChecked
+              model.filterButton.setChecked(isChecked, isNegated)
+            }
           }
         }
       }
