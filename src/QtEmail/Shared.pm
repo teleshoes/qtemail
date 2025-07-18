@@ -2,6 +2,8 @@ package QtEmail::Shared;
 use strict;
 use warnings;
 use Exporter;
+
+our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(INIT_GVAR GET_GVAR MODIFY_GVAR);
 
 my $GVAR = {};
