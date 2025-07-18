@@ -60,7 +60,7 @@ Rectangle {
           spacing: 10
           delegate: Btn {
             height: filterToggleBox.height
-            width: model.filterButton.Name.length * 1.14 * textSize
+            width: (model.filterButton.Name.length + 1) * 1.14 * textSize
 
             property bool checked: model.filterButton.IsChecked
             text: model.filterButton.Name
