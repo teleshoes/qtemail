@@ -1197,6 +1197,7 @@ class Controller(QObject):
       self.notifierModel.notify("ERROR: saving attachments failed\n")
 
   def startEmailCommandThread(self, command, messageBox, finishedAction, extraArgs):
+    print("starting command: " + str(command))
     thread = EmailCommandThread(
       command=command,
       messageBox=messageBox,
