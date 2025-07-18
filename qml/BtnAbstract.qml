@@ -29,6 +29,7 @@ Rectangle {
     id: mouseArea
     hoverEnabled: true
     anchors.fill: parent
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
     onClicked: button.clicked(mouse)
     function setColor(){
       if(this.pressed){
