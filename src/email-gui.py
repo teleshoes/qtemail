@@ -931,7 +931,6 @@ class Controller(QObject):
   @pyqtSlot(str, str)
   def replaceHeaderFilterStr(self, name, headerFilterStr):
     headerFilterStr = headerFilterStr.strip()
-    print(headerFilterStr)
     attMatch = regexMatch("^(read)=(true|false)$", headerFilterStr, re.IGNORECASE)
     headers = self.currentHeaders
 
@@ -939,6 +938,7 @@ class Controller(QObject):
       self.removeHeaderFilter(name)
       self.refreshHeaderFilters()
     elif attMatch:
+      print("att filter: " + headerFilterStr)
       att = attMatch.group(1)
       val = attMatch.group(2)
       if val.lower() == "true":
@@ -949,6 +949,7 @@ class Controller(QObject):
       self.replaceHeaderFilter(headerFilter)
       self.refreshHeaderFilters()
     else:
+      print("search filter: " + headerFilterStr)
       minUid = None
       maxUid = None
       for header in headers:
