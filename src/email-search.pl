@@ -20,6 +20,7 @@ sub prettyPrintQueryStr($;$);
 sub formatQuery($;$);
 sub parseQueryStr($);
 sub parseFlatQueryStr($);
+sub negateQuery($);
 sub parseDateParam($);
 sub escapeQueryStr($$);
 sub unescapeQueryStr($$);
@@ -141,6 +142,7 @@ my $usageFormat = "Usage:
       QUERY = <LIST_AND>
             | <LIST_OR>
             | <QUERY_PARENS>
+            | <NEGATE_QUERY_PARENS>
             | <HEADER_QUERY>
             | <BODY_QUERY>
             | <BODYPLAIN_QUERY>
@@ -161,6 +163,14 @@ my $usageFormat = "Usage:
       QUERY_PARENS = (<QUERY>)
         parse <QUERY> into inner component elements before parsing outer components
           e.g:  a || (b && (c || d))
+      NEGATE_QUERY_PARENS = !(<QUERY>)
+        parse and negate <QUERY> into inner component elements before parsing outer components
+          e.g.: to~a || !(to~b && (to~c || to~d))
+                  =>  to~a || !(   to~b     &&   (   to~c   ||   to~d   ))
+                  =>  to~a ||  ( !(to~b )   ||  !(   to~c   ||   to~d   ))
+                  =>  to~a ||  (   to!~b    ||   ( !(to~c ) && !(to~d ) ))
+                  =>  to~a ||  (   to!~b    ||   (   to!~c  &&   to!~d  ))
+                  =>  to~a ||      to!~b    ||   (   to!~c  &&   to!~d  )
       HEADER_QUERY = <HEADER_FIELD>~<PATTERN>  |  <HEADER_FIELD>!~<PATTERN>
         return emails where the indicated header field matches the pattern
         (negated if operator is '!~')
@@ -300,6 +310,11 @@ sub usage(){
     'from!~bob ++ subject!~math',
     'a ++ b',
     '"a ++ b"',
+    'from!~a',
+    '!(from~a)',
+    '!(a)',
+    'a || !(b || c) || d',
+    'a || !(b && c) || d',
     'date~#{TODAY} ++ from!~abcdef',
     'date!~#{TODAY} && date!~#{YESTERDAY}',
     'subject~\#{TODAY}',
@@ -592,11 +607,27 @@ sub parseQueryStr($){
   my @parensGroups;
   my $cur = "";
   my $parens = 0;
-  for my $ch(split //, $queryStr){
-    if($ch eq "("){
+  my $isCurParensNegated = 0;
+  my @chars = split //, $queryStr;
+  for(my $i=0; $i<@chars; $i++){
+    my $ch = $chars[$i];
+    my $nextCh = $i+1<@chars ? $chars[$i+1] : "";
+    if($ch eq "!" and $nextCh eq "("){
       if($parens == 0){
-        push @parensGroups, $cur;
+        push @parensGroups, [$cur, $isCurParensNegated];
         $cur = "";
+
+        $isCurParensNegated = 1;
+      }else{
+        $cur .= $ch . $nextCh;
+      }
+      $i++;
+      $parens++;
+    }elsif($ch eq "("){
+      if($parens == 0){
+        push @parensGroups, [$cur, $isCurParensNegated];
+        $cur = "";
+        $isCurParensNegated = 0;
       }else{
         $cur .= $ch;
       }
@@ -604,16 +635,18 @@ sub parseQueryStr($){
     }elsif($ch eq ")"){
       $parens--;
       if($parens == 0){
-        push @parensGroups, $cur;
+        push @parensGroups, [$cur, $isCurParensNegated];
         $cur = "";
+        $isCurParensNegated = 0;
       }else{
         $cur .= $ch;
       }
       $parens = 0 if $parens < 0; #ignore unmatched ')'
     }elsif($ch eq "|"){
       if($parens == 0){
-        push @parensGroups, $cur;
+        push @parensGroups, [$cur, $isCurParensNegated];
         $cur = "";
+        $isCurParensNegated = 0;
         push @orGroups, [@parensGroups];
         @parensGroups = ();
       }else{
@@ -623,16 +656,19 @@ sub parseQueryStr($){
       $cur .= $ch;
     }
   }
-  push @parensGroups, $cur; #ignore unmatched '('
+  push @parensGroups, [$cur, $isCurParensNegated]; #ignore unmatched '('
   push @orGroups, [@parensGroups];
 
   my $outerQuery = {type => "or", parts => []};
   for my $orGroup(@orGroups){
     next if @$orGroup == 0;
     my $innerQuery = {type => "and", parts => []};
-    for my $parensGroup(@$orGroup){
+    for my $parensGroupArr(@$orGroup){
+      my ($parensGroup, $isNegated) = @$parensGroupArr;
       next if length $parensGroup == 0;
-      push @{$$innerQuery{parts}}, parseQueryStr $parensGroup;
+      my $part = parseQueryStr $parensGroup;
+      negateQuery($part) if $isNegated;
+      push @{$$innerQuery{parts}}, $part;
     }
     push @{$$outerQuery{parts}}, $innerQuery;
   }
@@ -689,6 +725,18 @@ sub parseFlatQueryStr($){
     push @{$$outerQuery{parts}}, $innerQuery;
   }
   return $outerQuery;
+}
+
+sub negateQuery($){
+  my ($query) = @_;
+  if($$query{type} eq "and" or $$query{type} eq "or"){
+    $$query{type} = $$query{type} eq "and" ? "or" : "and";
+    for my $part(@{$$query{parts}}){
+      negateQuery($part);
+    }
+  }else{
+    $$query{negated} = $$query{negated} ? 0 : 1;
+  }
 }
 
 sub parseDateParam($){
