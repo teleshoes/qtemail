@@ -82,7 +82,7 @@ Rectangle {
 
             onClicked: {
               var isChecked = !model.filterButton.IsChecked
-              var isNegated = False
+              var isNegated = isChecked && mouse.button === Qt.RightButton
               model.filterButton.setChecked(isChecked, isNegated)
             }
           }
