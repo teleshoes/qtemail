@@ -225,7 +225,7 @@ class EmailManager():
       configOut = self.readProc(cmd)
 
       for line in configOut.splitlines():
-        m = regexMatch("(\w+(?:\.\w+)?)=(.*)", line)
+        m = regexMatch(r"(\w+(?:\.\w+)?)=(.*)", line)
         if m:
           fieldName = m.group(1)
           value = m.group(2)
@@ -265,7 +265,7 @@ class EmailManager():
 
     schema = []
     for line in out.splitlines():
-      m = regexMatch("(\w+)\s*=\s*(.+)", line)
+      m = regexMatch(r"(\w+)\s*=\s*(.+)", line)
       if m:
         key = m.group(1)
         desc = m.group(2)
@@ -321,7 +321,7 @@ class EmailManager():
     accountOut = self.readProc([EMAIL_BIN, "--accounts"])
     accounts = []
     for line in accountOut.splitlines():
-      m = regexMatch("(\w+):(\d+):([a-z0-9_\- ]+):(\d+)s:(\d+)s:(\d+)/(\d+):(.*)", line)
+      m = regexMatch(r"(\w+):(\d+):([a-z0-9_\- ]+):(\d+)s:(\d+)s:(\d+)/(\d+):(.*)", line)
       if m:
         accName = m.group(1)
         lastUpdated = int(m.group(2))
@@ -341,7 +341,7 @@ class EmailManager():
     folderOut = self.readProc([EMAIL_BIN, "--folders", accountName])
     folders = []
     for line in folderOut.splitlines():
-      m = regexMatch("([a-zA-Z_]+):(\d+)/(\d+)", line)
+      m = regexMatch(r"([a-zA-Z_]+):(\d+)/(\d+)", line)
       if m:
         folderName = m.group(1)
         unreadCount = int(m.group(2))
@@ -356,7 +356,7 @@ class EmailManager():
     f = open(filePath, 'r')
     uids = f.read().splitlines()
     f.close()
-    uids = filter(lambda uid: re.match("^\d+$", uid), uids)
+    uids = filter(lambda uid: re.match(r"^\d+$", uid), uids)
     return list(map(int, uids))
   def fetchHeaders(self, accName, folderName, limit=None, limitWithoutUnread=None, exclude=[], minUid=None):
     uids = self.getUids(accName, folderName, "all")
@@ -400,7 +400,7 @@ class EmailManager():
     for line in header.split('\n'):
       if line.strip() == "":
         continue
-      m = regexMatch('(\w+): (.*)', line)
+      m = regexMatch(r'(\w+): (.*)', line)
       if not m:
         print("MALFORMED HEADER FILE: " + filePath)
         return None
