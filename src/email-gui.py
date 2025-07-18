@@ -1614,11 +1614,12 @@ class FilterButton(QObject):
   @pyqtSlot(bool)
   def setChecked(self, isChecked_):
     self.isChecked_ = isChecked_
-    self.changed.emit()
-  changed = pyqtSignal()
-  Name = pyqtProperty(STR_TYPE, Name, notify=changed)
-  FilterString = pyqtProperty(STR_TYPE, FilterString, notify=changed)
-  IsChecked = pyqtProperty(bool, IsChecked, notify=changed)
+    self.checkedChanged.emit()
+  cfgChanged = pyqtSignal()
+  checkedChanged = pyqtSignal()
+  Name = pyqtProperty(STR_TYPE, Name, notify=cfgChanged)
+  FilterString = pyqtProperty(STR_TYPE, FilterString, notify=cfgChanged)
+  IsChecked = pyqtProperty(bool, IsChecked, notify=checkedChanged)
 
 class NotifierModel(QObject):
   def __init__(self):
